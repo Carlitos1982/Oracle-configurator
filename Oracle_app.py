@@ -1,6 +1,6 @@
 import streamlit as st
 
-=== Data ===
+#=== Data ===
 
 size_options = { "HPX": ["", "1.5HPX15A", "10HPX15A", "10HPX18A"], "HDX": ["", "4HDX14A", "6HDX11A"], "HED": ["", "1,5HED11", "2HED15"], }
 
@@ -10,7 +10,7 @@ material_options = { "ASTM": { "A": ["A105", "A216 WCB"], "B": ["B564 UNS N06625
 
 material_type_list = list(material_options.keys())
 
-=== UI ===
+#=== UI ===
 
 st.set_page_config(page_title="Oracle Item Setup", layout="wide") st.title("Oracle Item Setup - Web Version") st.subheader("Configurazione: Casing, Pump")
 
