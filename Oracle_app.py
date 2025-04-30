@@ -1,3 +1,5 @@
+#=== Oracle App (versione Streamlit) ===
+
 import streamlit as st
 
 #=== Data ===
@@ -33,6 +35,8 @@ name = st.selectbox("Material Name", names)
 
 madd = st.text_input("Material additional features")
 submitted = st.form_submit_button("Genera Output")
+
+#=== Output ===
 
 if submitted: descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feat1, feat2, note, dwg, mtype, prefix, name, madd])) materiale = f"{mtype} {prefix}{name}"
 
