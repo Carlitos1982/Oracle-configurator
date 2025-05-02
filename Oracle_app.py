@@ -57,8 +57,8 @@ if size == "Seleziona un modello":
     size = ""
 
 features = features_options.get(model, {})
-feature_1 = st.selectbox("Additional Feature 1", features.get("features1", ["N/A"]), key="feature1")
-feature_2 = st.selectbox("Additional Feature 2", features.get("features2", ["N/A"]) if features.get("features2") else ["N/A"], key="feature2")
+feature_1 = st.selectbox("Additional Feature 1", [""] + features.get("features1", []), key="feature1")
+feature_2 = st.selectbox("Additional Feature 2", [""] + features.get("features2", []) if features.get("features2") else [""], key="feature2")
 
 # === ALTRI CAMPI ===
 note = st.text_area("Note (opzionale)", height=80, key="note_input")
@@ -120,7 +120,7 @@ if st.button("Genera Output", key="genera_output"):
             st.markdown(f"**{campo}**")
             col1, col2 = st.columns([0.85, 0.15])
             with col1:
-                st.code(valore if valore else "-", language="text")
+                st.code(valore, language="text")
             with col2:
                 if st.button("Copia", key=f"copy_{campo}"):
-                    copy_text_to_clipboard(valore if valore else "")
+                    copy_text_to_clipboard(valore)
