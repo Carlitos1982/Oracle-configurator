@@ -70,24 +70,11 @@ mtype = st.selectbox("Material Type", [""] + list(material_options.keys()), key=
 mprefix = ""
 mname = ""
 
-if st.session_state.get("mtype"):
-    if st.session_state.mtype == "MISCELLANEOUS":
-        mname = st.selectbox(
-            "Material Name",
-            material_options["MISCELLANEOUS"][None],
-            key="mname_misc"
-        )
-    else:
-        mprefix = st.selectbox(
-            "Material Prefix",
-            list(material_options[st.session_state.mtype].keys()),
-            key="mprefix"
-        )
-        mname = st.selectbox(
-            "Material Name",
-            material_options[st.session_state.mtype][st.session_state.mprefix],
-            key="mname_std"
-        )
+if mtype == "MISCELLANEOUS":
+    mname = st.selectbox("Material Name", material_options["MISCELLANEOUS"][None], key="mname_misc")
+elif mtype in material_options:
+    mprefix = st.selectbox("Material Prefix", list(material_options[mtype].keys()), key="mprefix")
+    mname = st.selectbox("Material Name", material_options[mtype][mprefix], key="mname_std")
 
 # === CAMPO FINALE PER MATERIAL ADDITIONAL FEATURES ===
 madd = st.text_input("Material add. Features (opzionale)", key="madd_input")
