@@ -65,7 +65,6 @@ note = st.text_area("Note (opzionale)", height=80, key="note_input")
 dwg = st.text_input("Dwg/doc number", key="dwg_input")
 
 # === MATERIALI ===
-st.markdown("### Materiale")
 mtype = st.selectbox("Material Type", [""] + list(material_options.keys()), key="mtype")
 
 mprefix = ""
