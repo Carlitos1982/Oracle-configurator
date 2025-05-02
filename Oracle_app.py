@@ -1,5 +1,6 @@
 # streamlit_oracle_config.py
 import streamlit as st
+import streamlit.components.v1 as components
 
 # === DATI ===
 size_options = {
@@ -33,6 +34,24 @@ def get_material_names(mtype, prefix):
 def get_misc_names(mtype):
     return material_options.get(mtype, {}).get(None, [])
 
+def copy_button(value, key):
+    btn_id = f"btn_{key}"
+    js_code = f"""
+    <script>
+    function copyToClipboard_{key}() {{
+        navigator.clipboard.writeText(`{value}`).then(function() {{
+            var btn = document.getElementById("{btn_id}");
+            if (btn) {{
+                btn.innerText = "Copiato!";
+                setTimeout(() => {{ btn.innerText = "Copia"; }}, 1500);
+            }}
+        }});
+    }}
+    </script>
+    <button id="{btn_id}" onclick="copyToClipboard_{key}()">Copia</button>
+    """
+    components.html(js_code, height=40)
+
 # === INTERFACCIA STREAMLIT ===
 st.set_page_config(layout="wide")
 st.title("Oracle Item Setup - Web App")
@@ -41,7 +60,6 @@ with st.form("config_form"):
     st.subheader("Configurazione - Casing, Pump")
 
     model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()))
-    
     sizes = size_options.get(model, [])
     size = st.selectbox("Product/Pump Size", sizes if sizes else [""])
 
@@ -94,4 +112,4 @@ if submitted:
         with col1:
             st.code(valore, language="text")
         with col2:
-            st.button(f"Copia", key=f"copy_{campo}", help="Copia manualmente il testo", use_container_width=True)
+            copy_button(valore, campo.replace(" ", "_"))
