@@ -65,8 +65,8 @@ features = features_options.get(model, {})
 feature_1 = st.selectbox("Additional Feature 1", features.get("features1", ["N/A"]), key="feature1")
 feature_2 = st.selectbox("Additional Feature 2", features.get("features2", ["N/A"]) if features.get("features2") else ["N/A"], key="feature2")
 
-# === ALTRI CAMPI STABILI ===
-note = st.text_area("Note (opzionale)", height=60, key="note_input")
+# === ALTRI CAMPI ===
+note = st.text_area("Note (opzionale)", height=80, key="note_input")
 dwg = st.text_input("Dwg/doc number", key="dwg_input")
 madd = st.text_input("Material add. Features (opzionale)", key="madd_input")
 
