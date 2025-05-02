@@ -1,19 +1,16 @@
-
 import streamlit as st
 
-# === Data ===
+# === DATI ===
 size_options = {
-    "HPX": ["", "1.5HPX15A", "10HPX15A", "10HPX18A"],
-    "HDX": ["", "4HDX14A", "6HDX11A"],
-    "HED": ["", "1,5HED11", "2HED15"],
+    "HPX": ["", "1.5HPX15A", "2HPX10A"],
+    "HDX": ["", "4HDX14A", "6HDX13A"],
+    "HED": ["", "1,5HED11", "2HED13"]
 }
-
 features_options = {
     "HPX": {"features1": ["", "STD", "INDUCER"], "features2": ["", "PLUGGED DISCHARGE NOZZLE"]},
-    "HDX": {"features1": ["", "TOP-TOP"], "features2": None},
-    "HED": {"features1": ["TOP-TOP"], "features2": ["", "HEAVY"]},
+    "HDX": {"features1": ["", "TOP-TOP", "SIDE-SIDE PL"], "features2": None},
+    "HED": {"features1": ["TOP-TOP"], "features2": ["", "HEAVY"]}
 }
-
 material_options = {
     "ASTM": {
         "A": ["A105", "A216 WCB"],
@@ -28,43 +25,57 @@ material_options = {
     }
 }
 
-material_type_list = list(material_options.keys())
-
-# === UI ===
+# === INTERFACCIA ===
 st.set_page_config(page_title="Oracle Item Setup", layout="wide")
-st.title("Oracle Item Setup - Web Version")
-st.subheader("Configurazione: Casing, Pump")
+st.title("Oracle Item Setup")
 
-with st.form("casing_form"):
-    model = st.selectbox("Product/Pump Model", list(size_options.keys()))
-    size = st.selectbox("Product/Pump Size", size_options.get(model, [""]))
+st.subheader("Configurazione - Casing, Pump")
 
-    features1 = features_options.get(model, {}).get("features1", [])
-    features2 = features_options.get(model, {}).get("features2", [])
+# === INPUT ===
+model = st.selectbox("Product/Pump Model", list(size_options.keys()), index=0)
+size = st.selectbox("Product/Pump Size", size_options.get(model, [""]), index=0)
 
-    feat1 = st.selectbox("Additional Features", features1) if features1 else ""
-    feat2 = st.selectbox("Additional Features2", features2) if features2 else ""
+features1 = features_options.get(model, {}).get("features1", [""])
+features2 = features_options.get(model, {}).get("features2", [""])
 
-    note = st.text_input("Note")
-    dwg = st.text_input("Dwg/doc number")
+feature1 = st.selectbox("_Additional_Features", features1 or [""])
+feature2 = st.selectbox("_Additional_Features2", features2 or [""]) if features2 else ""
 
-    mtype = st.selectbox("Material Type", material_type_list)
-    prefixes = list(material_options[mtype].keys())
-    prefix = st.selectbox("Material Prefix", prefixes) if prefixes[0] else ""
-    names = material_options[mtype][prefix] if prefix else material_options[mtype][None]
-    name = st.selectbox("Material Name", names)
+note = st.text_input("Note")
+drawing = st.text_input("Dwg/doc number")
 
-    madd = st.text_input("Material additional features")
-    submitted = st.form_submit_button("Genera Output")
+mat_type = st.selectbox("Material Type", list(material_options.keys()))
+prefixes = list(material_options[mat_type].keys())
 
-# === Output ===
-if submitted:
-    descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feat1, feat2, note, dwg, mtype, prefix, name, madd]))
-    materiale = f"{mtype} {prefix}{name}"
+if None in prefixes:
+    mat_prefix = ""
+    mat_name = st.selectbox("Material Name", material_options[mat_type][None])
+else:
+    mat_prefix = st.selectbox("Material Prefix", prefixes)
+    mat_name = st.selectbox("Material Name", material_options[mat_type][mat_prefix])
 
-    st.success("Output generato!")
-    st.markdown("### Risultato finale")
-    st.table({
-        "Campo": ["Item", "Description", "Disegno", "Materiale"],
-        "Valore": ["40202...", descrizione, dwg, materiale]
-    })
+mat_add = st.text_input("Material add. Features")
+
+# === GENERAZIONE OUTPUT ===
+if st.button("Genera Output"):
+    descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature1, feature2, note]))
+    materiale = f"{mat_type} {mat_prefix}{mat_name} {mat_add}".strip()
+
+    output_data = {
+        "Item": "40202...",
+        "Description": descrizione,
+        "Identificativo": "1100-CASING",
+        "Classe ricambi": "3",
+        "Categories": "Fascia ite 4",
+        "Catalog": "CORPO",
+        "Disegno": drawing,
+        "Mater+Descr_FPD": materiale,
+        "Template": "FPD_MAKE",
+        "ERP_L1": "20_TURNKEY_MACHINING",
+        "ERP_L2": "17_CASING",
+        "To supplier": "",
+        "Quality": ""
+    }
+
+    st.subheader("Risultato finale")
+    st.table(output_data)
