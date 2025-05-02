@@ -1,5 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
+import base64
 
 # === DATI ===
 size_options = {
@@ -27,23 +28,17 @@ material_options = {
 }
 
 # === FUNZIONE COPIA ===
-def copy_button(value, key):
-    btn_id = f"btn_{key}"
-    js_code = f"""
+def copy_text_to_clipboard(text):
+    b64 = base64.b64encode(text.encode()).decode()
+    copy_code = f"""
     <script>
-    function copyToClipboard_{key}() {{
-        navigator.clipboard.writeText(`{value}`).then(function() {{
-            var btn = document.getElementById("{btn_id}");
-            if (btn) {{
-                btn.innerText = "Copiato!";
-                setTimeout(() => {{ btn.innerText = "Copia"; }}, 1500);
-            }}
-        }});
+    function copyToClipboard(text) {{
+        navigator.clipboard.writeText(text);
     }}
+    copyToClipboard(atob("{b64}"));
     </script>
-    <button id="{btn_id}" onclick="copyToClipboard_{key}()">Copia</button>
     """
-    components.html(js_code, height=40)
+    components.html(copy_code, height=0)
 
 # === UI ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
@@ -68,17 +63,23 @@ feature_2 = st.selectbox("Additional Feature 2", features.get("features2", ["N/A
 # === ALTRI CAMPI ===
 note = st.text_area("Note (opzionale)", height=80, key="note_input")
 dwg = st.text_input("Dwg/doc number", key="dwg_input")
-madd = st.text_input("Material add. Features (opzionale)", key="madd_input")
 
+# === MATERIALI ===
+st.markdown("### Materiale")
 mtype = st.selectbox("Material Type", [""] + list(material_options.keys()), key="mtype")
-if mtype == "MISCELLANEOUS":
-    mprefix = ""
-    mname = st.selectbox("Material Name", material_options[mtype][None], key="mname_misc")
-elif mtype:
-    mprefix = st.selectbox("Material Prefix", list(material_options[mtype].keys()), key="mprefix")
-    mname = st.selectbox("Material Name", material_options[mtype][mprefix], key="mname_std")
-else:
-    mprefix = mname = ""
+
+mprefix = ""
+mname = ""
+
+if mtype:
+    if mtype == "MISCELLANEOUS":
+        mname = st.selectbox("Material Name", material_options[mtype][None], key="mname_misc")
+    else:
+        mprefix = st.selectbox("Material Prefix", list(material_options[mtype].keys()), key="mprefix")
+        mname = st.selectbox("Material Name", material_options[mtype][mprefix], key="mname_std")
+
+# === CAMPO FINALE PER MATERIAL ADDITIONAL FEATURES ===
+madd = st.text_input("Material add. Features (opzionale)", key="madd_input")
 
 # === GENERA OUTPUT ===
 if st.button("Genera Output", key="genera_output"):
@@ -102,10 +103,13 @@ if st.button("Genera Output", key="genera_output"):
     }
 
     st.subheader("Risultato finale")
+
     for campo, valore in output_data.items():
-        st.markdown(f"**{campo}**")
-        col1, col2 = st.columns([0.85, 0.15])
-        with col1:
-            st.code(valore if valore else "-", language="text")
-        with col2:
-            copy_button(valore if valore else "", campo.replace(" ", "_"))
+        with st.container():
+            st.markdown(f"**{campo}**")
+            col1, col2 = st.columns([0.85, 0.15])
+            with col1:
+                st.code(valore if valore else "-", language="text")
+            with col2:
+                if st.button("Copia", key=f"copy_{campo}"):
+                    copy_text_to_clipboard(valore if valore else "")
