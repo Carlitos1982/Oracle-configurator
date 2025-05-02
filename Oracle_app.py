@@ -26,7 +26,7 @@ material_options = {
     }
 }
 
-# === FUNZIONE PER COPIA ===
+# === COPIA ===
 def copy_button(value, key):
     btn_id = f"btn_{key}"
     js_code = f"""
@@ -50,22 +50,22 @@ st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙
 st.title("Oracle Item Setup - Web App")
 st.subheader("Configurazione - Casing, Pump")
 
-# === Selezione modello ===
+# === MODELLO ===
 model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()))
 
-# === Size e features ===
-if model:
-    size = st.selectbox("Product/Pump Size", size_options[model])
-    features = features_options.get(model, {})
-    f1 = features.get("features1", [])
-    f2 = features.get("features2", [])
-    feature_1 = st.selectbox("Additional Feature 1", f1 if f1 else ["N/A"])
-    feature_2 = st.selectbox("Additional Feature 2", f2 if f2 else ["N/A"])
-else:
-    size = st.selectbox("Product/Pump Size", options=["Seleziona un modello"], disabled=True)
-    feature_1 = feature_2 = ""
+# === SIZE e FEATURES ===
+size_choices = size_options.get(model, [])
+if not size_choices:
+    size_choices = ["Seleziona un modello"]
+size = st.selectbox("Product/Pump Size", size_choices)
+if size == "Seleziona un modello":
+    size = ""
 
-# === Altri campi ===
+features = features_options.get(model, {})
+feature_1 = st.selectbox("Additional Feature 1", features.get("features1", ["N/A"]))
+feature_2 = st.selectbox("Additional Feature 2", features.get("features2", ["N/A"]) if features.get("features2") else ["N/A"])
+
+# === ALTRI CAMPI ===
 note = st.text_area("Note (opzionale)", height=60)
 dwg = st.text_input("Dwg/doc number")
 
@@ -81,7 +81,7 @@ else:
 
 madd = st.text_input("Material add. Features (opzionale)")
 
-# === Output ===
+# === OUTPUT ===
 if st.button("Genera Output"):
     descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
     materiale = f"{mtype} {mprefix}{mname} {madd}".strip()
