@@ -40,7 +40,7 @@ def copy_text_to_clipboard(text):
     """
     components.html(copy_code, height=0)
 
-# === CONFIGURAZIONE STREAMLIT ===
+# === UI BASE ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 st.subheader("Configurazione - Casing, Pump")
@@ -50,11 +50,7 @@ model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()), key
 
 # === SIZE e FEATURES ===
 size_choices = size_options.get(model, [])
-if not size_choices:
-    size_choices = ["Seleziona un modello"]
-size = st.selectbox("Product/Pump Size", size_choices, key="size")
-if size == "Seleziona un modello":
-    size = ""
+size = st.selectbox("Product/Pump Size", [""] + size_choices, key="size")
 
 features = features_options.get(model, {})
 feature_1 = st.selectbox("Additional Feature 1", [""] + features.get("features1", []), key="feature1")
@@ -67,35 +63,26 @@ dwg = st.text_input("Dwg/doc number", key="dwg_input")
 # === MATERIALI ===
 mtype = st.selectbox("Material Type", [""] + list(material_options.keys()), key="mtype")
 
-# Campo Material Prefix
-mprefix_options = []
-if mtype and mtype != "MISCELLANEOUS":
-    mprefix_options = list(material_options[mtype].keys())
-if not mprefix_options:
-    mprefix_options = ["Seleziona tipo materiale"]
-mprefix = st.selectbox("Material Prefix", mprefix_options, key="mprefix")
-if mprefix == "Seleziona tipo materiale":
-    mprefix = ""
+mprefix = ""
+mname = ""
 
-# Campo Material Name
-mname_options = []
 if mtype == "MISCELLANEOUS":
-    mname_options = material_options[mtype][None]
-elif mtype and mprefix:
-    mname_options = material_options[mtype][mprefix]
-if not mname_options:
-    mname_options = ["Seleziona materiale"]
-mname = st.selectbox("Material Name", mname_options, key="mname")
-if mname == "Seleziona materiale":
-    mname = ""
+    mname = st.selectbox("Material Name", [""] + material_options[mtype][None], key="mname_misc")
+elif mtype in material_options:
+    prefix_options = list(material_options[mtype].keys())
+    mprefix = st.selectbox("Material Prefix", [""] + prefix_options, key="mprefix")
+    if mprefix in material_options[mtype]:
+        mname = st.selectbox("Material Name", [""] + material_options[mtype][mprefix], key="mname_std")
+    else:
+        mname = ""
 
-# === CAMPO FINALE PER MATERIAL ADDITIONAL FEATURES ===
+# === CAMPO ADDIZIONALE ===
 madd = st.text_input("Material add. Features (opzionale)", key="madd_input")
 
-# === GENERA OUTPUT ===
+# === OUTPUT ===
 if st.button("Genera Output", key="genera_output"):
     descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
-    materiale = f"{mtype} {mprefix}{mname} {madd}".strip()
+    materiale = " ".join(filter(None, [mtype, mprefix + mname, madd]))
 
     output_data = {
         "Item": "40202...",
