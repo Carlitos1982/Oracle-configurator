@@ -52,35 +52,31 @@ st.subheader("Configurazione - Casing, Pump")
 
 # === CAMPI DINAMICI ===
 model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()))
-size = ""
-feature_1 = ""
-feature_2 = ""
 if model:
     size = st.selectbox("Product/Pump Size", size_options[model])
-    f1 = features_options.get(model, {}).get("features1", [])
-    f2 = features_options.get(model, {}).get("features2", [])
+    f1 = features_options[model].get("features1", [])
+    f2 = features_options[model].get("features2", [])
     feature_1 = st.selectbox("Additional Feature 1", f1 if f1 else ["N/A"])
     feature_2 = st.selectbox("Additional Feature 2", f2 if f2 else ["N/A"])
 else:
-    st.warning("Seleziona un modello per continuare.")
+    size = feature_1 = feature_2 = ""
 
 note = st.text_input("Note")
 dwg = st.text_input("Dwg/doc number")
 
 mtype = st.selectbox("Material Type", [""] + list(material_options.keys()))
-mprefix = ""
-mname = ""
 if mtype == "MISCELLANEOUS":
+    mprefix = ""
     mname = st.selectbox("Material Name", material_options[mtype][None])
 elif mtype:
     mprefix = st.selectbox("Material Prefix", list(material_options[mtype].keys()))
     mname = st.selectbox("Material Name", material_options[mtype][mprefix])
+else:
+    mprefix = mname = ""
 
 madd = st.text_input("Material add. Features")
 
 if st.button("Genera Output"):
-    st.subheader("Risultato finale")
-
     descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
     materiale = f"{mtype} {mprefix}{mname} {madd}".strip()
 
@@ -100,6 +96,7 @@ if st.button("Genera Output"):
         "Quality": ""
     }
 
+    st.subheader("Risultato finale")
     for campo, valore in output_data.items():
         st.markdown(f"**{campo}**")
         col1, col2 = st.columns([0.85, 0.15])
