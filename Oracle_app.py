@@ -26,7 +26,7 @@ material_options = {
     }
 }
 
-# === COPIA ===
+# === FUNZIONE COPIA ===
 def copy_button(value, key):
     btn_id = f"btn_{key}"
     js_code = f"""
@@ -45,44 +45,43 @@ def copy_button(value, key):
     """
     components.html(js_code, height=40)
 
-# === UI ===
+# === UI SETUP ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 st.subheader("Configurazione - Casing, Pump")
 
 # === MODELLO ===
-model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()))
+model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()), key="model")
 
 # === SIZE e FEATURES ===
 size_choices = size_options.get(model, [])
 if not size_choices:
     size_choices = ["Seleziona un modello"]
-size = st.selectbox("Product/Pump Size", size_choices)
+size = st.selectbox("Product/Pump Size", size_choices, key="size")
 if size == "Seleziona un modello":
     size = ""
 
 features = features_options.get(model, {})
-feature_1 = st.selectbox("Additional Feature 1", features.get("features1", ["N/A"]))
-feature_2 = st.selectbox("Additional Feature 2", features.get("features2", ["N/A"]) if features.get("features2") else ["N/A"])
+feature_1 = st.selectbox("Additional Feature 1", features.get("features1", ["N/A"]), key="feature1")
+feature_2 = st.selectbox("Additional Feature 2", features.get("features2", ["N/A"]) if features.get("features2") else ["N/A"], key="feature2")
 
 # === ALTRI CAMPI ===
-note = st.text_area("Note (opzionale)", value="", height=60)
-dwg = st.text_input("Dwg/doc number", value="")
+note = st.text_area("Note (opzionale)", value="", height=60, key="note")
+dwg = st.text_input("Dwg/doc number", value="", key="dwg")
+madd = st.text_input("Material add. Features (opzionale)", value="", key="madd")
 
-mtype = st.selectbox("Material Type", [""] + list(material_options.keys()))
+mtype = st.selectbox("Material Type", [""] + list(material_options.keys()), key="mtype")
 if mtype == "MISCELLANEOUS":
     mprefix = ""
-    mname = st.selectbox("Material Name", material_options[mtype][None])
+    mname = st.selectbox("Material Name", material_options[mtype][None], key="mname_misc")
 elif mtype:
-    mprefix = st.selectbox("Material Prefix", list(material_options[mtype].keys()))
-    mname = st.selectbox("Material Name", material_options[mtype][mprefix])
+    mprefix = st.selectbox("Material Prefix", list(material_options[mtype].keys()), key="mprefix")
+    mname = st.selectbox("Material Name", material_options[mtype][mprefix], key="mname_std")
 else:
     mprefix = mname = ""
 
-madd = st.text_input("Material add. Features (opzionale)", value="")
-
-# === OUTPUT ===
-if st.button("Genera Output"):
+# === GENERAZIONE OUTPUT ===
+if st.button("Genera Output", key="genera_output"):
     descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
     materiale = f"{mtype} {mprefix}{mname} {madd}".strip()
 
