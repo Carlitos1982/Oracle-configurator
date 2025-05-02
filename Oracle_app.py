@@ -4,14 +4,14 @@ import streamlit.components.v1 as components
 
 # === DATI ===
 size_options = {
-    "HPX": ["", "1.5HPX15A", "2HPX10A"],
-    "HDX": ["", "4HDX14A", "6HDX13A"],
-    "HED": ["", "1,5HED11", "2HED13"]
+    "HPX": ["1.5HPX15A", "2HPX10A"],
+    "HDX": ["4HDX14A", "6HDX13A"],
+    "HED": ["1,5HED11", "2HED13"]
 }
 features_options = {
-    "HPX": {"features1": ["", "STD", "INDUCER"], "features2": ["", "PLUGGED DISCHARGE NOZZLE"]},
-    "HDX": {"features1": ["", "TOP-TOP", "SIDE-SIDE PL"], "features2": None},
-    "HED": {"features1": ["TOP-TOP"], "features2": ["", "HEAVY"]}
+    "HPX": {"features1": ["STD", "INDUCER"], "features2": ["PLUGGED DISCHARGE NOZZLE"]},
+    "HDX": {"features1": ["TOP-TOP", "SIDE-SIDE PL"], "features2": None},
+    "HED": {"features1": ["TOP-TOP"], "features2": ["HEAVY"]}
 }
 material_options = {
     "ASTM": {
@@ -61,13 +61,13 @@ with st.form("config_form"):
 
     model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()))
     sizes = size_options.get(model, [])
-    size = st.selectbox("Product/Pump Size", sizes if sizes else [""])
+    size = st.selectbox("Product/Pump Size", sizes) if model else st.selectbox("Product/Pump Size", ["Seleziona modello"])
 
     features = features_options.get(model, {})
-    features1 = features.get("features1", [""])
-    features2 = features.get("features2", [""]) if features.get("features2") else None
-    feature_1 = st.selectbox("Additional Feature 1", features1)
-    feature_2 = st.selectbox("Additional Feature 2", features2 if features2 else [""]) if features2 else ""
+    features1 = features.get("features1")
+    features2 = features.get("features2")
+    feature_1 = st.selectbox("Additional Feature 1", features1) if features1 else st.selectbox("Additional Feature 1", ["N/A"])
+    feature_2 = st.selectbox("Additional Feature 2", features2) if features2 else st.selectbox("Additional Feature 2", ["N/A"])
 
     note = st.text_input("Note")
     dwg = st.text_input("Dwg/doc number")
@@ -75,10 +75,13 @@ with st.form("config_form"):
     mtype = st.selectbox("Material Type", [""] + list(material_options.keys()))
     if mtype == "MISCELLANEOUS":
         mprefix = ""
-        mname = st.selectbox("Material Name", get_misc_names(mtype))
-    else:
+        mname = st.selectbox("Material Name", get_misc_names(mtype)) if mtype else ""
+    elif mtype:
         mprefix = st.selectbox("Material Prefix", list(material_options.get(mtype, {}).keys()))
-        mname = st.selectbox("Material Name", get_material_names(mtype, mprefix))
+        mname = st.selectbox("Material Name", get_material_names(mtype, mprefix)) if mprefix else ""
+    else:
+        mprefix = ""
+        mname = ""
 
     madd = st.text_input("Material add. Features")
 
@@ -94,22 +97,4 @@ if submitted:
         "Item": "40202...",
         "Description": descrizione,
         "Identificativo": "1100-CASING",
-        "Classe ricambi": "3",
-        "Categories": "Fascia ite 4",
-        "Catalog": "CORPO",
-        "Disegno": dwg,
-        "Mater+Descr_FPD": materiale,
-        "Template": "FPD_MAKE",
-        "ERP_L1": "20_TURNKEY_MACHINING",
-        "ERP_L2": "17_CASING",
-        "To supplier": "",
-        "Quality": ""
-    }
-
-    for campo, valore in output_data.items():
-        st.markdown(f"**{campo}**")
-        col1, col2 = st.columns([0.85, 0.15])
-        with col1:
-            st.code(valore, language="text")
-        with col2:
-            copy_button(valore, campo.replace(" ", "_"))
+        "Classe ricambi": "3
