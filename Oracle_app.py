@@ -56,12 +56,17 @@ def copy_button(value, key):
 st.set_page_config(layout="wide")
 st.title("Oracle Item Setup - Web App")
 
+# === INIZIALIZZAZIONE SESSION_STATE ===
+if "model" not in st.session_state:
+    st.session_state.model = ""
+
+# === FORM ===
 with st.form("config_form"):
     st.subheader("Configurazione - Casing, Pump")
 
-    model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()))
+    model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()), key="model")
     sizes = size_options.get(model, [])
-    size = st.selectbox("Product/Pump Size", sizes if model else ["Seleziona modello"])
+    size = st.selectbox("Product/Pump Size", sizes if sizes else ["Seleziona modello"])
 
     features = features_options.get(model, {})
     features1 = features.get("features1", [])
@@ -87,6 +92,7 @@ with st.form("config_form"):
 
     submitted = st.form_submit_button("Genera Output")
 
+# === OUTPUT ===
 if submitted:
     st.subheader("Risultato finale")
 
