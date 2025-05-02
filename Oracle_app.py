@@ -40,7 +40,7 @@ def copy_text_to_clipboard(text):
     """
     components.html(copy_code, height=0)
 
-# === UI BASE ===
+# === CONFIGURAZIONE STREAMLIT ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 st.subheader("Configurazione - Casing, Pump")
@@ -63,18 +63,19 @@ dwg = st.text_input("Dwg/doc number", key="dwg_input")
 # === MATERIALI ===
 mtype = st.selectbox("Material Type", [""] + list(material_options.keys()), key="mtype")
 
-mprefix = ""
-mname = ""
-
-if mtype == "MISCELLANEOUS":
-    mname = st.selectbox("Material Name", [""] + material_options[mtype][None], key="mname_misc")
-elif mtype in material_options:
+# Material Prefix: sempre visibile
+prefix_options = []
+if mtype and mtype != "MISCELLANEOUS":
     prefix_options = list(material_options[mtype].keys())
-    mprefix = st.selectbox("Material Prefix", [""] + prefix_options, key="mprefix")
-    if mprefix in material_options[mtype]:
-        mname = st.selectbox("Material Name", [""] + material_options[mtype][mprefix], key="mname_std")
-    else:
-        mname = ""
+mprefix = st.selectbox("Material Prefix", [""] + prefix_options, key="mprefix")
+
+# Material Name: sempre visibile
+name_options = []
+if mtype == "MISCELLANEOUS":
+    name_options = material_options[mtype][None]
+elif mtype and mprefix:
+    name_options = material_options[mtype].get(mprefix, [])
+mname = st.selectbox("Material Name", [""] + name_options, key="mname")
 
 # === CAMPO ADDIZIONALE ===
 madd = st.text_input("Material add. Features (opzionale)", key="madd_input")
