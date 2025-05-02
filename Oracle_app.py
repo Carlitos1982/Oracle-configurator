@@ -67,7 +67,7 @@ feature_2 = st.selectbox("Additional Feature 2", features.get("features2", ["N/A
 
 # === ALTRI CAMPI ===
 note = st.text_area("Note (opzionale)", value="", height=60)
-dwg = st.text_input("Dwg/doc number")
+dwg = st.text_input("Dwg/doc number", value="")
 
 mtype = st.selectbox("Material Type", [""] + list(material_options.keys()))
 if mtype == "MISCELLANEOUS":
@@ -97,4 +97,16 @@ if st.button("Genera Output"):
         "Mater+Descr_FPD": materiale,
         "Template": "FPD_MAKE",
         "ERP_L1": "20_TURNKEY_MACHINING",
-        "ERP_L
+        "ERP_L2": "17_CASING",
+        "To supplier": "",
+        "Quality": ""
+    }
+
+    st.subheader("Risultato finale")
+    for campo, valore in output_data.items():
+        st.markdown(f"**{campo}**")
+        col1, col2 = st.columns([0.85, 0.15])
+        with col1:
+            st.code(valore if valore else "-", language="text")
+        with col2:
+            copy_button(valore if valore else "", campo.replace(" ", "_"))
