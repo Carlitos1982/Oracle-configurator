@@ -26,7 +26,7 @@ material_options = {
     }
 }
 
-# === FUNZIONE COPIA ===
+# === COPIA ===
 def copy_button(value, key):
     btn_id = f"btn_{key}"
     js_code = f"""
@@ -45,10 +45,18 @@ def copy_button(value, key):
     """
     components.html(js_code, height=40)
 
-# === UI SETUP ===
+# === INIT ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 st.subheader("Configurazione - Casing, Pump")
+
+# === GESTIONE SICURA DELLO STATO ===
+if "note_input" not in st.session_state:
+    st.session_state["note_input"] = ""
+if "dwg_input" not in st.session_state:
+    st.session_state["dwg_input"] = ""
+if "madd_input" not in st.session_state:
+    st.session_state["madd_input"] = ""
 
 # === MODELLO ===
 model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()), key="model")
@@ -65,10 +73,10 @@ features = features_options.get(model, {})
 feature_1 = st.selectbox("Additional Feature 1", features.get("features1", ["N/A"]), key="feature1")
 feature_2 = st.selectbox("Additional Feature 2", features.get("features2", ["N/A"]) if features.get("features2") else ["N/A"], key="feature2")
 
-# === ALTRI CAMPI ===
-note = st.text_area("Note (opzionale)", value="", height=60, key="note")
-dwg = st.text_input("Dwg/doc number", value="", key="dwg")
-madd = st.text_input("Material add. Features (opzionale)", value="", key="madd")
+# === ALTRI CAMPI CON SESSION STATE ===
+note = st.text_area("Note (opzionale)", value=st.session_state["note_input"], height=60, key="note_input")
+dwg = st.text_input("Dwg/doc number", value=st.session_state["dwg_input"], key="dwg_input")
+madd = st.text_input("Material add. Features (opzionale)", value=st.session_state["madd_input"], key="madd_input")
 
 mtype = st.selectbox("Material Type", [""] + list(material_options.keys()), key="mtype")
 if mtype == "MISCELLANEOUS":
@@ -80,7 +88,7 @@ elif mtype:
 else:
     mprefix = mname = ""
 
-# === GENERAZIONE OUTPUT ===
+# === GENERA OUTPUT ===
 if st.button("Genera Output", key="genera_output"):
     descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
     materiale = f"{mtype} {mprefix}{mname} {madd}".strip()
