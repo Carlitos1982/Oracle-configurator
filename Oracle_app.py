@@ -67,14 +67,27 @@ dwg = st.text_input("Dwg/doc number", key="dwg_input")
 # === MATERIALI ===
 mtype = st.selectbox("Material Type", [""] + list(material_options.keys()), key="mtype")
 
-mprefix = ""
-mname = ""
+# Campo Material Prefix
+mprefix_options = []
+if mtype and mtype != "MISCELLANEOUS":
+    mprefix_options = list(material_options[mtype].keys())
+if not mprefix_options:
+    mprefix_options = ["Seleziona tipo materiale"]
+mprefix = st.selectbox("Material Prefix", mprefix_options, key="mprefix")
+if mprefix == "Seleziona tipo materiale":
+    mprefix = ""
 
+# Campo Material Name
+mname_options = []
 if mtype == "MISCELLANEOUS":
-    mname = st.selectbox("Material Name", material_options["MISCELLANEOUS"][None], key="mname_misc")
-elif mtype in material_options:
-    mprefix = st.selectbox("Material Prefix", list(material_options[mtype].keys()), key="mprefix")
-    mname = st.selectbox("Material Name", material_options[mtype][mprefix], key="mname_std")
+    mname_options = material_options[mtype][None]
+elif mtype and mprefix:
+    mname_options = material_options[mtype][mprefix]
+if not mname_options:
+    mname_options = ["Seleziona materiale"]
+mname = st.selectbox("Material Name", mname_options, key="mname")
+if mname == "Seleziona materiale":
+    mname = ""
 
 # === CAMPO FINALE PER MATERIAL ADDITIONAL FEATURES ===
 madd = st.text_input("Material add. Features (opzionale)", key="madd_input")
