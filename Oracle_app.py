@@ -28,7 +28,6 @@ material_options = {
 # === INTERFACCIA ===
 st.set_page_config(page_title="Oracle Item Setup", layout="wide")
 st.title("Oracle Item Setup")
-
 st.subheader("Configurazione - Casing, Pump")
 
 # === INPUT ===
@@ -56,7 +55,7 @@ else:
 
 mat_add = st.text_input("Material add. Features")
 
-# === GENERAZIONE OUTPUT ===
+# === OUTPUT ===
 if st.button("Genera Output"):
     descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature1, feature2, note]))
     materiale = f"{mat_type} {mat_prefix}{mat_name} {mat_add}".strip()
@@ -78,4 +77,12 @@ if st.button("Genera Output"):
     }
 
     st.subheader("Risultato finale")
-    st.table(output_data)
+    for campo, valore in output_data.items():
+        html = f"""
+        <div style="margin-bottom: 1.5em;">
+            <strong>{campo}</strong><br>
+            <input type="text" value="{valore}" id="{campo}" readonly style="width: 90%; padding: 6px; font-family: monospace;">
+            <button onclick="navigator.clipboard.writeText(document.getElementById('{campo}').value)">Copia</button>
+        </div>
+        """
+        st.markdown(html, unsafe_allow_html=True)
