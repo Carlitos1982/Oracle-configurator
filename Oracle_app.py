@@ -1,4 +1,3 @@
-# streamlit_oracle_config.py
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -27,13 +26,6 @@ material_options = {
     }
 }
 
-# === FUNZIONI ===
-def get_material_names(mtype, prefix):
-    return material_options.get(mtype, {}).get(prefix, [])
-
-def get_misc_names(mtype):
-    return material_options.get(mtype, {}).get(None, [])
-
 def copy_button(value, key):
     btn_id = f"btn_{key}"
     js_code = f"""
@@ -52,25 +44,22 @@ def copy_button(value, key):
     """
     components.html(js_code, height=40)
 
-# === INTERFACCIA STREAMLIT ===
+# === INTERFACCIA ===
 st.set_page_config(layout="wide")
 st.title("Oracle Item Setup - Web App")
 
-# === INIZIALIZZAZIONE SESSION_STATE ===
-if "model" not in st.session_state:
-    st.session_state.model = ""
+# === MODELLO DINAMICO ===
+model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()))
+sizes = size_options.get(model, [])
+features = features_options.get(model, {})
+features1 = features.get("features1", [])
+features2 = features.get("features2", [])
 
 # === FORM ===
 with st.form("config_form"):
     st.subheader("Configurazione - Casing, Pump")
 
-    model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()), key="model")
-    sizes = size_options.get(model, [])
-    size = st.selectbox("Product/Pump Size", sizes if sizes else ["Seleziona modello"])
-
-    features = features_options.get(model, {})
-    features1 = features.get("features1", [])
-    features2 = features.get("features2", [])
+    size = st.selectbox("Product/Pump Size", sizes if sizes else ["Seleziona un modello"])
     feature_1 = st.selectbox("Additional Feature 1", features1 if features1 else ["N/A"])
     feature_2 = st.selectbox("Additional Feature 2", features2 if features2 else ["N/A"])
 
@@ -80,22 +69,18 @@ with st.form("config_form"):
     mtype = st.selectbox("Material Type", [""] + list(material_options.keys()))
     if mtype == "MISCELLANEOUS":
         mprefix = ""
-        mname = st.selectbox("Material Name", get_misc_names(mtype)) if mtype else ""
+        mname = st.selectbox("Material Name", material_options[mtype][None])
     elif mtype:
-        mprefix = st.selectbox("Material Prefix", list(material_options.get(mtype, {}).keys()))
-        mname = st.selectbox("Material Name", get_material_names(mtype, mprefix)) if mprefix else ""
+        mprefix = st.selectbox("Material Prefix", list(material_options[mtype].keys()))
+        mname = st.selectbox("Material Name", material_options[mtype][mprefix])
     else:
-        mprefix = ""
-        mname = ""
+        mprefix, mname = "", ""
 
     madd = st.text_input("Material add. Features")
-
     submitted = st.form_submit_button("Genera Output")
 
 # === OUTPUT ===
 if submitted:
-    st.subheader("Risultato finale")
-
     descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
     materiale = f"{mtype} {mprefix}{mname} {madd}".strip()
 
@@ -115,6 +100,7 @@ if submitted:
         "Quality": ""
     }
 
+    st.subheader("Risultato finale")
     for campo, valore in output_data.items():
         st.markdown(f"**{campo}**")
         col1, col2 = st.columns([0.85, 0.15])
