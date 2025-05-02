@@ -1,3 +1,4 @@
+# streamlit_oracle_config.py
 import streamlit as st
 
 # === DATI ===
@@ -25,40 +26,51 @@ material_options = {
     }
 }
 
-# === INTERFACCIA ===
-st.set_page_config(page_title="Oracle Item Setup", layout="wide")
-st.title("Oracle Item Setup")
-st.subheader("Configurazione - Casing, Pump")
+# === FUNZIONI ===
+def get_material_names(mtype, prefix):
+    return material_options.get(mtype, {}).get(prefix, [])
 
-# === INPUT ===
-model = st.selectbox("Product/Pump Model", list(size_options.keys()), index=0)
-size = st.selectbox("Product/Pump Size", size_options.get(model, [""]), index=0)
+def get_misc_names(mtype):
+    return material_options.get(mtype, {}).get(None, [])
 
-features1 = features_options.get(model, {}).get("features1", [""])
-features2 = features_options.get(model, {}).get("features2", [""])
+# === INTERFACCIA STREAMLIT ===
+st.set_page_config(layout="wide")
+st.title("Oracle Item Setup - Web App")
 
-feature1 = st.selectbox("_Additional_Features", features1 or [""])
-feature2 = st.selectbox("_Additional_Features2", features2 or [""]) if features2 else ""
+with st.form("config_form"):
+    st.subheader("Configurazione - Casing, Pump")
 
-note = st.text_input("Note")
-drawing = st.text_input("Dwg/doc number")
+    model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()))
+    
+    sizes = size_options.get(model, [])
+    size = st.selectbox("Product/Pump Size", sizes if sizes else [""])
 
-mat_type = st.selectbox("Material Type", list(material_options.keys()))
-prefixes = list(material_options[mat_type].keys())
+    features = features_options.get(model, {})
+    features1 = features.get("features1", [""])
+    features2 = features.get("features2", [""]) if features.get("features2") else None
+    feature_1 = st.selectbox("Additional Feature 1", features1)
+    feature_2 = st.selectbox("Additional Feature 2", features2 if features2 else [""]) if features2 else ""
 
-if None in prefixes:
-    mat_prefix = ""
-    mat_name = st.selectbox("Material Name", material_options[mat_type][None])
-else:
-    mat_prefix = st.selectbox("Material Prefix", prefixes)
-    mat_name = st.selectbox("Material Name", material_options[mat_type][mat_prefix])
+    note = st.text_input("Note")
+    dwg = st.text_input("Dwg/doc number")
 
-mat_add = st.text_input("Material add. Features")
+    mtype = st.selectbox("Material Type", [""] + list(material_options.keys()))
+    if mtype == "MISCELLANEOUS":
+        mprefix = ""
+        mname = st.selectbox("Material Name", get_misc_names(mtype))
+    else:
+        mprefix = st.selectbox("Material Prefix", list(material_options.get(mtype, {}).keys()))
+        mname = st.selectbox("Material Name", get_material_names(mtype, mprefix))
 
-# === OUTPUT ===
-if st.button("Genera Output"):
-    descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature1, feature2, note]))
-    materiale = f"{mat_type} {mat_prefix}{mat_name} {mat_add}".strip()
+    madd = st.text_input("Material add. Features")
+
+    submitted = st.form_submit_button("Genera Output")
+
+if submitted:
+    st.subheader("Risultato finale")
+
+    descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
+    materiale = f"{mtype} {mprefix}{mname} {madd}".strip()
 
     output_data = {
         "Item": "40202...",
@@ -67,7 +79,7 @@ if st.button("Genera Output"):
         "Classe ricambi": "3",
         "Categories": "Fascia ite 4",
         "Catalog": "CORPO",
-        "Disegno": drawing,
+        "Disegno": dwg,
         "Mater+Descr_FPD": materiale,
         "Template": "FPD_MAKE",
         "ERP_L1": "20_TURNKEY_MACHINING",
@@ -76,13 +88,10 @@ if st.button("Genera Output"):
         "Quality": ""
     }
 
-    st.subheader("Risultato finale")
     for campo, valore in output_data.items():
-        html = f"""
-        <div style="margin-bottom: 1.5em;">
-            <strong>{campo}</strong><br>
-            <input type="text" value="{valore}" id="{campo}" readonly style="width: 90%; padding: 6px; font-family: monospace;">
-            <button onclick="navigator.clipboard.writeText(document.getElementById('{campo}').value)">Copia</button>
-        </div>
-        """
-        st.markdown(html, unsafe_allow_html=True)
+        st.markdown(f"**{campo}**")
+        col1, col2 = st.columns([0.85, 0.15])
+        with col1:
+            st.code(valore, language="text")
+        with col2:
+            st.button(f"Copia", key=f"copy_{campo}", help="Copia manualmente il testo", use_container_width=True)
