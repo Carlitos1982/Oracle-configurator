@@ -26,6 +26,7 @@ material_options = {
     }
 }
 
+# === FUNZIONE PER COPIA ===
 def copy_button(value, key):
     btn_id = f"btn_{key}"
     js_code = f"""
@@ -49,8 +50,10 @@ st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙
 st.title("Oracle Item Setup - Web App")
 st.subheader("Configurazione - Casing, Pump")
 
+# === Selezione modello ===
 model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()))
 
+# === Size e features ===
 if model:
     size = st.selectbox("Product/Pump Size", size_options[model])
     features = features_options.get(model, {})
@@ -59,9 +62,10 @@ if model:
     feature_1 = st.selectbox("Additional Feature 1", f1 if f1 else ["N/A"])
     feature_2 = st.selectbox("Additional Feature 2", f2 if f2 else ["N/A"])
 else:
-    size = st.selectbox("Product/Pump Size", ["— Seleziona prima un modello —"])
+    size = st.selectbox("Product/Pump Size", options=["Seleziona un modello"], disabled=True)
     feature_1 = feature_2 = ""
 
+# === Altri campi ===
 note = st.text_area("Note (opzionale)", height=60)
 dwg = st.text_input("Dwg/doc number")
 
@@ -77,8 +81,9 @@ else:
 
 madd = st.text_input("Material add. Features (opzionale)")
 
+# === Output ===
 if st.button("Genera Output"):
-    descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note])).strip()
+    descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
     materiale = f"{mtype} {mprefix}{mname} {madd}".strip()
 
     output_data = {
