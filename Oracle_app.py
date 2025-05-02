@@ -61,13 +61,13 @@ with st.form("config_form"):
 
     model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()))
     sizes = size_options.get(model, [])
-    size = st.selectbox("Product/Pump Size", sizes) if model else st.selectbox("Product/Pump Size", ["Seleziona modello"])
+    size = st.selectbox("Product/Pump Size", sizes if model else ["Seleziona modello"])
 
     features = features_options.get(model, {})
-    features1 = features.get("features1")
-    features2 = features.get("features2")
-    feature_1 = st.selectbox("Additional Feature 1", features1) if features1 else st.selectbox("Additional Feature 1", ["N/A"])
-    feature_2 = st.selectbox("Additional Feature 2", features2) if features2 else st.selectbox("Additional Feature 2", ["N/A"])
+    features1 = features.get("features1", [])
+    features2 = features.get("features2", [])
+    feature_1 = st.selectbox("Additional Feature 1", features1 if features1 else ["N/A"])
+    feature_2 = st.selectbox("Additional Feature 2", features2 if features2 else ["N/A"])
 
     note = st.text_input("Note")
     dwg = st.text_input("Dwg/doc number")
@@ -97,4 +97,22 @@ if submitted:
         "Item": "40202...",
         "Description": descrizione,
         "Identificativo": "1100-CASING",
-        "Classe ricambi": "3
+        "Classe ricambi": "3",
+        "Categories": "Fascia ite 4",
+        "Catalog": "CORPO",
+        "Disegno": dwg,
+        "Mater+Descr_FPD": materiale,
+        "Template": "FPD_MAKE",
+        "ERP_L1": "20_TURNKEY_MACHINING",
+        "ERP_L2": "17_CASING",
+        "To supplier": "",
+        "Quality": ""
+    }
+
+    for campo, valore in output_data.items():
+        st.markdown(f"**{campo}**")
+        col1, col2 = st.columns([0.85, 0.15])
+        with col1:
+            st.code(valore, language="text")
+        with col2:
+            copy_button(valore, campo.replace(" ", "_"))
