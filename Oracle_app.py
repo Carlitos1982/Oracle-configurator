@@ -45,7 +45,7 @@ def copy_button(value, key):
     """
     components.html(js_code, height=40)
 
-# === UI SETUP ===
+# === UI ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 st.subheader("Configurazione - Casing, Pump")
@@ -65,21 +65,10 @@ features = features_options.get(model, {})
 feature_1 = st.selectbox("Additional Feature 1", features.get("features1", ["N/A"]), key="feature1")
 feature_2 = st.selectbox("Additional Feature 2", features.get("features2", ["N/A"]) if features.get("features2") else ["N/A"], key="feature2")
 
-# === ALTRI CAMPI — CON PROTEZIONE ===
-note_val = st.session_state.get("note_input", "")
-if note_val is None:
-    note_val = ""
-note = st.text_area("Note (opzionale)", value=note_val, height=60, key="note_input")
-
-dwg_val = st.session_state.get("dwg_input", "")
-if dwg_val is None:
-    dwg_val = ""
-dwg = st.text_input("Dwg/doc number", value=dwg_val, key="dwg_input")
-
-madd_val = st.session_state.get("madd_input", "")
-if madd_val is None:
-    madd_val = ""
-madd = st.text_input("Material add. Features (opzionale)", value=madd_val, key="madd_input")
+# === ALTRI CAMPI STABILI ===
+note = st.text_area("Note (opzionale)", height=60, key="note_input")
+dwg = st.text_input("Dwg/doc number", key="dwg_input")
+madd = st.text_input("Material add. Features (opzionale)", key="madd_input")
 
 mtype = st.selectbox("Material Type", [""] + list(material_options.keys()), key="mtype")
 if mtype == "MISCELLANEOUS":
