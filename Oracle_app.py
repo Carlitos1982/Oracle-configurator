@@ -100,7 +100,7 @@ if st.button("Genera Output", key="genera_output"):
         "To supplier": "",
         "Quality": ""
     }
-    st.session_state["last_copied"] = None  # reset notifica copia
+    st.session_state["last_copied"] = None  # reset conferma copia
 
 # === MOSTRA OUTPUT SE PRESENTE ===
 if "output_data" in st.session_state:
@@ -122,4 +122,4 @@ if "output_data" in st.session_state:
                     copy_text_to_clipboard(valore)
                     st.session_state["last_copied"] = campo
                 if st.session_state.get("last_copied") == campo:
-                    st.success("Copiato!")
+                    st.markdown("<span style='color: green; font-size: 0.85rem;'>✅ Copiato!</span>", unsafe_allow_html=True)
