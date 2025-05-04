@@ -100,7 +100,7 @@ if st.button("Genera Output", key="genera_output"):
         "To supplier": "",
         "Quality": ""
     }
-    st.session_state["last_copied"] = None  # reset conferma copia
+    st.session_state["copied_fields"] = []  # reset tutti i 'copiato'
 
 # === MOSTRA OUTPUT SE PRESENTE ===
 if "output_data" in st.session_state:
@@ -115,13 +115,16 @@ if "output_data" in st.session_state:
             else:
                 st.code(valore, language="text")
 
-            # Pulsante + conferma su una riga flessibile
+            # Pulsante copia responsive
             copiato = st.button("Copia", key=f"copy_{campo}", use_container_width=True)
             if copiato:
                 copy_text_to_clipboard(valore)
-                st.session_state["last_copied"] = campo
+                if "copied_fields" not in st.session_state:
+                    st.session_state["copied_fields"] = []
+                if campo not in st.session_state["copied_fields"]:
+                    st.session_state["copied_fields"].append(campo)
 
-            if st.session_state.get("last_copied") == campo:
+            if campo in st.session_state.get("copied_fields", []):
                 st.markdown(
                     "<div style='text-align: right; margin-top: -0.5rem;'>"
                     "<span style='color: green; font-size: 0.85rem;'>✅ Copiato!</span>"
