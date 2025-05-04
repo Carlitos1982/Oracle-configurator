@@ -108,10 +108,8 @@ if st.button("Genera Output", key="genera_output"):
             col1, col2 = st.columns([0.85, 0.15])
             with col1:
                 if campo == "Description":
-                    st.markdown(f"""
-                        <div style='font-weight:bold; margin-bottom:0.2rem;'>{campo}</div>
-                        <textarea readonly rows="4" style="width: 100%; padding: 0.5rem; font-size: 1rem; font-family: monospace; border: 1px solid #ccc; border-radius: 4px;'>{valore}</textarea>
-                    """, unsafe_allow_html=True)
+                    st.markdown(f"<div style='font-weight:bold; margin-bottom:0.2rem;'>{campo}</div>", unsafe_allow_html=True)
+                    st.text_area(label="", value=valore, height=100, key=f"txt_{campo}")
                 else:
                     st.markdown(f"**{campo}**")
                     st.code(valore, language="text")
