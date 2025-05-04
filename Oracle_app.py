@@ -80,12 +80,12 @@ mname = st.selectbox("Material Name", [""] + name_options, key="mname")
 # === CAMPO ADDIZIONALE ===
 madd = st.text_input("Material add. Features (opzionale)", key="madd_input")
 
-# === OUTPUT ===
+# === GENERAZIONE OUTPUT ===
 if st.button("Genera Output", key="genera_output"):
     descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
     materiale = " ".join(filter(None, [mtype, mprefix + mname, madd]))
 
-    output_data = {
+    st.session_state["output_data"] = {
         "Item": "40202...",
         "Description": descrizione,
         "Identificativo": "1100-CASING",
@@ -100,8 +100,12 @@ if st.button("Genera Output", key="genera_output"):
         "To supplier": "",
         "Quality": ""
     }
+    st.session_state["last_copied"] = None  # reset notifica copia
 
+# === MOSTRA OUTPUT SE PRESENTE ===
+if "output_data" in st.session_state:
     st.subheader("Risultato finale")
+    output_data = st.session_state["output_data"]
 
     for campo, valore in output_data.items():
         with st.container():
@@ -116,3 +120,6 @@ if st.button("Genera Output", key="genera_output"):
             with col2:
                 if st.button("Copia", key=f"copy_{campo}"):
                     copy_text_to_clipboard(valore)
+                    st.session_state["last_copied"] = campo
+                if st.session_state.get("last_copied") == campo:
+                    st.success("Copiato!")
