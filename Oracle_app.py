@@ -108,7 +108,10 @@ if st.button("Genera Output", key="genera_output"):
             st.markdown(f"**{campo}**")
             col1, col2 = st.columns([0.85, 0.15])
             with col1:
-                st.code(valore, language="text")
+                if campo == "Description":
+                    st.text_area(label="", value=valore, height=100, key=f"txt_{campo}")
+                else:
+                    st.code(valore, language="text")
             with col2:
                 if st.button("Copia", key=f"copy_{campo}"):
                     copy_text_to_clipboard(valore)
