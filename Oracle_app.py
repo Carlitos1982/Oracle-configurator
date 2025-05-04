@@ -105,12 +105,13 @@ if st.button("Genera Output", key="genera_output"):
 
     for campo, valore in output_data.items():
         with st.container():
-            st.markdown(f"**{campo}**")
             col1, col2 = st.columns([0.85, 0.15])
             with col1:
                 if campo == "Description":
+                    st.markdown(f"<div style='font-weight:bold; margin-bottom:0.2rem;'>{campo}</div>", unsafe_allow_html=True)
                     st.text_area(label="", value=valore, height=100, key=f"txt_{campo}")
                 else:
+                    st.markdown(f"**{campo}**")
                     st.code(valore, language="text")
             with col2:
                 if st.button("Copia", key=f"copy_{campo}"):
