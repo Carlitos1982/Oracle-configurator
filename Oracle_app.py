@@ -109,17 +109,22 @@ if "output_data" in st.session_state:
 
     for campo, valore in output_data.items():
         with st.container():
-            col1, col2 = st.columns([0.85, 0.15])
-            with col1:
-                if campo == "Description":
-                    st.markdown(f"<div style='font-weight:bold; margin-bottom:0.2rem;'>{campo}</div>", unsafe_allow_html=True)
-                    st.text_area(label="", value=valore, height=100, key=f"txt_{campo}")
-                else:
-                    st.markdown(f"**{campo}**")
-                    st.code(valore, language="text")
-            with col2:
-                if st.button("Copia", key=f"copy_{campo}"):
-                    copy_text_to_clipboard(valore)
-                    st.session_state["last_copied"] = campo
-                if st.session_state.get("last_copied") == campo:
-                    st.markdown("<span style='color: green; font-size: 0.85rem;'>✅ Copiato!</span>", unsafe_allow_html=True)
+            st.markdown(f"**{campo}**")
+            if campo == "Description":
+                st.text_area(label="", value=valore, height=100, key=f"txt_{campo}", label_visibility="collapsed")
+            else:
+                st.code(valore, language="text")
+
+            # Pulsante + conferma su una riga flessibile
+            copiato = st.button("Copia", key=f"copy_{campo}", use_container_width=True)
+            if copiato:
+                copy_text_to_clipboard(valore)
+                st.session_state["last_copied"] = campo
+
+            if st.session_state.get("last_copied") == campo:
+                st.markdown(
+                    "<div style='text-align: right; margin-top: -0.5rem;'>"
+                    "<span style='color: green; font-size: 0.85rem;'>✅ Copiato!</span>"
+                    "</div>",
+                    unsafe_allow_html=True
+                )
