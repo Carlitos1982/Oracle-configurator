@@ -2,26 +2,39 @@ import streamlit as st
 import streamlit.components.v1 as components
 import base64
 
-# === FUNZIONE: BOTTONE HTML + FEEDBACK COPIA ===
+# === FUNZIONE: BOTTONE HTML CON STATO COPIATO ===
 def render_copy_button(text, campo):
     b64 = base64.b64encode(text.encode()).decode()
     copied_fields = st.session_state.get("copied_fields", [])
     copied = campo in copied_fields
 
-    html_button = f"""
-    <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-        <button onclick="navigator.clipboard.writeText(atob('{b64}'))"
-                style="padding:6px 12px; font-size:0.9rem; border:1px solid #ccc; border-radius:4px; cursor:pointer;">
-            Copia
-        </button>
-        {'<span style="color:green; font-size:0.9rem;">✅ Copiato!</span>' if copied else ''}
+    style_normal = "padding:6px 12px; font-size:0.9rem; border:1px solid #ccc; border-radius:4px; cursor:pointer;"
+    style_copied = "padding:6px 12px; font-size:0.9rem; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius:4px; font-weight: bold;"
+    style = style_copied if copied else style_normal
+    label = "✅ Copiato!" if copied else "Copia"
+
+    html = f"""
+    <script>
+    function copyAndMark_{campo}() {{
+        navigator.clipboard.writeText(atob('{b64}'));
+        const input = window.parent.document.querySelector('input[data-streamlit-input="{campo}"]');
+        if (input) {{
+            input.value = "1";
+            const event = new Event("input", {{ bubbles: true }});
+            input.dispatchEvent(event);
+        }}
+    }}
+    </script>
+    <div style="margin-top: 6px;">
+        <button onclick="copyAndMark_{campo}()" style="{style}">{label}</button>
     </div>
     """
-    components.html(html_button, height=50)
+    st.text_input("", "", key=campo, label_visibility="collapsed")
+    components.html(html, height=50)
 
-    # Bottone invisibile per aggiornare stato copiato
-    if st.button(f"Segna come copiato: {campo}", key=f"mark_{campo}"):
-        st.session_state.setdefault("copied_fields", []).append(campo)
+    if st.session_state.get(campo) == "1" and campo not in copied_fields:
+        st.session_state["copied_fields"].append(campo)
+        st.session_state[campo] = "0"
 
 # === CONFIGURAZIONE STREAMLIT ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
@@ -44,7 +57,6 @@ if selected_part == "Casing, Pump":
 
     st.subheader("Configurazione - Casing, Pump")
 
-    # === DATI ===
     size_options = {
         "HPX": ["1.5HPX15A", "2HPX10A"],
         "HDX": ["4HDX14A", "6HDX13A"],
@@ -69,24 +81,16 @@ if selected_part == "Casing, Pump":
         }
     }
 
-    # === MODELLO ===
     model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()), key="model")
-
-    # === SIZE e FEATURES ===
     size_choices = size_options.get(model, [])
     size = st.selectbox("Product/Pump Size", [""] + size_choices, key="size")
-
     features = features_options.get(model, {})
     feature_1 = st.selectbox("Additional Feature 1", [""] + features.get("features1", []), key="feature1")
     feature_2 = st.selectbox("Additional Feature 2", [""] + features.get("features2", []) if features.get("features2") else [""], key="feature2")
-
-    # === ALTRI CAMPI ===
     note = st.text_area("Note (opzionale)", height=80, key="note_input")
     dwg = st.text_input("Dwg/doc number", key="dwg_input")
 
-    # === MATERIALI ===
     mtype = st.selectbox("Material Type", [""] + list(material_options.keys()), key="mtype")
-
     prefix_options = []
     if mtype and mtype != "MISCELLANEOUS":
         prefix_options = list(material_options[mtype].keys())
@@ -98,15 +102,11 @@ if selected_part == "Casing, Pump":
     elif mtype and mprefix:
         name_options = material_options[mtype].get(mprefix, [])
     mname = st.selectbox("Material Name", [""] + name_options, key="mname")
-
-    # === CAMPO ADDIZIONALE ===
     madd = st.text_input("Material add. Features (opzionale)", key="madd_input")
 
-    # === GENERAZIONE OUTPUT ===
     if st.button("Genera Output", key="genera_output"):
         descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
         materiale = " ".join(filter(None, [mtype, mprefix + mname if mprefix and mname else "", madd]))
-
         st.session_state["output_data"] = {
             "Item": "40202...",
             "Description": descrizione,
@@ -124,26 +124,21 @@ if selected_part == "Casing, Pump":
         }
         st.session_state["copied_fields"] = []
 
-# === MOSTRA OUTPUT SE PRESENTE ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
     output_data = st.session_state["output_data"]
 
     for campo, valore in output_data.items():
-        with st.container():
-            st.markdown("**" + campo + "**")
-            if campo == "Description":
-                st.text_area(label="", value=valore, height=100, key=f"txt_{campo}", label_visibility="collapsed")
-            else:
-                st.code(valore, language="text")
+        st.markdown("**" + campo + "**")
+        if campo == "Description":
+            st.text_area(label="", value=valore, height=100, key=f"txt_{campo}", label_visibility="collapsed")
+        else:
+            st.code(valore, language="text")
+        render_copy_button(valore, campo)
 
-            render_copy_button(valore, campo)
-
-    # === OUTPUT COMPLETO ===
     full_output = "\n".join([f"{k}: {v}" for k, v in output_data.items()])
     st.markdown("---")
     st.text_area("Output completo (per copia manuale su iPhone)", value=full_output, height=300)
 
-# === ALTRE PARTI ===
 if selected_part != "Casing, Pump":
     st.info("La configurazione per **" + selected_part + "** è in fase di sviluppo. Riprova più tardi.")
