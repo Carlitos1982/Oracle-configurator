@@ -2,15 +2,17 @@ import streamlit as st
 import streamlit.components.v1 as components
 import base64
 
-# === FUNZIONE COPIA ===
+# === FUNZIONE COPIA PER PC DESKTOP ===
 def copy_text_to_clipboard(text):
     b64 = base64.b64encode(text.encode()).decode()
     copy_code = f"""
     <script>
-    function copyToClipboard(text) {{
-        navigator.clipboard.writeText(text);
-    }}
-    copyToClipboard(atob("{b64}"));
+    const decoded = atob("{b64}");
+    navigator.clipboard.writeText(decoded).then(function() {{
+        console.log('Copied to clipboard');
+    }}, function(err) {{
+        console.error('Clipboard copy failed', err);
+    }});
     </script>
     """
     components.html(copy_code, height=0)
@@ -97,7 +99,7 @@ if selected_part == "Casing, Pump":
     # === GENERAZIONE OUTPUT ===
     if st.button("Genera Output", key="genera_output"):
         descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
-        materiale = " ".join(filter(None, [mtype, mprefix + mname, madd]))
+        materiale = " ".join(filter(None, [mtype, mprefix + mname if mprefix and mname else "", madd]))
 
         st.session_state["output_data"] = {
             "Item": "40202...",
@@ -129,7 +131,6 @@ if selected_part == "Casing, Pump":
                 else:
                     st.code(valore, language="text")
 
-                # Pulsante copia responsive
                 copiato = st.button("Copia", key=f"copy_{campo}", use_container_width=True)
                 if copiato:
                     copy_text_to_clipboard(valore)
@@ -148,4 +149,4 @@ if selected_part == "Casing, Pump":
 
 # === ALTRE PARTI ===
 else:
-    st.info(f"La configurazione per **{selected_part}** è in fase di sviluppo. Riprova più tardi.")
+    st.info(f"La configurazione per **{selected_part}** è in fase di sviluppo. Riprova più tardi.")by by 
