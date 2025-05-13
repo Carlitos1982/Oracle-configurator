@@ -125,7 +125,7 @@ if selected_part == "Casing, Pump":
 
         for campo, valore in output_data.items():
             with st.container():
-                st.markdown(f"**{campo}**")
+                st.markdown("**" + campo + "**")
                 if campo == "Description":
                     st.text_area(label="", value=valore, height=100, key=f"txt_{campo}", label_visibility="collapsed")
                 else:
@@ -147,6 +147,11 @@ if selected_part == "Casing, Pump":
                         unsafe_allow_html=True
                     )
 
+        # === OUTPUT COMPLETO PER COPIA MANUALE ===
+        full_output = "\n".join([f"{k}: {v}" for k, v in output_data.items()])
+        st.markdown("---")
+        st.text_area("Output completo (per copia manuale su iPhone)", value=full_output, height=300)
+
 # === ALTRE PARTI ===
 else:
-    st.info(f"La configurazione per **{selected_part}** è in fase di sviluppo. Riprova più tardi.")by by 
+    st.info("La configurazione per **" + selected_part + "** è in fase di sviluppo. Riprova più tardi.")
