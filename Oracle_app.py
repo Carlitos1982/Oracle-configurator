@@ -2,16 +2,26 @@ import streamlit as st
 import streamlit.components.v1 as components
 import base64
 
-# === FUNZIONE: BOTTONE HTML CON COPIA ===
-def render_copy_button(text, key):
+# === FUNZIONE: BOTTONE HTML + FEEDBACK COPIA ===
+def render_copy_button(text, campo):
     b64 = base64.b64encode(text.encode()).decode()
+    copied_fields = st.session_state.get("copied_fields", [])
+    copied = campo in copied_fields
+
     html_button = f"""
-    <button onclick="navigator.clipboard.writeText(atob('{b64}'))"
-            style="margin-top:4px; padding:6px 12px; font-size:0.9rem; border:1px solid #ccc; border-radius:4px; cursor:pointer;">
-        Copia
-    </button>
+    <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+        <button onclick="navigator.clipboard.writeText(atob('{b64}'))"
+                style="padding:6px 12px; font-size:0.9rem; border:1px solid #ccc; border-radius:4px; cursor:pointer;">
+            Copia
+        </button>
+        {'<span style="color:green; font-size:0.9rem;">✅ Copiato!</span>' if copied else ''}
+    </div>
     """
-    components.html(html_button, height=40)
+    components.html(html_button, height=50)
+
+    # Bottone invisibile per aggiornare stato copiato
+    if st.button(f"Segna come copiato: {campo}", key=f"mark_{campo}"):
+        st.session_state.setdefault("copied_fields", []).append(campo)
 
 # === CONFIGURAZIONE STREAMLIT ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
@@ -112,6 +122,7 @@ if selected_part == "Casing, Pump":
             "To supplier": "",
             "Quality": ""
         }
+        st.session_state["copied_fields"] = []
 
 # === MOSTRA OUTPUT SE PRESENTE ===
 if "output_data" in st.session_state:
@@ -125,7 +136,8 @@ if "output_data" in st.session_state:
                 st.text_area(label="", value=valore, height=100, key=f"txt_{campo}", label_visibility="collapsed")
             else:
                 st.code(valore, language="text")
-            render_copy_button(valore, key=f"copybtn_{campo}")
+
+            render_copy_button(valore, campo)
 
     # === OUTPUT COMPLETO ===
     full_output = "\n".join([f"{k}: {v}" for k, v in output_data.items()])
