@@ -1,26 +1,52 @@
 import streamlit as st
 import streamlit.components.v1 as components
-import base64
 
-# === FUNZIONE: PULSANTE COPIA + FEEDBACK ===
+# === STILE PERSONALIZZATO PER IL BOTTONE COPIA ===
+st.markdown("""
+    <style>
+    .copied-button {
+        background-color: #d4edda !important;
+        color: #155724 !important;
+        font-weight: bold;
+        border: 1px solid #c3e6cb !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# === FUNZIONE: PULSANTE COPIA CON CAMBIO COLORE ===
 def render_copy_button(text, campo):
     copied_fields = st.session_state.get("copied_fields", [])
     copied = campo in copied_fields
 
-    col1, col2 = st.columns([1, 4])
-    with col1:
-        if st.button("Copia", key=f"btn_{campo}"):
-            st.session_state["copied_fields"].append(campo)
-            escaped_text = text.replace("\\", "\\\\").replace('"', '\\"')
-            js = f"""
-            <script>
-            navigator.clipboard.writeText("{escaped_text}");
-            </script>
-            """
-            components.html(js, height=0)
-    with col2:
-        if copied:
-            st.markdown("✅ **Copiato!**")
+    button_label = "Copia"
+    button_key = f"copy_{campo}"
+    button_class = "copied-button" if copied else ""
+
+    # Bottone copia con classe CSS dinamica
+    button_html = f"""
+    <button class="{button_class}" onclick='navigator.clipboard.writeText("{text.replace('"', '\\"')}");
+        window.parent.postMessage({{"type": "copied", "campo": "{campo}"}}, "*");'
+        style="padding:6px 12px; font-size:0.9rem; border-radius:4px; cursor:pointer; border:1px solid #ccc;">
+        {button_label}
+    </button>
+    <script>
+    window.addEventListener("message", (event) => {{
+        if (event.data.type === "copied" && event.data.campo === "{campo}") {{
+            const streamlitInput = window.parent.document.querySelector('input[data-streamlit-input="{campo}"]');
+            if (streamlitInput) {{
+                streamlitInput.value = "1";
+                streamlitInput.dispatchEvent(new Event("input", {{ bubbles: true }}));
+            }}
+        }}
+    }});
+    </script>
+    """
+    st.text_input("", "", key=campo, label_visibility="collapsed")
+    components.html(button_html, height=40)
+
+    if st.session_state.get(campo) == "1" and campo not in copied_fields:
+        st.session_state["copied_fields"].append(campo)
+        st.session_state[campo] = "0"
 
 # === CONFIGURAZIONE STREAMLIT ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
