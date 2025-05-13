@@ -1,30 +1,35 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
+# === CONFIGURAZIONE ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 
-# === Funzione: copia JS per ogni campo ===
-def render_copy_button(valore, campo):
-    if st.button(f"Copia", key=f"copy_{campo}"):
-        escaped = valore.replace("\\", "\\\\").replace('"', '\\"')
-        js = f"""
-        <script>
-        navigator.clipboard.writeText("{escaped}");
-        </script>
-        """
-        components.html(js, height=0)
+# === FUNZIONE: PULSANTE COPIA ===
+def render_copy_button(text):
+    escaped = text.replace("\\", "\\\\").replace('"', '\\"')
+    js_code = f"""
+    <script>
+    navigator.clipboard.writeText("{escaped}")
+        .then(() => console.log("Copied!"))
+        .catch(err => console.error("Copy failed:", err));
+    </script>
+    """
+    components.html(js_code, height=0)
+    st.success("Copiato negli appunti!")
 
-# === Configurazione attiva ===
+# === PARTE SELEZIONATA ===
 part_options = [
-    "Casing, Pump", "Impeller", "Shaft", "Bearing Housing", "Seal Cover", "Mechanical Seal", "Coupling Guard"
+    "Casing, Pump", "Impeller", "Shaft",
+    "Bearing Housing", "Seal Cover", "Mechanical Seal", "Coupling Guard"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
+# === SOLO CASING, PUMP ===
 if selected_part == "Casing, Pump":
     st.subheader("Configurazione - Casing, Pump")
 
-    # === Input utente ===
+    # Input dati
     model = st.selectbox("Product/Pump Model", ["", "HPX", "HDX", "HED"])
     size = st.selectbox("Product/Pump Size", ["", "1.5HPX15A", "2HPX10A"])
     feature_1 = st.selectbox("Additional Feature 1", ["", "STD", "INDUCER"])
@@ -36,7 +41,7 @@ if selected_part == "Casing, Pump":
     mname = st.selectbox("Material Name", ["", "A105", "A216 WCB", "1.4301", "1.0619", "BRONZE", "PLASTIC"])
     madd = st.text_input("Material add. Features (opzionale)")
 
-    # === Genera output ===
+    # Output
     if st.button("Genera Output"):
         descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
         materiale = " ".join(filter(None, [mtype, mprefix + mname if mprefix and mname else "", madd]))
@@ -57,15 +62,15 @@ if selected_part == "Casing, Pump":
             "Quality": ""
         }
 
-# === Output finale ===
+# === OUTPUT RISULTATO ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
-
     for campo, valore in st.session_state["output_data"].items():
         st.markdown(f"**{campo}**")
         st.code(valore)
-        render_copy_button(valore, campo)
+        if st.button(f"Copia {campo}", key=f"copy_{campo}"):
+            render_copy_button(valore)
 
-# === Altre parti ===
+# === ALTRE PARTI ===
 if selected_part != "Casing, Pump":
     st.info("La configurazione per **" + selected_part + "** è in fase di sviluppo. Riprova più tardi.")
