@@ -1,86 +1,42 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# === PRIMA ISTRUZIONE ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
+st.title("Oracle Item Setup - Web App")
 
-# === STATO INIZIALE ===
-if "copied_fields" not in st.session_state:
-    st.session_state["copied_fields"] = []
-
-# === FUNZIONE: COPIA E FEEDBACK ===
-def render_copy_button(text, campo):
-    if st.button(f"Copia {campo}", key=f"btn_{campo}"):
+# === Funzione: copia JS per ogni campo ===
+def render_copy_button(valore, campo):
+    if st.button(f"Copia", key=f"copy_{campo}"):
+        escaped = valore.replace("\\", "\\\\").replace('"', '\\"')
         js = f"""
         <script>
-        navigator.clipboard.writeText("{text.replace('"', '\\"')}");
+        navigator.clipboard.writeText("{escaped}");
         </script>
         """
         components.html(js, height=0)
-        st.session_state["copied_fields"].append(campo)
-    if campo in st.session_state["copied_fields"]:
-        st.success(f"{campo} copiato!")
 
-# === TITOLO E PARTE ===
-st.title("Oracle Item Setup - Web App")
+# === Configurazione attiva ===
 part_options = [
-    "Casing, Pump", "Impeller", "Shaft",
-    "Bearing Housing", "Seal Cover", "Mechanical Seal", "Coupling Guard"
+    "Casing, Pump", "Impeller", "Shaft", "Bearing Housing", "Seal Cover", "Mechanical Seal", "Coupling Guard"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
-# === SOLO CASING, PUMP ATTIVO ===
 if selected_part == "Casing, Pump":
     st.subheader("Configurazione - Casing, Pump")
 
-    size_options = {
-        "HPX": ["1.5HPX15A", "2HPX10A"],
-        "HDX": ["4HDX14A", "6HDX13A"],
-        "HED": ["1,5HED11", "2HED13"]
-    }
-    features_options = {
-        "HPX": {"features1": ["STD", "INDUCER"], "features2": ["PLUGGED DISCHARGE NOZZLE"]},
-        "HDX": {"features1": ["TOP-TOP", "SIDE-SIDE PL"], "features2": None},
-        "HED": {"features1": ["TOP-TOP"], "features2": ["HEAVY"]}
-    }
-    material_options = {
-        "ASTM": {
-            "A": ["A105", "A216 WCB"],
-            "B": ["B564 UNS N06625"]
-        },
-        "EN": {
-            "C": ["1.4301"],
-            "D": ["1.0619"]
-        },
-        "MISCELLANEOUS": {
-            None: ["BRONZE", "PLASTIC"]
-        }
-    }
-
-    model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()))
-    size_choices = size_options.get(model, [])
-    size = st.selectbox("Product/Pump Size", [""] + size_choices)
-    features = features_options.get(model, {})
-    feature_1 = st.selectbox("Additional Feature 1", [""] + features.get("features1", []))
-    feature_2 = st.selectbox("Additional Feature 2", [""] + features.get("features2", []) if features.get("features2") else [""])
+    # === Input utente ===
+    model = st.selectbox("Product/Pump Model", ["", "HPX", "HDX", "HED"])
+    size = st.selectbox("Product/Pump Size", ["", "1.5HPX15A", "2HPX10A"])
+    feature_1 = st.selectbox("Additional Feature 1", ["", "STD", "INDUCER"])
+    feature_2 = st.selectbox("Additional Feature 2", ["", "PLUGGED DISCHARGE NOZZLE"])
     note = st.text_area("Note (opzionale)", height=80)
     dwg = st.text_input("Dwg/doc number")
-
-    mtype = st.selectbox("Material Type", [""] + list(material_options.keys()))
-    prefix_options = []
-    if mtype and mtype != "MISCELLANEOUS":
-        prefix_options = list(material_options[mtype].keys())
-    mprefix = st.selectbox("Material Prefix", [""] + prefix_options)
-
-    name_options = []
-    if mtype == "MISCELLANEOUS":
-        name_options = material_options[mtype][None]
-    elif mtype and mprefix:
-        name_options = material_options[mtype].get(mprefix, [])
-    mname = st.selectbox("Material Name", [""] + name_options)
+    mtype = st.selectbox("Material Type", ["", "ASTM", "EN", "MISCELLANEOUS"])
+    mprefix = st.selectbox("Material Prefix", ["", "A", "B", "C", "D"])
+    mname = st.selectbox("Material Name", ["", "A105", "A216 WCB", "1.4301", "1.0619", "BRONZE", "PLASTIC"])
     madd = st.text_input("Material add. Features (opzionale)")
 
-    # === GENERAZIONE OUTPUT ===
+    # === Genera output ===
     if st.button("Genera Output"):
         descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
         materiale = " ".join(filter(None, [mtype, mprefix + mname if mprefix and mname else "", madd]))
@@ -100,20 +56,16 @@ if selected_part == "Casing, Pump":
             "To supplier": "",
             "Quality": ""
         }
-        st.session_state["copied_fields"] = []
 
-# === VISUALIZZAZIONE OUTPUT ===
+# === Output finale ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
+
     for campo, valore in st.session_state["output_data"].items():
         st.markdown(f"**{campo}**")
         st.code(valore)
         render_copy_button(valore, campo)
 
-    st.markdown("---")
-    full = "\n".join(f"{k}: {v}" for k, v in st.session_state["output_data"].items())
-    st.text_area("Output completo (manuale)", value=full, height=300)
-
-# === ALTRE PARTI ===
+# === Altre parti ===
 if selected_part != "Casing, Pump":
     st.info("La configurazione per **" + selected_part + "** è in fase di sviluppo. Riprova più tardi.")
