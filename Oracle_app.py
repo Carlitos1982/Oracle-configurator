@@ -2,20 +2,16 @@ import streamlit as st
 import streamlit.components.v1 as components
 import base64
 
-# === FUNZIONE COPIA PER PC DESKTOP ===
-def copy_text_to_clipboard(text):
+# === FUNZIONE: BOTTONE HTML CON COPIA ===
+def render_copy_button(text, key):
     b64 = base64.b64encode(text.encode()).decode()
-    copy_code = f"""
-    <script>
-    const decoded = atob("{b64}");
-    navigator.clipboard.writeText(decoded).then(function() {{
-        console.log('Copied to clipboard');
-    }}, function(err) {{
-        console.error('Clipboard copy failed', err);
-    }});
-    </script>
+    html_button = f"""
+    <button onclick="navigator.clipboard.writeText(atob('{b64}'))"
+            style="margin-top:4px; padding:6px 12px; font-size:0.9rem; border:1px solid #ccc; border-radius:4px; cursor:pointer;">
+        Copia
+    </button>
     """
-    components.html(copy_code, height=0)
+    components.html(html_button, height=40)
 
 # === CONFIGURAZIONE STREAMLIT ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
@@ -116,42 +112,26 @@ if selected_part == "Casing, Pump":
             "To supplier": "",
             "Quality": ""
         }
-        st.session_state["copied_fields"] = []
 
-    # === MOSTRA OUTPUT SE PRESENTE ===
-    if "output_data" in st.session_state:
-        st.subheader("Risultato finale")
-        output_data = st.session_state["output_data"]
+# === MOSTRA OUTPUT SE PRESENTE ===
+if "output_data" in st.session_state:
+    st.subheader("Risultato finale")
+    output_data = st.session_state["output_data"]
 
-        for campo, valore in output_data.items():
-            with st.container():
-                st.markdown("**" + campo + "**")
-                if campo == "Description":
-                    st.text_area(label="", value=valore, height=100, key=f"txt_{campo}", label_visibility="collapsed")
-                else:
-                    st.code(valore, language="text")
+    for campo, valore in output_data.items():
+        with st.container():
+            st.markdown("**" + campo + "**")
+            if campo == "Description":
+                st.text_area(label="", value=valore, height=100, key=f"txt_{campo}", label_visibility="collapsed")
+            else:
+                st.code(valore, language="text")
+            render_copy_button(valore, key=f"copybtn_{campo}")
 
-                copiato = st.button("Copia", key=f"copy_{campo}", use_container_width=True)
-                if copiato:
-                    copy_text_to_clipboard(valore)
-                    if "copied_fields" not in st.session_state:
-                        st.session_state["copied_fields"] = []
-                    if campo not in st.session_state["copied_fields"]:
-                        st.session_state["copied_fields"].append(campo)
-
-                if campo in st.session_state.get("copied_fields", []):
-                    st.markdown(
-                        "<div style='text-align: right; margin-top: -0.5rem;'>"
-                        "<span style='color: green; font-size: 0.85rem;'>✅ Copiato!</span>"
-                        "</div>",
-                        unsafe_allow_html=True
-                    )
-
-        # === OUTPUT COMPLETO PER COPIA MANUALE ===
-        full_output = "\n".join([f"{k}: {v}" for k, v in output_data.items()])
-        st.markdown("---")
-        st.text_area("Output completo (per copia manuale su iPhone)", value=full_output, height=300)
+    # === OUTPUT COMPLETO ===
+    full_output = "\n".join([f"{k}: {v}" for k, v in output_data.items()])
+    st.markdown("---")
+    st.text_area("Output completo (per copia manuale su iPhone)", value=full_output, height=300)
 
 # === ALTRE PARTI ===
-else:
+if selected_part != "Casing, Pump":
     st.info("La configurazione per **" + selected_part + "** è in fase di sviluppo. Riprova più tardi.")
