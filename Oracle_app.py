@@ -1,35 +1,19 @@
 import streamlit as st
-import streamlit.components.v1 as components
 
-# === CONFIGURAZIONE ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 
-# === FUNZIONE: PULSANTE COPIA ===
-def render_copy_button(text):
-    escaped = text.replace("\\", "\\\\").replace('"', '\\"')
-    js_code = f"""
-    <script>
-    navigator.clipboard.writeText("{escaped}")
-        .then(() => console.log("Copied!"))
-        .catch(err => console.error("Copy failed:", err));
-    </script>
-    """
-    components.html(js_code, height=0)
-    st.success("Copiato negli appunti!")
-
-# === PARTE SELEZIONATA ===
+# === SELEZIONE PARTE ===
 part_options = [
     "Casing, Pump", "Impeller", "Shaft",
     "Bearing Housing", "Seal Cover", "Mechanical Seal", "Coupling Guard"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
-# === SOLO CASING, PUMP ===
 if selected_part == "Casing, Pump":
     st.subheader("Configurazione - Casing, Pump")
 
-    # Input dati
+    # === INPUT DATI ===
     model = st.selectbox("Product/Pump Model", ["", "HPX", "HDX", "HED"])
     size = st.selectbox("Product/Pump Size", ["", "1.5HPX15A", "2HPX10A"])
     feature_1 = st.selectbox("Additional Feature 1", ["", "STD", "INDUCER"])
@@ -41,7 +25,7 @@ if selected_part == "Casing, Pump":
     mname = st.selectbox("Material Name", ["", "A105", "A216 WCB", "1.4301", "1.0619", "BRONZE", "PLASTIC"])
     madd = st.text_input("Material add. Features (opzionale)")
 
-    # Output
+    # === OUTPUT ===
     if st.button("Genera Output"):
         descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
         materiale = " ".join(filter(None, [mtype, mprefix + mname if mprefix and mname else "", madd]))
@@ -62,14 +46,13 @@ if selected_part == "Casing, Pump":
             "Quality": ""
         }
 
-# === OUTPUT RISULTATO ===
+# === RISULTATO ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
+
+    st.markdown("_Clicca nel campo e premi Ctrl+C per copiare il valore_")
     for campo, valore in st.session_state["output_data"].items():
-        st.markdown(f"**{campo}**")
-        st.code(valore)
-        if st.button(f"Copia {campo}", key=f"copy_{campo}"):
-            render_copy_button(valore)
+        st.text_input(f"{campo}", value=valore, key=f"output_{campo},", label_visibility="visible")
 
 # === ALTRE PARTI ===
 if selected_part != "Casing, Pump":
