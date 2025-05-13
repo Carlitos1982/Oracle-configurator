@@ -2,39 +2,25 @@ import streamlit as st
 import streamlit.components.v1 as components
 import base64
 
-# === FUNZIONE: BOTTONE HTML CON STATO COPIATO ===
+# === FUNZIONE: PULSANTE COPIA + FEEDBACK ===
 def render_copy_button(text, campo):
-    b64 = base64.b64encode(text.encode()).decode()
     copied_fields = st.session_state.get("copied_fields", [])
     copied = campo in copied_fields
 
-    style_normal = "padding:6px 12px; font-size:0.9rem; border:1px solid #ccc; border-radius:4px; cursor:pointer;"
-    style_copied = "padding:6px 12px; font-size:0.9rem; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius:4px; font-weight: bold;"
-    style = style_copied if copied else style_normal
-    label = "✅ Copiato!" if copied else "Copia"
-
-    html = f"""
-    <script>
-    function copyAndMark_{campo}() {{
-        navigator.clipboard.writeText(atob('{b64}'));
-        const input = window.parent.document.querySelector('input[data-streamlit-input="{campo}"]');
-        if (input) {{
-            input.value = "1";
-            const event = new Event("input", {{ bubbles: true }});
-            input.dispatchEvent(event);
-        }}
-    }}
-    </script>
-    <div style="margin-top: 6px;">
-        <button onclick="copyAndMark_{campo}()" style="{style}">{label}</button>
-    </div>
-    """
-    st.text_input("", "", key=campo, label_visibility="collapsed")
-    components.html(html, height=50)
-
-    if st.session_state.get(campo) == "1" and campo not in copied_fields:
-        st.session_state["copied_fields"].append(campo)
-        st.session_state[campo] = "0"
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        if st.button("Copia", key=f"btn_{campo}"):
+            st.session_state["copied_fields"].append(campo)
+            escaped_text = text.replace("\\", "\\\\").replace('"', '\\"')
+            js = f"""
+            <script>
+            navigator.clipboard.writeText("{escaped_text}");
+            </script>
+            """
+            components.html(js, height=0)
+    with col2:
+        if copied:
+            st.markdown("✅ **Copiato!**")
 
 # === CONFIGURAZIONE STREAMLIT ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
@@ -124,6 +110,7 @@ if selected_part == "Casing, Pump":
         }
         st.session_state["copied_fields"] = []
 
+# === MOSTRA OUTPUT SE PRESENTE ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
     output_data = st.session_state["output_data"]
@@ -140,5 +127,6 @@ if "output_data" in st.session_state:
     st.markdown("---")
     st.text_area("Output completo (per copia manuale su iPhone)", value=full_output, height=300)
 
+# === ALTRE PARTI ===
 if selected_part != "Casing, Pump":
     st.info("La configurazione per **" + selected_part + "** è in fase di sviluppo. Riprova più tardi.")
