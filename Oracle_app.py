@@ -1,49 +1,28 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# === CONFIGURAZIONE STREAMLIT (PRIMA DI TUTTO) ===
+# === PRIMA ISTRUZIONE ===
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 
-# === STILE PER BOTTONE COPIA CLICCATO ===
-st.markdown("""
-    <style>
-    .copied-button {
-        background-color: #d4edda !important;
-        color: #155724 !important;
-        font-weight: bold;
-        border: 1px solid #c3e6cb !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# === STATO INIZIALE ===
+if "copied_fields" not in st.session_state:
+    st.session_state["copied_fields"] = []
 
-# === FUNZIONE: BOTTONE COPIA CHE CAMBIA COLORE ===
+# === FUNZIONE: COPIA E FEEDBACK ===
 def render_copy_button(text, campo):
-    copied_fields = st.session_state.get("copied_fields", [])
-    copied = campo in copied_fields
-
-    label = "Copia"
-    style = "copied-button" if copied else ""
-
-    escaped = text.replace("\\", "\\\\").replace('"', '\\"')
-    html = f"""
-    <input type="button" value="{label}" class="{style}" onclick='navigator.clipboard.writeText("{escaped}");
-    const input = window.parent.document.querySelector("input[data-streamlit-input=\'{campo}\']");
-    if (input) {{
-        input.value = "1";
-        input.dispatchEvent(new Event("input", {{ bubbles: true }}));
-    }}' style="padding:6px 12px; font-size:0.9rem; border-radius:4px; cursor:pointer; border:1px solid #ccc;" />
-    """
-    st.text_input("", "", key=campo, label_visibility="collapsed")
-    components.html(html, height=40)
-
-    if st.session_state.get(campo) == "1" and campo not in copied_fields:
+    if st.button(f"Copia {campo}", key=f"btn_{campo}"):
+        js = f"""
+        <script>
+        navigator.clipboard.writeText("{text.replace('"', '\\"')}");
+        </script>
+        """
+        components.html(js, height=0)
         st.session_state["copied_fields"].append(campo)
-        st.session_state[campo] = "0"
+    if campo in st.session_state["copied_fields"]:
+        st.success(f"{campo} copiato!")
 
-# === TITOLO ===
+# === TITOLO E PARTE ===
 st.title("Oracle Item Setup - Web App")
-
-# === SCELTA PARTE ===
 part_options = [
     "Casing, Pump", "Impeller", "Shaft",
     "Bearing Housing", "Seal Cover", "Mechanical Seal", "Coupling Guard"
@@ -101,6 +80,7 @@ if selected_part == "Casing, Pump":
     mname = st.selectbox("Material Name", [""] + name_options)
     madd = st.text_input("Material add. Features (opzionale)")
 
+    # === GENERAZIONE OUTPUT ===
     if st.button("Genera Output"):
         descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
         materiale = " ".join(filter(None, [mtype, mprefix + mname if mprefix and mname else "", madd]))
@@ -122,20 +102,17 @@ if selected_part == "Casing, Pump":
         }
         st.session_state["copied_fields"] = []
 
-# === MOSTRA OUTPUT ===
+# === VISUALIZZAZIONE OUTPUT ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
     for campo, valore in st.session_state["output_data"].items():
         st.markdown(f"**{campo}**")
-        if campo == "Description":
-            st.text_area("", value=valore, height=100, label_visibility="collapsed")
-        else:
-            st.code(valore)
+        st.code(valore)
         render_copy_button(valore, campo)
 
     st.markdown("---")
-    output_all = "\n".join(f"{k}: {v}" for k, v in st.session_state["output_data"].items())
-    st.text_area("Output completo (per copia manuale su iPhone)", value=output_all, height=300)
+    full = "\n".join(f"{k}: {v}" for k, v in st.session_state["output_data"].items())
+    st.text_area("Output completo (manuale)", value=full, height=300)
 
 # === ALTRE PARTI ===
 if selected_part != "Casing, Pump":
