@@ -43,9 +43,9 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
 
     extra_descr = ""
     if extra_fields == "diameters":
-        int_dia = st.number_input("Qual è il diametro interno (in mm)?", min_value=0.0, step=0.1, key=f"int_dia_{parte}")
-        ext_dia = st.number_input("Qual è il diametro esterno (in mm)?", min_value=0.0, step=0.1, key=f"ext_dia_{parte}")
-        extra_descr = f"int. dia.: {int_dia}mm ext. dia.: {ext_dia}mm"
+        int_dia = st.number_input("Qual è il diametro interno (in mm)?", min_value=0, step=1, format="%d", key=f"int_dia_{parte}")
+        ext_dia = st.number_input("Qual è il diametro esterno (in mm)?", min_value=0, step=1, format="%d", key=f"ext_dia_{parte}")
+        extra_descr = f"int. dia.: {int(int_dia)}mm ext. dia.: {int(ext_dia)}mm"
 
     note = st.text_area("Note (opzionale)", height=80, key=f"note_{parte}")
     dwg = st.text_input("Dwg/doc number", key=f"dwg_{parte}")
