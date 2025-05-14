@@ -7,7 +7,7 @@ st.title("Oracle Item Setup - Web App")
 # === CARICA DATI DA EXCEL SU GITHUB ===
 @st.cache_data
 def load_config_data():
-    url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config3.xlsx"
+    url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
     xls = pd.ExcelFile(url)
     return {
         "size_df": pd.read_excel(xls, sheet_name="Pump Size"),
@@ -68,9 +68,26 @@ if selected_part == "Casing, Pump":
     madd = st.text_input("Material add. Features (opzionale)")
 
     if st.button("Genera Output"):
-        descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
-        materiale = " ".join(filter(None, [mtype, mprefix + (mname or "") if mprefix else mname, madd]))
+        # === COMBINA IL MATERIALE ===
+        if mtype == "MISCELLANEOUS":
+            materiale = f"{mtype} {mname}"
+        else:
+            materiale = f"{mtype} {mprefix} {mname}".strip()
+        if madd:
+            materiale += f" {madd}"
 
+        # === CERCA IL FPD MATERIAL CODE ===
+        match = materials_df[
+            (materials_df["Material Type"] == mtype) &
+            (materials_df["Prefix"] == mprefix) &
+            (materials_df["Name"] == mname)
+        ]
+        codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
+
+        # === DESCRIZIONE COMPLETA ===
+        descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
+
+        # === OUTPUT COMPLETO ===
         st.session_state["output_data"] = {
             "Item": "40202...",
             "Description": descrizione,
@@ -79,7 +96,8 @@ if selected_part == "Casing, Pump":
             "Categories": "Fascia ite 4",
             "Catalog": "CORPO",
             "Disegno": dwg,
-            "Mater+Descr_FPD": materiale,
+            "Material": materiale,
+            "FPD material code": codice_fpd,
             "Template": "FPD_MAKE",
             "ERP_L1": "20_TURNKEY_MACHINING",
             "ERP_L2": "17_CASING",
@@ -90,7 +108,7 @@ if selected_part == "Casing, Pump":
 # === RISULTATO FINALE ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
-    st.markdown("_Clicca nei campi e usa Ctrl+C per copiare_")
+    st.markdown("_Clicca nei campi e usa Ctrl+C per copiare il valore_")
 
     for campo, valore in st.session_state["output_data"].items():
         if campo == "Description":
