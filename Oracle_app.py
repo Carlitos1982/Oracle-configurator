@@ -84,8 +84,9 @@ if selected_part == "Casing, Pump":
         ]
         codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-        # === DESCRIZIONE COMPLETA ===
-        descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
+        # === DESCRIZIONE COMPLETA con Material Info ===
+        materiale_descr = " ".join(filter(None, [mtype, mprefix, mname, madd]))
+        descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note, materiale_descr]))
 
         # === OUTPUT COMPLETO ===
         st.session_state["output_data"] = {
