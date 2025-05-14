@@ -1,45 +1,75 @@
 import streamlit as st
-from dati_configuratore import size_options, features_options, material_options
+import pandas as pd
 
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 
-part_options = [
-    "Casing, Pump", "Impeller", "Shaft",
-    "Bearing Housing", "Seal Cover", "Mechanical Seal", "Coupling Guard"
-]
+# === CARICA DATI DA EXCEL SU GITHUB ===
+@st.cache_data
+def load_config_data():
+    url = "https://raw.githubusercontent.com/NOME-UTENTE/NOME-REPO/main/dati_config3.xlsx"
+    xls = pd.ExcelFile(url)
+    return {
+        "size_df": pd.read_excel(xls, sheet_name="Pump Size"),
+        "features_df": pd.read_excel(xls, sheet_name="Features"),
+        "materials_df": pd.read_excel(xls, sheet_name="Materials")
+    }
+
+data = load_config_data()
+size_df = data["size_df"]
+features_df = data["features_df"]
+materials_df = data["materials_df"]
+
+# === INTERFACCIA CONFIGURATORE ===
+part_options = ["Casing, Pump"]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
 if selected_part == "Casing, Pump":
     st.subheader("Configurazione - Casing, Pump")
 
-    model = st.selectbox("Product/Pump Model", [""] + list(size_options.keys()))
-    size = st.selectbox("Product/Pump Size", [""] + size_options.get(model, []))
+    pump_models = sorted(size_df["Pump Model"].dropna().unique())
+    model = st.selectbox("Product/Pump Model", [""] + list(pump_models))
 
-    features = features_options.get(model, {})
-    feature_1 = st.selectbox("Additional Feature 1", [""] + (features.get("features1") or []))
-    feature_2 = st.selectbox("Additional Feature 2", [""] + (features.get("features2") or []))
+    size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
+    size = st.selectbox("Product/Pump Size", [""] + size_list)
+
+    feature1_list = features_df[
+        (features_df["Pump Model"] == model) & 
+        (features_df["Feature Type"] == "features1")
+    ]["Feature"].dropna().tolist()
+
+    feature2_list = features_df[
+        (features_df["Pump Model"] == model) & 
+        (features_df["Feature Type"] == "features2")
+    ]["Feature"].dropna().tolist()
+
+    feature_1 = st.selectbox("Additional Feature 1", [""] + feature1_list)
+    feature_2 = st.selectbox("Additional Feature 2", [""] + feature2_list if feature2_list else [""])
 
     note = st.text_area("Note (opzionale)", height=80)
     dwg = st.text_input("Dwg/doc number")
 
-    mtype = st.selectbox("Material Type", [""] + list(material_options.keys()))
-    prefix_options = list(material_options[mtype].keys()) if mtype and mtype != "MISCELLANEOUS" else []
-    mprefix = st.selectbox("Material Prefix", [""] + prefix_options)
+    material_types = materials_df["Material Type"].dropna().unique().tolist()
+    mtype = st.selectbox("Material Type", [""] + material_types)
+
+    prefix_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
+    prefix_list = sorted(prefix_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
+    mprefix = st.selectbox("Material Prefix", [""] + prefix_list)
 
     if mtype == "MISCELLANEOUS":
-        name_options = material_options[mtype][None]
-    elif mtype and mprefix:
-        name_options = material_options[mtype].get(mprefix, [])
+        name_list = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
     else:
-        name_options = []
+        name_list = materials_df[
+            (materials_df["Material Type"] == mtype) & 
+            (materials_df["Prefix"] == mprefix)
+        ]["Name"].dropna().tolist()
+    mname = st.selectbox("Material Name", [""] + name_list)
 
-    mname = st.selectbox("Material Name", [""] + name_options)
     madd = st.text_input("Material add. Features (opzionale)")
 
     if st.button("Genera Output"):
         descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note]))
-        materiale = " ".join(filter(None, [mtype, mprefix + mname if mprefix and mname else "", madd]))
+        materiale = " ".join(filter(None, [mtype, mprefix + (mname or "") if mprefix else mname, madd]))
 
         st.session_state["output_data"] = {
             "Item": "40202...",
@@ -57,15 +87,13 @@ if selected_part == "Casing, Pump":
             "Quality": ""
         }
 
+# === RISULTATO FINALE ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
-    st.markdown("_Clicca nel campo e premi Ctrl+C per copiare il valore_")
+    st.markdown("_Clicca nei campi e usa Ctrl+C per copiare_")
 
     for campo, valore in st.session_state["output_data"].items():
         if campo == "Description":
             st.text_area(campo, value=valore, height=100, key=f"out_{campo}")
         else:
             st.text_input(campo, value=valore, key=f"out_{campo}")
-
-if selected_part != "Casing, Pump":
-    st.info(f"La configurazione per **{selected_part}** è in fase di sviluppo.")
