@@ -3,26 +3,31 @@ import streamlit as st
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 
-# === STILE per campo cliccato ===
+# === CSS per bordo rosso persistente ===
 st.markdown("""
     <style>
-    .red-border > div > input, .red-border textarea {
+    div[data-testid="stTextInput"] input,
+    div[data-testid="stTextArea"] textarea {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .red-border input,
+    .red-border textarea {
         border: 2px solid red !important;
-        border-radius: 4px !important;
+        border-radius: 4px;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# === STATO CAMPI EVIDENZIATI ===
+# === Inizializza stato
 if "highlighted_fields" not in st.session_state:
     st.session_state["highlighted_fields"] = []
 
-# === FUNZIONE: MEMORIZZA CAMPO CLICCATO ===
-def on_focus(campo):
+def add_highlight(campo):
     if campo not in st.session_state["highlighted_fields"]:
         st.session_state["highlighted_fields"].append(campo)
 
-# === PARTE ===
+# === Selezione parte
 part_options = [
     "Casing, Pump", "Impeller", "Shaft",
     "Bearing Housing", "Seal Cover", "Mechanical Seal", "Coupling Guard"
@@ -62,9 +67,9 @@ if selected_part == "Casing, Pump":
             "To supplier": "",
             "Quality": ""
         }
-        st.session_state["highlighted_fields"] = []  # reset bordi
+        st.session_state["highlighted_fields"] = []  # reset
 
-# === RISULTATO ===
+# === OUTPUT ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
     st.markdown("_Clicca nel campo e premi Ctrl+C per copiare il valore_")
@@ -76,11 +81,11 @@ if "output_data" in st.session_state:
         with st.container():
             st.markdown(f"<div class='{css_class}'>", unsafe_allow_html=True)
             if campo == "Description":
-                st.text_area(campo, value=valore, key=field_key, height=100, on_change=on_focus, args=(campo,))
+                st.text_area(campo, value=valore, key=field_key, height=100, on_change=add_highlight, args=(campo,))
             else:
-                st.text_input(campo, value=valore, key=field_key, on_change=on_focus, args=(campo,))
+                st.text_input(campo, value=valore, key=field_key, on_change=add_highlight, args=(campo,))
             st.markdown("</div>", unsafe_allow_html=True)
 
-# === ALTRE PARTI ===
+# === ALTRE PARTI
 if selected_part != "Casing, Pump":
-    st.info(f"La configurazione per **{selected_part}** è in fase di sviluppo. Riprova più tardi.")
+    st.info(f"La configurazione per **{selected_part}** è in fase di sviluppo.")
