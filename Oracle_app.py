@@ -3,27 +3,30 @@ import streamlit as st
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 
-# === STILE per bordo rosso ===
+# === STILE per campo cliccato ===
 st.markdown("""
     <style>
-    .red-border {
+    .red-border > div > input, .red-border textarea {
         border: 2px solid red !important;
-        border-radius: 4px;
+        border-radius: 4px !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# === inizializzazione
+# === STATO CAMPI EVIDENZIATI ===
 if "highlighted_fields" not in st.session_state:
     st.session_state["highlighted_fields"] = []
 
-# === funzione per gestire il clic ===
+# === FUNZIONE: MEMORIZZA CAMPO CLICCATO ===
 def on_focus(campo):
     if campo not in st.session_state["highlighted_fields"]:
         st.session_state["highlighted_fields"].append(campo)
 
 # === PARTE ===
-part_options = ["Casing, Pump", "Impeller", "Shaft"]
+part_options = [
+    "Casing, Pump", "Impeller", "Shaft",
+    "Bearing Housing", "Seal Cover", "Mechanical Seal", "Coupling Guard"
+]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
 if selected_part == "Casing, Pump":
@@ -36,8 +39,8 @@ if selected_part == "Casing, Pump":
     note = st.text_area("Note (opzionale)", height=80)
     dwg = st.text_input("Dwg/doc number")
     mtype = st.selectbox("Material Type", ["", "ASTM", "EN", "MISCELLANEOUS"])
-    mprefix = st.selectbox("Material Prefix", ["", "A", "B"])
-    mname = st.selectbox("Material Name", ["", "A105", "A216", "BRONZE", "PLASTIC"])
+    mprefix = st.selectbox("Material Prefix", ["", "A", "B", "C", "D"])
+    mname = st.selectbox("Material Name", ["", "A105", "A216 WCB", "1.4301", "1.0619", "BRONZE", "PLASTIC"])
     madd = st.text_input("Material add. Features (opzionale)")
 
     if st.button("Genera Output"):
@@ -59,18 +62,25 @@ if selected_part == "Casing, Pump":
             "To supplier": "",
             "Quality": ""
         }
-        st.session_state["highlighted_fields"] = []
+        st.session_state["highlighted_fields"] = []  # reset bordi
 
-# === OUTPUT ===
+# === RISULTATO ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
-    st.markdown("_Clicca dentro il campo e premi Ctrl+C per copiare_")
+    st.markdown("_Clicca nel campo e premi Ctrl+C per copiare il valore_")
 
     for campo, valore in st.session_state["output_data"].items():
+        field_key = f"out_{campo}"
         css_class = "red-border" if campo in st.session_state["highlighted_fields"] else ""
-        st.markdown(f"""<div class="{css_class}">""", unsafe_allow_html=True)
-        st.text_input(f"{campo}", value=valore, key=f"out_{campo}", on_change=on_focus, args=(campo,))
-        st.markdown("</div>", unsafe_allow_html=True)
 
+        with st.container():
+            st.markdown(f"<div class='{css_class}'>", unsafe_allow_html=True)
+            if campo == "Description":
+                st.text_area(campo, value=valore, key=field_key, height=100, on_change=on_focus, args=(campo,))
+            else:
+                st.text_input(campo, value=valore, key=field_key, on_change=on_focus, args=(campo,))
+            st.markdown("</div>", unsafe_allow_html=True)
+
+# === ALTRE PARTI ===
 if selected_part != "Casing, Pump":
-    st.info("La configurazione per **" + selected_part + "** è in fase di sviluppo.")
+    st.info(f"La configurazione per **{selected_part}** è in fase di sviluppo. Riprova più tardi.")
