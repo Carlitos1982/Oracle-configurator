@@ -127,7 +127,7 @@ elif selected_part == "Casing Cover, Pump":
         template = "FPD_MAKE" if make_or_buy == "Make" else "FPD_BUY_1"
 
         st.session_state["output_data"] = {
-            "Item": "40202...",
+            "Item": "4020...",
             "Description": descrizione,
             "Identificativo": "1221-CASING COVER",
             "Classe ricambi": "3",
