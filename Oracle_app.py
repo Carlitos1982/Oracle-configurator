@@ -7,7 +7,7 @@ st.title("Oracle Item Setup - Web App")
 # === CARICA DATI DA EXCEL SU GITHUB ===
 @st.cache_data
 def load_config_data():
-    url = "https://raw.githubusercontent.com/NOME-UTENTE/NOME-REPO/main/dati_config3.xlsx"
+    url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config3.xlsx"
     xls = pd.ExcelFile(url)
     return {
         "size_df": pd.read_excel(xls, sheet_name="Pump Size"),
