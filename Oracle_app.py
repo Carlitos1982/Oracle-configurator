@@ -1,29 +1,13 @@
 import streamlit as st
-import streamlit.components.v1 as components
 
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 
-# === Inizializzazione stato
-if "highlighted_fields" not in st.session_state:
-    st.session_state["highlighted_fields"] = []
-
-# === Funzione: genera blocco HTML selezionabile con bordo rosso se cliccato
-def campo_html(label, value, campo):
-    clicked = campo in st.session_state["highlighted_fields"]
-    border = "2px solid red" if clicked else "1px solid #ccc"
-
-    html = f"""
-    <div style="margin-bottom: 12px;">
-        <label style="font-weight: bold; display: block; margin-bottom: 4px;">{label}</label>
-        <textarea id="{campo}" readonly onclick="this.select(); this.style.border='2px solid red'; fetch('/?field={campo}')" 
-        style="width: 100%; padding: 6px; font-size: 0.9rem; border: {border}; border-radius: 4px;">{value}</textarea>
-    </div>
-    """
-    components.html(html, height=100)
-
-# === Parte
-part_options = ["Casing, Pump", "Impeller", "Shaft"]
+# === SCELTA PARTE ===
+part_options = [
+    "Casing, Pump", "Impeller", "Shaft",
+    "Bearing Housing", "Seal Cover", "Mechanical Seal", "Coupling Guard"
+]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
 if selected_part == "Casing, Pump":
@@ -59,21 +43,18 @@ if selected_part == "Casing, Pump":
             "To supplier": "",
             "Quality": ""
         }
-        st.session_state["highlighted_fields"] = []
 
-# === Output ===
+# === OUTPUT ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
-    st.markdown("_Clicca nel campo per selezionare, poi premi Ctrl+C per copiare._")
+    st.markdown("_Clicca nel campo e premi Ctrl+C per copiare il valore_")
 
     for campo, valore in st.session_state["output_data"].items():
-        campo_html(campo, valore, campo)
+        if campo == "Description":
+            st.text_area(campo, value=valore, height=100, key=f"out_{campo}")
+        else:
+            st.text_input(campo, value=valore, key=f"out_{campo}")
 
-# === Aggiorna lista campi cliccati (hack temporaneo via query param)
-query_params = st.experimental_get_query_params()
-if "field" in query_params:
-    field = query_params["field"][0]
-    if field not in st.session_state["highlighted_fields"]:
-        st.session_state["highlighted_fields"].append(field)
-    # pulizia (evita persist che ricarica sempre)
-    st.experimental_set_query_params()
+# === ALTRE PARTI ===
+if selected_part != "Casing, Pump":
+    st.info(f"La configurazione per **{selected_part}** è in fase di sviluppo.")
