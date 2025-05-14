@@ -70,7 +70,7 @@ if selected_part == "Casing, Pump":
     if st.button("Genera Output"):
         # === COMBINA IL MATERIALE ===
         if mtype == "MISCELLANEOUS":
-            materiale = f"{mtype} {mname}"
+            materiale = f"{mtype} {mname}".strip()
         else:
             materiale = f"{mtype} {mprefix} {mname}".strip()
         if madd:
