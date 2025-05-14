@@ -114,7 +114,7 @@ elif selected_part == "Balance Bushing, Pump":
     st.subheader("Configurazione - Balance Bushing, Pump")
     genera_output(
         parte="balance",
-        item="402XX...",
+        item="40226...",
         identificativo="6231-BALANCE DRUM BUSH",
         classe="1-2-3",
         catalog="ALBERO",
