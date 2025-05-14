@@ -68,13 +68,11 @@ if selected_part == "Casing, Pump":
     madd = st.text_input("Material add. Features (opzionale)")
 
     if st.button("Genera Output"):
-        # === COMBINA IL MATERIALE ===
+        # === COMBINA IL CAMPO "Material" SENZA material add. features ===
         if mtype == "MISCELLANEOUS":
             materiale = f"{mtype} {mname}".strip()
         else:
             materiale = f"{mtype} {mprefix} {mname}".strip()
-        if madd:
-            materiale += f" {madd}"
 
         # === CERCA IL FPD MATERIAL CODE ===
         match = materials_df[
@@ -84,7 +82,7 @@ if selected_part == "Casing, Pump":
         ]
         codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-        # === DESCRIZIONE COMPLETA con Material Info ===
+        # === DESCRIZIONE COMPLETA con tutti i materiali
         materiale_descr = " ".join(filter(None, [mtype, mprefix, mname, madd]))
         descrizione = "Casing, Pump " + " ".join(filter(None, [model, size, feature_1, feature_2, note, materiale_descr]))
 
