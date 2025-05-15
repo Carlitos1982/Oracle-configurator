@@ -33,13 +33,11 @@ material_types = materials_df["Material Type"].dropna().unique().tolist()
 def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template_fisso=None, extra_fields=None):
     model = st.selectbox("Product/Pump Model", [""] + pump_models, key=f"model_{parte}")
 
-    # Product/Pump Size sempre visibile
     size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
     size = st.selectbox("Product/Pump Size", [""] + size_list, key=f"size_{parte}")
 
-    # Gestione intelligente features1 (stages)
+    # === Additional Feature 1 ===
     feature_1 = ""
-    feature1_list = []
     modelli_speciali = ["HDO", "DMX", "WXB", "WIK"]
     mostra_feature1 = not (model in modelli_speciali and parte != "casing")
 
@@ -50,14 +48,16 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
         ]["Feature"].dropna().tolist()
         feature_1 = st.selectbox("Additional Feature 1", [""] + feature1_list, key=f"f1_{parte}")
 
-    # Additional Feature 2
-    feature2_list = features_df[
-        (features_df["Pump Model"] == model) &
-        (features_df["Feature Type"] == "features2")
-    ]["Feature"].dropna().tolist()
-    feature_2 = st.selectbox("Additional Feature 2", [""] + feature2_list if feature2_list else [""], key=f"f2_{parte}")
+    # === Additional Feature 2 ===
+    feature_2 = ""
+    if (model == "HPX" and parte == "casing") or model == "HED":
+        feature2_list = features_df[
+            (features_df["Pump Model"] == model) &
+            (features_df["Feature Type"] == "features2")
+        ]["Feature"].dropna().tolist()
+        feature_2 = st.selectbox("Additional Feature 2", [""] + feature2_list, key=f"f2_{parte}")
 
-    # Diametri (solo per alcune parti)
+    # === Diametri ===
     extra_descr = ""
     if extra_fields == "diameters":
         int_dia = st.number_input("Qual è il diametro interno (in mm)?", min_value=0, step=1, format="%d", key=f"int_dia_{parte}")
@@ -67,15 +67,18 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
     note = st.text_area("Note (opzionale)", height=80, key=f"note_{parte}")
     dwg = st.text_input("Dwg/doc number", key=f"dwg_{parte}")
 
-    if parte == "cover":
-        make_or_buy = st.radio("Make or Buy", ["Make", "Buy"], horizontal=True, key="mob_cover")
+    # === Make / Buy ===
+    if parte == "cover" and model in ["HPX", "PVML"]:
+        make_or_buy = st.radio("Make or Buy", ["Make", "Buy"], horizontal=True, key=f"mob_{parte}")
         template = "FPD_MAKE" if make_or_buy == "Make" else "FPD_BUY_1"
+    elif parte == "cover":
+        template = "FPD_MAKE"
     elif parte == "balance":
         template = "FPD_BUY_1"
     else:
         template = template_fisso
 
-    # Materiali
+    # === Materiali ===
     mtype = st.selectbox("Material Type", [""] + material_types, key=f"mtype_{parte}")
     prefix_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
     prefix_list = sorted(prefix_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
@@ -85,13 +88,13 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
         name_list = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
     else:
         name_list = materials_df[
-            (materials_df["Material Type"] == mtype) & 
+            (materials_df["Material Type"] == mtype) &
             (materials_df["Prefix"] == mprefix)
         ]["Name"].dropna().tolist()
     mname = st.selectbox("Material Name", [""] + name_list, key=f"mname_{parte}")
     madd = st.text_input("Material add. Features (opzionale)", key=f"madd_{parte}")
 
-    # Output
+    # === Genera Output ===
     if st.button("Genera Output", key=f"gen_{parte}"):
         materiale = f"{mtype} {mname}" if mtype == "MISCELLANEOUS" else f"{mtype} {mprefix} {mname}"
         materiale = materiale.strip()
