@@ -20,6 +20,7 @@ features_df = data["features_df"]
 materials_df = data["materials_df"]
 
 part_options = [
+    "Baseplate, Pump",
     "Casing, Pump",
     "Casing Cover, Pump",
     "Impeller, Pump",
@@ -32,42 +33,38 @@ material_types = materials_df["Material Type"].dropna().unique().tolist()
 
 def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template_fisso=None, extra_fields=None):
     model = st.selectbox("Product/Pump Model", [""] + pump_models, key=f"model_{parte}")
-
     size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
     size = st.selectbox("Product/Pump Size", [""] + size_list, key=f"size_{parte}")
-
-    # === Additional Feature 1 ===
+    
+        # Feature 1
     feature_1 = ""
     modelli_speciali = ["HDO", "DMX", "WXB", "WIK"]
-    mostra_feature1 = not (model in modelli_speciali and parte != "casing")
-
-    if mostra_feature1:
-        feature1_list = features_df[
-            (features_df["Pump Model"] == model) &
-            (features_df["Feature Type"] == "features1")
-        ]["Feature"].dropna().tolist()
+    if not (model in modelli_speciali and parte != "casing"):
+        feature1_list = features_df[(features_df["Pump Model"] == model) & (features_df["Feature Type"] == "features1")]["Feature"].dropna().tolist()
         feature_1 = st.selectbox("Additional Feature 1", [""] + feature1_list, key=f"f1_{parte}")
 
-    # === Additional Feature 2 ===
+    # Feature 2
     feature_2 = ""
     if (model == "HPX" and parte == "casing") or model == "HED":
-        feature2_list = features_df[
-            (features_df["Pump Model"] == model) &
-            (features_df["Feature Type"] == "features2")
-        ]["Feature"].dropna().tolist()
+        feature2_list = features_df[(features_df["Pump Model"] == model) & (features_df["Feature Type"] == "features2")]["Feature"].dropna().tolist()
         feature_2 = st.selectbox("Additional Feature 2", [""] + feature2_list, key=f"f2_{parte}")
 
-    # === Diametri ===
+    # Extra descrizione
     extra_descr = ""
     if extra_fields == "diameters":
         int_dia = st.number_input("Qual è il diametro interno (in mm)?", min_value=0, step=1, format="%d", key=f"int_dia_{parte}")
         ext_dia = st.number_input("Qual è il diametro esterno (in mm)?", min_value=0, step=1, format="%d", key=f"ext_dia_{parte}")
         extra_descr = f"int. dia.: {int(int_dia)}mm ext. dia.: {int(ext_dia)}mm"
+    elif extra_fields == "baseplate":
+        length = st.number_input("Length (mm)", min_value=0, step=1, format="%d", key=f"len_{parte}")
+        width = st.number_input("Width (mm)", min_value=0, step=1, format="%d", key=f"wid_{parte}")
+        height = st.number_input("Height (kg)", min_value=0, step=1, format="%d", key=f"hgt_{parte}")
+        sourcing = st.selectbox("Sourcing", ["Europe", "India", "China"], key=f"sourcing_{parte}")
+        extra_descr = f"Length: {length}mm Width: {width}mm Height: {height}kg Sourcing: {sourcing}"
 
     note = st.text_area("Note (opzionale)", height=80, key=f"note_{parte}")
     dwg = st.text_input("Dwg/doc number", key=f"dwg_{parte}")
 
-    # === Make / Buy ===
     if parte == "cover" and model in ["HPX", "PVML"]:
         make_or_buy = st.radio("Make or Buy", ["Make", "Buy"], horizontal=True, key=f"mob_{parte}")
         template = "FPD_MAKE" if make_or_buy == "Make" else "FPD_BUY_1"
@@ -78,34 +75,23 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
     else:
         template = template_fisso
 
-    # === Materiali ===
+    # Materiali
     mtype = st.selectbox("Material Type", [""] + material_types, key=f"mtype_{parte}")
     prefix_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
     prefix_list = sorted(prefix_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
     mprefix = st.selectbox("Material Prefix", [""] + prefix_list, key=f"mprefix_{parte}")
-
     if mtype == "MISCELLANEOUS":
         name_list = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
     else:
-        name_list = materials_df[
-            (materials_df["Material Type"] == mtype) &
-            (materials_df["Prefix"] == mprefix)
-        ]["Name"].dropna().tolist()
+        name_list = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().tolist()
     mname = st.selectbox("Material Name", [""] + name_list, key=f"mname_{parte}")
     madd = st.text_input("Material add. Features (opzionale)", key=f"madd_{parte}")
-
-    # === Genera Output ===
-    if st.button("Genera Output", key=f"gen_{parte}"):
+    
+        if st.button("Genera Output", key=f"gen_{parte}"):
         materiale = f"{mtype} {mname}" if mtype == "MISCELLANEOUS" else f"{mtype} {mprefix} {mname}"
         materiale = materiale.strip()
-
-        match = materials_df[
-            (materials_df["Material Type"] == mtype) &
-            (materials_df["Prefix"] == mprefix) &
-            (materials_df["Name"] == mname)
-        ]
+        match = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix) & (materials_df["Name"] == mname)]
         codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
-
         materiale_descr = " ".join(filter(None, [mtype, mprefix, mname, madd]))
         descrizione = f"{selected_part} " + " ".join(filter(None, [model, size, feature_1, feature_2, extra_descr, note, materiale_descr]))
 
@@ -114,20 +100,24 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
             "Description": descrizione,
             "Identificativo": identificativo,
             "Classe ricambi": classe,
-            "Categories": "Fascia ite 4",
+            "Categories": "Fascia ite 5" if parte == "baseplate" else "Fascia ite 4",
             "Catalog": catalog,
             "Disegno": dwg,
             "Material": materiale,
             "FPD material code": codice_fpd,
             "Template": template,
-            "ERP_L1": "20_TURNKEY_MACHINING",
+            "ERP_L1": "21_FABRICATIONS_OR_BASEPLATES" if parte == "baseplate" else "20_TURNKEY_MACHINING",
             "ERP_L2": erp_l2,
             "To supplier": "",
             "Quality": ""
         }
 
-# === Routing Parti ===
-if selected_part == "Casing, Pump":
+# === ROUTING ===
+if selected_part == "Baseplate, Pump":
+    st.subheader("Configurazione - Baseplate, Pump")
+    genera_output(parte="baseplate", item="477...", identificativo="6110-BASE PLATE", classe="", catalog="ARTVARI", erp_l2="18_FOUNDATION PLATE", template_fisso="FPD_MAKE", extra_fields="baseplate")
+
+elif selected_part == "Casing, Pump":
     st.subheader("Configurazione - Casing, Pump")
     genera_output(parte="casing", item="40202...", identificativo="1100-CASING", classe="3", catalog="CORPO", erp_l2="17_CASING", template_fisso="FPD_MAKE")
 
@@ -143,7 +133,7 @@ elif selected_part == "Balance Bushing, Pump":
     st.subheader("Configurazione - Balance Bushing, Pump")
     genera_output(parte="balance", item="40226...", identificativo="6231-BALANCE DRUM BUSH", classe="1-2-3", catalog="ALBERO", erp_l2="16_BUSHING", extra_fields="diameters")
 
-# === Output Finale ===
+# === OUTPUT FINALE ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
     st.markdown("_Clicca nei campi e usa Ctrl+C per copiare il valore_")
