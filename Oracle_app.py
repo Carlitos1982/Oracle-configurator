@@ -35,21 +35,18 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
     model = st.selectbox("Product/Pump Model", [""] + pump_models, key=f"model_{parte}")
     size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
     size = st.selectbox("Product/Pump Size", [""] + size_list, key=f"size_{parte}")
-    
-        # Feature 1
+
     feature_1 = ""
     modelli_speciali = ["HDO", "DMX", "WXB", "WIK"]
     if not (model in modelli_speciali and parte != "casing"):
         feature1_list = features_df[(features_df["Pump Model"] == model) & (features_df["Feature Type"] == "features1")]["Feature"].dropna().tolist()
         feature_1 = st.selectbox("Additional Feature 1", [""] + feature1_list, key=f"f1_{parte}")
 
-    # Feature 2
     feature_2 = ""
     if (model == "HPX" and parte == "casing") or model == "HED":
         feature2_list = features_df[(features_df["Pump Model"] == model) & (features_df["Feature Type"] == "features2")]["Feature"].dropna().tolist()
         feature_2 = st.selectbox("Additional Feature 2", [""] + feature2_list, key=f"f2_{parte}")
 
-    # Extra descrizione
     extra_descr = ""
     if extra_fields == "diameters":
         int_dia = st.number_input("Qual è il diametro interno (in mm)?", min_value=0, step=1, format="%d", key=f"int_dia_{parte}")
@@ -75,7 +72,6 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
     else:
         template = template_fisso
 
-    # Materiali
     mtype = st.selectbox("Material Type", [""] + material_types, key=f"mtype_{parte}")
     prefix_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
     prefix_list = sorted(prefix_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
@@ -86,8 +82,8 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
         name_list = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().tolist()
     mname = st.selectbox("Material Name", [""] + name_list, key=f"mname_{parte}")
     madd = st.text_input("Material add. Features (opzionale)", key=f"madd_{parte}")
-    
-        if st.button("Genera Output", key=f"gen_{parte}"):
+
+    if st.button("Genera Output", key=f"gen_{parte}"):
         materiale = f"{mtype} {mname}" if mtype == "MISCELLANEOUS" else f"{mtype} {mprefix} {mname}"
         materiale = materiale.strip()
         match = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix) & (materials_df["Name"] == mname)]
