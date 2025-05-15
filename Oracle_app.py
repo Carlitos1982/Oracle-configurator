@@ -32,15 +32,33 @@ material_types = materials_df["Material Type"].dropna().unique().tolist()
 
 def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template_fisso=None, extra_fields=None):
     model = st.selectbox("Product/Pump Model", [""] + pump_models, key=f"model_{parte}")
-    size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
-    size = st.selectbox("Product/Pump Size", [""] + size_list, key=f"size_{parte}")
 
-    feature1_list = features_df[(features_df["Pump Model"] == model) & (features_df["Feature Type"] == "features1")]["Feature"].dropna().tolist()
-    feature2_list = features_df[(features_df["Pump Model"] == model) & (features_df["Feature Type"] == "features2")]["Feature"].dropna().tolist()
+    size = ""
+    if parte == "casing":
+        size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
+        size = st.selectbox("Product/Pump Size", [""] + size_list, key=f"size_{parte}")
 
-    feature_1 = st.selectbox("Additional Feature 1", [""] + feature1_list, key=f"f1_{parte}")
+    # === Feature 1: condizionale ===
+    feature_1 = ""
+    feature1_list = []
+    modelli_speciali = ["HDO", "DMX", "WXB", "WIK"]
+    mostra_feature1 = not (model in modelli_speciali and parte != "casing")
+
+    if mostra_feature1:
+        feature1_list = features_df[
+            (features_df["Pump Model"] == model) & 
+            (features_df["Feature Type"] == "features1")
+        ]["Feature"].dropna().tolist()
+        feature_1 = st.selectbox("Additional Feature 1", [""] + feature1_list, key=f"f1_{parte}")
+
+    # === Feature 2 ===
+    feature2_list = features_df[
+        (features_df["Pump Model"] == model) & 
+        (features_df["Feature Type"] == "features2")
+    ]["Feature"].dropna().tolist()
     feature_2 = st.selectbox("Additional Feature 2", [""] + feature2_list if feature2_list else [""], key=f"f2_{parte}")
 
+    # === Diametri se richiesti ===
     extra_descr = ""
     if extra_fields == "diameters":
         int_dia = st.number_input("Qual è il diametro interno (in mm)?", min_value=0, step=1, format="%d", key=f"int_dia_{parte}")
@@ -58,6 +76,7 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
     else:
         template = template_fisso
 
+    # === Materiali ===
     mtype = st.selectbox("Material Type", [""] + material_types, key=f"mtype_{parte}")
     prefix_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
     prefix_list = sorted(prefix_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
@@ -70,11 +89,16 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
     mname = st.selectbox("Material Name", [""] + name_list, key=f"mname_{parte}")
     madd = st.text_input("Material add. Features (opzionale)", key=f"madd_{parte}")
 
+    # === GENERA OUTPUT ===
     if st.button("Genera Output", key=f"gen_{parte}"):
         materiale = f"{mtype} {mname}" if mtype == "MISCELLANEOUS" else f"{mtype} {mprefix} {mname}"
         materiale = materiale.strip()
 
-        match = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix) & (materials_df["Name"] == mname)]
+        match = materials_df[
+            (materials_df["Material Type"] == mtype) & 
+            (materials_df["Prefix"] == mprefix) & 
+            (materials_df["Name"] == mname)
+        ]
         codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
         materiale_descr = " ".join(filter(None, [mtype, mprefix, mname, madd]))
@@ -112,21 +136,12 @@ elif selected_part == "Impeller, Pump":
 
 elif selected_part == "Balance Bushing, Pump":
     st.subheader("Configurazione - Balance Bushing, Pump")
-    genera_output(
-        parte="balance",
-        item="40226...",
-        identificativo="6231-BALANCE DRUM BUSH",
-        classe="1-2-3",
-        catalog="ALBERO",
-        erp_l2="16_BUSHING",
-        extra_fields="diameters"
-    )
+    genera_output(parte="balance", item="40226...", identificativo="6231-BALANCE DRUM BUSH", classe="1-2-3", catalog="ALBERO", erp_l2="16_BUSHING", extra_fields="diameters")
 
 # === OUTPUT FINALE ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
     st.markdown("_Clicca nei campi e usa Ctrl+C per copiare il valore_")
-
     for campo, valore in st.session_state["output_data"].items():
         if campo == "Description":
             st.text_area(campo, value=valore, height=100, key=f"out_{campo}")
