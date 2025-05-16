@@ -99,10 +99,7 @@ def genera_output_flange():
     size = st.selectbox("Size", ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”'])
     face_type = st.selectbox("Face type", ["RF", "FF", "RJ"])
     class_options = ["150 Sch", "300 Sch", "600 Sch", "900 Sch", "1500 Sch"]
-    class_flange = st.selectbox("Class", class_options)
-    material_options = ["A106-GR.B", "A105", "A182-F304", "A182-F316"]
-    material = st.selectbox("Material", material_options)
-    additional = st.text_input("Additional features (opzionale)")
+    class_flange = st.selectbox("Class", class_options)additional = st.text_input("Additional features (opzionale)")
     note = st.text_area("Note (opzionale)", height=80)
 
     
