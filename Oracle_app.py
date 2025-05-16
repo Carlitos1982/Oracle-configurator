@@ -102,8 +102,7 @@ def genera_output_flange():
     
     class_options = ["150 Sch", "300 Sch", "600 Sch", "900 Sch", "1500 Sch"]
     class_flange = st.selectbox("Class", class_options)
-    
-        material = st.selectbox("Material", ["A105", "A106-GR B", "UNS-S31803", "UNS-S32760", "A350 LF2", "A182-F316L", "ALLOY 825", "GALVANIZED CARBON STEEL"])
+    material = st.selectbox("Material", ["A105", "A106-GR B", "UNS-S31803", "UNS-S32760", "A350 LF2", "A182-F316L", "ALLOY 825", "GALVANIZED CARBON STEEL"])
 note = st.text_area("Note (opzionale)", height=80)
 
     if st.button("Genera Output"):
