@@ -94,17 +94,19 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
         }
 
 
+
 def genera_output_flange():
     pipe_type = st.selectbox("Pipe type", ["SW", "WN"])
     size = st.selectbox("Size", ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”'])
     face_type = st.selectbox("Face type", ["RF", "FF", "RJ"])
+    
     class_options = ["150 Sch", "300 Sch", "600 Sch", "900 Sch", "1500 Sch"]
-    class_flange = st.selectbox("Class", class_options)additional = st.text_input("Additional features (opzionale)")
+    class_flange = st.selectbox("Class", class_options)
+    
     note = st.text_area("Note (opzionale)", height=80)
 
-    
     if st.button("Genera Output"):
-        description = f"Flange, Pipe type {pipe_type} Size {size} Face type {face_type} Class {class_flange} Material {material}"
+        description = f"Flange, Pipe type {pipe_type} Size {size} Face type {face_type} Class {class_flange}"
         if note:
             description += f" Note: {note}"
         st.session_state["output_data"] = {
