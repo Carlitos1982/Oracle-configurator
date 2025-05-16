@@ -4,6 +4,8 @@ import pandas as pd
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 
+
+
 @st.cache_data
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
@@ -122,4 +124,6 @@ if "output_data" in st.session_state:
         if campo == "Description":
             st.text_area(campo, value=valore, height=100, key=f"out_{campo}")
         else:
-            st.text_input(campo, value=valore, key=f"out_{campo}")
+            st.text_input(campo, value=valore, key=f"out_{campo}"
+
+)
