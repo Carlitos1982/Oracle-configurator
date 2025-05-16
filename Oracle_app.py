@@ -1,10 +1,38 @@
-
 import streamlit as st
 import pandas as pd
 
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 
+@st.cache_data
+def load_config_data():
+    url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
+    xls = pd.ExcelFile(url)
+    return {
+        "size_df": pd.read_excel(xls, sheet_name="Pump Size"),
+        "features_df": pd.read_excel(xls, sheet_name="Features"),
+        "materials_df": pd.read_excel(xls, sheet_name="Materials")
+    }
+
+data = load_config_data()
+size_df = data["size_df"]
+features_df = data["features_df"]
+materials_df = data["materials_df"]
+
+part_options = [
+    "Baseplate, Pump",
+    "Casing, Pump",
+    "Casing Cover, Pump",
+    "Impeller, Pump",
+    "Balance Bushing, Pump",
+    "Balance Drum, Pump",
+    "Balance Disc, Pump",
+    "Shaft, Pump"
+]
+selected_part = st.selectbox("Seleziona Parte", part_options)
+
+pump_models = sorted(size_df["Pump Model"].dropna().unique())
+material_types = materials_df["Material Type"].dropna().unique().tolist()
 
 def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template_fisso=None, extra_fields=None):
     model = st.selectbox("Product/Pump Model", [""] + pump_models, key=f"model_{parte}")
@@ -30,15 +58,15 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
     elif extra_fields == "baseplate":
         length = st.number_input("Length (mm)", min_value=0, step=1, format="%d", key=f"len_{parte}")
         width = st.number_input("Width (mm)", min_value=0, step=1, format="%d", key=f"wid_{parte}")
-        weight = st.number_input("Weight (kg)", min_value=0, step=1, format="%d", key=f"hgt_{parte}")
+        weight = st.number_input("Weight (kg)", min_value=0, step=1, format="%d", key=f"wgt_{parte}")
         sourcing = st.selectbox("Sourcing", ["Europe", "India", "China"], key=f"sourcing_{parte}")
         extra_descr = f"Length: {length}mm Width: {width}mm Weight: {weight}kg Sourcing: {sourcing}"
     elif extra_fields == "shaft":
         brg_type = st.text_input("Brg. type", key=f"brg_type_{parte}")
-        brg_size = st.text_input("Brg. Size", key=f"brg_size_{parte}")
-        max_dia = st.number_input("Max diameter (mm)", min_value=0, step=1, format="%d", key=f"dia_{parte}")
-        max_len = st.number_input("Max length (mm)", min_value=0, step=1, format="%d", key=f"len_{parte}")
-        extra_descr = f"Brg. type: {brg_type} Brg. Size: {brg_size} Max diameter: {max_dia}mm Max length: {max_len}mm"
+        brg_size = st.text_input("Brg. size", key=f"brg_size_{parte}")
+        max_dia = st.number_input("Max diameter (mm)", min_value=0, step=1, format="%d", key=f"max_dia_{parte}")
+        max_len = st.number_input("Max length (mm)", min_value=0, step=1, format="%d", key=f"max_len_{parte}")
+        extra_descr = f"Brg. type: {brg_type} Brg. size: {brg_size} Max dia: {max_dia}mm Max len: {max_len}mm"
 
     note = st.text_area("Note (opzionale)", height=80, key=f"note_{parte}")
     dwg = st.text_input("Dwg/doc number", key=f"dwg_{parte}")
@@ -48,10 +76,8 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
         template = "FPD_MAKE" if make_or_buy == "Make" else "FPD_BUY_1"
     elif parte == "cover":
         template = "FPD_MAKE"
-    elif parte == "balance":
+    elif parte in ["balance", "drum", "disc"]:
         template = "FPD_BUY_1"
-    elif parte == "flange":
-        template = "FPD_BUY_2"
     elif parte == "baseplate":
         template = "FPD_BUY_4"
     else:
@@ -81,38 +107,52 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
             "Description": descrizione,
             "Identificativo": identificativo,
             "Classe ricambi": classe,
-            "Categories": "Fascia ite 5" if parte in ["baseplate", "flange"] else "Fascia ite 4",
+            "Categories": "Fascia ite 5" if parte == "baseplate" else "Fascia ite 4",
             "Catalog": catalog,
-            "Disegno": dwg if parte != "flange" else "",
-            "Material": materiale if parte != "flange" else "NOT AVAILABLE",
-            "FPD material code": codice_fpd if parte != "flange" else "NA",
+            "Disegno": dwg,
+            "Material": materiale,
+            "FPD material code": codice_fpd,
             "Template": template,
-            "ERP_L1": "21_FABRICATIONS_OR_BASEPLATES" if parte == "baseplate" else ("23_FLANGE" if parte == "flange" else "20_TURNKEY_MACHINING"),
+            "ERP_L1": "21_FABRICATIONS_OR_BASEPLATES" if parte == "baseplate" else "20_TURNKEY_MACHINING",
             "ERP_L2": erp_l2,
             "To supplier": "",
             "Quality": ""
         }
 
+# === ROUTING ===
+if selected_part == "Baseplate, Pump":
+    st.subheader("Configurazione - Baseplate, Pump")
+    genera_output(parte="baseplate", item="477...", identificativo="6110-BASE PLATE", classe="", catalog="ARTVARI", erp_l2="18_FOUNDATION PLATE", extra_fields="baseplate")
 
+elif selected_part == "Casing, Pump":
+    st.subheader("Configurazione - Casing, Pump")
+    genera_output(parte="casing", item="40202...", identificativo="1100-CASING", classe="3", catalog="CORPO", erp_l2="17_CASING", template_fisso="FPD_MAKE")
 
-@st.cache_data
-def load_config_data():
-    url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
-    xls = pd.ExcelFile(url)
-    return {
-        "size_df": pd.read_excel(xls, sheet_name="Pump Size"),
-        "features_df": pd.read_excel(xls, sheet_name="Features"),
-        "materials_df": pd.read_excel(xls, sheet_name="Materials")
-    }
+elif selected_part == "Casing Cover, Pump":
+    st.subheader("Configurazione - Casing Cover, Pump")
+    genera_output(parte="cover", item="40205...", identificativo="1221-CASING COVER", classe="3", catalog="COPERCHIO", erp_l2="13_OTHER")
 
+elif selected_part == "Impeller, Pump":
+    st.subheader("Configurazione - Impeller, Pump")
+    genera_output(parte="imp", item="40229...", identificativo="2200-IMPELLER", classe="2-3", catalog="GIRANTE", erp_l2="20_IMPELLER_DIFFUSER", template_fisso="FPD_MAKE")
 
-data = load_config_data()
-size_df = data["size_df"]
-features_df = data["features_df"]
-materials_df = data["materials_df"]
+elif selected_part == "Balance Bushing, Pump":
+    st.subheader("Configurazione - Balance Bushing, Pump")
+    genera_output(parte="balance", item="40226...", identificativo="6231-BALANCE DRUM BUSH", classe="1-2-3", catalog="ALBERO", erp_l2="16_BUSHING", extra_fields="diameters")
 
+elif selected_part == "Balance Drum, Pump":
+    st.subheader("Configurazione - Balance Drum, Pump")
+    genera_output(parte="drum", item="40227...", identificativo="6231-BALANCE DRUM BUSH", classe="1-2-3", catalog="ARTVARI", erp_l2="16_BUSHING", extra_fields="diameters")
 
-# OUTPUT
+elif selected_part == "Balance Disc, Pump":
+    st.subheader("Configurazione - Balance Disc, Pump")
+    genera_output(parte="disc", item="40228...", identificativo="6210-BALANCE DISC", classe="1-2-3", catalog="ARTVARI", erp_l2="30_DISK", extra_fields="diameters")
+
+elif selected_part == "Shaft, Pump":
+    st.subheader("Configurazione - Shaft, Pump")
+    genera_output(parte="shaft", item="40231...", identificativo="2100-SHAFT", classe="2-3", catalog="ALBERO", erp_l2="25_SHAFTS", template_fisso="FPD_MAKE", extra_fields="shaft")
+
+# === OUTPUT FINALE ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
     st.markdown("_Clicca nei campi e usa Ctrl+C per copiare il valore_")
@@ -121,22 +161,3 @@ if "output_data" in st.session_state:
             st.text_area(campo, value=valore, height=100, key=f"out_{campo}")
         else:
             st.text_input(campo, value=valore, key=f"out_{campo}")
-
-
-
-
-
-    class_options = ["150 Sch", "300 Sch", "600 Sch", "900 Sch", "1500 Sch"]
-    class_flange = st.selectbox("Class", class_options)
-
-    material = st.selectbox(
-        "Material",
-        [
-            "A105", "A106-GR B", "UNS-S31803", "UNS-S32760",
-            "A350 LF2", "A182-F316L", "ALLOY 825", "GALVANIZED CARBON STEEL"
-        ]
-    )
-
-    note = st.text_area("Note (opzionale)", height=80)
-
-    
