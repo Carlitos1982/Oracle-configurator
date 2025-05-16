@@ -67,15 +67,14 @@ def genera_output_flange():
     }
 
 # === ROUTING ===
-if selected_part == "Flange, Pipe":
-    st.subheader("Configurazione - Flange, Pipe")
-    genera_output_flange()
 
 # === OUTPUT FINALE ===
-
-        else:
-            st.text_input(campo, value=valore, key=f"out_{campo}")
-
+if "output_data" in st.session_state:
+    st.subheader("Risultato finale")
+    st.markdown("_Clicca nei campi e usa Ctrl+C per copiare il valore_")
+    for campo, valore in st.session_state["output_data"].items():
+        if campo == "Description":
+            st.text_area(campo, value=valore, height=100, key=f"out_{campo}")
 if selected_part == "Flange, Pipe":
     st.subheader("Configurazione - Flange, Pipe")
     genera_output("flange", "50155…", "1245-FLANGE", "", "", "13_OTHER")
@@ -112,7 +111,12 @@ elif selected_part == "Shaft, Pump":
     st.subheader("Configurazione - Shaft, Pump")
     genera_output(parte="shaft", item="40231...", identificativo="2100-SHAFT", classe="2-3", catalog="ALBERO", erp_l2="25_SHAFTS", template_fisso="FPD_MAKE", extra_fields="shaft")
 
-
+if "output_data" in st.session_state:
+    st.subheader("Risultato finale")
+    st.markdown("_Clicca nei campi e usa Ctrl+C per copiare il valore_")
+    for campo, valore in st.session_state["output_data"].items():
+        if campo == "Description":
+            st.text_area(campo, value=valore, height=100, key=f"out_{campo}")
         else:
             st.text_input(campo, value=valore, key=f"out_{campo}"
 
