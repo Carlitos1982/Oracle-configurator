@@ -95,27 +95,6 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
 
 
 
-def genera_output_flange():    pipe_type = st.selectbox("Pipe type", ["SW", "WN"])    size = st.selectbox("Size", ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”'])    face_type = st.selectbox("Face type", ["RF", "FF", "RJ"])        class_options = ["150 Sch", "300 Sch", "600 Sch", "900 Sch", "1500 Sch"]    class_flange = st.selectbox("Class", class_options)    material = st.selectbox("Material", ["A105", "A106-GR B", "UNS-S31803", "UNS-S32760", "A350 LF2", "A182-F316L", "ALLOY 825", "GALVANIZED CARBON STEEL"])
-note = st.text_area("Note (opzionale)", height=80)
-    if st.button("Genera Output"):
-        description = f"Flange, Pipe type {pipe_type} Size {size} Face type {face_type} Class {class_flange} Material {material}"
-        if note:
-            description += f" Note: {note}"
-        st.session_state["output_data"] = {
-            "Item": "50155…",
-            "Description": description,
-            "Identificativo": "1245-FLANGE",
-            "Classe ricambi": "",
-            "Categories": "Fascia ite 5",
-            "Catalog": "",
-            "Material": "NOT AVAILABLE",
-            "FPD material code": "NA",
-            "Template": "FPD_BUY_2",
-            "ERP_L1": "23_FLANGE",
-            "ERP_L2": "13_OTHER",
-            "To supplier": "",
-            "Quality": ""
-        }
 @st.cache_data
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
@@ -186,3 +165,50 @@ if "output_data" in st.session_state:
             st.text_area(campo, value=valore, height=100, key=f"out_{campo}")
         else:
             st.text_input(campo, value=valore, key=f"out_{campo}")
+
+
+
+
+def genera_output_flange():
+    pipe_type = st.selectbox("Pipe type", ["SW", "WN"])
+    size = st.selectbox(
+        "Size",
+        ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”']
+    )
+    face_type = st.selectbox("Face type", ["RF", "FF", "RJ"])
+
+    class_options = ["150 Sch", "300 Sch", "600 Sch", "900 Sch", "1500 Sch"]
+    class_flange = st.selectbox("Class", class_options)
+
+    material = st.selectbox(
+        "Material",
+        [
+            "A105", "A106-GR B", "UNS-S31803", "UNS-S32760",
+            "A350 LF2", "A182-F316L", "ALLOY 825", "GALVANIZED CARBON STEEL"
+        ]
+    )
+
+    note = st.text_area("Note (opzionale)", height=80)
+
+    if st.button("Genera Output"):
+        description = (
+            f"Flange, Pipe type {pipe_type} Size {size} "
+            f"Face type {face_type} Class {class_flange} Material {material}"
+        )
+        if note:
+            description += f" Note: {note}"
+        st.session_state["output_data"] = {
+            "Item": "50155…",
+            "Description": description,
+            "Identificativo": "1245-FLANGE",
+            "Classe ricambi": "",
+            "Categories": "Fascia ite 5",
+            "Catalog": "",
+            "Material": "NOT AVAILABLE",
+            "FPD material code": "NA",
+            "Template": "FPD_BUY_2",
+            "ERP_L1": "23_FLANGE",
+            "ERP_L2": "13_OTHER",
+            "To supplier": "",
+            "Quality": ""
+        }
