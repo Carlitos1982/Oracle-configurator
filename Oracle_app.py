@@ -105,10 +105,9 @@ def genera_output_flange():
     additional = st.text_input("Additional features (opzionale)")
     note = st.text_area("Note (opzionale)", height=80)
 
+    
     if st.button("Genera Output"):
         description = f"Flange, Pipe type {pipe_type} Size {size} Face type {face_type} Class {class_flange} Material {material}"
-        if additional:
-            description += f" Additional features: {additional}"
         if note:
             description += f" Note: {note}"
         st.session_state["output_data"] = {
@@ -119,15 +118,13 @@ def genera_output_flange():
             "Categories": "Fascia ite 5",
             "Catalog": "",
             "Material": "NOT AVAILABLE",
-            "Template": "FPD_BUY_2",
             "FPD material code": "NA",
+            "Template": "FPD_BUY_2",
             "ERP_L1": "23_FLANGE",
             "ERP_L2": "13_OTHER",
             "To supplier": "",
             "Quality": ""
         }
-
-
 @st.cache_data
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
