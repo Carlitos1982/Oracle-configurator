@@ -26,7 +26,8 @@ part_options = [
     "Impeller, Pump",
     "Balance Bushing, Pump",
     "Balance Drum, Pump",
-    "Balance Disc, Pump"
+    "Balance Disc, Pump",
+    "Shaft, Pump"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
@@ -60,6 +61,13 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
         weight = st.number_input("Weight (kg)", min_value=0, step=1, format="%d", key=f"wgt_{parte}")
         sourcing = st.selectbox("Sourcing", ["Europe", "India", "China"], key=f"sourcing_{parte}")
         extra_descr = f"Length: {length}mm Width: {width}mm Weight: {weight}kg Sourcing: {sourcing}"
+    elif extra_fields == "shaft":
+        brg_type = st.text_input("Brg. type", key=f"brg_type_{parte}")
+        brg_size = st.text_input("Brg. size", key=f"brg_size_{parte}")
+        max_dia = st.number_input("Max diameter (mm)", min_value=0, step=1, format="%d", key=f"max_dia_{parte}")
+        max_len = st.number_input("Max length (mm)", min_value=0, step=1, format="%d", key=f"max_len_{parte}")
+        sourcing = st.selectbox("Sourcing", ["Europe", "India", "China"], key=f"sourcing_{parte}")
+        extra_descr = f"Brg. type: {brg_type} Brg. size: {brg_size} Max dia: {max_dia}mm Max len: {max_len}mm Sourcing: {sourcing}"
 
     note = st.text_area("Note (opzionale)", height=80, key=f"note_{parte}")
     dwg = st.text_input("Dwg/doc number", key=f"dwg_{parte}")
@@ -140,6 +148,10 @@ elif selected_part == "Balance Drum, Pump":
 elif selected_part == "Balance Disc, Pump":
     st.subheader("Configurazione - Balance Disc, Pump")
     genera_output(parte="disc", item="40228...", identificativo="6210-BALANCE DISC", classe="1-2-3", catalog="ARTVARI", erp_l2="30_DISK", extra_fields="diameters")
+
+elif selected_part == "Shaft, Pump":
+    st.subheader("Configurazione - Shaft, Pump")
+    genera_output(parte="shaft", item="40231...", identificativo="2100-SHAFT", classe="2-3", catalog="ALBERO", erp_l2="25_SHAFTS", template_fisso="FPD_MAKE", extra_fields="shaft")
 
 # === OUTPUT FINALE ===
 if "output_data" in st.session_state:
