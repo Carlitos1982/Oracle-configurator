@@ -111,6 +111,13 @@ size_df = data["size_df"]
 features_df = data["features_df"]
 materials_df = data["materials_df"]
 
+def genera_output_flange():
+    pipe_type = st.selectbox("Pipe type", ["SW", "WN"])
+    size = st.selectbox(
+        "Size",
+        ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”']
+    )
+    face_type = st.selectbox("Face type", ["RF", "FF", "RJ"])
 part_options = [
     "Baseplate, Pump",
     "Casing, Pump",
@@ -169,13 +176,6 @@ if "output_data" in st.session_state:
 
 
 
-def genera_output_flange():
-    pipe_type = st.selectbox("Pipe type", ["SW", "WN"])
-    size = st.selectbox(
-        "Size",
-        ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”']
-    )
-    face_type = st.selectbox("Face type", ["RF", "FF", "RJ"])
 
     class_options = ["150 Sch", "300 Sch", "600 Sch", "900 Sch", "1500 Sch"]
     class_flange = st.selectbox("Class", class_options)
