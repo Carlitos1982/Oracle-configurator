@@ -80,7 +80,7 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
             "Description": descrizione,
             "Identificativo": identificativo,
             "Classe ricambi": classe,
-            "Categories": "Fascia ite 5" if parte == "baseplate" or parte == "flange" else "Fascia ite 4",
+            "Categories": "Fascia ite 5" if parte in ["baseplate", "flange"] else "Fascia ite 4",
             "Catalog": catalog,
             "Disegno": dwg if parte != "flange" else "",
             "Material": materiale if parte != "flange" else "NOT AVAILABLE",
@@ -93,6 +93,34 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
         }
 
 
+def genera_output_flange():
+    pipe_type = st.selectbox("Pipe type", ["SW", "WN"])
+    size = st.selectbox("Size", ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”'])
+    face_type = st.selectbox("Face type", ["RF", "FF", "RJ"])
+    class_flange = st.text_input("Class (es. 150 Sch)")
+    material = st.text_input("Material (es. A106-GR.B)")
+    additional = st.text_input("Additional features (opzionale)")
+    note = st.text_area("Note (opzionale)", height=80)
+    description = f"Flange, Pipe type {pipe_type} Size {size} Face type {face_type} Class {class_flange} Material {material}"
+    if additional:
+        description += f" Additional features: {additional}"
+    if note:
+        description += f" Note: {note}"
+    st.session_state["output_data"] = {
+        "Item": "50155…",
+        "Description": description,
+        "Identificativo": "1245-FLANGE",
+        "Classe ricambi": "",
+        "Categories": "Fascia ite 5",
+        "Catalog": "",
+        "Material": "NOT AVAILABLE",
+        "Template": "FPD_BUY_2",
+        "FPD material code": "NA",
+        "ERP_L1": "23_FLANGE",
+        "ERP_L2": "13_OTHER",
+        "To supplier": "",
+        "Quality": ""
+    }
 
 
 @st.cache_data
@@ -104,6 +132,7 @@ def load_config_data():
         "features_df": pd.read_excel(xls, sheet_name="Features"),
         "materials_df": pd.read_excel(xls, sheet_name="Materials")
     }
+
 
 data = load_config_data()
 size_df = data["size_df"]
@@ -126,91 +155,36 @@ selected_part = st.selectbox("Seleziona Parte", part_options)
 pump_models = sorted(size_df["Pump Model"].dropna().unique())
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 
-def genera_output_flange():
-    pipe_type = st.selectbox("Pipe type", ["SW", "WN"])
-    size = st.selectbox("Size", ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”'])
-    face_type = st.selectbox("Face type", ["RF", "FF", "RJ"])
-    class_flange = st.text_input("Class (es. 150 Sch)")
-    material = st.text_input("Material (es. A106-GR.B)")
-    additional = st.text_input("Additional features (opzionale)")
-    note = st.text_area("Note (opzionale)", height=80)
-    description = f"Flange, Pipe type {pipe_type} Size {size} Face type {face_type} Class {class_flange} Material {material}"
-    if additional:
-        description += f" Additional features: {additional}"
-    if note:
-        description += f" Note: {note}"
-    st.session_state["output_data"] = {
-        "Item": "50155…",
-        "Description": description,
-        "Identificativo": "1245-FLANGE",
-        "Classe ricambi": "",
-        "Categories": "Fascia ite 5",
-        "Catalog": "",        "Material": "NOT AVAILABLE",
-        "Template": "FPD_BUY_2",
-        "FPD material code": "NA",
-        "Template": "",
-        "ERP_L1": "23_FLANGE",
-        "ERP_L2": "13_OTHER",
-        "To supplier": "",
-        "Quality": ""
-    }
-
 # === ROUTING ===
-
-# === OUTPUT FINALE ===
-if "output_data" in st.session_state:
-    st.subheader("Risultato finale")
-    st.markdown("_Clicca nei campi e usa Ctrl+C per copiare il valore_")
-    for campo, valore in st.session_state["output_data"].items():
-        if campo == "Description":
-            st.text_area(campo, value=valore, height=100, key=f"out_{campo}")
 if selected_part == "Flange, Pipe":
     st.subheader("Configurazione - Flange, Pipe")
-    genera_output("flange", "50155…", "1245-FLANGE", "", "", "13_OTHER")
-
+    genera_output_flange()
 elif selected_part == "Baseplate, Pump":
     st.subheader("Configurazione - Baseplate, Pump")
-    genera_output(parte="baseplate", item="477...", identificativo="6110-BASE PLATE", classe="", catalog="ARTVARI", erp_l2="18_FOUNDATION PLATE", extra_fields="baseplate")
-
+    genera_output("baseplate", "477...", "6110-BASE PLATE", "", "ARTVARI", "18_FOUNDATION PLATE", extra_fields="baseplate")
 elif selected_part == "Casing, Pump":
     st.subheader("Configurazione - Casing, Pump")
-    genera_output(parte="casing", item="40202...", identificativo="1100-CASING", classe="3", catalog="CORPO", erp_l2="17_CASING", template_fisso="FPD_MAKE")
-
+    genera_output("casing", "40202...", "1100-CASING", "3", "CORPO", "17_CASING", template_fisso="FPD_MAKE")
 elif selected_part == "Casing Cover, Pump":
     st.subheader("Configurazione - Casing Cover, Pump")
-    genera_output(parte="cover", item="40205...", identificativo="1221-CASING COVER", classe="3", catalog="COPERCHIO", erp_l2="13_OTHER")
-
+    genera_output("cover", "40205...", "1221-CASING COVER", "3", "COPERCHIO", "13_OTHER")
 elif selected_part == "Impeller, Pump":
     st.subheader("Configurazione - Impeller, Pump")
-    genera_output(parte="imp", item="40229...", identificativo="2200-IMPELLER", classe="2-3", catalog="GIRANTE", erp_l2="20_IMPELLER_DIFFUSER", template_fisso="FPD_MAKE")
-
+    genera_output("imp", "40229...", "2200-IMPELLER", "2-3", "GIRANTE", "20_IMPELLER_DIFFUSER", template_fisso="FPD_MAKE")
 elif selected_part == "Balance Bushing, Pump":
     st.subheader("Configurazione - Balance Bushing, Pump")
-    genera_output(parte="balance", item="40226...", identificativo="6231-BALANCE DRUM BUSH", classe="1-2-3", catalog="ALBERO", erp_l2="16_BUSHING", extra_fields="diameters")
-
+    genera_output("balance", "40226...", "6231-BALANCE DRUM BUSH", "1-2-3", "ALBERO", "16_BUSHING", extra_fields="diameters")
 elif selected_part == "Balance Drum, Pump":
     st.subheader("Configurazione - Balance Drum, Pump")
-    genera_output(parte="drum", item="40227...", identificativo="6231-BALANCE DRUM BUSH", classe="1-2-3", catalog="ARTVARI", erp_l2="16_BUSHING", extra_fields="diameters")
-
+    genera_output("drum", "40227...", "6231-BALANCE DRUM BUSH", "1-2-3", "ARTVARI", "16_BUSHING", extra_fields="diameters")
 elif selected_part == "Balance Disc, Pump":
     st.subheader("Configurazione - Balance Disc, Pump")
-    genera_output(parte="disc", item="40228...", identificativo="6210-BALANCE DISC", classe="1-2-3", catalog="ARTVARI", erp_l2="30_DISK", extra_fields="diameters")
-
+    genera_output("disc", "40228...", "6210-BALANCE DISC", "1-2-3", "ARTVARI", "30_DISK", extra_fields="diameters")
 elif selected_part == "Shaft, Pump":
     st.subheader("Configurazione - Shaft, Pump")
-    genera_output(parte="shaft", item="40231...", identificativo="2100-SHAFT", classe="2-3", catalog="ALBERO", erp_l2="25_SHAFTS", template_fisso="FPD_MAKE", extra_fields="shaft")
+    genera_output("shaft", "40231...", "2100-SHAFT", "2-3", "ALBERO", "25_SHAFTS", template_fisso="FPD_MAKE", extra_fields="shaft")
 
-if "output_data" in st.session_state:
-    st.subheader("Risultato finale")
-    st.markdown("_Clicca nei campi e usa Ctrl+C per copiare il valore_")
-    for campo, valore in st.session_state["output_data"].items():
-        if campo == "Description":
-            st.text_area(campo, value=valore, height=100, key=f"out_{campo}")
-        else:
-            st.text_input(campo, value=valore, key=f"out_{campo}"
-
-)
-
+# === OUTPUT FINALE UNICO ===
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
     st.markdown("_Clicca nei campi e usa Ctrl+C per copiare il valore_")
