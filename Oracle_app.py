@@ -24,7 +24,9 @@ part_options = [
     "Casing, Pump",
     "Casing Cover, Pump",
     "Impeller, Pump",
-    "Balance Bushing, Pump"
+    "Balance Bushing, Pump",
+    "Balance Drum, Pump",
+    "Balance Disc, Pump"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
@@ -55,9 +57,9 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
     elif extra_fields == "baseplate":
         length = st.number_input("Length (mm)", min_value=0, step=1, format="%d", key=f"len_{parte}")
         width = st.number_input("Width (mm)", min_value=0, step=1, format="%d", key=f"wid_{parte}")
-        height = st.number_input("Height (kg)", min_value=0, step=1, format="%d", key=f"hgt_{parte}")
+        weight = st.number_input("Weight (kg)", min_value=0, step=1, format="%d", key=f"wgt_{parte}")
         sourcing = st.selectbox("Sourcing", ["Europe", "India", "China"], key=f"sourcing_{parte}")
-        extra_descr = f"Length: {length}mm Width: {width}mm Height: {height}kg Sourcing: {sourcing}"
+        extra_descr = f"Length: {length}mm Width: {width}mm Weight: {weight}kg Sourcing: {sourcing}"
 
     note = st.text_area("Note (opzionale)", height=80, key=f"note_{parte}")
     dwg = st.text_input("Dwg/doc number", key=f"dwg_{parte}")
@@ -67,8 +69,10 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
         template = "FPD_MAKE" if make_or_buy == "Make" else "FPD_BUY_1"
     elif parte == "cover":
         template = "FPD_MAKE"
-    elif parte == "balance":
+    elif parte in ["balance", "drum", "disc"]:
         template = "FPD_BUY_1"
+    elif parte == "baseplate":
+        template = "FPD_BUY_4"
     else:
         template = template_fisso
 
@@ -111,7 +115,7 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
 # === ROUTING ===
 if selected_part == "Baseplate, Pump":
     st.subheader("Configurazione - Baseplate, Pump")
-    genera_output(parte="baseplate", item="477...", identificativo="6110-BASE PLATE", classe="", catalog="ARTVARI", erp_l2="18_FOUNDATION PLATE", template_fisso="FPD_MAKE", extra_fields="baseplate")
+    genera_output(parte="baseplate", item="477...", identificativo="6110-BASE PLATE", classe="", catalog="ARTVARI", erp_l2="18_FOUNDATION PLATE", extra_fields="baseplate")
 
 elif selected_part == "Casing, Pump":
     st.subheader("Configurazione - Casing, Pump")
@@ -128,6 +132,14 @@ elif selected_part == "Impeller, Pump":
 elif selected_part == "Balance Bushing, Pump":
     st.subheader("Configurazione - Balance Bushing, Pump")
     genera_output(parte="balance", item="40226...", identificativo="6231-BALANCE DRUM BUSH", classe="1-2-3", catalog="ALBERO", erp_l2="16_BUSHING", extra_fields="diameters")
+
+elif selected_part == "Balance Drum, Pump":
+    st.subheader("Configurazione - Balance Drum, Pump")
+    genera_output(parte="drum", item="40227...", identificativo="6231-BALANCE DRUM BUSH", classe="1-2-3", catalog="ARTVARI", erp_l2="16_BUSHING", extra_fields="diameters")
+
+elif selected_part == "Balance Disc, Pump":
+    st.subheader("Configurazione - Balance Disc, Pump")
+    genera_output(parte="disc", item="40228...", identificativo="6210-BALANCE DISC", classe="1-2-3", catalog="ARTVARI", erp_l2="30_DISK", extra_fields="diameters")
 
 # === OUTPUT FINALE ===
 if "output_data" in st.session_state:
