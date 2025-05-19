@@ -27,7 +27,8 @@ part_options = [
     "Balance Bushing, Pump",
     "Balance Drum, Pump",
     "Balance Disc, Pump",
-    "Shaft, Pump"
+    "Shaft, Pump",
+    "Flange, Pipe"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
@@ -151,6 +152,43 @@ elif selected_part == "Balance Disc, Pump":
 elif selected_part == "Shaft, Pump":
     st.subheader("Configurazione - Shaft, Pump")
     genera_output(parte="shaft", item="40231...", identificativo="2100-SHAFT", classe="2-3", catalog="ALBERO", erp_l2="25_SHAFTS", template_fisso="FPD_MAKE", extra_fields="shaft")
+
+elif selected_part == "Flange, Pipe":
+    st.subheader("Configurazione - Flange, Pipe")
+
+    flange_type = st.selectbox("Type", ["SW", "BW"])
+    size = st.selectbox("Size", ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”'])
+    face_type = st.selectbox("Face Type", ["RF", "FF", "RJ"])
+    flange_class = st.selectbox("Class", ["150", "300", "600", "1500", "2500"])
+    schedule = st.selectbox("Schedula", ["5", "10", "20", "30", "40", "60", "80", "100", "120", "140", "160"])
+    flange_material = st.selectbox("Flange Material", ["A105", "A350 LF2", "A182 F316"])  # puoi aggiornare
+    note = st.text_area("Note (opzionale)", height=80)
+    dwg = st.text_input("Dwg/doc number")
+
+    if st.button("Genera Output", key="gen_flange"):
+        descrizione = (
+            f"TYPE: {flange_type}, SIZE: {size}, FACE TYPE: {face_type}, CLASS: {flange_class}, "
+            f"SCHEDULA: {schedule}, MATERIAL: {flange_material}"
+        )
+        if note:
+            descrizione += f", NOTE: {note}"
+
+        st.session_state["output_data"] = {
+            "Item": "50155…",
+            "Description": descrizione,
+            "Identificativo": "1245-FLANGE",
+            "Classe ricambi": "",
+            "Categories": "FASCIA ITE 5",
+            "Catalog": "",
+            "Material": "NOT AVAILABLE",
+            "FPD material code": "BO-NA",
+            "Template": "FPD_BUY_2",
+            "ERP_L1": "23_FLANGE",
+            "ERP_L2": "13_OTHER",
+            "Disegno": dwg,
+            "To supplier": "",
+            "Quality": ""
+        }
 
 # === OUTPUT FINALE ===
 if "output_data" in st.session_state:
