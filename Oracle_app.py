@@ -83,8 +83,8 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2,
     elif extra_fields == "shaft":
         brg_type = st.text_input("Brg. type", key=f"brg_type_{parte}")
         brg_size = st.text_input("Brg. size", key=f"brg_size_{parte}")
-        max_dia  = st.number_input("Max diameter (mm)", min_value=0, step=1, key=f"max_dia_{parte}")
-        max_len  = st.number_input("Max length (mm)", min_value=0, step=1, key=f"max_len_{parte}")
+        max_dia  = st.number_input("Max diameter (mm)", min_value=0, step=1, format="%d", key=f"max_dia_{parte}")
+        max_len  = st.number_input("Max length (mm)", min_value=0, step=1, format="%d", key=f"max_len_{parte}")
         extra_descr = (
             f"Brg. type: {brg_type} Brg. size: {brg_size} "
             f"Max dia: {int(max_dia)}mm Max len: {int(max_len)}mm"
@@ -121,7 +121,7 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2,
     mname = st.selectbox("Material Name", [""] + names, key=f"mname_{parte}")
 
     if st.button("Genera Output", key=f"gen_{parte}"):
-        # Costruzione del campo Material / FPD Code
+        # Costruzione Material / FPD code
         if mtype != "MISCELLANEOUS":
             materiale = f"{mtype} {mprefix} {mname}".strip()
             match = materials_df[
@@ -192,24 +192,23 @@ elif selected_part == "Shaft, Pump":
     st.subheader("Configurazione - Shaft, Pump")
     genera_output("shaft", "40231…", "2100-SHAFT", "2-3", "ALBERO", "25_SHAFTS", template_fisso="FPD_MAKE", extra_fields="shaft")
 
-# --- Flange, Pipe --- #
 elif selected_part == "Flange, Pipe":
     st.subheader("Configurazione - Flange, Pipe")
     flange_type = st.selectbox("Type", ["SW", "BW"])
     size_fp     = st.selectbox("Size", ['1/8”','1/4”','3/8”','1/2”','3/4”','1”','1-1/4”','1-1/2”','2”','2-1/2”','3”','4”'])
     face_type   = st.selectbox("Face Type", ["RF","FF","RJ"])
     flange_cls  = st.selectbox("Class", ["150","300","600","1500","2500"])
-    schedule    = st.selectbox("Schedula", ["5","10","20","30","40","60","80","100","120","140","160"])
+    schedule_fp = st.selectbox("Schedula", ["5","10","20","30","40","60","80","100","120","140","160"])
     flange_mat  = st.selectbox("Flange Material", [
         "A105","A106-GR B","UNS-S31803","UNS-S32760","A350 LF2","A182-F316L",
         "ALLOY 825","GALVANIZED CARBON STEEL"
     ])
-    note_fp = st.text_area("Note (opzionale)", height=80)
-    dwg_fp  = st.text_input("Dwg/doc number")
+    note_fp = st.text_area("Note (opzionale)", height=80, key="note_flange")
+    dwg_fp  = st.text_input("Dwg/doc number", key="dwg_flange")
     if st.button("Genera Output", key="gen_flange"):
         descr_fp = (
             f"FLANGE, PIPE - TYPE: {flange_type}, SIZE: {size_fp}, "
-            f"FACE TYPE: {face_type}, CLASS: {flange_cls}, SCHEDULA: {schedule}, MATERIAL: {flange_mat}"
+            f"FACE TYPE: {face_type}, CLASS: {flange_cls}, SCHEDULA: {schedule_fp}, MATERIAL: {flange_mat}"
         )
         if note_fp:
             descr_fp += f", NOTE: {note_fp}"
@@ -229,15 +228,14 @@ elif selected_part == "Flange, Pipe":
             "Quality": ""
         }
 
-# --- Gate, Valve --- #
 elif selected_part == "Gate, Valve":
     st.subheader("Configurazione - Gate, Valve")
-    size        = st.selectbox("Size", pump_models if False else ['1/8”','1/4”','3/8”','1/2”','3/4”','1”','1-1/4”','1-1/2”','2”','2-1/2”','3”','4”'], key="gate_size")
+    size        = st.selectbox("Size", ['1/8”','1/4”','3/8”','1/2”','3/4”','1”','1-1/4”','1-1/2”','2”','2-1/2”','3”','4”'], key="gate_size")
     pclass      = st.selectbox("Pressure class", ["150","300","600","1500","2500"], key="gate_pressure")
-    inlet_size  = st.selectbox("Inlet connection size", ['1/8”','1/4”','3/8”','1/2”','3/4”','1”','1-1/4”','1-1/2”','2”','2-1/2”','3”','4”'], key="gate_inlet_size")
     inlet_type  = st.selectbox("Inlet connection type", ["SW","WN"], key="gate_inlet_type")
-    outlet_size = st.selectbox("Outlet connection size", ['1/8”','1/4”','3/8”','1/2”','3/4”','1”','1-1/4”','1-1/2”','2”','2-1/2”','3”','4”'], key="gate_outlet_size")
+    inlet_size  = st.selectbox("Inlet connection size", ['1/8”','1/4”','3/8”','1/2”','3/4”','1”','1-1/4”','1-1/2”','2”','2-1/2”','3”','4”'], key="gate_inlet_size")
     outlet_type = st.selectbox("Outlet connection type", ["SW","WN"], key="gate_outlet_type")
+    outlet_size = st.selectbox("Outlet connection size", ['1/8”','1/4”','3/8”','1/2”','3/4”','1”','1-1/4”','1-1/2”','2”','2-1/2”','3”','4”'], key="gate_outlet_size")
     valve_mat   = st.selectbox("Valve material", [
         "A105","A106-GR B","UNS-S31803","UNS-S32760","A350 LF2","A182-F316L",
         "ALLOY 825","GALVANIZED CARBON STEEL"
@@ -247,12 +245,12 @@ elif selected_part == "Gate, Valve":
     if st.button("Genera Output", key="gen_gate"):
         descr_gate = (
             f"Gate, Valve; Size {size} Pressure class {pclass} "
-            f"Inlet Conn.Size {inlet_size} Inlet Conn.Type {inlet_type} "
-            f"Outlet Conn.Size {outlet_size} Outlet Conn.Type {outlet_type} "
+            f"Inlet connection type {inlet_type} size {inlet_size} "
+            f"Outlet connection type {outlet_type} size {outlet_size} "
             f"Body material {valve_mat} Sch {schedule}"
         )
         if note_gate:
-            descr_gate += f" Additional Feat. {note_gate}"
+            descr_gate += f", NOTE: {note_gate}"
         st.session_state["output_data"] = {
             "Item": "50186…",
             "Description": descr_gate,
@@ -269,7 +267,6 @@ elif selected_part == "Gate, Valve":
             "Quality": ""
         }
 
-# --- Gasket, Spiral Wound --- #
 elif selected_part == "Gasket, Spiral Wound":
     st.subheader("Configurazione - Gasket, Spiral Wound")
     winding_colors = {
@@ -298,8 +295,8 @@ elif selected_part == "Gasket, Spiral Wound":
     outer_dia = st.number_input("Diametro esterno (mm)", min_value=0.0, step=0.1, format="%.1f")
     thickness = st.number_input("Spessore (mm)", min_value=0.0, step=0.1, format="%.1f")
     rating    = st.selectbox("Rating", list(rating_stripes.keys()))
-    dwg_g     = st.text_input("Dwg/doc number")
-    note_g    = st.text_area("Note (opzionale)", height=80)
+    dwg_g     = st.text_input("Dwg/doc number", key="dwg_gasket")
+    note_g    = st.text_area("Note (opzionale)", height=80, key="note_gasket")
 
     if st.button("Genera Output", key="gen_gasket"):
         c1     = winding_colors[winding]
@@ -330,7 +327,6 @@ elif selected_part == "Gasket, Spiral Wound":
             "Quality": ""
         }
 
-# --- Gasket, Flat --- #
 elif selected_part == "Gasket, Flat":
     st.subheader("Configurazione - Gasket, Flat")
     thickness = st.number_input("Thickness", min_value=0.0, step=0.1, format="%.1f", key="thk_flat")
@@ -386,7 +382,7 @@ elif selected_part == "Gasket, Flat":
             "Quality": ""
         }
 
-# --- OUTPUT FINALE --- #
+# Output finale
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
     st.markdown("_Clicca nei campi e usa Ctrl+C per copiare il valore_")
