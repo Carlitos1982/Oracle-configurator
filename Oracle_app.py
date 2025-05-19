@@ -5,7 +5,7 @@ import pandas as pd
 st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 st.title("Oracle Item Setup - Web App")
 
-# Carica dati Excel
+# Caricamento dati Excel
 @st.cache_data
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
@@ -17,121 +17,129 @@ def load_config_data():
     }
 
 data = load_config_data()
-size_df = data["size_df"]
-features_df = data["features_df"]
+size_df      = data["size_df"]
+features_df  = data["features_df"]
 materials_df = data["materials_df"]
 
 # Lista delle parti
 part_options = [
-    "Baseplate, Pump","Casing, Pump","Casing Cover, Pump","Impeller, Pump",
-    "Balance Bushing, Pump","Balance Drum, Pump","Balance Disc, Pump",
-    "Shaft, Pump","Flange, Pipe","Gasket, Spiral Wound","Gasket, Flat"
+    "Baseplate, Pump",
+    "Casing, Pump",
+    "Casing Cover, Pump",
+    "Impeller, Pump",
+    "Balance Bushing, Pump",
+    "Balance Drum, Pump",
+    "Balance Disc, Pump",
+    "Shaft, Pump",
+    "Flange, Pipe",
+    "Gate, Valve",
+    "Gasket, Spiral Wound",
+    "Gasket, Flat"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
 # Dati comuni
-pump_models   = sorted(size_df["Pump Model"].dropna().unique())
-material_types= materials_df["Material Type"].dropna().unique().tolist()
+pump_models    = sorted(size_df["Pump Model"].dropna().unique())
+material_types = materials_df["Material Type"].dropna().unique().tolist()
 
+# Funzione generica per le parti a catalog
 def genera_output(parte, item, identificativo, classe, catalog, erp_l2,
                   template_fisso=None, extra_fields=None):
-    model = st.selectbox("Product/Pump Model", [""]+pump_models, key=f"model_{parte}")
-    size_list = size_df[size_df["Pump Model"]==model]["Size"].dropna().tolist()
-    size      = st.selectbox("Product/Pump Size", [""]+size_list, key=f"size_{parte}")
+    model = st.selectbox("Product/Pump Model", [""] + pump_models, key=f"model_{parte}")
+    size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
+    size = st.selectbox("Product/Pump Size", [""] + size_list, key=f"size_{parte}")
 
-    # Feature1
+    # Additional Feature 1
     feature_1 = ""
-    special = ["HDO","DMX","WXB","WIK"]
-    if not(model in special and parte!="casing"):
+    special = ["HDO", "DMX", "WXB", "WIK"]
+    if not (model in special and parte != "casing"):
         f1_list = features_df[
-            (features_df["Pump Model"]==model)&
-            (features_df["Feature Type"]=="features1")
+            (features_df["Pump Model"] == model) &
+            (features_df["Feature Type"] == "features1")
         ]["Feature"].dropna().tolist()
-        feature_1 = st.selectbox("Additional Feature 1",[""]+f1_list,key=f"f1_{parte}")
+        feature_1 = st.selectbox("Additional Feature 1", [""] + f1_list, key=f"f1_{parte}")
 
-    # Feature2
+    # Additional Feature 2
     feature_2 = ""
-    if (model=="HPX" and parte=="casing") or model=="HED":
+    if (model == "HPX" and parte == "casing") or model == "HED":
         f2_list = features_df[
-            (features_df["Pump Model"]==model)&
-            (features_df["Feature Type"]=="features2")
+            (features_df["Pump Model"] == model) &
+            (features_df["Feature Type"] == "features2")
         ]["Feature"].dropna().tolist()
-        feature_2 = st.selectbox("Additional Feature 2",[""]+f2_list,key=f"f2_{parte}")
+        feature_2 = st.selectbox("Additional Feature 2", [""] + f2_list, key=f"f2_{parte}")
 
-    # Extra fields
+    # Campi extra (diameters, baseplate, shaft)
     extra_descr = ""
-    if extra_fields=="diameters":
-        int_dia = st.number_input("Diametro interno (mm)",min_value=0,step=1,format="%d",key=f"int_dia_{parte}")
-        ext_dia = st.number_input("Diametro esterno (in mm)",min_value=0,step=1,format="%d",key=f"ext_dia_{parte}")
+    if extra_fields == "diameters":
+        int_dia = st.number_input("Diametro interno (mm)", min_value=0, step=1, format="%d", key=f"int_dia_{parte}")
+        ext_dia = st.number_input("Diametro esterno (mm)", min_value=0, step=1, format="%d", key=f"ext_dia_{parte}")
         extra_descr = f"int. dia.: {int(int_dia)}mm ext. dia.: {int(ext_dia)}mm"
-    elif extra_fields=="baseplate":
-        length  = st.number_input("Length (mm)",min_value=0,step=1,format="%d",key=f"len_{parte}")
-        width   = st.number_input("Width (mm)",min_value=0,step=1,format="%d",key=f"wid_{parte}")
-        weight  = st.number_input("Weight (kg)",min_value=0,step=1,format="%d",key=f"wgt_{parte}")
-        sourcing= st.selectbox("Sourcing",["Europe","India","China"],key=f"sourcing_{parte}")
+    elif extra_fields == "baseplate":
+        length = st.number_input("Length (mm)", min_value=0, step=1, format="%d", key=f"len_{parte}")
+        width  = st.number_input("Width (mm)", min_value=0, step=1, format="%d", key=f"wid_{parte}")
+        weight = st.number_input("Weight (kg)", min_value=0, step=1, format="%d", key=f"wgt_{parte}")
+        sourcing = st.selectbox("Sourcing", ["Europe", "India", "China"], key=f"sourcing_{parte}")
         extra_descr = f"Length: {length}mm Width: {width}mm Weight: {weight}kg Sourcing: {sourcing}"
-    elif extra_fields=="shaft":
-        brg_type= st.text_input("Brg. type",key=f"brg_type_{parte}")
-        brg_size= st.text_input("Brg. size",key=f"brg_size_{parte}")
-        max_dia = st.number_input("Max diameter (mm)",min_value=0,step=1,format="%d",key=f"max_dia_{parte}")
-        max_len = st.number_input("Max length (mm)",min_value=0,step=1,format="%d",key=f"max_len_{parte}")
+    elif extra_fields == "shaft":
+        brg_type = st.text_input("Brg. type", key=f"brg_type_{parte}")
+        brg_size = st.text_input("Brg. size", key=f"brg_size_{parte}")
+        max_dia  = st.number_input("Max diameter (mm)", min_value=0, step=1, key=f"max_dia_{parte}")
+        max_len  = st.number_input("Max length (mm)", min_value=0, step=1, key=f"max_len_{parte}")
         extra_descr = (
             f"Brg. type: {brg_type} Brg. size: {brg_size} "
             f"Max dia: {int(max_dia)}mm Max len: {int(max_len)}mm"
         )
 
-    note = st.text_area("Note (opzionale)",height=80,key=f"note_{parte}")
-    dwg  = st.text_input("Dwg/doc number",key=f"dwg_{parte}")
+    note = st.text_area("Note (opzionale)", height=80, key=f"note_{parte}")
+    dwg  = st.text_input("Dwg/doc number", key=f"dwg_{parte}")
 
-    # Template logic
-    if parte=="cover" and model in ["HPX","PVML"]:
-        mob=st.radio("Make or Buy",["Make","Buy"],horizontal=True,key=f"mob_{parte}")
-        template = "FPD_MAKE" if mob=="Make" else "FPD_BUY_1"
-    elif parte=="cover":
+    # Scelta del template
+    if parte == "cover" and model in ["HPX", "PVML"]:
+        mob = st.radio("Make or Buy", ["Make", "Buy"], horizontal=True, key=f"mob_{parte}")
+        template = "FPD_MAKE" if mob == "Make" else "FPD_BUY_1"
+    elif parte == "cover":
         template = "FPD_MAKE"
-    elif parte in ["balance","drum","disc"]:
+    elif parte in ["balance", "drum", "disc"]:
         template = "FPD_BUY_1"
-    elif parte=="baseplate":
+    elif parte == "baseplate":
         template = "FPD_BUY_4"
     else:
         template = template_fisso
 
-    # Selezione materiale: Type, Prefix, Name
-    mtype = st.selectbox("Material Type",[""]+material_types,key=f"mtype_{parte}")
-    pref_df = materials_df[(materials_df["Material Type"]==mtype)&(materials_df["Prefix"].notna())]
-    prefixes= sorted(pref_df["Prefix"].unique()) if mtype!="MISCELLANEOUS" else []
-    mprefix = st.selectbox("Material Prefix",[""]+prefixes,key=f"mprefix_{parte}")
-    if mtype=="MISCELLANEOUS":
-        names = materials_df[materials_df["Material Type"]==mtype]["Name"].dropna().tolist()
+    # Selezione materiale
+    mtype = st.selectbox("Material Type", [""] + material_types, key=f"mtype_{parte}")
+    pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
+    prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
+    mprefix = st.selectbox("Material Prefix", [""] + prefixes, key=f"mprefix_{parte}")
+    if mtype == "MISCELLANEOUS":
+        names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
     else:
         names = materials_df[
-            (materials_df["Material Type"]==mtype)&
-            (materials_df["Prefix"]==mprefix)
+            (materials_df["Material Type"] == mtype) &
+            (materials_df["Prefix"] == mprefix)
         ]["Name"].dropna().tolist()
-    mname = st.selectbox("Material Name",[""]+names,key=f"mname_{parte}")
+    mname = st.selectbox("Material Name", [""] + names, key=f"mname_{parte}")
 
-    # Generazione output
-    if st.button("Genera Output",key=f"gen_{parte}"):
-        # costruisci 'materiale'
-        if mtype!="MISCELLANEOUS":
+    if st.button("Genera Output", key=f"gen_{parte}"):
+        # Costruzione del campo Material / FPD Code
+        if mtype != "MISCELLANEOUS":
             materiale = f"{mtype} {mprefix} {mname}".strip()
             match = materials_df[
-                (materials_df["Material Type"]==mtype)&
-                (materials_df["Prefix"]==mprefix)&
-                (materials_df["Name"]==mname)
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix) &
+                (materials_df["Name"] == mname)
             ]
         else:
             materiale = mname
             match = materials_df[
-                (materials_df["Material Type"]==mtype)&
-                (materials_df["Name"]==mname)
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Name"] == mname)
             ]
         codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-        descrizione = (
-            f"{selected_part} " + " ".join(
-                filter(None,[model, size, feature_1, feature_2, extra_descr, note, materiale])
-            )
+        # Costruzione descrizione
+        descrizione = f"{selected_part} " + " ".join(
+            filter(None, [model, size, feature_1, feature_2, extra_descr, note, materiale])
         )
 
         st.session_state["output_data"] = {
@@ -139,160 +147,251 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2,
             "Description": descrizione,
             "Identificativo": identificativo,
             "Classe ricambi": classe,
-            "Categories": "Fascia ite 5" if parte=="baseplate" else "Fascia ite 4",
+            "Categories": "FASCIA ITE 5" if parte == "baseplate" else "FASCIA ITE 4",
             "Catalog": catalog,
             "Disegno": dwg,
             "Material": materiale,
             "FPD material code": codice_fpd,
             "Template": template,
-            "ERP_L1": "21_FABRICATIONS_OR_BASEPLATES" if parte=="baseplate" else "20_TURNKEY_MACHINING",
+            "ERP_L1": "21_FABRICATIONS_OR_BASEPLATES" if parte == "baseplate" else "20_TURNKEY_MACHINING",
             "ERP_L2": erp_l2,
-            "To supplier":"",
-            "Quality":""
+            "To supplier": "",
+            "Quality": ""
         }
 
-# --- ROUTING parti standard ---
-if selected_part=="Baseplate, Pump":
+# --- ROUTING DELLE PARTI --- #
+if selected_part == "Baseplate, Pump":
     st.subheader("Configurazione - Baseplate, Pump")
-    genera_output("baseplate","477...","6110-BASE PLATE","", "ARTVARI","18_FOUNDATION_PLATE",extra_fields="baseplate")
-elif selected_part=="Casing, Pump":
-    st.subheader("Configurazione - Casing, Pump")
-    genera_output("casing","40202...","1100-CASING","3","CORPO","17_CASING",template_fisso="FPD_MAKE")
-elif selected_part=="Casing Cover, Pump":
-    st.subheader("Configurazione - Casing Cover, Pump")
-    genera_output("cover","40205...","1221-CASING COVER","3","COPERCHIO","13_OTHER")
-elif selected_part=="Impeller, Pump":
-    st.subheader("Configurazione - Impeller, Pump")
-    genera_output("imp","40229...","2200-IMPELLER","2-3","GIRANTE","20_IMPELLER_DIFFUSER",template_fisso="FPD_MAKE")
-elif selected_part=="Balance Bushing, Pump":
-    st.subheader("Configurazione - Balance Bushing, Pump")
-    genera_output("balance","40226...","6231-BALANCE DRUM BUSH","1-2-3","ALBERO","16_BUSHING",extra_fields="diameters")
-elif selected_part=="Balance Drum, Pump":
-    st.subheader("Configurazione - Balance Drum, Pump")
-    genera_output("drum","40227...","6231-BALANCE DRUM BUSH","1-2-3","ARTVARI","16_BUSHING",extra_fields="diameters")
-elif selected_part=="Balance Disc, Pump":
-    st.subheader("Configurazione - Balance Disc, Pump")
-    genera_output("disc","40228...","6210-BALANCE DISC","1-2-3","ARTVARI","30_DISK",extra_fields="diameters")
-elif selected_part=="Shaft, Pump":
-    st.subheader("Configurazione - Shaft, Pump")
-    genera_output("shaft","40231...","2100-SHAFT","2-3","ALBERO","25_SHAFTS",template_fisso="FPD_MAKE",extra_fields="shaft")
+    genera_output("baseplate", "477…", "6110-BASE PLATE", "", "ARTVARI", "18_FOUNDATION_PLATE", extra_fields="baseplate")
 
-# Flange
-elif selected_part=="Flange, Pipe":
+elif selected_part == "Casing, Pump":
+    st.subheader("Configurazione - Casing, Pump")
+    genera_output("casing", "40202…", "1100-CASING", "3", "CORPO", "17_CASING", template_fisso="FPD_MAKE")
+
+elif selected_part == "Casing Cover, Pump":
+    st.subheader("Configurazione - Casing Cover, Pump")
+    genera_output("cover", "40205…", "1221-CASING COVER", "3", "COPERCHIO", "13_OTHER")
+
+elif selected_part == "Impeller, Pump":
+    st.subheader("Configurazione - Impeller, Pump")
+    genera_output("imp", "40229…", "2200-IMPELLER", "2-3", "GIRANTE", "20_IMPELLER_DIFFUSER", template_fisso="FPD_MAKE")
+
+elif selected_part == "Balance Bushing, Pump":
+    st.subheader("Configurazione - Balance Bushing, Pump")
+    genera_output("balance", "40226…", "6231-BALANCE DRUM BUSH", "1-2-3", "ALBERO", "16_BUSHING", extra_fields="diameters")
+
+elif selected_part == "Balance Drum, Pump":
+    st.subheader("Configurazione - Balance Drum, Pump")
+    genera_output("drum", "40227…", "6231-BALANCE DRUM BUSH", "1-2-3", "ARTVARI", "16_BUSHING", extra_fields="diameters")
+
+elif selected_part == "Balance Disc, Pump":
+    st.subheader("Configurazione - Balance Disc, Pump")
+    genera_output("disc", "40228…", "6210-BALANCE DISC", "1-2-3", "ARTVARI", "30_DISK", extra_fields="diameters")
+
+elif selected_part == "Shaft, Pump":
+    st.subheader("Configurazione - Shaft, Pump")
+    genera_output("shaft", "40231…", "2100-SHAFT", "2-3", "ALBERO", "25_SHAFTS", template_fisso="FPD_MAKE", extra_fields="shaft")
+
+# --- Flange, Pipe --- #
+elif selected_part == "Flange, Pipe":
     st.subheader("Configurazione - Flange, Pipe")
-    flange_type     = st.selectbox("Type",["SW","BW"])
-    size_fp         = st.selectbox("Size",['1/8”','1/4”','3/8”','1/2”','3/4”',
-                                            '1”','1-1/4”','1-1/2”','2”','2-1/2”','3”','4”'])
-    face_type       = st.selectbox("Face Type",["RF","FF","RJ"])
-    flange_class    = st.selectbox("Class",["150","300","600","1500","2500"])
-    schedule        = st.selectbox("Schedula",["5","10","20","30","40","60","80","100","120","140","160"])
-    flange_material = st.selectbox("Flange Material",[
+    flange_type = st.selectbox("Type", ["SW", "BW"])
+    size_fp     = st.selectbox("Size", ['1/8”','1/4”','3/8”','1/2”','3/4”','1”','1-1/4”','1-1/2”','2”','2-1/2”','3”','4”'])
+    face_type   = st.selectbox("Face Type", ["RF","FF","RJ"])
+    flange_cls  = st.selectbox("Class", ["150","300","600","1500","2500"])
+    schedule    = st.selectbox("Schedula", ["5","10","20","30","40","60","80","100","120","140","160"])
+    flange_mat  = st.selectbox("Flange Material", [
         "A105","A106-GR B","UNS-S31803","UNS-S32760","A350 LF2","A182-F316L",
         "ALLOY 825","GALVANIZED CARBON STEEL"
     ])
-    note_fp=st.text_area("Note (opzionale)",height=80)
-    dwg_fp =st.text_input("Dwg/doc number")
-    if st.button("Genera Output",key="gen_flange"):
-        descr_fp=(
-            f"FLANGE, PIPE - TYPE: {flange_type}, SIZE: {size_fp}, FACE TYPE: {face_type}, "
-            f"CLASS: {flange_class}, SCHEDULA: {schedule}, MATERIAL: {flange_material}"
+    note_fp = st.text_area("Note (opzionale)", height=80)
+    dwg_fp  = st.text_input("Dwg/doc number")
+    if st.button("Genera Output", key="gen_flange"):
+        descr_fp = (
+            f"FLANGE, PIPE - TYPE: {flange_type}, SIZE: {size_fp}, "
+            f"FACE TYPE: {face_type}, CLASS: {flange_cls}, SCHEDULA: {schedule}, MATERIAL: {flange_mat}"
         )
-        if note_fp: descr_fp+=f", NOTE: {note_fp}"
-        st.session_state["output_data"]={
-            "Item":"50155…","Description":descr_fp,"Identificativo":"1245-FLANGE",
-            "Classe ricambi":"","Categories":"FASCIA ITE 5","Catalog":"",
-            "Material":"NOT AVAILABLE","FPD material code":"BO-NA",
-            "Template":"FPD_BUY_2","ERP_L1":"23_FLANGE","ERP_L2":"13_OTHER",
-            "To supplier":"","Quality":""
+        if note_fp:
+            descr_fp += f", NOTE: {note_fp}"
+        st.session_state["output_data"] = {
+            "Item": "50155…",
+            "Description": descr_fp,
+            "Identificativo": "1245-FLANGE",
+            "Classe ricambi": "",
+            "Categories": "FASCIA ITE 5",
+            "Catalog": "",
+            "Material": "NOT AVAILABLE",
+            "FPD material code": "BO-NA",
+            "Template": "FPD_BUY_2",
+            "ERP_L1": "23_FLANGE",
+            "ERP_L2": "13_OTHER",
+            "To supplier": "",
+            "Quality": ""
         }
 
-# Gasket Spiral Wound
-elif selected_part=="Gasket, Spiral Wound":
+# --- Gate, Valve --- #
+elif selected_part == "Gate, Valve":
+    st.subheader("Configurazione - Gate, Valve")
+    size        = st.selectbox("Size", pump_models if False else ['1/8”','1/4”','3/8”','1/2”','3/4”','1”','1-1/4”','1-1/2”','2”','2-1/2”','3”','4”'], key="gate_size")
+    pclass      = st.selectbox("Pressure class", ["150","300","600","1500","2500"], key="gate_pressure")
+    inlet_size  = st.selectbox("Inlet connection size", ['1/8”','1/4”','3/8”','1/2”','3/4”','1”','1-1/4”','1-1/2”','2”','2-1/2”','3”','4”'], key="gate_inlet_size")
+    inlet_type  = st.selectbox("Inlet connection type", ["SW","WN"], key="gate_inlet_type")
+    outlet_size = st.selectbox("Outlet connection size", ['1/8”','1/4”','3/8”','1/2”','3/4”','1”','1-1/4”','1-1/2”','2”','2-1/2”','3”','4”'], key="gate_outlet_size")
+    outlet_type = st.selectbox("Outlet connection type", ["SW","WN"], key="gate_outlet_type")
+    valve_mat   = st.selectbox("Valve material", [
+        "A105","A106-GR B","UNS-S31803","UNS-S32760","A350 LF2","A182-F316L",
+        "ALLOY 825","GALVANIZED CARBON STEEL"
+    ], key="gate_material")
+    schedule    = st.selectbox("Schedula", ["5","10","20","30","40","60","80","100","120","140","160"], key="gate_schedule")
+    note_gate   = st.text_area("Note (opzionale)", height=80, key="gate_note")
+    if st.button("Genera Output", key="gen_gate"):
+        descr_gate = (
+            f"Gate, Valve; Size {size} Pressure class {pclass} "
+            f"Inlet Conn.Size {inlet_size} Inlet Conn.Type {inlet_type} "
+            f"Outlet Conn.Size {outlet_size} Outlet Conn.Type {outlet_type} "
+            f"Body material {valve_mat} Sch {schedule}"
+        )
+        if note_gate:
+            descr_gate += f" Additional Feat. {note_gate}"
+        st.session_state["output_data"] = {
+            "Item": "50186…",
+            "Description": descr_gate,
+            "Identificativo": "VALVOLA (GLOBO,SARAC,SFERA,NEEDLE,MANIF,CONTR)",
+            "Classe ricambi": "",
+            "Categories": "FASCIA ITE 5",
+            "Catalog": "",
+            "Material": "NOT AVAILABLE",
+            "FPD material code": "BO-NA",
+            "Template": "FPD_BUY_2",
+            "ERP_L1": "72_VALVE",
+            "ERP_L2": "18_GATE_VALVE",
+            "To supplier": "",
+            "Quality": ""
+        }
+
+# --- Gasket, Spiral Wound --- #
+elif selected_part == "Gasket, Spiral Wound":
     st.subheader("Configurazione - Gasket, Spiral Wound")
-    winding_colors={ ... }  # come sopra
-    filler_colors ={ ... }
-    rating_stripes={ ... }
-    winding=st.selectbox("Winding material",list(winding_colors.keys()))
-    filler=st.selectbox("Filler",list(filler_colors.keys()))
-    inner_dia=st.number_input("Diametro interno (mm)",min_value=0.0,step=0.1,format="%.1f")
-    outer_dia=st.number_input("Diametro esterno (mm)",min_value=0.0,step=0.1,format="%.1f")
-    thickness=st.number_input("Spessore (mm)",min_value=0.0,step=0.1,format="%.1f")
-    rating=st.selectbox("Rating",list(rating_stripes.keys()))
-    dwg=st.text_input("Dwg/doc number")
-    note=st.text_area("Note (opzionale)",height=80)
-    if st.button("Genera Output",key="gen_gasket"):
-        color1=winding_colors[winding]; color2=filler_colors[filler]; stripe=rating_stripes[rating]
-        descr=(
+    winding_colors = {
+        "304 stainless steel":"Yellow RAL1021","316L stainless steel":"Green RAL6005",
+        "317L stainless steel":"Maroon RAL3003","321 stainless steel":"Turquoise RAL5018",
+        "347 stainless steel":"Blue RAL5017","MONEL":"Orange RAL2003","Nickel":"Red RAL3024",
+        "Titanium":"Purple RAL4003","Alloy20":"Black RAL9005","INCONEL 600":"Gold RAL1004",
+        "HASTELLOY B":"Brown RAL8003","HASTELLOY C":"Beige RAL1001","INCOLOY800":"White RAL9010",
+        "DUPLEX":"Yellow+Blue RAL1021+5017","SUPERDUPLEX":"Red+Black RAL3024+9005",
+        "ALLOY 825":"Orange+Green RAL2003+6005","UNS S31254":"Orange+Blue RAL2003+5017",
+        "ZYRCONIUM 702":"Gold+Green RAL1004+6005","INCONEL X750HT":"Gold+Black RAL1004+9005"
+    }
+    filler_colors = {
+        "Graphite":"Gray RAL7011","PTFE":"White RAL9010",
+        "Ceramic":"Ceramic Lt. Green RAL6021","Verdicarb (Mica Graphite)":"Pink RAL3015"
+    }
+    rating_stripes = {
+        "STANDARD PRESSURE m=3 y=10000 psi":"(1 stripe)",
+        "HIGH PRESSURE m=3 y=17500 psi":"(2 stripes)",
+        "ULTRA HIGH PRESSURE m=3 y=23500 psi":"(3 stripes)"
+    }
+
+    winding   = st.selectbox("Winding material", list(winding_colors.keys()))
+    filler    = st.selectbox("Filler", list(filler_colors.keys()))
+    inner_dia = st.number_input("Diametro interno (mm)", min_value=0.0, step=0.1, format="%.1f")
+    outer_dia = st.number_input("Diametro esterno (mm)", min_value=0.0, step=0.1, format="%.1f")
+    thickness = st.number_input("Spessore (mm)", min_value=0.0, step=0.1, format="%.1f")
+    rating    = st.selectbox("Rating", list(rating_stripes.keys()))
+    dwg_g     = st.text_input("Dwg/doc number")
+    note_g    = st.text_area("Note (opzionale)", height=80)
+
+    if st.button("Genera Output", key="gen_gasket"):
+        c1     = winding_colors[winding]
+        c2     = filler_colors[filler]
+        stripe = rating_stripes[rating]
+        descr  = (
             f"GASKET, SPIRAL WOUND - WINDING: {winding}, FILLER: {filler}, "
             f"ID: {inner_dia}mm, OD: {outer_dia}mm, THK: {thickness}mm, "
-            f"RATING: {rating}, COLOR CODE: {color1}/{color2}, {stripe}"
+            f"RATING: {rating}, COLOR CODE: {c1}/{c2}, {stripe}"
         )
-        if note: descr+=f", NOTE: {note}"
-        st.session_state["output_data"]={
-            "Item":"50415…","Description":descr,"Identificativo":"4510-JOINT",
-            "Classe ricambi":"1-2-3","Categories":"FASCIA ITE 5",
-            "Catalog":"ARTVARI","Disegno":dwg,"Material":"NA",
-            "FPD material code":"NOT AVAILABLE","Template":"FPD_BUY_1",
-            "ERP_L1":"55_GASKETS_OR_SEAL","ERP_L2":"16_SPIRAL_WOUND",
-            "To supplier":"","Quality":""
+        if note_g:
+            descr += f", NOTE: {note_g}"
+
+        st.session_state["output_data"] = {
+            "Item": "50415…",
+            "Description": descr,
+            "Identificativo": "4510-JOINT",
+            "Classe ricambi": "1-2-3",
+            "Categories": "FASCIA ITE 5",
+            "Catalog": "ARTVARI",
+            "Disegno": dwg_g,
+            "Material": "NA",
+            "FPD material code": "NOT AVAILABLE",
+            "Template": "FPD_BUY_1",
+            "ERP_L1": "55_GASKETS_OR_SEAL",
+            "ERP_L2": "16_SPIRAL_WOUND",
+            "To supplier": "",
+            "Quality": ""
         }
 
-# Gasket Flat
-elif selected_part=="Gasket, Flat":
+# --- Gasket, Flat --- #
+elif selected_part == "Gasket, Flat":
     st.subheader("Configurazione - Gasket, Flat")
-    thickness=st.number_input("Thickness",min_value=0.0,step=0.1,format="%.1f",key="thk_flat")
-    uom=st.selectbox("UOM",["mm","inches"],key="uom_flat")
-    dwg_flat=st.text_input("Dwg/doc number",key="dwg_flat")
-    mtype_flat=st.selectbox("Material Type",[""]+material_types,key="mtype_flat")
-    pref_df_flat=materials_df[
-        (materials_df["Material Type"]==mtype_flat)&
+    thickness = st.number_input("Thickness", min_value=0.0, step=0.1, format="%.1f", key="thk_flat")
+    uom       = st.selectbox("UOM", ["mm", "inches"], key="uom_flat")
+    dwg_flat  = st.text_input("Dwg/doc number", key="dwg_flat")
+    mtype_flat = st.selectbox("Material Type", [""] + material_types, key="mtype_flat")
+    pref_df_flat = materials_df[
+        (materials_df["Material Type"] == mtype_flat) &
         (materials_df["Prefix"].notna())
     ]
-    prefixes_flat=sorted(pref_df_flat["Prefix"].unique()) if mtype_flat!="MISCELLANEOUS" else []
-    mprefix_flat=st.selectbox("Material Prefix",[""]+prefixes_flat,key="mprefix_flat")
-    if mtype_flat=="MISCELLANEOUS":
-        names_flat=materials_df[materials_df["Material Type"]==mtype_flat]["Name"].dropna().tolist()
+    prefixes_flat = sorted(pref_df_flat["Prefix"].unique()) if mtype_flat != "MISCELLANEOUS" else []
+    mprefix_flat = st.selectbox("Material Prefix", [""] + prefixes_flat, key="mprefix_flat")
+    if mtype_flat == "MISCELLANEOUS":
+        names_flat = materials_df[materials_df["Material Type"] == mtype_flat]["Name"].dropna().tolist()
     else:
-        names_flat=materials_df[
-            (materials_df["Material Type"]==mtype_flat)&
-            (materials_df["Prefix"]==mprefix_flat)
+        names_flat = materials_df[
+            (materials_df["Material Type"] == mtype_flat) &
+            (materials_df["Prefix"] == mprefix_flat)
         ]["Name"].dropna().tolist()
-    mname_flat=st.selectbox("Material Name",[""]+names_flat,key="mname_flat")
-    note_flat=st.text_area("Note (opzionale)",height=80,key="note_flat")
-    if st.button("Genera Output",key="gen_flat"):
-        # Materiale e codice FPD
-        if mtype_flat!="MISCELLANEOUS":
-            materiale_flat=f"{mtype_flat} {mprefix_flat} {mname_flat}".strip()
-            match_flat=materials_df[
-                (materials_df["Material Type"]==mtype_flat)&
-                (materials_df["Prefix"]==mprefix_flat)&
-                (materials_df["Name"]==mname_flat)
+    mname_flat = st.selectbox("Material Name", [""] + names_flat, key="mname_flat")
+
+    if st.button("Genera Output", key="gen_flat"):
+        if mtype_flat != "MISCELLANEOUS":
+            materiale_flat = f"{mtype_flat} {mprefix_flat} {mname_flat}".strip()
+            match_flat = materials_df[
+                (materials_df["Material Type"] == mtype_flat) &
+                (materials_df["Prefix"] == mprefix_flat) &
+                (materials_df["Name"] == mname_flat)
             ]
         else:
-            materiale_flat=mname_flat
-            match_flat=materials_df[
-                (materials_df["Material Type"]==mtype_flat)&
-                (materials_df["Name"]==mname_flat)
+            materiale_flat = mname_flat
+            match_flat = materials_df[
+                (materials_df["Material Type"] == mtype_flat) &
+                (materials_df["Name"] == mname_flat)
             ]
-        codice_flat=match_flat["FPD Code"].values[0] if not match_flat.empty else ""
-        descr_flat=f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale_flat}"
-        if note_flat: descr_flat+=f", NOTE: {note_flat}"
+        codice_flat = match_flat["FPD Code"].values[0] if not match_flat.empty else ""
+        descr_flat = f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale_flat}"
 
-        st.session_state["output_data"]={
-            "Item":"50158…","Description":descr_flat,
-            "Identificativo":"4590-GASKET","Classe ricambi":"1-2-3",
-            "Categories":"FASCIA ITE 5","Catalog":"ARTVARI","Disegno":dwg_flat,
-            "Material":materiale_flat,"FPD material code":codice_flat,
-            "Template":"FPD_BUY_2","ERP_L1":"55_GASKETS_OR_SEAL",
-            "ERP_L2":"20_OTHER","To supplier":"","Quality":""
+        st.session_state["output_data"] = {
+            "Item": "50158…",
+            "Description": descr_flat,
+            "Identificativo": "4590-GASKET",
+            "Classe ricambi": "1-2-3",
+            "Categories": "FASCIA ITE 5",
+            "Catalog": "ARTVARI",
+            "Disegno": dwg_flat,
+            "Material": materiale_flat,
+            "FPD material code": codice_flat,
+            "Template": "FPD_BUY_2",
+            "ERP_L1": "55_GASKETS_OR_SEAL",
+            "ERP_L2": "20_OTHER",
+            "To supplier": "",
+            "Quality": ""
         }
 
-# --- Output finale ---
+# --- OUTPUT FINALE --- #
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
     st.markdown("_Clicca nei campi e usa Ctrl+C per copiare il valore_")
-    for campo,valore in st.session_state["output_data"].items():
-        if campo=="Description":
-            st.text_area(campo,value=valore,height=100)
+    for campo, valore in st.session_state["output_data"].items():
+        if campo == "Description":
+            st.text_area(campo, value=valore, height=100)
         else:
-            st.text_input(campo,value=valore)
+            st.text_input(campo, value=valore)
