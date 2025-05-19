@@ -70,7 +70,6 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
         extra_descr = f"Brg. type: {brg_type} Brg. size: {brg_size} Max dia: {max_dia}mm Max len: {max_len}mm"
 
     note = st.text_area("Note (opzionale)", height=80, key=f"note_{parte}")
-    dwg = st.text_input("Dwg/doc number", key=f"dwg_{parte}")
 
     if parte == "cover" and model in ["HPX", "PVML"]:
         make_or_buy = st.radio("Make or Buy", ["Make", "Buy"], horizontal=True, key=f"mob_{parte}")
@@ -110,7 +109,6 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
             "Classe ricambi": classe,
             "Categories": "Fascia ite 5" if parte == "baseplate" else "Fascia ite 4",
             "Catalog": catalog,
-            "Disegno": dwg,
             "Material": materiale,
             "FPD material code": codice_fpd,
             "Template": template,
@@ -161,13 +159,12 @@ elif selected_part == "Flange, Pipe":
     face_type = st.selectbox("Face Type", ["RF", "FF", "RJ"])
     flange_class = st.selectbox("Class", ["150", "300", "600", "1500", "2500"])
     schedule = st.selectbox("Schedula", ["5", "10", "20", "30", "40", "60", "80", "100", "120", "140", "160"])
-    flange_material = st.selectbox("Flange Material", ["A105", "A350 LF2", "A182 F316"])  # puoi aggiornare
+    flange_material = st.selectbox("Flange Material", ["A105", "A350 LF2", "A182 F316"])  # aggiornabile
     note = st.text_area("Note (opzionale)", height=80)
-    dwg = st.text_input("Dwg/doc number")
 
     if st.button("Genera Output", key="gen_flange"):
         descrizione = (
-            f"TYPE: {flange_type}, SIZE: {size}, FACE TYPE: {face_type}, CLASS: {flange_class}, "
+            f"FLANGE, PIPE - TYPE: {flange_type}, SIZE: {size}, FACE TYPE: {face_type}, CLASS: {flange_class}, "
             f"SCHEDULA: {schedule}, MATERIAL: {flange_material}"
         )
         if note:
@@ -185,7 +182,6 @@ elif selected_part == "Flange, Pipe":
             "Template": "FPD_BUY_2",
             "ERP_L1": "23_FLANGE",
             "ERP_L2": "13_OTHER",
-            "Disegno": dwg,
             "To supplier": "",
             "Quality": ""
         }
