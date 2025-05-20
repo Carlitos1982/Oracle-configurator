@@ -35,7 +35,8 @@ part_options = [
     "Gate, Valve",
     "Gasket, Spiral Wound",
     "Gasket, Flat",
-    "Bearing, Hydrostatic/Hydrodynamic"
+    "Bearing, Hydrostatic/Hydrodynamic",
+    "Bearing, Rolling"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
@@ -385,14 +386,11 @@ elif selected_part == "Gasket, Flat":
 
 elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
     st.subheader("Configurazione - Bearing, Hydrostatic/Hydrodynamic")
-    # --- INPUT ---
-    ins_dia        = st.number_input("InsDia (mm)", min_value=0.0, step=0.1, format="%.1f", key="insdia_bearing")
-    out_dia        = st.number_input("OutDia (mm)", min_value=0.0, step=0.1, format="%.1f", key="outdia_bearing")
-    width          = st.number_input("Width (mm)", min_value=0.0, step=0.1, format="%.1f", key="width_bearing")
+    ins_dia        = st.number_input("InsDia (mm)",  min_value=0.0, step=0.1, format="%.1f", key="insdia_bearing")
+    out_dia        = st.number_input("OutDia (mm)",  min_value=0.0, step=0.1, format="%.1f", key="outdia_bearing")
+    width          = st.number_input("Width (mm)",   min_value=0.0, step=0.1, format="%.1f", key="width_bearing")
     add_feat       = st.text_input("Additional Features", key="feat_bearing")
-    # Docs
     dwg_bearing    = st.text_input("Dwg/doc number", key="dwg_bearing")
-    # Materiale
     mtype_bearing  = st.selectbox("Type", [""] + material_types, key="mtype_bearing")
     prefixes       = (
         sorted(materials_df[
@@ -409,11 +407,10 @@ elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
             (materials_df["Material Type"]==mtype_bearing)&
             (materials_df["Prefix"]==mprefix_bearing)
         ]["Name"].dropna().tolist()
-    mname_bearing   = st.selectbox("Name", [""] + names, key="mname_bearing")
+    mname_bearing    = st.selectbox("Name", [""] + names, key="mname_bearing")
     mat_feat_bearing = st.text_input("Material add. Features", key="matfeat_bearing")
 
     if st.button("Genera Output", key="gen_bearing"):
-        # costruzione materiale e codice FPD
         if mtype_bearing != "MISCELLANEOUS":
             materiale_b = f"{mtype_bearing} {mprefix_bearing} {mname_bearing}".strip()
             match_b     = materials_df[
@@ -428,18 +425,14 @@ elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
                 (materials_df["Name"]==mname_bearing)
             ]
         codice_fpd_b = match_b["FPD Code"].values[0] if not match_b.empty else ""
-
-        # costruzione descrizione
         descr_b = (
             "Bearing, Hydrostatic/Hydrodynamic; "
             f"InsDia(mm){ins_dia} "
             f"OutDia(mm){out_dia} "
             f"Width(mm){width} "
             f"{add_feat} "
-            f"{mprefix_bearing}{mname_bearing} "
             f"{mat_feat_bearing}"
         )
-
         st.session_state["output_data"] = {
             "Item":               "50122…",
             "Description":        descr_b,
@@ -453,7 +446,48 @@ elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
             "Template":           "FPD_BUY_1",
             "ERP_L1":             "31_COMMERCIAL_BEARING",
             "ERP_L2":             "18_OTHER",
-            "To supplier":        "NO REACH",
+            "To supplier":        "",
+            "Quality":            ""
+        }
+
+elif selected_part == "Bearing, Rolling":
+    st.subheader("Configurazione - Bearing, Rolling")
+    type_options  = [
+        "ANGULAR_CONTACT_BEARING",
+        "BALL_BEARING",
+        "ROLLER_BEARING",
+        "TAPERED_BEARING",
+        "ANTIFRICTION_THRUST_BEARING",
+        "OTHER"
+    ]
+    bearing_type  = st.selectbox("Type", type_options, key="rolling_type")
+    designation   = st.text_input("Designation", key="rolling_designation")
+    ins_dia_r     = st.number_input("InsDia (mm)",  min_value=0.0, step=0.1, format="%.1f", key="insdia_rolling")
+    out_dia_r     = st.number_input("OutDia (mm)", min_value=0.0, step=0.1, format="%.1f", key="outdia_rolling")
+    width_r       = st.number_input("Width (mm)",  min_value=0.0, step=0.1, format="%.1f", key="width_rolling")
+    add_feat_r    = st.text_input("Additional Features", key="feat_rolling")
+    dwg_rolling   = st.text_input("Dwg/doc number", key="dwg_rolling")
+
+    if st.button("Genera Output", key="gen_rolling"):
+        descr_rolling = (
+            f"Bearing, Rolling;{bearing_type} {designation} "
+            f"InsDia(mm){ins_dia_r} OutDia(mm){out_dia_r} Width(mm){width_r} "
+            f"{add_feat_r}"
+        )
+        st.session_state["output_data"] = {
+            "Item":               "50122…",
+            "Description":        descr_rolling,
+            "Identificativo":     "3010-ANTI-FRICTION BEARING",
+            "Classe ricambi":     "1-2-3",
+            "Categories":         "FASCIA ITE 5",
+            "Catalog":            "ALBERO",
+            "Disegno":            dwg_rolling,
+            "Material":           "BUY OUT NOT AVAILABLE",
+            "FPD material code":  "BO-NA",
+            "Template":           "FPD_BUY_2",
+            "ERP_L1":             "31_COMMERCIAL_BEARING",
+            "ERP_L2":             "11_BALL_BEARING",
+            "To supplier":        "",
             "Quality":            ""
         }
 
