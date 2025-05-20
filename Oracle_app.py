@@ -37,7 +37,7 @@ part_options = [
     "Gasket, Flat",
     "Bearing, Hydrostatic/Hydrodynamic",
     "Bearing, Rolling",
-    "Bolt, Eye"
+    "Bolt, Eye",
     "Bolt, Hexagonal"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
