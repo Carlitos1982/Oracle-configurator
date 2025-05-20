@@ -491,9 +491,9 @@ elif selected_part == "Bearing, Rolling":
             "To supplier":        "",
             "Quality":            ""
         }
-        
-elif selected_part == "Bolt, Eye":
+        elif selected_part == "Bolt, Eye":
     st.subheader("Configurazione - Bolt, Eye")
+
     thread = st.selectbox("Thread type/size", [
         "#10-24UNC","5/16\"-18UNC","3/8\"-16UNC","1/2\"-13UNC","3/4\"-16UNF",
         "7/8\"-9UNC","7/8\"-14UNF","1\"-12UNF","1-1/8\"-12UNF","1-1/2\"-12UNC",
@@ -502,49 +502,86 @@ elif selected_part == "Bolt, Eye":
         "M30x3.5","M36x4","M42x4.5","M48x5","M56x5.5","M64x6","M72x6","M80x6",
         "M90x6","M100x6"
     ], key="bolt_thread")
+
     length = st.selectbox("Length", [
         "1/8\"in","1/4\"in","3/8\"in","5/16\"in","1/2\"in","3/4\"in",
         "1\"in","1-1/8\"in","1-1/4\"in","1-3/8\"in","1-1/2\"in","2\"in",
         "2-1/8\"in","2-1/4\"in","2-3/8\"in","2-1/2\"in","2-3/4\"in",
         "3\"in","3-1/8\"in","3-1/4\"in","3-3/8\"in","3-1/2\"in","4\"in",
         "4-1/8\"in","4-1/4\"in","4-3/8\"in","4-1/2\"in",
-        "50mm","55mm","60mm","65mm","70mm","75mm","80mm","85mm","90mm","95mm",
-        "100mm","105mm","110mm","115mm","120mm","125mm","130mm","135mm","140mm",
-        "145mm","150mm","155mm","160mm","165mm","170mm","175mm","180mm","185mm",
-        "190mm","195mm"
+        "50mm","55mm","60mm","65mm","70mm
+
+Ecco i **routing completi e corretti** per:
+
+---
+
+### **1. Bolt, Eye** *(senza etichetta “MATERIAL:” nella descrizione)*
+
+```python
+elif selected_part == "Bolt, Eye":
+    st.subheader("Configurazione - Bolt, Eye")
+
+    thread = st.selectbox("Thread type/size", [
+        "#10-24UNC", "5/16\"-18UNC", "3/8\"-16UNC", "1/2\"-13UNC", "3/4\"-16UNF",
+        "7/8\"-9UNC", "7/8\"-14UNF", "1\"-12UNF", "1-1/8\"-12UNF", "1-1/2\"-12UNC",
+        "2\"-4.5UNC", "2-1/2\"-4UNC", "3\"-6UNC", "4\"-8UNC",
+        "M6x1", "M8x1.25", "M10x1.5", "M12x1.75", "M16x2", "M20x2.5", "M24x3",
+        "M30x3.5", "M36x4", "M42x4.5", "M48x5", "M56x5.5", "M64x6", "M72x6", "M80x6",
+        "M90x6", "M100x6"
+    ], key="bolt_thread")
+
+    length = st.selectbox("Length", [
+        "1/8\"in", "1/4\"in", "3/8\"in", "5/16\"in", "1/2\"in", "3/4\"in",
+        "1\"in", "1-1/8\"in", "1-1/4\"in", "1-3/8\"in", "1-1/2\"in", "2\"in",
+        "2-1/8\"in", "2-1/4\"in", "2-3/8\"in", "2-1/2\"in", "2-3/4\"in",
+        "3\"in", "3-1/8\"in", "3-1/4\"in", "3-3/8\"in", "3-1/2\"in", "4\"in",
+        "4-1/8\"in", "4-1/4\"in", "4-3/8\"in", "4-1/2\"in",
+        "50mm", "55mm", "60mm", "65mm", "70mm", "75mm", "80mm", "85mm", "90mm", "95mm",
+        "100mm", "105mm", "110mm", "115mm", "120mm", "125mm", "130mm", "135mm", "140mm",
+        "145mm", "150mm", "155mm", "160mm", "165mm", "170mm", "175mm", "180mm", "185mm",
+        "190mm", "195mm"
     ], key="bolt_length")
+
     note1 = st.text_area("Note (opzionale)", height=80, key="bolt_note1")
-    mtype_bolt = st.selectbox("Material Type", [""]+material_types, key="mtype_bolt")
-    pref_df_bolt = materials_df[(materials_df["Material Type"]==mtype_bolt)&(materials_df["Prefix"].notna())]
-    prefixes_bolt = sorted(pref_df_bolt["Prefix"].unique()) if mtype_bolt!="MISCELLANEOUS" else []
-    mprefix_bolt = st.selectbox("Material Prefix", [""]+prefixes_bolt, key="mprefix_bolt")
-    if mtype_bolt=="MISCELLANEOUS":
-        names_bolt = materials_df[materials_df["Material Type"]==mtype_bolt]["Name"].dropna().tolist()
+
+    mtype_bolt = st.selectbox("Material Type", [""] + material_types, key="mtype_bolt")
+    pref_df_bolt = materials_df[(materials_df["Material Type"] == mtype_bolt) & (materials_df["Prefix"].notna())]
+    prefixes_bolt = sorted(pref_df_bolt["Prefix"].unique()) if mtype_bolt != "MISCELLANEOUS" else []
+    mprefix_bolt = st.selectbox("Material Prefix", [""] + prefixes_bolt, key="mprefix_bolt")
+
+    if mtype_bolt == "MISCELLANEOUS":
+        names_bolt = materials_df[materials_df["Material Type"] == mtype_bolt]["Name"].dropna().tolist()
     else:
         names_bolt = materials_df[
-            (materials_df["Material Type"]==mtype_bolt)&
-            (materials_df["Prefix"]==mprefix_bolt)
+            (materials_df["Material Type"] == mtype_bolt) &
+            (materials_df["Prefix"] == mprefix_bolt)
         ]["Name"].dropna().tolist()
-    mname_bolt = st.selectbox("Material Name", [""]+names_bolt, key="mname_bolt")
+    mname_bolt = st.selectbox("Material Name", [""] + names_bolt, key="mname_bolt")
+
     material_note = st.text_area("Material Note (opzionale)", height=80, key="bolt_note2")
+
     if st.button("Genera Output", key="gen_bolt"):
-        if mtype_bolt!="MISCELLANEOUS":
-            materiale_bolt=f"{mtype_bolt} {mprefix_bolt} {mname_bolt}".strip()
-            match_bolt=materials_df[
-                (materials_df["Material Type"]==mtype_bolt)&
-                (materials_df["Prefix"]==mprefix_bolt)&
-                (materials_df["Name"]==mname_bolt)
+        if mtype_bolt != "MISCELLANEOUS":
+            materiale_bolt = f"{mtype_bolt} {mprefix_bolt} {mname_bolt}".strip()
+            match_bolt = materials_df[
+                (materials_df["Material Type"] == mtype_bolt) &
+                (materials_df["Prefix"] == mprefix_bolt) &
+                (materials_df["Name"] == mname_bolt)
             ]
         else:
-            materiale_bolt=mname_bolt
-            match_bolt=materials_df[
-                (materials_df["Material Type"]==mtype_bolt)&
-                (materials_df["Name"]==mname_bolt)
+            materiale_bolt = mname_bolt
+            match_bolt = materials_df[
+                (materials_df["Material Type"] == mtype_bolt) &
+                (materials_df["Name"] == mname_bolt)
             ]
-        codice_fpd_bolt=match_bolt["FPD Code"].values[0] if not match_bolt.empty else ""
-        descr_bolt = f"BOLT, EYE - THREAD: {thread}, LENGTH: {length}, MATERIAL: {materiale_bolt}"
-        if note1:         descr_bolt += f", NOTE: {note1}"
-        if material_note: descr_bolt += f", NOTE: {material_note}"
+        codice_fpd_bolt = match_bolt["FPD Code"].values[0] if not match_bolt.empty else ""
+
+        descr_bolt = f"BOLT, EYE - THREAD: {thread}, LENGTH: {length}, {materiale_bolt}"
+        if note1:
+            descr_bolt += f", NOTE: {note1}"
+        if material_note:
+            descr_bolt += f", NOTE: {material_note}"
+
         st.session_state["output_data"] = {
             "Item": "50150…",
             "Description": descr_bolt,
@@ -560,31 +597,12 @@ elif selected_part == "Bolt, Eye":
             "To supplier": "",
             "Quality": ""
         }
-elif selected_part == "Bolt, Hexagonal":
+        
+        elif selected_part == "Bolt, Hexagonal":
     st.subheader("Configurazione - Bolt, Hexagonal")
 
-    # Size e Length (stesso elenco di Bolt, Eye)
-    bolt_sizes = [
-        "#10-24UNC", "5/16\"-18UNC", "3/8\"-16UNC", "1/2\"-13UNC",
-        "3/4\"-16UNF", "7/8\"-9UNC", "7/8\"-14UNF", "1\"-12UNF",
-        "1-1/8\"-12UNF", "1-1/2\"-12UNC", "2\"-4.5UNC", "2-1/2\"-4UNC",
-        "3\"-6UNC", "4\"-8UNC", "M6x1", "M8x1.25", "M10x1.5", "M12x1.75",
-        "M16x2", "M20x2.5", "M24x3", "M30x3.5", "M36x4", "M42x4.5",
-        "M48x5", "M56x5.5", "M64x6", "M72x6", "M80x6", "M90x6", "M100x6"
-    ]
-    bolt_lengths = [
-        "1/8\"in", "1/4\"in", "3/8\"in", "5/16\"in", "1/2\"in",
-        "3/4\"in", "1\"in", "1-1/8\"in", "1-1/4\"in", "1-3/8\"in",
-        "1-1/2\"in", "2\"in", "2-1/8\"in", "2-1/4\"in", "2-3/8\"in",
-        "2-1/2\"in", "2-3/4\"in", "3\"in", "3-1/8\"in", "3-1/4\"in",
-        "3-3/8\"in", "3-1/2\"in", "4\"in", "4-1/8\"in", "4-1/4\"in",
-        "4-3/8\"in", "4-1/2\"in", "50mm", "55mm", "60mm", "65mm",
-        "70mm", "75mm", "80mm", "85mm", "90mm", "95mm", "100mm",
-        "105mm", "110mm", "115mm", "120mm", "125mm", "130mm",
-        "135mm", "140mm", "145mm", "150mm", "155mm", "160mm",
-        "165mm", "170mm", "175mm", "180mm", "185mm", "190mm",
-        "195mm"
-    ]
+    bolt_sizes = [ ... ]  # stesso elenco di Bolt, Eye
+    bolt_lengths = [ ... ]
 
     size_hex   = st.selectbox("Size", bolt_sizes, key="hex_size")
     length_hex = st.selectbox("Length", bolt_lengths, key="hex_length")
@@ -592,7 +610,6 @@ elif selected_part == "Bolt, Hexagonal":
     zinc       = st.radio("Zinc Plated?", ["Yes", "No"], horizontal=True, key="hex_zinc")
     note1_hex  = st.text_area("Note (opzionale)", height=80, key="hex_note1")
 
-    # Selezione materiali
     mtype_hex = st.selectbox("Material Type", [""] + material_types, key="mtype_hex")
     pref_df_hex = materials_df[(materials_df["Material Type"] == mtype_hex) & (materials_df["Prefix"].notna())]
     prefixes_hex = sorted(pref_df_hex["Prefix"].unique()) if mtype_hex != "MISCELLANEOUS" else []
@@ -630,7 +647,7 @@ elif selected_part == "Bolt, Hexagonal":
             descr_hex += ", FULL THREADED"
         if zinc == "Yes":
             descr_hex += ", ZINC PLATED AS PER ASTM B633"
-        descr_hex += f", MATERIAL: {materiale_hex}"
+        descr_hex += f", {materiale_hex}"
         if note1_hex:
             descr_hex += f", NOTE: {note1_hex}"
         if note2_hex:
@@ -651,6 +668,7 @@ elif selected_part == "Bolt, Hexagonal":
             "To supplier": "",
             "Quality": ""
         }
+
         
 # Output finale
 if "output_data" in st.session_state:
