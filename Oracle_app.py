@@ -34,7 +34,8 @@ part_options = [
     "Flange, Pipe",
     "Gate, Valve",
     "Gasket, Spiral Wound",
-    "Gasket, Flat"
+    "Gasket, Flat",
+    "Bearing, Hydrostatic/Hydrodynamic"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
@@ -329,16 +330,16 @@ elif selected_part == "Gasket, Spiral Wound":
 
 elif selected_part == "Gasket, Flat":
     st.subheader("Configurazione - Gasket, Flat")
-    thickness = st.number_input("Thickness", min_value=0.0, step=0.1, format="%.1f", key="thk_flat")
-    uom       = st.selectbox("UOM", ["mm", "inches"], key="uom_flat")
-    dwg_flat  = st.text_input("Dwg/doc number", key="dwg_flat")
-    mtype_flat = st.selectbox("Material Type", [""] + material_types, key="mtype_flat")
+    thickness    = st.number_input("Thickness", min_value=0.0, step=0.1, format="%.1f", key="thk_flat")
+    uom          = st.selectbox("UOM", ["mm", "inches"], key="uom_flat")
+    dwg_flat     = st.text_input("Dwg/doc number", key="dwg_flat")
+    mtype_flat   = st.selectbox("Material Type", [""] + material_types, key="mtype_flat")
     pref_df_flat = materials_df[
         (materials_df["Material Type"] == mtype_flat) &
         (materials_df["Prefix"].notna())
     ]
     prefixes_flat = sorted(pref_df_flat["Prefix"].unique()) if mtype_flat != "MISCELLANEOUS" else []
-    mprefix_flat = st.selectbox("Material Prefix", [""] + prefixes_flat, key="mprefix_flat")
+    mprefix_flat  = st.selectbox("Material Prefix", [""] + prefixes_flat, key="mprefix_flat")
     if mtype_flat == "MISCELLANEOUS":
         names_flat = materials_df[materials_df["Material Type"] == mtype_flat]["Name"].dropna().tolist()
     else:
@@ -380,6 +381,80 @@ elif selected_part == "Gasket, Flat":
             "ERP_L2": "20_OTHER",
             "To supplier": "",
             "Quality": ""
+        }
+
+elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
+    st.subheader("Configurazione - Bearing, Hydrostatic/Hydrodynamic")
+    # --- INPUT ---
+    ins_dia        = st.number_input("InsDia (mm)", min_value=0.0, step=0.1, format="%.1f", key="insdia_bearing")
+    out_dia        = st.number_input("OutDia (mm)", min_value=0.0, step=0.1, format="%.1f", key="outdia_bearing")
+    width          = st.number_input("Width (mm)", min_value=0.0, step=0.1, format="%.1f", key="width_bearing")
+    add_feat       = st.text_input("Additional Features", key="feat_bearing")
+    # Docs
+    dwg_bearing    = st.text_input("Dwg/doc number", key="dwg_bearing")
+    # Materiale
+    mtype_bearing  = st.selectbox("Type", [""] + material_types, key="mtype_bearing")
+    prefixes       = (
+        sorted(materials_df[
+            (materials_df["Material Type"]==mtype_bearing)&
+            (materials_df["Prefix"].notna())
+        ]["Prefix"].unique())
+        if mtype_bearing in ["ASTM","EN"] else []
+    )
+    mprefix_bearing = st.selectbox("Prefix (only if ASTM or EN)", [""] + prefixes, key="mprefix_bearing")
+    if mtype_bearing == "MISCELLANEOUS":
+        names = materials_df[materials_df["Material Type"]==mtype_bearing]["Name"].dropna().tolist()
+    else:
+        names = materials_df[
+            (materials_df["Material Type"]==mtype_bearing)&
+            (materials_df["Prefix"]==mprefix_bearing)
+        ]["Name"].dropna().tolist()
+    mname_bearing   = st.selectbox("Name", [""] + names, key="mname_bearing")
+    mat_feat_bearing = st.text_input("Material add. Features", key="matfeat_bearing")
+
+    if st.button("Genera Output", key="gen_bearing"):
+        # costruzione materiale e codice FPD
+        if mtype_bearing != "MISCELLANEOUS":
+            materiale_b = f"{mtype_bearing} {mprefix_bearing} {mname_bearing}".strip()
+            match_b     = materials_df[
+                (materials_df["Material Type"]==mtype_bearing)&
+                (materials_df["Prefix"]==mprefix_bearing)&
+                (materials_df["Name"]==mname_bearing)
+            ]
+        else:
+            materiale_b = mname_bearing
+            match_b     = materials_df[
+                (materials_df["Material Type"]==mtype_bearing)&
+                (materials_df["Name"]==mname_bearing)
+            ]
+        codice_fpd_b = match_b["FPD Code"].values[0] if not match_b.empty else ""
+
+        # costruzione descrizione
+        descr_b = (
+            "Bearing, Hydrostatic/Hydrodynamic; "
+            f"InsDia(mm){ins_dia} "
+            f"OutDia(mm){out_dia} "
+            f"Width(mm){width} "
+            f"{add_feat} "
+            f"{mprefix_bearing}{mname_bearing} "
+            f"{mat_feat_bearing}"
+        )
+
+        st.session_state["output_data"] = {
+            "Item":               "50122…",
+            "Description":        descr_b,
+            "Identificativo":     "3010-ANTI-FRICTION BEARING",
+            "Classe ricambi":     "1-2-3",
+            "Categories":         "FASCIA ITE 5",
+            "Catalog":            "ALBERO",
+            "Disegno":            dwg_bearing,
+            "Material":           materiale_b,
+            "FPD material code":  codice_fpd_b,
+            "Template":           "FPD_BUY_1",
+            "ERP_L1":             "31_COMMERCIAL_BEARING",
+            "ERP_L2":             "18_OTHER",
+            "To supplier":        "NO REACH",
+            "Quality":            ""
         }
 
 # Output finale
