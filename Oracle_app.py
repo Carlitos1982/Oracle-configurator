@@ -38,6 +38,7 @@ part_options = [
     "Bearing, Hydrostatic/Hydrodynamic",
     "Bearing, Rolling",
     "Bolt, Eye"
+    "Bolt, Hexagonal"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
@@ -494,8 +495,6 @@ elif selected_part == "Bearing, Rolling":
 
 
 ### **1. Bolt, Eye** *(senza etichetta “MATERIAL:” nella descrizione)*
-
-
 elif selected_part == "Bolt, Eye":
     st.subheader("Configurazione - Bolt, Eye")
 
@@ -554,11 +553,13 @@ elif selected_part == "Bolt, Eye":
             ]
         codice_fpd_bolt = match_bolt["FPD Code"].values[0] if not match_bolt.empty else ""
 
-        descr_bolt = f"BOLT, EYE - THREAD: {thread}, LENGTH: {length}, {materiale_bolt}"
+        # Descrizione con NOTE prima del materiale, e material note senza etichetta
+        descr_bolt = f"BOLT, EYE - THREAD: {thread}, LENGTH: {length}"
         if note1:
             descr_bolt += f", NOTE: {note1}"
+        descr_bolt += f", {materiale_bolt}"
         if material_note:
-            descr_bolt += f", NOTE: {material_note}"
+            descr_bolt += f", {material_note}"
 
         st.session_state["output_data"] = {
             "Item": "50150…",
