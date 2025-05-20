@@ -492,7 +492,7 @@ elif selected_part == "Bearing, Rolling":
             "Quality":            ""
         }
         
-        elif selected_part == "Bolt, Eye":
+elif selected_part == "Bolt, Eye":
     st.subheader("Configurazione - Bolt, Eye")
     thread = st.selectbox("Thread type/size", [
         "#10-24UNC","5/16\"-18UNC","3/8\"-16UNC","1/2\"-13UNC","3/4\"-16UNF",
