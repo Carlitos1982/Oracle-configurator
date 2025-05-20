@@ -560,68 +560,82 @@ elif selected_part == "Bearing, Rolling":
             "To supplier": "",
             "Quality": ""
         }
-
 elif selected_part == "Bolt, Hexagonal":
     st.subheader("Configurazione - Bolt, Hexagonal")
-    size_hex = st.selectbox("Size", [
-        "#10-24UNC","5/16\"-18UNC","3/8\"-16UNC","1/2\"-13UNC","3/4\"-16UNF",
-        "7/8\"-9UNC","7/8\"-14UNF","1\"-12UNF","1-1/8\"-12UNF","1-1/2\"-12UNC",
-        "2\"-4.5UNC","2-1/2\"-4UNC","3\"-6UNC","4\"-8UNC",
-        "M6x1","M8x1.25","M10x1.5","M12x1.75","M16x2","M20x2.5","M24x3",
-        "M30x3.5","M36x4","M42x4.5","M48x5","M56x5.5","M64x6","M72x6","M80x6",
-        "M90x6","M100x6"
-    ], key="hex_size")
-    length_hex = st.selectbox("Length", [
-        "1/8\"in","1/4\"in","3/8\"in","5/16\"in","1/2\"in","3/4\"in",
-        "1\"in","1-1/8\"in","1-1/4\"in","1-3/8\"in","1-1/2\"in","2\"in",
-        "2-1/8\"in","2-1/4\"in","2-3/8\"in","2-1/2\"in","2-3/4\"in",
-        "3\"in","3-1/8\"in","3-1/4\"in","3-3/8\"in","3-1/2\"in","4\"in",
-        "4-1/8\"in","4-1/4\"in","4-3/8\"in","4-1/2\"in",
-        "50mm","55mm","60mm","65mm","70mm","75mm","80mm","85mm","90mm","95mm",
-        "100mm","105mm","110mm","115mm","120mm","125mm","130mm","135mm","140mm",
-        "145mm","150mm","155mm","160mm","165mm","170mm","175mm","180mm","185mm",
-        "190mm","195mm"
-    ], key="hex_length")
-    full_threaded = st.radio("Full threaded?", ["Yes","No"], horizontal=True, key="hex_full_threaded")
-    note_hex      = st.text_area("Note (opzionale)", height=80, key="hex_note1")
-    mtype_hex     = st.selectbox("Material Type", [""]+material_types, key="hex_mtype")
-    pref_df_hex   = materials_df[
-        (materials_df["Material Type"]==mtype_hex)&
-        (materials_df["Prefix"].notna())
+
+    # Size e Length (stesso elenco di Bolt, Eye)
+    bolt_sizes = [
+        "#10-24UNC", "5/16\"-18UNC", "3/8\"-16UNC", "1/2\"-13UNC",
+        "3/4\"-16UNF", "7/8\"-9UNC", "7/8\"-14UNF", "1\"-12UNF",
+        "1-1/8\"-12UNF", "1-1/2\"-12UNC", "2\"-4.5UNC", "2-1/2\"-4UNC",
+        "3\"-6UNC", "4\"-8UNC", "M6x1", "M8x1.25", "M10x1.5", "M12x1.75",
+        "M16x2", "M20x2.5", "M24x3", "M30x3.5", "M36x4", "M42x4.5",
+        "M48x5", "M56x5.5", "M64x6", "M72x6", "M80x6", "M90x6", "M100x6"
     ]
-    prefixes_hex  = sorted(pref_df_hex["Prefix"].unique()) if mtype_hex!="MISCELLANEOUS" else []
-    mprefix_hex   = st.selectbox("Material Prefix", [""]+prefixes_hex, key="hex_mprefix")
-    if mtype_hex=="MISCELLANEOUS":
-        names_hex = materials_df[materials_df["Material Type"]==mtype_hex]["Name"].dropna().tolist()
+    bolt_lengths = [
+        "1/8\"in", "1/4\"in", "3/8\"in", "5/16\"in", "1/2\"in",
+        "3/4\"in", "1\"in", "1-1/8\"in", "1-1/4\"in", "1-3/8\"in",
+        "1-1/2\"in", "2\"in", "2-1/8\"in", "2-1/4\"in", "2-3/8\"in",
+        "2-1/2\"in", "2-3/4\"in", "3\"in", "3-1/8\"in", "3-1/4\"in",
+        "3-3/8\"in", "3-1/2\"in", "4\"in", "4-1/8\"in", "4-1/4\"in",
+        "4-3/8\"in", "4-1/2\"in", "50mm", "55mm", "60mm", "65mm",
+        "70mm", "75mm", "80mm", "85mm", "90mm", "95mm", "100mm",
+        "105mm", "110mm", "115mm", "120mm", "125mm", "130mm",
+        "135mm", "140mm", "145mm", "150mm", "155mm", "160mm",
+        "165mm", "170mm", "175mm", "180mm", "185mm", "190mm",
+        "195mm"
+    ]
+
+    size_hex   = st.selectbox("Size", bolt_sizes, key="hex_size")
+    length_hex = st.selectbox("Length", bolt_lengths, key="hex_length")
+    full_thd   = st.radio("Full threaded?", ["Yes", "No"], horizontal=True, key="hex_fullthread")
+    zinc       = st.radio("Zinc Plated?", ["Yes", "No"], horizontal=True, key="hex_zinc")
+    note1_hex  = st.text_area("Note (opzionale)", height=80, key="hex_note1")
+
+    # Selezione materiali
+    mtype_hex = st.selectbox("Material Type", [""] + material_types, key="mtype_hex")
+    pref_df_hex = materials_df[(materials_df["Material Type"] == mtype_hex) & (materials_df["Prefix"].notna())]
+    prefixes_hex = sorted(pref_df_hex["Prefix"].unique()) if mtype_hex != "MISCELLANEOUS" else []
+    mprefix_hex  = st.selectbox("Material Prefix", [""] + prefixes_hex, key="mprefix_hex")
+
+    if mtype_hex == "MISCELLANEOUS":
+        names_hex = materials_df[materials_df["Material Type"] == mtype_hex]["Name"].dropna().tolist()
     else:
         names_hex = materials_df[
-            (materials_df["Material Type"]==mtype_hex)&
-            (materials_df["Prefix"]==mprefix_hex)
+            (materials_df["Material Type"] == mtype_hex) &
+            (materials_df["Prefix"] == mprefix_hex)
         ]["Name"].dropna().tolist()
-    mname_hex        = st.selectbox("Material Name", [""]+names_hex, key="hex_mname")
-    zinc_plated      = st.radio("Zinc Plated?", ["Yes","No"], horizontal=True, key="hex_zinc")
-    material_note_hex= st.text_area("Material Note (opzionale)", height=80, key="hex_material_note")
+    mname_hex = st.selectbox("Material Name", [""] + names_hex, key="mname_hex")
+
+    note2_hex = st.text_area("Material Note (opzionale)", height=80, key="hex_note2")
+
     if st.button("Genera Output", key="gen_hex"):
-        if mtype_hex!="MISCELLANEOUS":
+        if mtype_hex != "MISCELLANEOUS":
             materiale_hex = f"{mtype_hex} {mprefix_hex} {mname_hex}".strip()
-            match_hex     = materials_df[
-                (materials_df["Material Type"]==mtype_hex)&
-                (materials_df["Prefix"]==mprefix_hex)&
-                (materials_df["Name"]==mname_hex)
+            match_hex = materials_df[
+                (materials_df["Material Type"] == mtype_hex) &
+                (materials_df["Prefix"] == mprefix_hex) &
+                (materials_df["Name"] == mname_hex)
             ]
         else:
             materiale_hex = mname_hex
-            match_hex     = materials_df[
-                (materials_df["Material Type"]==mtype_hex)&
-                (materials_df["Name"]==mname_hex)
+            match_hex = materials_df[
+                (materials_df["Material Type"] == mtype_hex) &
+                (materials_df["Name"] == mname_hex)
             ]
         codice_fpd_hex = match_hex["FPD Code"].values[0] if not match_hex.empty else ""
+
         descr_hex = f"BOLT, HEXAGONAL - SIZE: {size_hex}, LENGTH: {length_hex}"
-        if full_threaded=="Yes":     descr_hex += ", FULL THREADED"
-        if zinc_plated=="Yes":       descr_hex += ", ZINC PLATED AS PER ASTM B633"
+        if full_thd == "Yes":
+            descr_hex += ", FULL THREADED"
+        if zinc == "Yes":
+            descr_hex += ", ZINC PLATED AS PER ASTM B633"
         descr_hex += f", MATERIAL: {materiale_hex}"
-        if note_hex:                 descr_hex += f", NOTE: {note_hex}"
-        if material_note_hex:        descr_hex += f", NOTE: {material_note_hex}"
+        if note1_hex:
+            descr_hex += f", NOTE: {note1_hex}"
+        if note2_hex:
+            descr_hex += f", NOTE: {note2_hex}"
+
         st.session_state["output_data"] = {
             "Item": "56230…",
             "Description": descr_hex,
@@ -634,10 +648,9 @@ elif selected_part == "Bolt, Hexagonal":
             "Template": "FPD_BUY_2",
             "ERP_L1": "60_FASTENER",
             "ERP_L2": "10_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
-         "To supplier": "",
+            "To supplier": "",
             "Quality": ""
-            
-            }
+        }
         
 # Output finale
 if "output_data" in st.session_state:
