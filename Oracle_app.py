@@ -41,7 +41,8 @@ part_options = [
     "Bolt, Hexagonal",
     "Gasket, Ring Type Joint",
     "Gusset, Other",
-    "Nut, Hex"
+    "Nut, Hex",
+    "Stud, Threaded"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
