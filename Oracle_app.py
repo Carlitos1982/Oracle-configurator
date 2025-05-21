@@ -972,9 +972,9 @@ elif selected_part == "Ring, Wear":
 
     int_dia = st.number_input("Internal Diameter (mm)", min_value=0, step=1, format="%d", key="ring_int_dia")
     ext_dia = st.number_input("External Diameter (mm)", min_value=0, step=1, format="%d", key="ring_ext_dia")
+    thk_ring = st.number_input("Thickness (mm)", min_value=0, step=1, format="%d", key="ring_thk")
 
     note_ring = st.text_area("Note (opzionale)", height=80, key="ring_note")
-
     clearance = st.radio("Increased clearance?", ["No", "Yes"], horizontal=True, key="ring_clearance")
     dwg_ring = st.text_input("Dwg/doc number", key="ring_dwg")
 
@@ -1010,7 +1010,6 @@ elif selected_part == "Ring, Wear":
             ]
         codice_fpd_ring = match_ring["FPD Code"].values[0] if not match_ring.empty else ""
 
-        # Determina identificativo e item code in base al tipo
         if ring_type == "Rotary":
             identificativo = "2300-IMPELLER WEAR RING"
             item_code = "40224…"
@@ -1018,7 +1017,7 @@ elif selected_part == "Ring, Wear":
             identificativo = "1500-CASING WEAR RING"
             item_code = "40223…"
 
-        descr_ring = f"RING, WEAR - TYPE: {ring_type}, MODEL: {model}, SIZE: {size}, ID: {int_dia}mm, OD: {ext_dia}mm"
+        descr_ring = f"RING, WEAR - {ring_type} {model} {size}, ID {int_dia}mm, OD {ext_dia}mm, THK {thk_ring}mm"
         if note_ring:
             descr_ring += f", {note_ring}"
         if clearance == "Yes":
