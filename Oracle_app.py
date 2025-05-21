@@ -54,7 +54,7 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2,
                   template_fisso=None, extra_fields=None):
     model = st.selectbox("Product/Pump Model", [""] + pump_models, key=f"model_{parte}")
     size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
-    size = st.select#box("Product/Pump Size", [""] + size_list, key=f"size_{parte}")
+    size = st.selectbox("Product/Pump Size", [""] + size_list, key=f"size_{parte}")
 
     # Additional Feature 1
     feature_1 = ""
