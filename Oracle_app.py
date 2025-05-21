@@ -204,6 +204,10 @@ elif selected_part == "Flange, Pipe":
     size_fp     = st.selectbox("Size", ['1/8”','1/4”','3/8”','1/2”','3/4”','1”','1-1/4”','1-1/2”','2”','2-1/2”','3”','4”'])
     face_type   = st.selectbox("Face Type", ["RF","FF","RJ"])
     flange_cls  = st.selectbox("Class", ["150","300","600","1500","2500"])
+    if flange_cls in ["1500", "2500"] and face_type != "RJ":
+    st.warning("Attenzione: per classi 1500 o 2500 è raccomandato l'uso di faccia tipo RJ (Ring Joint).")
+    
+    
     schedule_fp = st.selectbox("Schedula", ["5","10","20","30","40","60","80","100","120","140","160"])
     flange_mat  = st.selectbox("Flange Material", [
         "A105","A106-GR B","UNS-S31803","UNS-S32760","A350 LF2","A182-F316L",
