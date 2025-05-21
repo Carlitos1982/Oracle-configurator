@@ -43,7 +43,7 @@ part_options = [
     "Gusset, Other",
     "Nut, Hex",
     "Stud, Threaded",
-    "Ring, Wear"=
+    "Ring, Wear"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
@@ -962,7 +962,7 @@ elif selected_part == "Stud, Threaded":
             "To supplier": "",
             "Quality": ""
         }
-        elif selected_part == "Ring, Wear":
+elif selected_part == "Ring, Wear":
     st.subheader("Configurazione - Ring, Wear")
 
     ring_type = st.selectbox("Type", ["Stationary", "Rotary"], key="ring_type")
