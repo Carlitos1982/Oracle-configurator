@@ -38,7 +38,8 @@ part_options = [
     "Bearing, Hydrostatic/Hydrodynamic",
     "Bearing, Rolling",
     "Bolt, Eye",
-    "Bolt, Hexagonal"
+    "Bolt, Hexagonal",
+    "Gasket, Ring Type Joint"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
@@ -666,7 +667,69 @@ elif selected_part == "Bolt, Hexagonal":
             "To supplier": "",
             "Quality": ""
         }
+elif selected_part == "Gasket, Ring Type Joint":
+    st.subheader("Configurazione - Gasket, Ring Type Joint")
 
+    rtj_type = st.selectbox("Type", ["Oval", "Octagonal"], key="rtj_type")
+    rtj_size = st.selectbox("Size", [f"R{i}" for i in range(11, 61)], key="rtj_size")
+
+    note1_rtj = st.text_area("Note (opzionale)", height=80, key="rtj_note1")
+
+    mtype_rtj = st.selectbox("Material Type", [""] + material_types, key="mtype_rtj")
+    pref_df_rtj = materials_df[(materials_df["Material Type"] == mtype_rtj) & (materials_df["Prefix"].notna())]
+    prefixes_rtj = sorted(pref_df_rtj["Prefix"].unique()) if mtype_rtj != "MISCELLANEOUS" else []
+    mprefix_rtj = st.selectbox("Material Prefix", [""] + prefixes_rtj, key="mprefix_rtj")
+
+    if mtype_rtj == "MISCELLANEOUS":
+        names_rtj = materials_df[materials_df["Material Type"] == mtype_rtj]["Name"].dropna().tolist()
+    else:
+        names_rtj = materials_df[
+            (materials_df["Material Type"] == mtype_rtj) &
+            (materials_df["Prefix"] == mprefix_rtj)
+        ]["Name"].dropna().tolist()
+    mname_rtj = st.selectbox("Material Name", [""] + names_rtj, key="mname_rtj")
+
+    note2_rtj = st.text_area("Material Note (opzionale)", height=80, key="rtj_note2")
+
+    if st.button("Genera Output", key="gen_rtj"):
+        if mtype_rtj != "MISCELLANEOUS":
+            materiale_rtj = f"{mtype_rtj} {mprefix_rtj} {mname_rtj}".strip()
+            match_rtj = materials_df[
+                (materials_df["Material Type"] == mtype_rtj) &
+                (materials_df["Prefix"] == mprefix_rtj) &
+                (materials_df["Name"] == mname_rtj)
+            ]
+        else:
+            materiale_rtj = mname_rtj
+            match_rtj = materials_df[
+                (materials_df["Material Type"] == mtype_rtj) &
+                (materials_df["Name"] == mname_rtj)
+            ]
+        codice_fpd_rtj = match_rtj["FPD Code"].values[0] if not match_rtj.empty else ""
+
+        descr_rtj = f"GASKET, RING TYPE JOINT - TYPE: {rtj_type}, SIZE: {rtj_size}"
+        if note1_rtj:
+            descr_rtj += f", {note1_rtj}"
+        descr_rtj += f", {materiale_rtj}"
+        if note2_rtj:
+            descr_rtj += f", {note2_rtj}"
+
+        st.session_state["output_data"] = {
+            "Item": "50158…",
+            "Description": descr_rtj,
+            "Identificativo": "ANELLO SFERICO RING JOINT",
+            "Classe ricambi": "1-2-3",
+            "Categories": "FASCIA ITE 5",
+            "Catalog": "",
+            "Material": materiale_rtj,
+            "FPD material code": codice_fpd_rtj,
+            "Template": "FPD_BUY_2",
+            "ERP_L1": "55_GASKETS_OR_SEAL",
+            "ERP_L2": "20_OTHER",
+            "Disegno": "",
+            "To supplier": "",
+            "Quality": ""
+        }
         
 # Output finale
 if "output_data" in st.session_state:
