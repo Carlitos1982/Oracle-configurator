@@ -556,7 +556,7 @@ elif selected_part == "Bolt, Eye":
         # Descrizione con NOTE prima del materiale, e material note senza etichetta
         descr_bolt = f"BOLT, EYE - THREAD: {thread}, LENGTH: {length}"
         if note1:
-            descr_bolt += f", NOTE: {note1}"
+            descr_bolt += f", {note1}"
         descr_bolt += f", {materiale_bolt}"
         if material_note:
             descr_bolt += f", {material_note}"
