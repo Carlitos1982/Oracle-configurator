@@ -735,8 +735,8 @@ elif selected_part == "Gasket, Ring Type Joint":
 elif selected_part == "Gusset, Other":
     st.subheader("Configurazione - Gusset, Other")
 
-    width = st.number_input("Width", min_value=0.0, step=1.0, format="%.1f", key="gusset_width")
-    thickness = st.number_input("Thickness", min_value=0.0, step=1.0, format="%.1f", key="gusset_thickness")
+    width = st.number_input("Width", min_value=0, step=1, format="%d", key="gusset_width")
+    thickness = st.number_input("Thickness", min_value=0, step=1, format="%d", key="gusset_thickness")
     uom = st.selectbox("Unità di misura", ["mm", "inches"], key="gusset_uom")
 
     note1_gusset = st.text_area("Note (opzionale)", height=80, key="gusset_note1")
@@ -792,7 +792,6 @@ elif selected_part == "Gusset, Other":
             "Template": "FPD_BUY_1",
             "ERP_L1": "21_FABRICATION_OR_BASEPLATES",
             "ERP_L2": "29_OTHER",
-            "Disegno": "",
             "To supplier": "",
             "Quality": ""
         }
