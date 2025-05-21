@@ -39,7 +39,8 @@ part_options = [
     "Bearing, Rolling",
     "Bolt, Eye",
     "Bolt, Hexagonal",
-    "Gasket, Ring Type Joint"
+    "Gasket, Ring Type Joint",
+    "Gusset, Other"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
@@ -726,6 +727,71 @@ elif selected_part == "Gasket, Ring Type Joint":
             "Template": "FPD_BUY_2",
             "ERP_L1": "55_GASKETS_OR_SEAL",
             "ERP_L2": "20_OTHER",
+            "Disegno": "",
+            "To supplier": "",
+            "Quality": ""
+        }
+        
+elif selected_part == "Gusset, Other":
+    st.subheader("Configurazione - Gusset, Other")
+
+    width = st.number_input("Width", min_value=0.0, step=1.0, format="%.1f", key="gusset_width")
+    thickness = st.number_input("Thickness", min_value=0.0, step=1.0, format="%.1f", key="gusset_thickness")
+    uom = st.selectbox("Unità di misura", ["mm", "inches"], key="gusset_uom")
+
+    note1_gusset = st.text_area("Note (opzionale)", height=80, key="gusset_note1")
+
+    mtype_gusset = st.selectbox("Material Type", [""] + material_types, key="mtype_gusset")
+    pref_df_gusset = materials_df[(materials_df["Material Type"] == mtype_gusset) & (materials_df["Prefix"].notna())]
+    prefixes_gusset = sorted(pref_df_gusset["Prefix"].unique()) if mtype_gusset != "MISCELLANEOUS" else []
+    mprefix_gusset = st.selectbox("Material Prefix", [""] + prefixes_gusset, key="mprefix_gusset")
+
+    if mtype_gusset == "MISCELLANEOUS":
+        names_gusset = materials_df[materials_df["Material Type"] == mtype_gusset]["Name"].dropna().tolist()
+    else:
+        names_gusset = materials_df[
+            (materials_df["Material Type"] == mtype_gusset) &
+            (materials_df["Prefix"] == mprefix_gusset)
+        ]["Name"].dropna().tolist()
+    mname_gusset = st.selectbox("Material Name", [""] + names_gusset, key="mname_gusset")
+
+    note2_gusset = st.text_area("Material Note (opzionale)", height=80, key="gusset_note2")
+
+    if st.button("Genera Output", key="gen_gusset"):
+        if mtype_gusset != "MISCELLANEOUS":
+            materiale_gusset = f"{mtype_gusset} {mprefix_gusset} {mname_gusset}".strip()
+            match_gusset = materials_df[
+                (materials_df["Material Type"] == mtype_gusset) &
+                (materials_df["Prefix"] == mprefix_gusset) &
+                (materials_df["Name"] == mname_gusset)
+            ]
+        else:
+            materiale_gusset = mname_gusset
+            match_gusset = materials_df[
+                (materials_df["Material Type"] == mtype_gusset) &
+                (materials_df["Name"] == mname_gusset)
+            ]
+        codice_fpd_gusset = match_gusset["FPD Code"].values[0] if not match_gusset.empty else ""
+
+        descr_gusset = f"GUSSET, OTHER - WIDTH: {width}{uom}, THK: {thickness}{uom}"
+        if note1_gusset:
+            descr_gusset += f", {note1_gusset}"
+        descr_gusset += f", {materiale_gusset}"
+        if note2_gusset:
+            descr_gusset += f", {note2_gusset}"
+
+        st.session_state["output_data"] = {
+            "Item": "565G…",
+            "Description": descr_gusset,
+            "Identificativo": "GUSSETING",
+            "Classe ricambi": "",
+            "Categories": "FASCIA ITE 5",
+            "Catalog": "ARTVARI",
+            "Material": materiale_gusset,
+            "FPD material code": codice_fpd_gusset,
+            "Template": "FPD_BUY_1",
+            "ERP_L1": "21_FABRICATION_OR_BASEPLATES",
+            "ERP_L2": "29_OTHER",
             "Disegno": "",
             "To supplier": "",
             "Quality": ""
