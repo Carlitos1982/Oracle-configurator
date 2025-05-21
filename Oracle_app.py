@@ -1,4 +1,4 @@
-import streamlit as st
+==import streamlit as st
 import pandas as pd
 
 # Configurazione pagina
@@ -288,7 +288,7 @@ elif selected_part == "Gate, Valve":
             "Quality": ""
         }
         
-        elif selected_part == "Gasket, Spiral Wound":
+elif selected_part == "Gasket, Spiral Wound":
     st.subheader("Configurazione - Gasket, Spiral Wound")
 
     winding = st.text_input("Winding material")
