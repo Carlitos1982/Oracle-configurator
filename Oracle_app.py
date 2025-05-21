@@ -1,4 +1,4 @@
-import streamlit as st
+==#=import streamlit as st
 import pandas as pd
 
 # Configurazione pagina
@@ -119,8 +119,8 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2, template
             (materials_df["Prefix"] == mprefix)
         ]["Name"].dropna().drop_duplicates().tolist()
     mname = st.selectbox("Material Name", [""] + names, key=f"mname_{parte}")
-    
-        if st.button("Genera Output", key=f"gen_{parte}"):
+
+    if st.button("Genera Output", key=f"gen_{parte}"):
         if mtype != "MISCELLANEOUS":
             materiale = f"{mtype} {mprefix} {mname}".strip()
             match = materials_df[
