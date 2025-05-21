@@ -205,7 +205,7 @@ elif selected_part == "Flange, Pipe":
     face_type   = st.selectbox("Face Type", ["RF","FF","RJ"])
     flange_cls  = st.selectbox("Class", ["150","300","600","1500","2500"])
     if flange_cls in ["1500", "2500"] and face_type != "RJ":
-        st.warning("Attenzione: per classi 1500 o 2500 è raccomandato l'uso di faccia tipo RJ (Ring Joint).")
+        st.warning("Attenzione: per classi 1500 o 2500 è raccomandato l'uso di faccia tipo RJ (Ring Joint). Verificare lo scopo di fornitura")
     
     
     schedule_fp = st.selectbox("Schedula", ["5","10","20","30","40","60","80","100","120","140","160"])
