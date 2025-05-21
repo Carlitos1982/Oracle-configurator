@@ -40,7 +40,8 @@ part_options = [
     "Bolt, Eye",
     "Bolt, Hexagonal",
     "Gasket, Ring Type Joint",
-    "Gusset, Other"
+    "Gusset, Other",
+    "Nut, Hex"
 ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
@@ -53,7 +54,7 @@ def genera_output(parte, item, identificativo, classe, catalog, erp_l2,
                   template_fisso=None, extra_fields=None):
     model = st.selectbox("Product/Pump Model", [""] + pump_models, key=f"model_{parte}")
     size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
-    size = st.selectbox("Product/Pump Size", [""] + size_list, key=f"size_{parte}")
+    size = st.select#box("Product/Pump Size", [""] + size_list, key=f"size_{parte}")
 
     # Additional Feature 1
     feature_1 = ""
@@ -800,6 +801,76 @@ elif selected_part == "Gusset, Other":
             "Quality": ""
         }
         
+elif selected_part == "Nut, Hex":
+    st.subheader("Configurazione - Nut, Hex")
+
+    nut_type = "Heavy"  # fisso
+    nut_sizes = [
+        "#10-24UNC", "5/16\"-18UNC", "3/8\"-16UNC", "1/2\"-13UNC",
+        "3/4\"-16UNF", "7/8\"-9UNC", "7/8\"-14UNF", "1\"-12UNF",
+        "1-1/8\"-12UNF", "1-1/2\"-12UNC", "2\"-4.5UNC", "2-1/2\"-4UNC",
+        "3\"-6UNC", "4\"-8UNC", "M6x1", "M8x1.25", "M10x1.5", "M12x1.75",
+        "M16x2", "M20x2.5", "M24x3", "M30x3.5", "M36x4", "M42x4.5",
+        "M48x5", "M56x5.5", "M64x6", "M72x6", "M80x6", "M90x6", "M100x6"
+    ]
+
+    size_nut = st.selectbox("Size", nut_sizes, key="nut_size")
+    note1_nut = st.text_area("Note (opzionale)", height=80, key="nut_note1")
+
+    mtype_nut = st.selectbox("Material Type", [""] + material_types, key="mtype_nut")
+    pref_df_nut = materials_df[(materials_df["Material Type"] == mtype_nut) & (materials_df["Prefix"].notna())]
+    prefixes_nut = sorted(pref_df_nut["Prefix"].unique()) if mtype_nut != "MISCELLANEOUS" else []
+    mprefix_nut = st.selectbox("Material Prefix", [""] + prefixes_nut, key="mprefix_nut")
+
+    if mtype_nut == "MISCELLANEOUS":
+        names_nut = materials_df[materials_df["Material Type"] == mtype_nut]["Name"].dropna().tolist()
+    else:
+        names_nut = materials_df[
+            (materials_df["Material Type"] == mtype_nut) &
+            (materials_df["Prefix"] == mprefix_nut)
+        ]["Name"].dropna().tolist()
+    mname_nut = st.selectbox("Material Name", [""] + names_nut, key="mname_nut")
+
+    note2_nut = st.text_area("Material Note (opzionale)", height=80, key="nut_note2")
+
+    if st.button("Genera Output", key="gen_nut"):
+        if mtype_nut != "MISCELLANEOUS":
+            materiale_nut = f"{mtype_nut} {mprefix_nut} {mname_nut}".strip()
+            match_nut = materials_df[
+                (materials_df["Material Type"] == mtype_nut) &
+                (materials_df["Prefix"] == mprefix_nut) &
+                (materials_df["Name"] == mname_nut)
+            ]
+        else:
+            materiale_nut = mname_nut
+            match_nut = materials_df[
+                (materials_df["Material Type"] == mtype_nut) &
+                (materials_df["Name"] == mname_nut)
+            ]
+        codice_fpd_nut = match_nut["FPD Code"].values[0] if not match_nut.empty else ""
+
+        descr_nut = f"NUT, HEX - TYPE: {nut_type}, SIZE: {size_nut}"
+        if note1_nut:
+            descr_nut += f", {note1_nut}"
+        descr_nut += f", {materiale_nut}"
+        if note2_nut:
+            descr_nut += f", {note2_nut}"
+
+        st.session_state["output_data"] = {
+            "Item": "56030…",
+            "Description": descr_nut,
+            "Identificativo": "6581-HEXAGON NUT",
+            "Classe ricambi": "",
+            "Categories": "FASCIA ITE 5",
+            "Catalog": "",
+            "Material": materiale_nut,
+            "FPD material code": codice_fpd_nut,
+            "Template": "FPD_BUY_2",
+            "ERP_L1": "60_FASTENER",
+            "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+            "To supplier": "",
+            "Quality": ""
+        }
 # Output finale
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
