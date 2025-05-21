@@ -553,7 +553,7 @@ elif selected_part == "Gusset, Other":
             "Quality": ""
         }
         
-        elif selected_part == "Ring, Wear":
+elif selected_part == "Ring, Wear":
     st.subheader("Configurazione - Ring, Wear")
 
     ring_type = st.selectbox("Type", ["Stationary", "Rotary"])
