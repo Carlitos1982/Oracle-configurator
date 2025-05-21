@@ -394,7 +394,7 @@ elif selected_part == "Gasket, Ring Type Joint":
         }
         
         
-        elif selected_part == "Bolt, Eye":
+elif selected_part == "Bolt, Eye":
     st.subheader("Configurazione - Bolt, Eye")
     thread = st.text_input("Thread type/size")
     length = st.text_input("Length")
