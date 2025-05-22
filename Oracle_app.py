@@ -1051,7 +1051,7 @@ elif selected_part == "Ring, Wear":
             "Template": "FPD_BUY_1",
             "ERP_L1": "20_TURNKEY_MACHINING",
             "ERP_L2": "24_RINGS",
-            "To supplier": "",
+            "To supplier": ""
             }
         
         
