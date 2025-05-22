@@ -1054,8 +1054,7 @@ elif selected_part == "Ring, Wear":
             "To supplier": "",
             "Quality": ""
         }
-        
-elif selected_part == "Pin, Dowel":
+        elif selected_part == "Pin, Dowel":
     st.subheader("Configurazione - Pin, Dowel")
 
     # Input dimensioni
@@ -1087,12 +1086,12 @@ elif selected_part == "Pin, Dowel":
         ]["Name"].dropna().drop_duplicates().tolist()
     mname_pin = st.selectbox("Material Name", [""] + names_pin, key="mname_pin")
 
-    # Nuovo campo Material Note
+    # Material Note
     material_note_pin = st.text_area("Material Note (opzionale)", height=80, key="pin_matnote")
 
-    # Generazione output
-    if st.button("Genera Output", key="gen_pin"):
-        # Costruzione Material / FPD code
+    # Bottone di generazione con key univoca
+    if st.button("Genera Output", key="gen_pin_dowel"):
+        # Material / FPD code
         if mtype_pin != "MISCELLANEOUS":
             materiale_pin = f"{mtype_pin} {mprefix_pin} {mname_pin}".strip()
             match_pin     = materials_df[
@@ -1108,7 +1107,7 @@ elif selected_part == "Pin, Dowel":
             ]
         codice_fpd_pin = match_pin["FPD Code"].values[0] if not match_pin.empty else ""
 
-        # Costruzione descrizione
+        # Descrizione senza etichetta “STANDARD:”
         descr_pin = (
             f"PIN, DOWEL - DIAMETER: {int(diameter)}{uom_diameter}, "
             f"LENGTH: {int(length)}{uom_length}"
@@ -1118,7 +1117,7 @@ elif selected_part == "Pin, Dowel":
         if material_note_pin:
             descr_pin += f", {material_note_pin}"
 
-        # Memorizzo in session_state
+        # Memorizzo l’output
         st.session_state["output_data"] = {
             "Item":               "56230…",
             "Description":        descr_pin,
@@ -1134,47 +1133,7 @@ elif selected_part == "Pin, Dowel":
             "To supplier":        "",
             "Quality":            ""
         }
-
-    # Generazione output
-    if st.button("Genera Output", key="gen_pin"):
-        # Costruzione Material / FPD code
-        if mtype_pin != "MISCELLANEOUS":
-            materiale_pin = f"{mtype_pin} {mprefix_pin} {mname_pin}".strip()
-            match_pin     = materials_df[
-                (materials_df["Material Type"] == mtype_pin) &
-                (materials_df["Prefix"] == mprefix_pin) &
-                (materials_df["Name"] == mname_pin)
-            ]
-        else:
-            materiale_pin = mname_pin
-            match_pin     = materials_df[
-                (materials_df["Material Type"] == mtype_pin) &
-                (materials_df["Name"] == mname_pin)
-            ]
-        codice_fpd_pin = match_pin["FPD Code"].values[0] if not match_pin.empty else ""
-
-        # Costruzione descrizione
-        descr_pin = (
-            f"PIN, DOWEL - DIAMETER: {int(diameter)}{uom_diameter}, "
-            f"LENGTH: {int(length)}{uom_length}, STANDARD: {standard}"
-        )
-
-        # Memorizzo in session_state
-        st.session_state["output_data"] = {
-            "Item":             "56230…",
-            "Description":      descr_pin,
-            "Identificativo":   "6810-DOWEL PIN",
-            "Classe ricambi":   "",
-            "Categories":       "FASCIA ITE 5",
-            "Catalog":          "",
-            "Material":         materiale_pin,
-            "FPD material code":codice_fpd_pin,
-            "Template":         "FPD_BUY_2",
-            "ERP_L1":           "64_HARDWARE",
-            "ERP_L2":           "14_PINS",
-            "To supplier":      "",
-            "Quality":          ""
-        }
+#
 # Output finale
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
