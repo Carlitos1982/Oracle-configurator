@@ -6,15 +6,26 @@ st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙
 st.title("Oracle Item Setup - Web App")
 
 # Caricamento dati Excel
+
 @st.cache_data
 def load_config_data():
-    url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
+    url = "https://…/dati_config4.xlsx"
     xls = pd.ExcelFile(url)
+    size_df = pd.read_excel(xls, sheet_name="Pump Size")
+    features_df = pd.read_excel(xls, sheet_name="Features")
+    materials_df = pd.read_excel(xls, sheet_name="Materials")
+
+    # ← qui deduplichiamo
+    materials_df = materials_df.drop_duplicates(
+        subset=["Material Type", "Prefix", "Name"]
+    ).reset_index(drop=True)
+
     return {
-        "size_df": pd.read_excel(xls, sheet_name="Pump Size"),
-        "features_df": pd.read_excel(xls, sheet_name="Features"),
-        "materials_df": pd.read_excel(xls, sheet_name="Materials")
+        "size_df": size_df,
+        "features_df": features_df,
+        "materials_df": materials_df
     }
+
 
 data = load_config_data()
 size_df      = data["size_df"]
