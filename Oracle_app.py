@@ -1144,7 +1144,7 @@ elif selected_part == "Pin, Dowel":
             "Quality":            ""
         }
         
-        elif selected_part == "Screw, Cap":
+elif selected_part == "Screw, Cap":
     st.subheader("Configurazione - Screw, Cap")
 
     bolt_sizes = [
