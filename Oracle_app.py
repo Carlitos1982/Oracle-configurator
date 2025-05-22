@@ -57,6 +57,29 @@ part_options = [
     "Ring, Wear",
     "Pin, Dowel"
 ]
+
+ bolt_sizes = [
+        "#10-24UNC", "5/16\"-18UNC", "3/8\"-16UNC", "1/2\"-13UNC",
+        "3/4\"-16UNF", "7/8\"-9UNC", "7/8\"-14UNF", "1\"-12UNF",
+        "1-1/8\"-12UNF", "1-1/2\"-12UNC", "2\"-4.5UNC", "2-1/2\"-4UNC",
+        "3\"-6UNC", "4\"-8UNC", "M6x1", "M8x1.25", "M10x1.5", "M12x1.75",
+        "M16x2", "M20x2.5", "M24x3", "M30x3.5", "M36x4", "M42x4.5",
+        "M48x5", "M56x5.5", "M64x6", "M72x6", "M80x6", "M90x6", "M100x6"
+    ]
+
+    bolt_lengths = [
+        "1/8\"in", "1/4\"in", "3/8\"in", "5/16\"in", "1/2\"in",
+        "3/4\"in", "1\"in", "1-1/8\"in", "1-1/4\"in", "1-3/8\"in",
+        "1-1/2\"in", "2\"in", "2-1/8\"in", "2-1/4\"in", "2-3/8\"in",
+        "2-1/2\"in", "2-3/4\"in", "3\"in", "3-1/8\"in", "3-1/4\"in",
+        "3-3/8\"in", "3-1/2\"in", "4\"in", "4-1/8\"in", "4-1/4\"in",
+        "4-3/8\"in", "4-1/2\"in", "50mm", "55mm", "60mm", "65mm",
+        "70mm", "75mm", "80mm", "85mm", "90mm", "95mm", "100mm",
+        "105mm", "110mm", "115mm", "120mm", "125mm", "130mm",
+        "135mm", "140mm", "145mm", "150mm", "155mm", "160mm",
+        "165mm", "170mm", "175mm", "180mm", "185mm", "190mm",
+        "195mm"
+    ]
 selected_part = st.selectbox("Seleziona Parte", part_options)
 
 # Dati comuni
@@ -600,28 +623,7 @@ elif selected_part == "Bolt, Eye":
 elif selected_part == "Bolt, Hexagonal":
     st.subheader("Configurazione - Bolt, Hexagonal")
 
-    bolt_sizes = [
-        "#10-24UNC", "5/16\"-18UNC", "3/8\"-16UNC", "1/2\"-13UNC",
-        "3/4\"-16UNF", "7/8\"-9UNC", "7/8\"-14UNF", "1\"-12UNF",
-        "1-1/8\"-12UNF", "1-1/2\"-12UNC", "2\"-4.5UNC", "2-1/2\"-4UNC",
-        "3\"-6UNC", "4\"-8UNC", "M6x1", "M8x1.25", "M10x1.5", "M12x1.75",
-        "M16x2", "M20x2.5", "M24x3", "M30x3.5", "M36x4", "M42x4.5",
-        "M48x5", "M56x5.5", "M64x6", "M72x6", "M80x6", "M90x6", "M100x6"
-    ]
-
-    bolt_lengths = [
-        "1/8\"in", "1/4\"in", "3/8\"in", "5/16\"in", "1/2\"in",
-        "3/4\"in", "1\"in", "1-1/8\"in", "1-1/4\"in", "1-3/8\"in",
-        "1-1/2\"in", "2\"in", "2-1/8\"in", "2-1/4\"in", "2-3/8\"in",
-        "2-1/2\"in", "2-3/4\"in", "3\"in", "3-1/8\"in", "3-1/4\"in",
-        "3-3/8\"in", "3-1/2\"in", "4\"in", "4-1/8\"in", "4-1/4\"in",
-        "4-3/8\"in", "4-1/2\"in", "50mm", "55mm", "60mm", "65mm",
-        "70mm", "75mm", "80mm", "85mm", "90mm", "95mm", "100mm",
-        "105mm", "110mm", "115mm", "120mm", "125mm", "130mm",
-        "135mm", "140mm", "145mm", "150mm", "155mm", "160mm",
-        "165mm", "170mm", "175mm", "180mm", "185mm", "190mm",
-        "195mm"
-    ]
+   #
 
     size_hex   = st.selectbox("Size", bolt_sizes, key="hex_size")
     length_hex = st.selectbox("Length", bolt_lengths, key="hex_length")
@@ -1142,6 +1144,152 @@ elif selected_part == "Pin, Dowel":
             "Quality":            ""
         }
         
+        elif selected_part == "Screw, Cap":
+    st.subheader("Configurazione - Screw, Cap")
+
+    bolt_sizes = [
+        "#10-24UNC", "5/16\"-18UNC", "3/8\"-16UNC", "1/2\"-13UNC",
+        "3/4\"-16UNF", "7/8\"-9UNC", "7/8\"-14UNF", "1\"-12UNF",
+        "1-1/8\"-12UNF", "1-1/2\"-12UNC", "2\"-4.5UNC", "2-1/2\"-4UNC",
+        "3\"-6UNC", "4\"-8UNC", "M6x1", "M8x1.25", "M10x1.5", "M12x1.75",
+        "M16x2", "M20x2.5", "M24x3", "M30x3.5", "M36x4", "M42x4.5",
+        "M48x5", "M56x5.5", "M64x6", "M72x6", "M80x6", "M90x6", "M100x6"
+    ]
+    bolt_lengths = [
+        "1/8\"in", "1/4\"in", "3/8\"in", "5/16\"in", "1/2\"in",
+        "3/4\"in", "1\"in", "1-1/8\"in", "1-1/4\"in", "1-3/8\"in",
+        "1-1/2\"in", "2\"in", "2-1/8\"in", "2-1/4\"in", "2-3/8\"in",
+        "2-1/2\"in", "2-3/4\"in", "3\"in", "3-1/8\"in", "3-1/4\"in",
+        "3-3/8\"in", "3-1/2\"in", "4\"in", "4-1/8\"in", "4-1/4\"in",
+        "4-3/8\"in", "4-1/2\"in", "50mm", "55mm", "60mm", "65mm",
+        "70mm", "75mm", "80mm", "85mm", "90mm"
+    ]
+
+    size_cap   = st.selectbox("Size", bolt_sizes, key="cap_size")
+    length_cap = st.selectbox("Length", bolt_lengths, key="cap_length")
+    full_thd   = st.radio("Full threaded?", ["Yes", "No"], horizontal=True, key="cap_fullthread")
+    zinc       = st.radio("Zinc Plated?", ["Yes", "No"], horizontal=True, key="cap_zinc")
+    note1_cap  = st.text_area("Note (opzionale)", height=80, key="cap_note1")
+
+    mtype_cap = st.selectbox("Material Type", [""] + material_types, key="cap_mtype")
+    pref_df_cap = materials_df[(materials_df["Material Type"] == mtype_cap) & (materials_df["Prefix"].notna())]
+    prefixes_cap = sorted(pref_df_cap["Prefix"].unique()) if mtype_cap != "MISCELLANEOUS" else []
+    mprefix_cap  = st.selectbox("Material Prefix", [""] + prefixes_cap, key="cap_mprefix")
+    if mtype_cap == "MISCELLANEOUS":
+        names_cap = materials_df[materials_df["Material Type"] == mtype_cap]["Name"].dropna().tolist()
+    else:
+        names_cap = materials_df[
+            (materials_df["Material Type"] == mtype_cap) &
+            (materials_df["Prefix"] == mprefix_cap)
+        ]["Name"].dropna().tolist()
+    mname_cap = st.selectbox("Material Name", [""] + names_cap, key="cap_mname")
+    note2_cap = st.text_area("Material Note (opzionale)", height=80, key="cap_note2")
+
+    if st.button("Genera Output", key="gen_cap"):
+        # costruisco material string e codice FPD
+        if mtype_cap != "MISCELLANEOUS":
+            materiale_cap = f"{mtype_cap} {mprefix_cap} {mname_cap}".strip()
+            match_cap = materials_df[
+                (materials_df["Material Type"] == mtype_cap) &
+                (materials_df["Prefix"] == mprefix_cap) &
+                (materials_df["Name"] == mname_cap)
+            ]
+        else:
+            materiale_cap = mname_cap
+            match_cap = materials_df[
+                (materials_df["Material Type"] == mtype_cap) &
+                (materials_df["Name"] == mname_cap)
+            ]
+        codice_fpd_cap = match_cap["FPD Code"].values[0] if not match_cap.empty else ""
+
+        # descrizione
+        descr_cap = f"SCREW, CAP - SIZE: {size_cap}, LENGTH: {length_cap}"
+        if full_thd == "Yes":
+            descr_cap += ", FULL THREADED"
+        if zinc == "Yes":
+            descr_cap += ", ZINC PLATED AS PER ASTM B633"
+        if note1_cap:
+            descr_cap += f", {note1_cap}"
+        descr_cap += f", {materiale_cap}"
+        if note2_cap:
+            descr_cap += f", {note2_cap}"
+
+        st.session_state["output_data"] = {
+            "Item": "56230…",
+            "Description": descr_cap,
+            "Identificativo": "6579-SOCKET HEAD CAP SCREW",
+            "Classe ricambi": "",
+            "Categories": "FASCIA ITE 5",
+            "Catalog": "",
+            "Material": materiale_cap,
+            "FPD material code": codice_fpd_cap,
+            "Template": "FPD_BUY_2",
+            "ERP_L1": "60_FASTENER",
+            "ERP_L2": "10_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+            "To supplier": "",
+            "Quality": ""
+        }
+
+elif selected_part == "Screw, Grub":
+    st.subheader("Configurazione - Screw, Grub")
+
+    size_grub   = st.selectbox("Size", bolt_sizes, key="grub_size")
+    length_grub = st.selectbox("Length", bolt_lengths, key="grub_length")
+    note1_grub  = st.text_area("Note (opzionale)", height=80, key="grub_note1")
+
+    mtype_grub = st.selectbox("Material Type", [""] + material_types, key="grub_mtype")
+    pref_df_grub = materials_df[(materials_df["Material Type"] == mtype_grub) & (materials_df["Prefix"].notna())]
+    prefixes_grub = sorted(pref_df_grub["Prefix"].unique()) if mtype_grub != "MISCELLANEOUS" else []
+    mprefix_grub  = st.selectbox("Material Prefix", [""] + prefixes_grub, key="grub_mprefix")
+    if mtype_grub == "MISCELLANEOUS":
+        names_grub = materials_df[materials_df["Material Type"] == mtype_grub]["Name"].dropna().tolist()
+    else:
+        names_grub = materials_df[
+            (materials_df["Material Type"] == mtype_grub) &
+            (materials_df["Prefix"] == mprefix_grub)
+        ]["Name"].dropna().tolist()
+    mname_grub = st.selectbox("Material Name", [""] + names_grub, key="grub_mname")
+    note2_grub = st.text_area("Material Note (opzionale)", height=80, key="grub_note2")
+
+    if st.button("Genera Output", key="gen_grub"):
+        if mtype_grub != "MISCELLANEOUS":
+            materiale_grub = f"{mtype_grub} {mprefix_grub} {mname_grub}".strip()
+            match_grub = materials_df[
+                (materials_df["Material Type"] == mtype_grub) &
+                (materials_df["Prefix"] == mprefix_grub) &
+                (materials_df["Name"] == mname_grub)
+            ]
+        else:
+            materiale_grub = mname_grub
+            match_grub = materials_df[
+                (materials_df["Material Type"] == mtype_grub) &
+                (materials_df["Name"] == mname_grub)
+            ]
+        codice_fpd_grub = match_grub["FPD Code"].values[0] if not match_grub.empty else ""
+
+        # descrizione (senza full threaded di default)
+        descr_grub = f"SCREW, GRUB - SIZE: {size_grub}, LENGTH: {length_grub}"
+        if note1_grub:
+            descr_grub += f", {note1_grub}"
+        descr_grub += f", {materiale_grub}"
+        if note2_grub:
+            descr_grub += f", {note2_grub}"
+
+        st.session_state["output_data"] = {
+            "Item": "56310…",
+            "Description": descr_grub,
+            "Identificativo": "6814-GRUB SCREW",
+            "Classe ricambi": "",
+            "Categories": "FASCIA ITE 5",
+            "Catalog": "",
+            "Material": materiale_grub,
+            "FPD material code": codice_fpd_grub,
+            "Template": "FPD_BUY_2",
+            "ERP_L1": "60_FASTENER",
+            "ERP_L2": "10_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+            "To supplier": "",
+            "Quality": ""
+        }#
 
 # Output finale
 if "output_data" in st.session_state:
