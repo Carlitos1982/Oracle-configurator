@@ -1055,7 +1055,7 @@ elif selected_part == "Ring, Wear":
             "Quality": ""
         }
         
-        elif selected_part == "Pin, Dowel":
+elif selected_part == "Pin, Dowel":
     st.subheader("Configurazione - Pin, Dowel")
 
     # Input
