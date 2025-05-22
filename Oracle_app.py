@@ -1053,8 +1053,6 @@ elif selected_part == "Ring, Wear":
             "ERP_L2": "24_RINGS",
             "To supplier": ""
             }
-        
-        
 elif selected_part == "Pin, Dowel":
     st.subheader("Configurazione - Pin, Dowel")
 
@@ -1066,6 +1064,13 @@ elif selected_part == "Pin, Dowel":
 
     # Standard (può restare vuoto)
     standard     = st.selectbox("Standard", [""] + ["ISO 2338"], key="pin_standard")
+
+    # *** Nota prima del materiale ***
+    pre_material_note = st.text_area(
+        "Note (opzionale, prima del materiale)",
+        height=80,
+        key="pin_note_pre"
+    )
 
     # Selezione materiale
     mtype_pin   = st.selectbox("Material Type", [""] + material_types, key="mtype_pin")
@@ -1087,7 +1092,7 @@ elif selected_part == "Pin, Dowel":
         ]["Name"].dropna().drop_duplicates().tolist()
     mname_pin = st.selectbox("Material Name", [""] + names_pin, key="mname_pin")
 
-    # Material Note
+    # Material Note (opzionale, dopo il materiale)
     material_note_pin = st.text_area("Material Note (opzionale)", height=80, key="pin_matnote")
 
     # Bottone di generazione con key univoca
@@ -1108,13 +1113,17 @@ elif selected_part == "Pin, Dowel":
             ]
         codice_fpd_pin = match_pin["FPD Code"].values[0] if not match_pin.empty else ""
 
-        # Descrizione senza etichetta “STANDARD:”
+        # Costruzione descrizione
         descr_pin = (
             f"PIN, DOWEL - DIAMETER: {int(diameter)}{uom_diameter}, "
             f"LENGTH: {int(length)}{uom_length}"
         )
         if standard:
             descr_pin += f", {standard}"
+        if pre_material_note:
+            descr_pin += f", {pre_material_note}"    # nota prima del materiale
+
+        descr_pin += f", {materiale_pin}"
         if material_note_pin:
             descr_pin += f", {material_note_pin}"
 
@@ -1133,8 +1142,9 @@ elif selected_part == "Pin, Dowel":
             "ERP_L2":             "14_PINS",
             "To supplier":        "",
             "Quality":            ""
-        }
-#
+        }        
+        
+
 # Output finale
 if "output_data" in st.session_state:
     st.subheader("Risultato finale")
