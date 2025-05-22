@@ -55,7 +55,9 @@ part_options = [
     "Nut, Hex",
     "Stud, Threaded",
     "Ring, Wear",
-    "Pin, Dowel"
+    "Pin, Dowel",
+    "Screw, Cap",
+    "Screw, Grub"
 ]
 
 bolt_sizes = [
