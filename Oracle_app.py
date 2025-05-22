@@ -1054,7 +1054,7 @@ elif selected_part == "Ring, Wear":
             "To supplier": "",
             "Quality": ""
         }
-        elif selected_part == "Pin, Dowel":
+elif selected_part == "Pin, Dowel":
     st.subheader("Configurazione - Pin, Dowel")
 
     # Input dimensioni
