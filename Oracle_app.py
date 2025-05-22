@@ -9,20 +9,20 @@ st.title("Oracle Item Setup - Web App")
 
 @st.cache_data
 def load_config_data():
-    url = "https://…/dati_config4.xlsx"
+    url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
     xls = pd.ExcelFile(url)
-    size_df = pd.read_excel(xls, sheet_name="Pump Size")
-    features_df = pd.read_excel(xls, sheet_name="Features")
+    size_df      = pd.read_excel(xls, sheet_name="Pump Size")
+    features_df  = pd.read_excel(xls, sheet_name="Features")
     materials_df = pd.read_excel(xls, sheet_name="Materials")
 
-    # ← qui deduplichiamo
+    # Elimino i duplicati su Material Type+Prefix+Name
     materials_df = materials_df.drop_duplicates(
         subset=["Material Type", "Prefix", "Name"]
     ).reset_index(drop=True)
 
     return {
-        "size_df": size_df,
-        "features_df": features_df,
+        "size_df":      size_df,
+        "features_df":  features_df,
         "materials_df": materials_df
     }
 
