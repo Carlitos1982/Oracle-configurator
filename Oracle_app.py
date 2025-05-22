@@ -988,7 +988,7 @@ elif selected_part == "Ring, Wear":
 
     int_dia = st.number_input("Internal Diameter (mm)", min_value=0, step=1, format="%d", key="ring_int_dia")
     ext_dia = st.number_input("External Diameter (mm)", min_value=0, step=1, format="%d", key="ring_ext_dia")
-    thk_ring = st.number_input("Thickness (mm)", min_value=0, step=1, format="%d", key="ring_thk")
+    thk_ring = st.number_input("Lenght (mm)", min_value=0, step=1, format="%d", key="ring_thk")
 
     note_ring = st.text_area("Note (opzionale)", height=80, key="ring_note")
     clearance = st.radio("Increased clearance?", ["No", "Yes"], horizontal=True, key="ring_clearance")
