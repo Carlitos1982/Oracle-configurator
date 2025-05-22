@@ -978,85 +978,7 @@ elif selected_part == "Stud, Threaded":
             "To supplier": "",
             "Quality": ""
         }
-elif selected_part == "Ring, Wear":
-    st.subheader("Configurazione - Ring, Wear")
 
-    ring_type = st.selectbox("Type", ["Stationary", "Rotary"], key="ring_type")
-    model = st.selectbox("Product/Pump Model", [""] + pump_models, key="ring_model")
-    size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
-    size = st.selectbox("Product/Pump Size", [""] + size_list, key="ring_size")
-
-    int_dia = st.number_input("Internal Diameter (mm)", min_value=0, step=1, format="%d", key="ring_int_dia")
-    ext_dia = st.number_input("External Diameter (mm)", min_value=0, step=1, format="%d", key="ring_ext_dia")
-    thk_ring = st.number_input("Lenght (mm)", min_value=0, step=1, format="%d", key="ring_thk")
-
-    note_ring = st.text_area("Note (opzionale)", height=80, key="ring_note")
-    clearance = st.radio("Increased clearance?", ["No", "Yes"], horizontal=True, key="ring_clearance")
-    dwg_ring = st.text_input("Dwg/doc number", key="ring_dwg")
-
-    mtype_ring = st.selectbox("Material Type", [""] + material_types, key="mtype_ring")
-    pref_df_ring = materials_df[(materials_df["Material Type"] == mtype_ring) & (materials_df["Prefix"].notna())]
-    prefixes_ring = sorted(pref_df_ring["Prefix"].unique()) if mtype_ring != "MISCELLANEOUS" else []
-    mprefix_ring = st.selectbox("Material Prefix", [""] + prefixes_ring, key="mprefix_ring")
-
-    if mtype_ring == "MISCELLANEOUS":
-        names_ring = materials_df[materials_df["Material Type"] == mtype_ring]["Name"].dropna().tolist()
-    else:
-        names_ring = materials_df[
-            (materials_df["Material Type"] == mtype_ring) &
-            (materials_df["Prefix"] == mprefix_ring)
-        ]["Name"].dropna().tolist()
-    mname_ring = st.selectbox("Material Name", [""] + names_ring, key="mname_ring")
-
-    note2_ring = st.text_area("Material Note (opzionale)", height=80, key="ring_note2")
-
-    if st.button("Genera Output", key="gen_ring"):
-        if mtype_ring != "MISCELLANEOUS":
-            materiale_ring = f"{mtype_ring} {mprefix_ring} {mname_ring}".strip()
-            match_ring = materials_df[
-                (materials_df["Material Type"] == mtype_ring) &
-                (materials_df["Prefix"] == mprefix_ring) &
-                (materials_df["Name"] == mname_ring)
-            ]
-        else:
-            materiale_ring = mname_ring
-            match_ring = materials_df[
-                (materials_df["Material Type"] == mtype_ring) &
-                (materials_df["Name"] == mname_ring)
-            ]
-        codice_fpd_ring = match_ring["FPD Code"].values[0] if not match_ring.empty else ""
-
-        if ring_type == "Rotary":
-            identificativo = "2300-IMPELLER WEAR RING"
-            item_code = "40224…"
-        else:
-            identificativo = "1500-CASING WEAR RING"
-            item_code = "40223…"
-
-        descr_ring = f"RING, WEAR - {ring_type} {model} {size}, ID {int_dia}mm, OD {ext_dia}mm, THK {thk_ring}mm"
-        if note_ring:
-            descr_ring += f", {note_ring}"
-        if clearance == "Yes":
-            descr_ring += ", INCREASED CLEARANCE"
-        descr_ring += f", {materiale_ring}"
-        if note2_ring:
-            descr_ring += f", {note2_ring}"
-
-        st.session_state["output_data"] = {
-            "Item": item_code,
-            "Description": descr_ring,
-            "Identificativo": identificativo,
-            "Classe ricambi": "1-2-3",
-            "Categories": "FASCIA ITE 4",
-            "Catalog": "ALBERO",
-            "Disegno": dwg_ring,
-            "Material": materiale_ring,
-            "FPD material code": codice_fpd_ring,
-            "Template": "FPD_BUY_1",
-            "ERP_L1": "20_TURNKEY_MACHINING",
-            "ERP_L2": "24_RINGS",
-            "To supplier": ""
-            }
 elif selected_part == "Pin, Dowel":
     st.subheader("Configurazione - Pin, Dowel")
 
@@ -1291,7 +1213,93 @@ elif selected_part == "Screw, Grub":
             "ERP_L2": "10_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
             "To supplier": "",
             "Quality": ""
-        }#
+        }
+        
+        elif selected_part == "Ring, Wear":
+    st.subheader("Configurazione - Ring, Wear")
+
+    ring_type    = st.selectbox("Type", ["Stationary", "Rotary"], key="ring_type")
+    model        = st.selectbox("Product/Pump Model", [""] + pump_models, key="ring_model")
+    size_list    = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
+    size         = st.selectbox("Product/Pump Size", [""] + size_list, key="ring_size")
+
+    int_dia      = st.number_input("Internal Diameter (mm)", min_value=0, step=1, format="%d", key="ring_int_dia")
+    ext_dia      = st.number_input("External Diameter (mm)", min_value=0, step=1, format="%d", key="ring_ext_dia")
+    length_ring  = st.number_input("Length (mm)",             min_value=0, step=1, format="%d", key="ring_length")
+
+    note_ring    = st.text_area("Note (opzionale)", height=80, key="ring_note")
+    clearance    = st.radio("Increased clearance?", ["No", "Yes"], horizontal=True, key="ring_clearance")
+    dwg_ring     = st.text_input("Dwg/doc number", key="ring_dwg")
+
+    mtype_ring   = st.selectbox("Material Type", [""] + material_types, key="mtype_ring")
+    pref_df_ring = materials_df[
+        (materials_df["Material Type"] == mtype_ring) &
+        (materials_df["Prefix"].notna())
+    ]
+    prefixes_ring = sorted(pref_df_ring["Prefix"].unique()) if mtype_ring != "MISCELLANEOUS" else []
+    mprefix_ring  = st.selectbox("Material Prefix", [""] + prefixes_ring, key="mprefix_ring")
+
+    if mtype_ring == "MISCELLANEOUS":
+        names_ring = materials_df[materials_df["Material Type"] == mtype_ring]["Name"].dropna().tolist()
+    else:
+        names_ring = materials_df[
+            (materials_df["Material Type"] == mtype_ring) &
+            (materials_df["Prefix"] == mprefix_ring)
+        ]["Name"].dropna().tolist()
+    mname_ring = st.selectbox("Material Name", [""] + names_ring, key="mname_ring")
+
+    note2_ring = st.text_area("Material Note (opzionale)", height=80, key="ring_note2")
+
+    if st.button("Genera Output", key="gen_ring"):
+        if mtype_ring != "MISCELLANEOUS":
+            materiale_ring = f"{mtype_ring} {mprefix_ring} {mname_ring}".strip()
+            match_ring = materials_df[
+                (materials_df["Material Type"] == mtype_ring) &
+                (materials_df["Prefix"] == mprefix_ring) &
+                (materials_df["Name"] == mname_ring)
+            ]
+        else:
+            materiale_ring = mname_ring
+            match_ring = materials_df[
+                (materials_df["Material Type"] == mtype_ring) &
+                (materials_df["Name"] == mname_ring)
+            ]
+        codice_fpd_ring = match_ring["FPD Code"].values[0] if not match_ring.empty else ""
+
+        if ring_type == "Rotary":
+            identificativo = "2300-IMPELLER WEAR RING"
+            item_code      = "40224…"
+        else:
+            identificativo = "1500-CASING WEAR RING"
+            item_code      = "40223…"
+
+        descr_ring = (
+            f"RING, WEAR - {ring_type} {model} {size}, "
+            f"ID {int_dia}mm, OD {ext_dia}mm, LENGTH {length_ring}mm"
+        )
+        if note_ring:
+            descr_ring += f", {note_ring}"
+        if clearance == "Yes":
+            descr_ring += ", INCREASED CLEARANCE"
+        descr_ring += f", {materiale_ring}"
+        if note2_ring:
+            descr_ring += f", {note2_ring}"
+
+        st.session_state["output_data"] = {
+            "Item":               item_code,
+            "Description":        descr_ring,
+            "Identificativo":     identificativo,
+            "Classe ricambi":     "1-2-3",
+            "Categories":         "FASCIA ITE 4",
+            "Catalog":            "ALBERO",
+            "Disegno":            dwg_ring,
+            "Material":           materiale_ring,
+            "FPD material code":  codice_fpd_ring,
+            "Template":           "FPD_BUY_1",
+            "ERP_L1":             "20_TURNKEY_MACHINING",
+            "ERP_L2":             "24_RINGS",
+            "To supplier":        ""
+        }
 
 # Output finale
 if "output_data" in st.session_state:
