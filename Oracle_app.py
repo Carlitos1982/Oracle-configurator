@@ -1065,7 +1065,7 @@ elif selected_part == "Pin, Dowel":
     # Standard (può restare vuoto)
     standard     = st.selectbox("Standard", [""] + ["ISO 2338"], key="pin_standard")
 
-    # *** Nota prima del materiale ***
+    # Nota prima del materiale
     pre_material_note = st.text_area(
         "Note (opzionale, prima del materiale)",
         height=80,
@@ -1082,9 +1082,7 @@ elif selected_part == "Pin, Dowel":
     mprefix_pin  = st.selectbox("Material Prefix", [""] + prefixes_pin, key="mprefix_pin")
 
     if mtype_pin == "MISCELLANEOUS":
-        names_pin = materials_df[
-            materials_df["Material Type"] == mtype_pin
-        ]["Name"].dropna().drop_duplicates().tolist()
+        names_pin = materials_df[materials_df["Material Type"] == mtype_pin]["Name"].dropna().drop_duplicates().tolist()
     else:
         names_pin = materials_df[
             (materials_df["Material Type"] == mtype_pin) &
@@ -1095,9 +1093,8 @@ elif selected_part == "Pin, Dowel":
     # Material Note (opzionale, dopo il materiale)
     material_note_pin = st.text_area("Material Note (opzionale)", height=80, key="pin_matnote")
 
-    # Bottone di generazione con key univoca
     if st.button("Genera Output", key="gen_pin_dowel"):
-        # Material / FPD code
+        # Costruzione Material / FPD code
         if mtype_pin != "MISCELLANEOUS":
             materiale_pin = f"{mtype_pin} {mprefix_pin} {mname_pin}".strip()
             match_pin     = materials_df[
@@ -1113,19 +1110,20 @@ elif selected_part == "Pin, Dowel":
             ]
         codice_fpd_pin = match_pin["FPD Code"].values[0] if not match_pin.empty else ""
 
-        # Costruzione descrizione
-        descr_pin = (
-            f"PIN, DOWEL - DIAMETER: {int(diameter)}{uom_diameter}, "
+        # Costruzione descrizione tramite join dei segmenti
+        parts = [
+            f"PIN, DOWEL - DIAMETER: {int(diameter)}{uom_diameter}",
             f"LENGTH: {int(length)}{uom_length}"
-        )
+        ]
         if standard:
-            descr_pin += f", {standard}"
+            parts.append(standard)
         if pre_material_note:
-            descr_pin += f", {pre_material_note}"    # nota prima del materiale
-
-        descr_pin += f", {materiale_pin}"
+            parts.append(pre_material_note)
+        parts.append(materiale_pin)
         if material_note_pin:
-            descr_pin += f", {material_note_pin}"
+            parts.append(material_note_pin)
+
+        descr_pin = ", ".join(parts)
 
         # Memorizzo l’output
         st.session_state["output_data"] = {
@@ -1142,7 +1140,7 @@ elif selected_part == "Pin, Dowel":
             "ERP_L2":             "14_PINS",
             "To supplier":        "",
             "Quality":            ""
-        }        
+        }
         
 
 # Output finale
