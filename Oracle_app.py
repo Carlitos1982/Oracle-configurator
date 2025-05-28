@@ -7,29 +7,34 @@ st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️"
 # Stile HTML per layout con divisione visiva tra colonne
 st.markdown("""
     <style>
+    /* Forzatura layout flessibile */
     .main > div {
         display: flex;
         gap: 1rem;
     }
+
     .block-container {
         padding-top: 1rem;
     }
-    div[data-testid="column"] {
-        padding-top: 0.5rem;
-    }
-    div[data-testid="column"]:nth-of-type(1) {
+
+    /* Colonna sinistra: bordo a destra */
+    div[data-testid="stVerticalBlock"] > div:nth-of-type(1) {
         border-right: 2px solid #aaa;
         padding-right: 1.5rem;
     }
-    div[data-testid="column"]:nth-of-type(2) {
+
+    /* Colonna destra: sfondo grigio chiaro */
+    div[data-testid="stVerticalBlock"] > div:nth-of-type(2) {
         background-color: #f9f9f9;
         padding-left: 1.5rem;
     }
+
+    /* Allineamento titoli */
     h3 {
         margin-top: 0;
     }
     </style>
-""", unsafe_allow_html=True)#
+""", unsafe_allow_html=True)
 
 st.title("Oracle Item Setup - Web App")
 
