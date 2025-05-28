@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 
-# Configura la pagina
+# Configura pagina Streamlit
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# Applica lo stile personalizzato alle colonne
+# Stile HTML per layout con divisione visiva tra colonne
 st.markdown("""
     <style>
     .main > div {
@@ -25,16 +25,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Titolo
 st.title("Oracle Item Setup - Web App")
 
-# Caricamento dati
+# Caricamento dati da Excel online
 @st.cache_data
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
     xls = pd.ExcelFile(url)
-    size_df = pd.read_excel(xls, sheet_name="Pump Size")
-    features_df = pd.read_excel(xls, sheet_name="Features")
+    size_df      = pd.read_excel(xls, sheet_name="Pump Size")
+    features_df  = pd.read_excel(xls, sheet_name="Features")
     materials_df = pd.read_excel(xls, sheet_name="Materials")
 
     materials_df = materials_df.drop_duplicates(
@@ -47,22 +46,34 @@ def load_config_data():
         "materials_df": materials_df
     }
 
+# Carica i dati
 data = load_config_data()
 size_df = data["size_df"]
 features_df = data["features_df"]
 materials_df = data["materials_df"]
 
-# Liste base
-part_options = ["Baseplate, Pump", "Casing, Pump", "Impeller, Pump"]  # esempio
+# Liste pulite
 material_types = materials_df["Material Type"].dropna().unique().tolist()
-pump_models = sorted(size_df["Pump Model"].dropna().unique())
+pump_models = size_df["Pump Model"].dropna().unique().tolist()
 
-# Scelta parte
-selected_part = st.selectbox("Seleziona Parte", part_options)
+# Selezione parte
+part_options = [
+    "Baseplate, Pump",
+    "Casing, Pump",
+    "Casing Cover, Pump",
+    "Impeller, Pump",
+    "Shaft, Pump",
+    "Flange, Pipe",
+    "Gasket, Spiral Wound",
+    "Gasket, Flat",
+    "Bolt, Hexagonal",
+    "Gusset, Other",
+    "Nut, Hex",
+    "Stud, Threaded",
+    "Ring, Wear"
+]
 
-# Colonne layout
-col1, col2 = st.columns([2, 1])
-
+selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
 
 if selected_part == "Gasket, Flat":
     col1, col2 = st.columns(2)
@@ -133,3 +144,4 @@ if selected_part == "Gasket, Flat":
                 else:
                     st.text_input(campo, value=valore)
                     
+=
