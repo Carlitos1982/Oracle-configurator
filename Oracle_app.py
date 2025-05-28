@@ -74,7 +74,6 @@ part_options = [
 ]
 
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
-
 if selected_part == "Gasket, Flat":
     col1, col2 = st.columns(2)
 
@@ -135,7 +134,9 @@ if selected_part == "Gasket, Flat":
             }
 
     with col2:
+        st.markdown("---")  # linea orizzontale decorativa
         st.subheader("📤 Output")
+
         if "output_data" in st.session_state:
             st.markdown("_Clicca nei campi e usa Ctrl+C per copiare_")
             for campo, valore in st.session_state["output_data"].items():
@@ -143,4 +144,3 @@ if selected_part == "Gasket, Flat":
                     st.text_area(campo, value=valore, height=100)
                 else:
                     st.text_input(campo, value=valore)
-                    
