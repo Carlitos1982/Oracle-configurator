@@ -1,13 +1,12 @@
 import streamlit as st
 import pandas as pd
 
-# Configura pagina Streamlit
+# Configura la pagina
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# Stile HTML per layout con divisione visiva tra colonne
+# Stile globale (colonne, sfondo output, bordo input)
 st.markdown("""
     <style>
-    /* Imposta layout flessibile */
     .main > div {
         display: flex;
         gap: 1rem;
@@ -17,7 +16,6 @@ st.markdown("""
         padding-top: 1rem;
     }
 
-    /* Rende la PRIMA COLONNA con bordo a destra */
     section.main div[data-testid="column"] {
         position: relative;
     }
@@ -32,18 +30,18 @@ st.markdown("""
         background-color: #aaa;
     }
 
-    /* Colonna destra con sfondo */
     section.main div[data-testid="column"]:nth-of-type(2) {
         background-color: #f9f9f9;
         padding-left: 1.5rem;
     }
 
-    /* Titoli perfettamente allineati */
     h3 {
         margin-top: 0;
     }
     </style>
 """, unsafe_allow_html=True)
+
+# Titolo
 st.title("Oracle Item Setup - Web App")
 
 # Caricamento dati da Excel online
@@ -51,10 +49,11 @@ st.title("Oracle Item Setup - Web App")
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
     xls = pd.ExcelFile(url)
-    size_df      = pd.read_excel(xls, sheet_name="Pump Size")
-    features_df  = pd.read_excel(xls, sheet_name="Features")
+    size_df = pd.read_excel(xls, sheet_name="Pump Size")
+    features_df = pd.read_excel(xls, sheet_name="Features")
     materials_df = pd.read_excel(xls, sheet_name="Materials")
 
+    # Rimuovi duplicati da materiali
     materials_df = materials_df.drop_duplicates(
         subset=["Material Type", "Prefix", "Name"]
     ).reset_index(drop=True)
@@ -65,17 +64,17 @@ def load_config_data():
         "materials_df": materials_df
     }
 
-# Carica i dati
+# Caricamento dati
 data = load_config_data()
 size_df = data["size_df"]
 features_df = data["features_df"]
 materials_df = data["materials_df"]
 
-# Liste pulite
+# Liste dinamiche
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 pump_models = size_df["Pump Model"].dropna().unique().tolist()
 
-# Selezione parte
+# Lista delle parti disponibili
 part_options = [
     "Baseplate, Pump",
     "Casing, Pump",
@@ -93,14 +92,15 @@ part_options = [
 ]
 
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
-if selected_part == "Gasket, Flat":
-    st.markdown("---")  # Riga sopra l’input/output
 
-    col1, col2 = st.columns(2)
+if selected_part == "Gasket, Flat":
+    st.markdown("---")  # Riga sopra tutto
+
+    col1, col2, col3 = st.columns([1, 1, 1])
 
     with col1:
-        st.markdown("### 🛠️ Input - Gasket, Flat")
-        st.markdown("---")  # Riga subito sotto il titolo
+        st.markdown("### 🛠️ Input")
+        st.markdown("---")
 
         thickness = st.number_input("Thickness", min_value=0.0, step=0.1, format="%.1f", key="flat_thk")
         uom = st.selectbox("UOM", ["mm", "inches"], key="flat_uom")
@@ -157,7 +157,7 @@ if selected_part == "Gasket, Flat":
 
     with col2:
         st.markdown("### 📤 Output")
-        st.markdown("---")  # Riga orizzontale dopo il titolo output
+        st.markdown("---")
 
         if "output_data" in st.session_state:
             st.markdown("_Clicca nei campi e usa Ctrl+C per copiare_")
@@ -166,3 +166,11 @@ if selected_part == "Gasket, Flat":
                     st.text_area(campo, value=valore, height=100)
                 else:
                     st.text_input(campo, value=valore)
+
+    with col3:
+        st.markdown("### 🧾 DataLoad")
+        st.markdown("---")
+        st.markdown("Qui comparirà:")
+        st.markdown("- ✅ L'**item number** (se creato o esistente)")
+        st.markdown("- ✅ La **stringa pronta per DataLoad Classic**")
+        st.markdown("_Funzione in arrivo…_")
