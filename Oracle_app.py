@@ -64,7 +64,7 @@ selected_part = st.selectbox("Seleziona Parte", part_options)
 col1, col2 = st.columns([2, 1])
 
 
-elif selected_part == "Gasket, Flat":
+if selected_part == "Gasket, Flat":
     col1, col2 = st.columns(2)
 
     with col1:
