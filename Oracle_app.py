@@ -1,8 +1,10 @@
 import streamlit as st
 import pandas as pd
 
-# Configurazione pagina
+# Configura la pagina
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
+
+# Applica lo stile personalizzato alle colonne
 st.markdown("""
     <style>
     .main > div {
@@ -21,9 +23,10 @@ st.markdown("""
         padding-left: 1.5rem;
     }
     </style>
-""", unsafe_allow_html=True)=
+""", unsafe_allow_html=True)
 
-st.title("Oracle Item Setup - Web App")
+# Titolo
+st.title("Oracle Item Setup - Web App")")
 
 # Caricamento dati
 @st.cache_data
