@@ -56,63 +56,38 @@ def load_config_data():
     size_df = pd.read_excel(xls, sheet_name="Pump Size")
     features_df = pd.read_excel(xls, sheet_name="Features")
     materials_df = pd.read_excel(xls, sheet_name="Materials")
-
-    materials_df = materials_df.drop_duplicates(
-        subset=["Material Type", "Prefix", "Name"]
-    ).reset_index(drop=True)
-
+    materials_df = materials_df.drop_duplicates(subset=["Material Type", "Prefix", "Name"]).reset_index(drop=True)
     return {
         "size_df": size_df,
         "features_df": features_df,
         "materials_df": materials_df
     }
 
-# Caricamento dei dati
+# Caricamento dati
 data = load_config_data()
 size_df = data["size_df"]
 features_df = data["features_df"]
 materials_df = data["materials_df"]
 
-# Liste dinamiche per le selezioni
+# Liste dinamiche
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 pump_models = size_df["Pump Model"].dropna().unique().tolist()
 
-# Elenco delle parti selezionabili
-part_options = [
-    "Baseplate, Pump",
-    "Casing, Pump",
-    "Casing Cover, Pump",
-    "Impeller, Pump",
-    "Shaft, Pump",
-    "Flange, Pipe",
-    "Gasket, Spiral Wound",
-    "Gasket, Flat",
-    "Bolt, Hexagonal",
-    "Gusset, Other",
-    "Nut, Hex",
-    "Stud, Threaded",
-    "Ring, Wear"
-]
-
-# Selettore della parte
+# Parti disponibili
+part_options = ["Gasket, Flat"]
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
 
-# Selettore di parte
-selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
-
+# Gasket, Flat
 if selected_part == "Gasket, Flat":
     st.markdown("---")
-
     col1, col2, col3 = st.columns([1, 1, 1])
 
     with col1:
         st.markdown("### 🛠️ Input")
         st.markdown("---")
-
         thickness = st.number_input("Thickness", min_value=0.0, step=0.1, format="%.1f", key="flat_thk")
         uom = st.selectbox("UOM", ["mm", "inches"], key="flat_uom")
         dwg = st.text_input("Dwg/doc number", key="flat_dwg")
-
         mtype = st.selectbox("Material Type", [""] + material_types, key="flat_mtype")
         pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
         prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
@@ -142,7 +117,6 @@ if selected_part == "Gasket, Flat":
                     (materials_df["Name"] == mname)
                 ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
-
             descr = f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale}"
 
             st.session_state["output_data"] = {
@@ -165,7 +139,6 @@ if selected_part == "Gasket, Flat":
     with col2:
         st.markdown("### 📤 Output")
         st.markdown("---")
-
         if "output_data" in st.session_state:
             for campo in [
                 "Item", "Description", "Identificativo", "Classe ricambi", "Categories", "Catalog",
@@ -183,4 +156,4 @@ if selected_part == "Gasket, Flat":
         st.markdown("---")
         st.text_input("Item Number (esistente o nuovo)", "")
         st.text_area("Stringa per DataLoad", value="(In arrivo…)", height=200)
-        st.empty()  # Riempitivo per allineare
+        st.empty()
