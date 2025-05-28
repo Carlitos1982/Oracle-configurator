@@ -26,7 +26,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Titolo
-st.title("Oracle Item Setup - Web App")")
+st.title("Oracle Item Setup - Web App")
 
 # Caricamento dati
 @st.cache_data
