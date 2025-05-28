@@ -1,14 +1,14 @@
 import streamlit as st
 import pandas as pd
 
-# Configura la pagina
+# Configurazione della pagina
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# Stile grafico e layout 3 colonne con sfondo
+# Stile CSS per layout e sfondo
 st.markdown("""
     <style>
-    body {
-        background-color: #eef2f7;
+    html, body, .main {
+        background-color: #eef2f7 !important;
     }
 
     .main > div {
@@ -45,10 +45,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Titolo dell'app
+# Titolo della pagina
 st.title("Oracle Item Setup - Web App")
 
-# Caricamento dati di configurazione
+# Funzione per caricare i dati
 @st.cache_data
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
@@ -67,17 +67,17 @@ def load_config_data():
         "materials_df": materials_df
     }
 
-# Carica i dati
+# Caricamento dei dati
 data = load_config_data()
 size_df = data["size_df"]
 features_df = data["features_df"]
 materials_df = data["materials_df"]
 
-# Liste per dropdown
+# Liste dinamiche per le selezioni
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 pump_models = size_df["Pump Model"].dropna().unique().tolist()
 
-# Elenco delle parti configurabili
+# Elenco delle parti selezionabili
 part_options = [
     "Baseplate, Pump",
     "Casing, Pump",
@@ -93,6 +93,9 @@ part_options = [
     "Stud, Threaded",
     "Ring, Wear"
 ]
+
+# Selettore della parte
+selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
 
 # Selettore di parte
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
