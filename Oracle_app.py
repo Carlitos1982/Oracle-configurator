@@ -1,10 +1,9 @@
 import streamlit as st
 import pandas as pd
 
-# Configura la pagina
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# CSS aggiornato per layout e colori accattivanti
+# CSS aggiornato
 st.markdown("""
     <style>
     body {
@@ -45,7 +44,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Titolo
 st.title("Oracle Item Setup - Web App")
 
 @st.cache_data
@@ -68,7 +66,6 @@ features_df = data["features_df"]
 materials_df = data["materials_df"]
 
 material_types = materials_df["Material Type"].dropna().unique().tolist()
-pump_models = size_df["Pump Model"].dropna().unique().tolist()
 
 part_options = ["Gasket, Flat"]
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
@@ -148,6 +145,22 @@ if selected_part == "Gasket, Flat":
     with col3:
         st.markdown("### 🧾 DataLoad")
         st.markdown("---")
-        st.text_input("Item Number (esistente o nuovo)", "")
-        st.text_area("Stringa per DataLoad", value="(In arrivo…)", height=200)
-        st.empty()
+
+        dataload_mode = st.radio(
+            "Modalità operazione",
+            options=["Creazione item", "Aggiornamento item"],
+            index=0,
+            horizontal=True
+        )
+
+        item_code = st.text_input("Item Number", placeholder="Es. 50158-0001", key="item_code_input")
+
+        dataload_string = ""
+        if "output_data" in st.session_state and item_code:
+            data = st.session_state["output_data"]
+            if dataload_mode == "Creazione item":
+                dataload_string = f"""{item_code}\t{data['Description']}\t{data['Template']}\t{data['Identificativo']}\t{data['ERP_L1']}\t{data['ERP_L2']}\t{data['Catalog']}\t{data['Material']}\t{data['FPD material code']}"""
+            else:
+                dataload_string = f"""{item_code}\tAggiorna:\t{data['Description']}\t{data['Material']}\t{data['FPD material code']}"""
+
+        st.text_area("Stringa per DataLoad", value=dataload_string, height=200)
