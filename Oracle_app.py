@@ -4,30 +4,42 @@ import pandas as pd
 # Configura la pagina
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# CSS per tema chiaro, leggibilità, e messaggio rotazione
+# CSS moderno per riquadri eleganti e leggibilità
 st.markdown("""
 <style>
 html, body, [data-testid="stAppViewContainer"] {
-    background-color: #FDFDFD !important;
-    color: #202020 !important;
+    background-color: #FAFAFA !important;
+    color: #222 !important;
+    font-family: 'Segoe UI', sans-serif;
 }
-h1, h2, h3, h4, h5, h6, p, label, div, span, textarea, input, select {
-    color: #202020 !important;
+h1, h2, h3, h4, h5, h6, p, label {
+    color: #222 !important;
+    font-weight: 600;
 }
 input, textarea, select {
     background-color: #ffffff !important;
-    color: #202020 !important;
-    border: 1px solid #999 !important;
+    color: #222 !important;
+    border: 1px solid #ccc !important;
+    border-radius: 8px !important;
+    padding: 0.4rem 0.6rem !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+    font-size: 0.95rem !important;
 }
 ::placeholder {
-    color: #666 !important;
+    color: #999 !important;
     opacity: 1 !important;
 }
 .block-container {
     background-color: white !important;
     padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.05);
+}
+section.main div[data-testid="column"]:nth-of-type(2) {
+    background-color: #F0F8FF;
+    padding-left: 1.5rem;
+    border-left: 2px solid #d0d0d0;
+    border-radius: 0 10px 10px 0;
 }
 section.main div[data-testid="column"]:nth-of-type(1)::after {
     content: "";
@@ -36,19 +48,13 @@ section.main div[data-testid="column"]:nth-of-type(1)::after {
     right: 0;
     width: 2px;
     height: 100%;
-    background-color: #ccc;
-}
-section.main div[data-testid="column"]:nth-of-type(2) {
-    background-color: #EBF5FB;
-    padding-left: 1.5rem;
-    border-left: 2px solid #ccc;
-    border-radius: 0 10px 10px 0;
+    background-color: #ddd;
 }
 #rotate-msg {
     display: block !important;
     font-weight: bold;
-    color: #AA0000;
-    background-color: #fff0f0;
+    color: #B00020;
+    background-color: #fff3f3;
     padding: 0.75rem;
     border-radius: 10px;
     margin-top: 1rem;
@@ -66,14 +72,13 @@ st.markdown('<div id="rotate-msg">📱 Per una migliore esperienza, ruota il tel
 
 st.title("Oracle Item Setup - Web App")
 
-# Esempio mock per materiali
+# Mock dati materiali
 materials_df = pd.DataFrame({
     "Material Type": ["ASTM", "ASTM", "EN", "MISCELLANEOUS"],
     "Prefix": ["A", "B", "C", None],
     "Name": ["304", "316", "S235JR", "SPECIAL"],
     "FPD Code": ["FPD-A304", "FPD-B316", "FPD-C235", "FPD-MISC"]
 })
-
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", ["Gasket, Flat"])
@@ -86,12 +91,10 @@ if selected_part == "Gasket, Flat":
         thickness = st.number_input("Thickness", min_value=0.0, step=0.1, format="%.1f")
         uom = st.selectbox("UOM", ["mm", "inches"])
         dwg = st.text_input("Dwg/doc number")
-
         mtype = st.selectbox("Material Type", [""] + material_types)
         pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
         prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
         mprefix = st.selectbox("Material Prefix", [""] + prefixes)
-
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
         else:
@@ -116,9 +119,7 @@ if selected_part == "Gasket, Flat":
                     (materials_df["Name"] == mname)
                 ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
-
             descr = f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale}"
-
             st.session_state["output_data"] = {
                 "Item": "50158…",
                 "Description": descr,
