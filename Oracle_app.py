@@ -3,47 +3,82 @@ import pandas as pd
 
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# CSS aggiornato
+# CSS generale + mobile
 st.markdown("""
-    <style>
-    body {
-        background-color: #e0ecf8 !important;
+<style>
+body {
+    background-color: #e0ecf8 !important;
+}
+
+.block-container {
+    background-color: white !important;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.15);
+}
+
+section.main div[data-testid="column"] {
+    position: relative;
+}
+
+section.main div[data-testid="column"]:nth-of-type(1)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 2px;
+    height: 100%;
+    background-color: #ccc;
+}
+
+section.main div[data-testid="column"]:nth-of-type(2) {
+    background-color: #f0f7fc;
+    padding-left: 1.5rem;
+    border-left: 2px solid #ccc;
+    border-radius: 0 10px 10px 0;
+}
+
+h3 {
+    margin-top: 0;
+}
+
+/* Mobile support */
+@media (max-width: 800px) {
+    #rotate-msg {
+        display: block;
+        font-weight: bold;
+        color: #AA0000;
+        margin-bottom: 1rem;
+        background-color: #fff0f0;
+        padding: 0.5rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+}
+
+#rotate-msg {
+    display: none;
+}
+
+@media (max-width: 1000px) {
+    .block-container .main .element-container {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
     }
 
-    .block-container {
-        background-color: white !important;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    .block-container section[data-testid="stHorizontalBlock"] > div {
+        min-width: 300px !important;
+        margin-right: 1rem;
     }
-
-    section.main div[data-testid="column"] {
-        position: relative;
-    }
-
-    section.main div[data-testid="column"]:nth-of-type(1)::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 2px;
-        height: 100%;
-        background-color: #ccc;
-    }
-
-    section.main div[data-testid="column"]:nth-of-type(2) {
-        background-color: #f0f7fc;
-        padding-left: 1.5rem;
-        border-left: 2px solid #ccc;
-        border-radius: 0 10px 10px 0;
-    }
-
-    h3 {
-        margin-top: 0;
-    }
-    </style>
+}
+</style>
 """, unsafe_allow_html=True)
 
+# Messaggio mobile
+st.markdown('<div id="rotate-msg">📱 Per una migliore esperienza, ruota il telefono in orizzontale.</div>', unsafe_allow_html=True)
+
+# Titolo
 st.title("Oracle Item Setup - Web App")
 
 @st.cache_data
@@ -64,7 +99,6 @@ data = load_config_data()
 size_df = data["size_df"]
 features_df = data["features_df"]
 materials_df = data["materials_df"]
-
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 
 part_options = ["Gasket, Flat"]
@@ -145,16 +179,13 @@ if selected_part == "Gasket, Flat":
     with col3:
         st.markdown("### 🧾 DataLoad")
         st.markdown("---")
-
         dataload_mode = st.radio(
             "Modalità operazione",
             options=["Creazione item", "Aggiornamento item"],
             index=0,
             horizontal=True
         )
-
         item_code = st.text_input("Item Number", placeholder="Es. 50158-0001", key="item_code_input")
-
         dataload_string = ""
         if "output_data" in st.session_state and item_code:
             data = st.session_state["output_data"]
@@ -162,5 +193,4 @@ if selected_part == "Gasket, Flat":
                 dataload_string = f"""{item_code}\t{data['Description']}\t{data['Template']}\t{data['Identificativo']}\t{data['ERP_L1']}\t{data['ERP_L2']}\t{data['Catalog']}\t{data['Material']}\t{data['FPD material code']}"""
             else:
                 dataload_string = f"""{item_code}\tAggiorna:\t{data['Description']}\t{data['Material']}\t{data['FPD material code']}"""
-
         st.text_area("Stringa per DataLoad", value=dataload_string, height=200)
