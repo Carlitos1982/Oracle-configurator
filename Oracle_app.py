@@ -4,13 +4,17 @@ import pandas as pd
 # Configura la pagina
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# Stile CSS con sfondo e layout 3 colonne
+# CSS con sfondo e contenuto elegante
 st.markdown("""
     <style>
-    .block-container {
+    body {
         background-color: #eef2f7 !important;
+    }
+
+    .block-container {
+        background-color: white !important;
         padding: 2rem;
-        border-radius: 8px;
+        border-radius: 10px;
         box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
