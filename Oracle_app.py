@@ -1,21 +1,22 @@
 import streamlit as st
 import pandas as pd
 
+# Configura la pagina
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# CSS per sfondo chiaro forzato e layout responsive
+# CSS per tema chiaro, leggibilità, e messaggio rotazione
 st.markdown("""
 <style>
 html, body, [data-testid="stAppViewContainer"] {
-    background-color: #ffffff !important;
-    color: #000000 !important;
+    background-color: #FDFDFD !important;
+    color: #202020 !important;
 }
 h1, h2, h3, h4, h5, h6, p, label, div, span, textarea, input, select {
-    color: #000000 !important;
+    color: #202020 !important;
 }
 input, textarea, select {
     background-color: #ffffff !important;
-    color: #000000 !important;
+    color: #202020 !important;
     border: 1px solid #999 !important;
 }
 ::placeholder {
@@ -26,7 +27,7 @@ input, textarea, select {
     background-color: white !important;
     padding: 2rem;
     border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
 }
 section.main div[data-testid="column"]:nth-of-type(1)::after {
     content: "";
@@ -38,35 +39,24 @@ section.main div[data-testid="column"]:nth-of-type(1)::after {
     background-color: #ccc;
 }
 section.main div[data-testid="column"]:nth-of-type(2) {
-    background-color: #f0f7fc;
+    background-color: #EBF5FB;
     padding-left: 1.5rem;
     border-left: 2px solid #ccc;
     border-radius: 0 10px 10px 0;
 }
-@media (max-width: 800px) {
-    #rotate-msg {
-        display: block;
-        font-weight: bold;
-        color: #AA0000;
-        margin-bottom: 1rem;
-        background-color: #fff0f0;
-        padding: 0.5rem;
-        border-radius: 8px;
-        text-align: center;
-    }
-}
 #rotate-msg {
-    display: none;
+    display: block !important;
+    font-weight: bold;
+    color: #AA0000;
+    background-color: #fff0f0;
+    padding: 0.75rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+    text-align: center;
 }
-@media (max-width: 1000px) {
-    .block-container .main .element-container {
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto;
-    }
-    .block-container section[data-testid="stHorizontalBlock"] > div {
-        min-width: 300px !important;
-        margin-right: 1rem;
+@media (min-width: 801px) {
+    #rotate-msg {
+        display: none !important;
     }
 }
 </style>
@@ -76,37 +66,32 @@ st.markdown('<div id="rotate-msg">📱 Per una migliore esperienza, ruota il tel
 
 st.title("Oracle Item Setup - Web App")
 
-@st.cache_data
-def load_config_data():
-    url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
-    xls = pd.ExcelFile(url)
-    size_df = pd.read_excel(xls, sheet_name="Pump Size")
-    features_df = pd.read_excel(xls, sheet_name="Features")
-    materials_df = pd.read_excel(xls, sheet_name="Materials")
-    materials_df = materials_df.drop_duplicates(subset=["Material Type", "Prefix", "Name"]).reset_index(drop=True)
-    return {"size_df": size_df, "features_df": features_df, "materials_df": materials_df}
+# Esempio mock per materiali
+materials_df = pd.DataFrame({
+    "Material Type": ["ASTM", "ASTM", "EN", "MISCELLANEOUS"],
+    "Prefix": ["A", "B", "C", None],
+    "Name": ["304", "316", "S235JR", "SPECIAL"],
+    "FPD Code": ["FPD-A304", "FPD-B316", "FPD-C235", "FPD-MISC"]
+})
 
-data = load_config_data()
-materials_df = data["materials_df"]
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 
-part_options = ["Gasket, Flat"]
-selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
+selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", ["Gasket, Flat"])
+
+col1, col2, col3 = st.columns(3)
 
 if selected_part == "Gasket, Flat":
-    st.markdown("---")
-    col1, col2, col3 = st.columns([1, 1, 1])
-
     with col1:
-        st.markdown("### 🛠️ Input")
-        st.markdown("---")
+        st.subheader("🔧 Input")
         thickness = st.number_input("Thickness", min_value=0.0, step=0.1, format="%.1f")
         uom = st.selectbox("UOM", ["mm", "inches"])
         dwg = st.text_input("Dwg/doc number")
+
         mtype = st.selectbox("Material Type", [""] + material_types)
         pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
         prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
         mprefix = st.selectbox("Material Prefix", [""] + prefixes)
+
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
         else:
@@ -131,6 +116,7 @@ if selected_part == "Gasket, Flat":
                     (materials_df["Name"] == mname)
                 ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
+
             descr = f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale}"
 
             st.session_state["output_data"] = {
@@ -151,8 +137,7 @@ if selected_part == "Gasket, Flat":
             }
 
     with col2:
-        st.markdown("### 📤 Output")
-        st.markdown("---")
+        st.subheader("📤 Output")
         if "output_data" in st.session_state:
             for campo, valore in st.session_state["output_data"].items():
                 if campo == "Description":
@@ -161,15 +146,10 @@ if selected_part == "Gasket, Flat":
                     st.text_input(campo, value=valore)
 
     with col3:
-        st.markdown("### 🧾 DataLoad")
-        st.markdown("---")
-        dataload_mode = st.radio("Modalità operazione", ["Creazione item", "Aggiornamento item"], horizontal=True)
-        item_code = st.text_input("Item Number", placeholder="Es. 50158-0001")
-        dataload_string = ""
-        if "output_data" in st.session_state and item_code:
-            d = st.session_state["output_data"]
-            if dataload_mode == "Creazione item":
-                dataload_string = f"{item_code}\t{d['Description']}\t{d['Template']}\t{d['Identificativo']}\t{d['ERP_L1']}\t{d['ERP_L2']}\t{d['Catalog']}\t{d['Material']}\t{d['FPD material code']}"
-            else:
-                dataload_string = f"{item_code}\tAggiorna:\t{d['Description']}\t{d['Material']}\t{d['FPD material code']}"
-        st.text_area("Stringa per DataLoad", value=dataload_string, height=200)
+        st.subheader("🧾 DataLoad")
+        mode = st.radio("Modalità operazione", ["Creazione item", "Aggiornamento item"])
+        item_num = st.text_input("Item Number", placeholder="Es. 50158-0001")
+        if "output_data" in st.session_state:
+            out = st.session_state["output_data"]
+            stringa_dl = f"{item_num}\t{out['Description']}\t{out['Template']}\t{out['ERP_L1']}\t{out['ERP_L2']}"
+            st.text_area("Stringa per DataLoad", value=stringa_dl, height=100)
