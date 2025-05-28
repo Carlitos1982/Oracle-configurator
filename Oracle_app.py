@@ -4,7 +4,7 @@ import pandas as pd
 # Configura la pagina
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# CSS moderno per riquadri eleganti e leggibilità
+# CSS moderno + fix frecce selectbox
 st.markdown("""
 <style>
 html, body, [data-testid="stAppViewContainer"] {
@@ -24,6 +24,16 @@ input, textarea, select {
     padding: 0.4rem 0.6rem !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
     font-size: 0.95rem !important;
+}
+select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='12' viewBox='0 0 24 24' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.5rem center !important;
+    background-size: 1rem !important;
+    padding-right: 2rem !important;
 }
 ::placeholder {
     color: #999 !important;
