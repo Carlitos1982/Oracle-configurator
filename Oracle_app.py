@@ -587,7 +587,7 @@ elif selected_part == "Flange, Pipe":
                 else:
                     st.text_input(campo, value=valore)
                     
-    elif selected_part == "Gate, Valve":
+elif selected_part == "Gate, Valve":
     with col1:
         st.subheader("Configurazione - Gate, Valve")
 
