@@ -4,18 +4,18 @@ import pandas as pd
 # Configura la pagina
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# CSS con sfondo e contenuto elegante
+# CSS aggiornato per layout e colori accattivanti
 st.markdown("""
     <style>
     body {
-        background-color: #eef2f7 !important;
+        background-color: #e0ecf8 !important;
     }
 
     .block-container {
         background-color: white !important;
         padding: 2rem;
         border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        box-shadow: 0 0 15px rgba(0,0,0,0.15);
     }
 
     section.main div[data-testid="column"] {
@@ -29,12 +29,14 @@ st.markdown("""
         right: 0;
         width: 2px;
         height: 100%;
-        background-color: #aaa;
+        background-color: #ccc;
     }
 
     section.main div[data-testid="column"]:nth-of-type(2) {
-        background-color: #f9f9f9;
+        background-color: #f0f7fc;
         padding-left: 1.5rem;
+        border-left: 2px solid #ccc;
+        border-radius: 0 10px 10px 0;
     }
 
     h3 {
@@ -46,7 +48,6 @@ st.markdown("""
 # Titolo
 st.title("Oracle Item Setup - Web App")
 
-# Caricamento dati
 @st.cache_data
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
@@ -69,11 +70,9 @@ materials_df = data["materials_df"]
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 pump_models = size_df["Pump Model"].dropna().unique().tolist()
 
-# Parti disponibili
 part_options = ["Gasket, Flat"]
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
 
-# === GASKET, FLAT ===
 if selected_part == "Gasket, Flat":
     st.markdown("---")
     col1, col2, col3 = st.columns([1, 1, 1])
