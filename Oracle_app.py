@@ -1,23 +1,17 @@
 import streamlit as st
 import pandas as pd
 
-# Configurazione della pagina
+# Configura la pagina
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# Stile CSS per layout e sfondo
+# Stile CSS con sfondo e layout 3 colonne
 st.markdown("""
     <style>
-    html, body, .main {
-        background-color: #eef2f7 !important;
-    }
-
-    .main > div {
-        display: flex;
-        gap: 1rem;
-    }
-
     .block-container {
-        padding-top: 1rem;
+        background-color: #eef2f7 !important;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
     section.main div[data-testid="column"] {
@@ -45,10 +39,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Titolo della pagina
+# Titolo
 st.title("Oracle Item Setup - Web App")
 
-# Funzione per caricare i dati
+# Caricamento dati
 @st.cache_data
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
@@ -63,13 +57,11 @@ def load_config_data():
         "materials_df": materials_df
     }
 
-# Caricamento dati
 data = load_config_data()
 size_df = data["size_df"]
 features_df = data["features_df"]
 materials_df = data["materials_df"]
 
-# Liste dinamiche
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 pump_models = size_df["Pump Model"].dropna().unique().tolist()
 
@@ -77,7 +69,7 @@ pump_models = size_df["Pump Model"].dropna().unique().tolist()
 part_options = ["Gasket, Flat"]
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
 
-# Gasket, Flat
+# === GASKET, FLAT ===
 if selected_part == "Gasket, Flat":
     st.markdown("---")
     col1, col2, col3 = st.columns([1, 1, 1])
@@ -92,7 +84,6 @@ if selected_part == "Gasket, Flat":
         pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
         prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="flat_mprefix")
-
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
         else:
