@@ -14,6 +14,9 @@ st.markdown("""
     .block-container {
         padding-top: 1rem;
     }
+    div[data-testid="column"] {
+        padding-top: 0.5rem;
+    }
     div[data-testid="column"]:nth-of-type(1) {
         border-right: 2px solid #aaa;
         padding-right: 1.5rem;
@@ -22,8 +25,11 @@ st.markdown("""
         background-color: #f9f9f9;
         padding-left: 1.5rem;
     }
+    h3 {
+        margin-top: 0;
+    }
     </style>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=True)#
 
 st.title("Oracle Item Setup - Web App")
 
@@ -75,10 +81,13 @@ part_options = [
 
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
 if selected_part == "Gasket, Flat":
+    st.markdown("---")  # Riga sopra l’input/output
+
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("🛠️ Input - Gasket, Flat")
+        st.markdown("### 🛠️ Input - Gasket, Flat")
+        st.markdown("---")  # Riga subito sotto il titolo
 
         thickness = st.number_input("Thickness", min_value=0.0, step=0.1, format="%.1f", key="flat_thk")
         uom = st.selectbox("UOM", ["mm", "inches"], key="flat_uom")
@@ -134,8 +143,8 @@ if selected_part == "Gasket, Flat":
             }
 
     with col2:
-        st.markdown("---")  # linea orizzontale decorativa
-        st.subheader("📤 Output")
+        st.markdown("### 📤 Output")
+        st.markdown("---")  # Riga orizzontale dopo il titolo output
 
         if "output_data" in st.session_state:
             st.markdown("_Clicca nei campi e usa Ctrl+C per copiare_")
