@@ -144,4 +144,3 @@ if selected_part == "Gasket, Flat":
                 else:
                     st.text_input(campo, value=valore)
                     
-=
