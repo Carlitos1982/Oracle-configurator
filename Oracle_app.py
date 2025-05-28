@@ -4,9 +4,13 @@ import pandas as pd
 # Configura la pagina
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# Stile globale (colonne, sfondo output, bordo input)
+# Stile grafico e layout 3 colonne con sfondo
 st.markdown("""
     <style>
+    body {
+        background-color: #eef2f7;
+    }
+
     .main > div {
         display: flex;
         gap: 1rem;
@@ -41,10 +45,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Titolo
+# Titolo dell'app
 st.title("Oracle Item Setup - Web App")
 
-# Caricamento dati da Excel online
+# Caricamento dati di configurazione
 @st.cache_data
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
@@ -53,7 +57,6 @@ def load_config_data():
     features_df = pd.read_excel(xls, sheet_name="Features")
     materials_df = pd.read_excel(xls, sheet_name="Materials")
 
-    # Rimuovi duplicati da materiali
     materials_df = materials_df.drop_duplicates(
         subset=["Material Type", "Prefix", "Name"]
     ).reset_index(drop=True)
@@ -64,17 +67,17 @@ def load_config_data():
         "materials_df": materials_df
     }
 
-# Caricamento dati
+# Carica i dati
 data = load_config_data()
 size_df = data["size_df"]
 features_df = data["features_df"]
 materials_df = data["materials_df"]
 
-# Liste dinamiche
+# Liste per dropdown
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 pump_models = size_df["Pump Model"].dropna().unique().tolist()
 
-# Lista delle parti disponibili
+# Elenco delle parti configurabili
 part_options = [
     "Baseplate, Pump",
     "Casing, Pump",
@@ -91,10 +94,11 @@ part_options = [
     "Ring, Wear"
 ]
 
+# Selettore di parte
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
 
 if selected_part == "Gasket, Flat":
-    st.markdown("---")  # Riga sopra tutto
+    st.markdown("---")
 
     col1, col2, col3 = st.columns([1, 1, 1])
 
@@ -160,8 +164,12 @@ if selected_part == "Gasket, Flat":
         st.markdown("---")
 
         if "output_data" in st.session_state:
-            st.markdown("_Clicca nei campi e usa Ctrl+C per copiare_")
-            for campo, valore in st.session_state["output_data"].items():
+            for campo in [
+                "Item", "Description", "Identificativo", "Classe ricambi", "Categories", "Catalog",
+                "Disegno", "Material", "FPD material code", "Template", "ERP_L1", "ERP_L2",
+                "To supplier", "Quality"
+            ]:
+                valore = st.session_state["output_data"].get(campo, "")
                 if campo == "Description":
                     st.text_area(campo, value=valore, height=100)
                 else:
@@ -170,7 +178,6 @@ if selected_part == "Gasket, Flat":
     with col3:
         st.markdown("### 🧾 DataLoad")
         st.markdown("---")
-        st.markdown("Qui comparirà:")
-        st.markdown("- ✅ L'**item number** (se creato o esistente)")
-        st.markdown("- ✅ La **stringa pronta per DataLoad Classic**")
-        st.markdown("_Funzione in arrivo…_")
+        st.text_input("Item Number (esistente o nuovo)", "")
+        st.text_area("Stringa per DataLoad", value="(In arrivo…)", height=200)
+        st.empty()  # Riempitivo per allineare
