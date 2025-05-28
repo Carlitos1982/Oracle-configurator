@@ -1,10 +1,11 @@
+
 import streamlit as st
 import pandas as pd
 
-# Configura la pagina
+# Configurazione pagina
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# CSS moderno + fix frecce selectbox
+# --- CSS per layout e fix grafici ---
 st.markdown("""
 <style>
 html, body, [data-testid="stAppViewContainer"] {
@@ -12,77 +13,35 @@ html, body, [data-testid="stAppViewContainer"] {
     color: #222 !important;
     font-family: 'Segoe UI', sans-serif;
 }
-h1, h2, h3, h4, h5, h6, p, label {
-    color: #222 !important;
-    font-weight: 600;
-}
 input, textarea, select {
-    background-color: #ffffff !important;
+    background-color: white !important;
     color: #222 !important;
     border: 1px solid #ccc !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
     padding: 0.4rem 0.6rem !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
     font-size: 0.95rem !important;
 }
 select {
     appearance: none !important;
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
-    background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='12' viewBox='0 0 24 24' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") !important;
-    background-repeat: no-repeat !important;
-    background-position: right 0.5rem center !important;
-    background-size: 1rem !important;
+    background-color: white !important;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='10' viewBox='0 0 24 24' width='10' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
     padding-right: 2rem !important;
 }
-::placeholder {
-    color: #999 !important;
-    opacity: 1 !important;
-}
-.block-container {
+[data-baseweb="select"] > div {
     background-color: white !important;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 0 12px rgba(0,0,0,0.05);
-}
-section.main div[data-testid="column"]:nth-of-type(2) {
-    background-color: #F0F8FF;
-    padding-left: 1.5rem;
-    border-left: 2px solid #d0d0d0;
-    border-radius: 0 10px 10px 0;
-}
-section.main div[data-testid="column"]:nth-of-type(1)::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 2px;
-    height: 100%;
-    background-color: #ddd;
-}
-#rotate-msg {
-    display: block !important;
-    font-weight: bold;
-    color: #B00020;
-    background-color: #fff3f3;
-    padding: 0.75rem;
-    border-radius: 10px;
-    margin-top: 1rem;
-    text-align: center;
-}
-@media (min-width: 801px) {
-    #rotate-msg {
-        display: none !important;
-    }
+    border-radius: 8px !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div id="rotate-msg">📱 Per una migliore esperienza, ruota il telefono in orizzontale.</div>', unsafe_allow_html=True)
-
-st.title("Oracle Item Setup - Web App")
-
-# Mock dati materiali
+# --- Dummy materials ---
 materials_df = pd.DataFrame({
     "Material Type": ["ASTM", "ASTM", "EN", "MISCELLANEOUS"],
     "Prefix": ["A", "B", "C", None],
@@ -90,6 +49,8 @@ materials_df = pd.DataFrame({
     "FPD Code": ["FPD-A304", "FPD-B316", "FPD-C235", "FPD-MISC"]
 })
 material_types = materials_df["Material Type"].dropna().unique().tolist()
+
+st.title("Oracle Item Setup - Web App")
 
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", ["Gasket, Flat"])
 
