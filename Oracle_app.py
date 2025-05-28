@@ -7,7 +7,7 @@ st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️"
 # Stile HTML per layout con divisione visiva tra colonne
 st.markdown("""
     <style>
-    /* Forzatura layout flessibile */
+    /* Imposta layout flessibile */
     .main > div {
         display: flex;
         gap: 1rem;
@@ -17,25 +17,33 @@ st.markdown("""
         padding-top: 1rem;
     }
 
-    /* Colonna sinistra: bordo a destra */
-    div[data-testid="stVerticalBlock"] > div:nth-of-type(1) {
-        border-right: 2px solid #aaa;
-        padding-right: 1.5rem;
+    /* Rende la PRIMA COLONNA con bordo a destra */
+    section.main div[data-testid="column"] {
+        position: relative;
     }
 
-    /* Colonna destra: sfondo grigio chiaro */
-    div[data-testid="stVerticalBlock"] > div:nth-of-type(2) {
+    section.main div[data-testid="column"]:nth-of-type(1)::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 2px;
+        height: 100%;
+        background-color: #aaa;
+    }
+
+    /* Colonna destra con sfondo */
+    section.main div[data-testid="column"]:nth-of-type(2) {
         background-color: #f9f9f9;
         padding-left: 1.5rem;
     }
 
-    /* Allineamento titoli */
+    /* Titoli perfettamente allineati */
     h3 {
         margin-top: 0;
     }
     </style>
 """, unsafe_allow_html=True)
-
 st.title("Oracle Item Setup - Web App")
 
 # Caricamento dati da Excel online
