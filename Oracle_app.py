@@ -17,38 +17,31 @@ st.markdown("""
         border-radius: 10px !important;
         box-shadow: 0 0 15px rgba(0,0,0,0.15) !important;
       }
-      /* Colonna 2 con sfondo leggermente diverso */
+      /* Colonna centrale con sfondo leggermente diverso */
       section.main div[data-testid="column"]:nth-of-type(2) {
         background-color: #f0f7fc !important;
         padding-left: 1.5rem !important;
         border-left: 2px solid #ccc !important;
         border-radius: 0 10px 10px 0 !important;
       }
+      h3 {
+        margin-top: 0;
+      }
     </style>
 """, unsafe_allow_html=True)
 
-# --- Header con loghi e titolo (puro Streamlit) ---
-flowserve_logo = Image.open("assets/IMG_1456.png")  # Assicurati che esista
-oracle_logo   = Image.open("assets/IMG_1455.png")  # Assicurati che esista
+# --- Header: titolo a sinistra, logo Flowserve a destra ---
+flowserve_logo = Image.open("assets/IMG_1456.png")
 
-col1, col2, col3 = st.columns([1, 4, 1], gap="small")
-with col1:
-    st.write("")  # allinea in verticale
+col_left, col_right = st.columns([4, 1], gap="small")
+with col_left:
+    st.markdown("## Oracle Item Setup - Web App")
+with col_right:
     st.image(flowserve_logo, width=120)
-with col2:
-    # div alto come i loghi, per centrare verticalmente il titolo
-    st.markdown("""
-      <div style="display:flex; align-items:center; justify-content:center; height:120px;">
-        <h1 style="margin:0; font-size:2.5rem;">Oracle Item Setup - Web App</h1>
-      </div>
-    """, unsafe_allow_html=True)
-with col3:
-    st.write("")
-    st.image(oracle_logo, width=180)
 
 st.markdown("---")
 
-# --- Caricamento dati da Excel ---
+# --- Funzione per caricare i dati di configurazione ---
 @st.cache_data
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
@@ -65,60 +58,62 @@ def load_config_data():
         "materials_df": materials_df
     }
 
+# --- Caricamento dati ---
 data           = load_config_data()
 size_df        = data["size_df"]
 features_df    = data["features_df"]
 materials_df   = data["materials_df"]
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 
-# --- Scelta della parte ---
+# --- Scelta della parte da configurare ---
 part_options  = ["Gasket, Flat"]
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
 
-# --- Sezione “Gasket, Flat” ---
+# --- Logica per “Gasket, Flat” ---
 if selected_part == "Gasket, Flat":
     st.markdown("---")
     col_input, col_output, col_dataload = st.columns([1,1,1])
 
-    # Input
+    # Colonna INPUT
     with col_input:
         st.markdown("### 🛠️ Input")
         st.markdown("---")
         thickness = st.number_input("Thickness", min_value=0.0, step=0.1, format="%.1f", key="flat_thk")
         uom       = st.selectbox("UOM", ["mm","inches"], key="flat_uom")
         dwg       = st.text_input("Dwg/doc number", key="flat_dwg")
-        mtype     = st.selectbox("Material Type", [""]+material_types, key="flat_mtype")
+        mtype     = st.selectbox("Material Type", [""] + material_types, key="flat_mtype")
 
         pref_df  = materials_df[
-            (materials_df["Material Type"]==mtype)&
+            (materials_df["Material Type"] == mtype) &
             (materials_df["Prefix"].notna())
         ]
-        prefixes = sorted(pref_df["Prefix"].unique()) if mtype!="MISCELLANEOUS" else []
-        mprefix  = st.selectbox("Material Prefix", [""]+prefixes, key="flat_mprefix")
+        prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
+        mprefix  = st.selectbox("Material Prefix", [""] + prefixes, key="flat_mprefix")
 
-        if mtype=="MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"]==mtype]["Name"].dropna().tolist()
+        if mtype == "MISCELLANEOUS":
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
         else:
             names = materials_df[
-                (materials_df["Material Type"]==mtype)&
-                (materials_df["Prefix"]==mprefix)
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
-        mname = st.selectbox("Material Name", [""]+names, key="flat_mname")
+        mname = st.selectbox("Material Name", [""] + names, key="flat_mname")
 
         if st.button("Genera Output", key="gen_flat"):
-            if mtype!="MISCELLANEOUS":
+            if mtype != "MISCELLANEOUS":
                 materiale = f"{mtype} {mprefix} {mname}".strip()
-                match     = materials_df[
-                    (materials_df["Material Type"]==mtype)&
-                    (materials_df["Prefix"]==mprefix)&
-                    (materials_df["Name"]==mname)
+                match      = materials_df[
+                    (materials_df["Material Type"] == mtype) &
+                    (materials_df["Prefix"] == mprefix) &
+                    (materials_df["Name"] == mname)
                 ]
             else:
                 materiale = mname
-                match     = materials_df[
-                    (materials_df["Material Type"]==mtype)&
-                    (materials_df["Name"]==mname)
+                match      = materials_df[
+                    (materials_df["Material Type"] == mtype) &
+                    (materials_df["Name"] == mname)
                 ]
+
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
             descr      = f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale}"
 
@@ -139,7 +134,7 @@ if selected_part == "Gasket, Flat":
                 "Quality":            ""
             }
 
-    # Output
+    # Colonna OUTPUT
     with col_output:
         st.markdown("### 📤 Output")
         st.markdown("---")
@@ -151,12 +146,12 @@ if selected_part == "Gasket, Flat":
                 "To supplier","Quality"
             ]:
                 valore = st.session_state["output_data"].get(campo,"")
-                if campo=="Description":
+                if campo == "Description":
                     st.text_area(campo, value=valore, height=100)
                 else:
                     st.text_input(campo, value=valore)
 
-    # DataLoad
+    # Colonna DATALOAD
     with col_dataload:
         st.markdown("### 🧾 DataLoad")
         st.markdown("---")
@@ -167,7 +162,7 @@ if selected_part == "Gasket, Flat":
         dataload_string = ""
         if "output_data" in st.session_state and item_code:
             d = st.session_state["output_data"]
-            if mode=="Creazione item":
+            if mode == "Creazione item":
                 dataload_string = (
                     f"{item_code}\t{d['Description']}\t{d['Template']}\t"
                     f"{d['Identificativo']}\t{d['ERP_L1']}\t{d['ERP_L2']}\t"
