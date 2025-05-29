@@ -1,44 +1,67 @@
 import streamlit as st
 import pandas as pd
+from PIL import Image
 
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# Inserimento loghi e titolo
-st.markdown("""
-    <div style='display: flex; justify-content: space-between; align-items: center; padding: 0 2rem;'>
-        <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1452.jpeg?raw=true" alt="Flowserve" height="60">
-        <h1 style='text-align: center;'>Oracle Item Setup - Web App</h1>
-        <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1451.png?raw=true" alt="Oracle" height="60">
-    </div>
-    <hr>
-""", unsafe_allow_html=True)
-
-# CSS
+# CSS aggiornato
 st.markdown("""
     <style>
     body {
         background-color: #e0ecf8 !important;
     }
+
     .block-container {
         background-color: white !important;
         padding: 2rem;
         border-radius: 10px;
         box-shadow: 0 0 15px rgba(0,0,0,0.15);
     }
+
     section.main div[data-testid="column"] {
         position: relative;
     }
+
+    section.main div[data-testid="column"]:nth-of-type(1)::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 2px;
+        height: 100%;
+        background-color: #ccc;
+    }
+
     section.main div[data-testid="column"]:nth-of-type(2) {
         background-color: #f0f7fc;
         padding-left: 1.5rem;
         border-left: 2px solid #ccc;
         border-radius: 0 10px 10px 0;
     }
+
     h3 {
         margin-top: 0;
     }
     </style>
 """, unsafe_allow_html=True)
+
+# Carica loghi
+flowserve_logo = Image.open("assets/IMG_1452.jpeg")
+oracle_logo = Image.open("assets/IMG_1451.png")
+
+# Mostra loghi e titolo
+col_a, col_b, col_c = st.columns([1, 2, 1])
+
+with col_a:
+    st.image(flowserve_logo, width=100)
+
+with col_b:
+    st.markdown("<h1 style='text-align: center; margin-top: 25px;'>Oracle Item Setup - Web App</h1>", unsafe_allow_html=True)
+
+with col_c:
+    st.image(oracle_logo, width=100)
+
+st.markdown("---")
 
 @st.cache_data
 def load_config_data():
@@ -72,11 +95,9 @@ if selected_part == "Gasket, Flat":
         uom = st.selectbox("UOM", ["mm", "inches"], key="flat_uom")
         dwg = st.text_input("Dwg/doc number", key="flat_dwg")
         mtype = st.selectbox("Material Type", [""] + material_types, key="flat_mtype")
-
         pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
         prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="flat_mprefix")
-
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
         else:
@@ -84,7 +105,6 @@ if selected_part == "Gasket, Flat":
                 (materials_df["Material Type"] == mtype) &
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
-
         mname = st.selectbox("Material Name", [""] + names, key="flat_mname")
 
         if st.button("Genera Output", key="gen_flat"):
@@ -101,7 +121,6 @@ if selected_part == "Gasket, Flat":
                     (materials_df["Material Type"] == mtype) &
                     (materials_df["Name"] == mname)
                 ]
-
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
             descr = f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale}"
 
