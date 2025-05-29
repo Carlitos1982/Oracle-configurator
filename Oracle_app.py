@@ -33,19 +33,33 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Loghi e titolo ---
-flowserve_logo = Image.open("assets/IMG_1456.png")
-oracle_logo   = Image.open("assets/IMG_1455.png")
-
-col_a, col_b, col_c = st.columns([1, 2, 1])
-with col_a:
-    st.image(flowserve_logo, width=100)
-with col_b:
-    st.markdown("<h1 style='text-align: center; margin-top: 25px;'>Oracle Item Setup - Web App</h1>",
-                unsafe_allow_html=True)
-with col_c:
-    st.image(oracle_logo, width=100)
-
-st.markdown("---")
+# --- Loghi e titolo (allineati a sinistra) ---
+st.markdown(
+    """
+    <div style="
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 20px;
+        padding-bottom: 1rem;
+    ">
+        <img
+            src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1456.png"
+            alt="Flowserve Logo"
+            style="height: 80px; object-fit: contain;"
+        >
+        <h1 style="margin: 0; font-size: 2.5rem;">
+            Oracle Item Setup - Web App
+        </h1>
+        <img
+            src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1455.png"
+            alt="Oracle Logo"
+            style="height: 80px; object-fit: contain;"
+        >
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # --- Caricamento dati da Excel ---
 @st.cache_data
