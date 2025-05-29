@@ -4,17 +4,17 @@ import pandas as pd
 # --- Configurazione pagina ---
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# --- Header con titolo a sinistra e logo a destra ---
+# --- Header con titolo a sinistra e logo Flowserve a destra ---
 st.markdown("""
 <div style="
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     padding: 1rem 2rem 0 2rem;
 ">
     <h1 style="margin:0; font-size:3rem;">Oracle Item Setup - Web App</h1>
     <img
-        src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1456.png"
+        src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/e4824ece0063e60c57011c8b5b29ad6df90fdcd6/assets/IMG_1456.png"
         alt="Flowserve Logo"
         style="height:120px; object-fit:contain;"
     >
@@ -40,6 +40,9 @@ st.markdown("""
         border-left: 2px solid #ccc !important;
         border-radius: 0 10px 10px 0 !important;
       }
+      h3 {
+        margin-top: 0;
+      }
     </style>
 """, unsafe_allow_html=True)
 
@@ -60,6 +63,7 @@ def load_config_data():
         "materials_df": materials_df
     }
 
+# --- Caricamento dati ---
 data           = load_config_data()
 size_df        = data["size_df"]
 features_df    = data["features_df"]
