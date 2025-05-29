@@ -1,67 +1,16 @@
 import streamlit as st
 import pandas as pd
-from PIL import Image
 
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# CSS aggiornato
+# Intestazione con loghi e titolo
 st.markdown("""
-    <style>
-    body {
-        background-color: #e0ecf8 !important;
-    }
-
-    .block-container {
-        background-color: white !important;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.15);
-    }
-
-    section.main div[data-testid="column"] {
-        position: relative;
-    }
-
-    section.main div[data-testid="column"]:nth-of-type(1)::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 2px;
-        height: 100%;
-        background-color: #ccc;
-    }
-
-    section.main div[data-testid="column"]:nth-of-type(2) {
-        background-color: #f0f7fc;
-        padding-left: 1.5rem;
-        border-left: 2px solid #ccc;
-        border-radius: 0 10px 10px 0;
-    }
-
-    h3 {
-        margin-top: 0;
-    }
-    </style>
+    <div style="display: flex; align-items: center; gap: 20px; padding-bottom: 10px;">
+        <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/e4824ece0063e60c57011c8b5b29ad6df90fdcd6/assets/IMG_1456.png" alt="Flowserve" style="height: 60px;">
+        <h1 style="margin: 0; font-size: 32px;">Oracle Item Setup - Web App</h1>
+        <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/e4824ece0063e60c57011c8b5b29ad6df90fdcd6/assets/IMG_1455.png" alt="Oracle" style="height: 60px;">
+    </div>
 """, unsafe_allow_html=True)
-
-# Carica loghi
-flowserve_logo = Image.open("assets/IMG_1452.jpeg")
-oracle_logo = Image.open("assets/IMG_1451.png")
-
-# Mostra loghi e titolo
-col_a, col_b, col_c = st.columns([1, 2, 1])
-
-with col_a:
-    st.image(flowserve_logo, width=100)
-
-with col_b:
-    st.markdown("<h1 style='text-align: center; margin-top: 25px;'>Oracle Item Setup - Web App</h1>", unsafe_allow_html=True)
-
-with col_c:
-    st.image(oracle_logo, width=100)
-
-st.markdown("---")
 
 @st.cache_data
 def load_config_data():
@@ -78,6 +27,8 @@ def load_config_data():
     }
 
 data = load_config_data()
+size_df = data["size_df"]
+features_df = data["features_df"]
 materials_df = data["materials_df"]
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 
@@ -101,26 +52,16 @@ if selected_part == "Gasket, Flat":
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
         else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
-            ]["Name"].dropna().tolist()
+            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().tolist()
         mname = st.selectbox("Material Name", [""] + names, key="flat_mname")
 
         if st.button("Genera Output", key="gen_flat"):
             if mtype != "MISCELLANEOUS":
                 materiale = f"{mtype} {mprefix} {mname}".strip()
-                match = materials_df[
-                    (materials_df["Material Type"] == mtype) &
-                    (materials_df["Prefix"] == mprefix) &
-                    (materials_df["Name"] == mname)
-                ]
+                match = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix) & (materials_df["Name"] == mname)]
             else:
                 materiale = mname
-                match = materials_df[
-                    (materials_df["Material Type"] == mtype) &
-                    (materials_df["Name"] == mname)
-                ]
+                match = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Name"] == mname)]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
             descr = f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale}"
 
@@ -159,14 +100,7 @@ if selected_part == "Gasket, Flat":
     with col3:
         st.markdown("### 🧾 DataLoad")
         st.markdown("---")
-
-        dataload_mode = st.radio(
-            "Modalità operazione",
-            options=["Creazione item", "Aggiornamento item"],
-            index=0,
-            horizontal=True
-        )
-
+        dataload_mode = st.radio("Modalità operazione", options=["Creazione item", "Aggiornamento item"], index=0, horizontal=True)
         item_code = st.text_input("Item Number", placeholder="Es. 50158-0001", key="item_code_input")
 
         dataload_string = ""
