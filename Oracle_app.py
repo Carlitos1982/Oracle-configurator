@@ -1,9 +1,26 @@
 import streamlit as st
 import pandas as pd
-from PIL import Image
 
 # --- Configurazione pagina ---
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
+
+# --- Header con titolo a sinistra e logo a destra ---
+st.markdown("""
+<div style="
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem 0 2rem;
+">
+    <h1 style="margin:0; font-size:3rem;">Oracle Item Setup - Web App</h1>
+    <img
+        src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1456.png"
+        alt="Flowserve Logo"
+        style="height:120px; object-fit:contain;"
+    >
+</div>
+<hr style="margin:0 2rem 1rem 2rem;">
+""", unsafe_allow_html=True)
 
 # --- CSS personalizzato (sfondo e container) ---
 st.markdown("""
@@ -17,29 +34,14 @@ st.markdown("""
         border-radius: 10px !important;
         box-shadow: 0 0 15px rgba(0,0,0,0.15) !important;
       }
-      /* Colonna centrale con sfondo leggermente diverso */
       section.main div[data-testid="column"]:nth-of-type(2) {
         background-color: #f0f7fc !important;
         padding-left: 1.5rem !important;
         border-left: 2px solid #ccc !important;
         border-radius: 0 10px 10px 0 !important;
       }
-      h3 {
-        margin-top: 0;
-      }
     </style>
 """, unsafe_allow_html=True)
-
-# --- Header: titolo a sinistra, logo Flowserve a destra ---
-flowserve_logo = Image.open("assets/IMG_1456.png")
-
-col_left, col_right = st.columns([4, 1], gap="small")
-with col_left:
-    st.markdown("## Oracle Item Setup - Web App")
-with col_right:
-    st.image(flowserve_logo, width=100)
-
-st.markdown("---")
 
 # --- Funzione per caricare i dati di configurazione ---
 @st.cache_data
@@ -58,7 +60,6 @@ def load_config_data():
         "materials_df": materials_df
     }
 
-# --- Caricamento dati ---
 data           = load_config_data()
 size_df        = data["size_df"]
 features_df    = data["features_df"]
