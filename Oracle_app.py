@@ -16,7 +16,7 @@ with col_header:
 with col_spacer:
     st.empty()  # mantiene lo spazio
 with col_logo:
-    st.image(flowserve_logo, width=100)
+    st.image(flowserve_logo, width=120)
 
 st.markdown("---")
 
