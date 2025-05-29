@@ -1,100 +1,166 @@
-
 import streamlit as st
 import pandas as pd
 
-# Configurazione della pagina
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# Caricamento dati
+# CSS aggiornato
+st.markdown("""
+    <style>
+    body {
+        background-color: #e0ecf8 !important;
+    }
+
+    .block-container {
+        background-color: white !important;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    }
+
+    section.main div[data-testid="column"] {
+        position: relative;
+    }
+
+    section.main div[data-testid="column"]:nth-of-type(1)::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 2px;
+        height: 100%;
+        background-color: #ccc;
+    }
+
+    section.main div[data-testid="column"]:nth-of-type(2) {
+        background-color: #f0f7fc;
+        padding-left: 1.5rem;
+        border-left: 2px solid #ccc;
+        border-radius: 0 10px 10px 0;
+    }
+
+    h3 {
+        margin-top: 0;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+st.title("Oracle Item Setup - Web App")
+
 @st.cache_data
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
     xls = pd.ExcelFile(url)
+    size_df = pd.read_excel(xls, sheet_name="Pump Size")
+    features_df = pd.read_excel(xls, sheet_name="Features")
     materials_df = pd.read_excel(xls, sheet_name="Materials")
     materials_df = materials_df.drop_duplicates(subset=["Material Type", "Prefix", "Name"]).reset_index(drop=True)
-    return materials_df
+    return {
+        "size_df": size_df,
+        "features_df": features_df,
+        "materials_df": materials_df
+    }
 
-materials_df = load_config_data()
+data = load_config_data()
+size_df = data["size_df"]
+features_df = data["features_df"]
+materials_df = data["materials_df"]
 
-# Colori e stile CSS
-st.markdown(
-    """
-    <style>
-        body {
-            background-color: #f2f2f2;
-        }
-        .block-container {
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-        }
-        .title-row {
-            border-top: 2px solid #ddd;
-            border-bottom: 2px solid #ddd;
-            padding: 1rem 0;
-            margin-bottom: 1rem;
-        }
-        .input-column, .output-column, .dataload-column {
-            background-color: #ffffff;
-            padding: 1rem;
-            border-radius: 8px;
-        }
-    </style>
-    """, unsafe_allow_html=True
-)
+material_types = materials_df["Material Type"].dropna().unique().tolist()
 
-# Titolo
-st.markdown("<h1 style='text-align: center;'>Oracle Item Setup - Web App</h1>", unsafe_allow_html=True)
-selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", ["Gasket, Flat"])
+part_options = ["Gasket, Flat"]
+selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
 
-st.markdown("<div class='title-row'></div>", unsafe_allow_html=True)
+if selected_part == "Gasket, Flat":
+    st.markdown("---")
+    col1, col2, col3 = st.columns([1, 1, 1])
 
-# Suddivisione in tre colonne
-col1, col2, col3 = st.columns([1, 1, 1])
+    with col1:
+        st.markdown("### 🛠️ Input")
+        st.markdown("---")
+        thickness = st.number_input("Thickness", min_value=0.0, step=0.1, format="%.1f", key="flat_thk")
+        uom = st.selectbox("UOM", ["mm", "inches"], key="flat_uom")
+        dwg = st.text_input("Dwg/doc number", key="flat_dwg")
+        mtype = st.selectbox("Material Type", [""] + material_types, key="flat_mtype")
+        pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
+        prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
+        mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="flat_mprefix")
+        if mtype == "MISCELLANEOUS":
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+        else:
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
+            ]["Name"].dropna().tolist()
+        mname = st.selectbox("Material Name", [""] + names, key="flat_mname")
 
-with col1:
-    st.markdown("### 🛠️ Input")
-    thickness = st.number_input("Thickness", min_value=0.0, step=0.1, format="%.1f")
-    uom = st.selectbox("UOM", ["mm", "inch"])
-    dwg_number = st.text_input("Dwg/doc number")
-    mat_type = st.selectbox("Material Type", materials_df["Material Type"].unique())
-    mat_prefix = st.selectbox("Material Prefix", materials_df[materials_df["Material Type"] == mat_type]["Prefix"].unique())
-    mat_name = st.selectbox("Material Name", materials_df[
-        (materials_df["Material Type"] == mat_type) &
-        (materials_df["Prefix"] == mat_prefix)
-    ]["Name"].drop_duplicates())
+        if st.button("Genera Output", key="gen_flat"):
+            if mtype != "MISCELLANEOUS":
+                materiale = f"{mtype} {mprefix} {mname}".strip()
+                match = materials_df[
+                    (materials_df["Material Type"] == mtype) &
+                    (materials_df["Prefix"] == mprefix) &
+                    (materials_df["Name"] == mname)
+                ]
+            else:
+                materiale = mname
+                match = materials_df[
+                    (materials_df["Material Type"] == mtype) &
+                    (materials_df["Name"] == mname)
+                ]
+            codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
+            descr = f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale}"
 
-    if st.button("Genera Output"):
-        st.session_state['gen_output'] = True
+            st.session_state["output_data"] = {
+                "Item": "50158…",
+                "Description": descr,
+                "Identificativo": "4590-GASKET",
+                "Classe ricambi": "1-2-3",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ARTVARI",
+                "Disegno": dwg,
+                "Material": materiale,
+                "FPD material code": codice_fpd,
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "55_GASKETS_OR_SEAL",
+                "ERP_L2": "20_OTHER",
+                "To supplier": "",
+                "Quality": ""
+            }
 
-with col2:
-    st.markdown("### 📤 Output")
-    if st.session_state.get('gen_output', False):
-        item = "50158..."
-        descr = f"GASKET, FLAT - THK: {thickness} {uom}, MATERIAL: {mat_name}"
-        identificativo = "4590-GASKET"
-        classe = "1-2-3"
-        categoria = "FASCIA ITE 5"
-        catalog = "ARTVARI"
-        template = "FPD_BUY_2"
-        erp_l1 = "55_GASKETS_OR_SEAL"
-        erp_l2 = "20_OTHER"
+    with col2:
+        st.markdown("### 📤 Output")
+        st.markdown("---")
+        if "output_data" in st.session_state:
+            for campo in [
+                "Item", "Description", "Identificativo", "Classe ricambi", "Categories", "Catalog",
+                "Disegno", "Material", "FPD material code", "Template", "ERP_L1", "ERP_L2",
+                "To supplier", "Quality"
+            ]:
+                valore = st.session_state["output_data"].get(campo, "")
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=100)
+                else:
+                    st.text_input(campo, value=valore)
 
-        st.text_input("Item", value=item)
-        st.text_area("Description", value=descr, height=60)
-        st.text_input("Identificativo", value=identificativo)
-        st.text_input("Classe ricambi", value=classe)
-        st.text_input("Categories", value=categoria)
-        st.text_input("Catalog", value=catalog)
-        st.text_input("Material", value=mat_name)
-        st.text_input("FPD material code", value="NOT AVAILABLE")
-        st.text_input("Template", value=template)
-        st.text_input("ERP L1", value=erp_l1)
-        st.text_input("ERP L2", value=erp_l2)
+    with col3:
+        st.markdown("### 🧾 DataLoad")
+        st.markdown("---")
 
-with col3:
-    st.markdown("### 🧾 DataLoad")
-    mode = st.radio("Modalità operazione", ["Creazione item", "Aggiornamento item"])
-    item_number = st.text_input("Item Number", placeholder="Es. 50158-0001")
-    if st.session_state.get('gen_output', False):
-        dataload_str = f"{descr}\nMATERIAL: {template}\n{erp_l1}\n{erp_l2}"
-        st.text_area("Stringa per DataLoad", value=dataload_str, height=100)
+        dataload_mode = st.radio(
+            "Modalità operazione",
+            options=["Creazione item", "Aggiornamento item"],
+            index=0,
+            horizontal=True
+        )
+
+        item_code = st.text_input("Item Number", placeholder="Es. 50158-0001", key="item_code_input")
+
+        dataload_string = ""
+        if "output_data" in st.session_state and item_code:
+            data = st.session_state["output_data"]
+            if dataload_mode == "Creazione item":
+                dataload_string = f"""{item_code}\t{data['Description']}\t{data['Template']}\t{data['Identificativo']}\t{data['ERP_L1']}\t{data['ERP_L2']}\t{data['Catalog']}\t{data['Material']}\t{data['FPD material code']}"""
+            else:
+                dataload_string = f"""{item_code}\tAggiorna:\t{data['Description']}\t{data['Material']}\t{data['FPD material code']}"""
+
+        st.text_area("Stringa per DataLoad", value=dataload_string, height=200)
