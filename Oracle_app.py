@@ -7,7 +7,7 @@ st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️"
 # --- CSS per header e container principale ---
 st.markdown("""
 <style>
-  /* Contenitore header con angoli arrotondati in alto */
+  /* Header esterno con angoli arrotondati in alto */
   .header-container {
     background-color: white;
     padding: 1rem 2rem;
@@ -17,16 +17,18 @@ st.markdown("""
     display: flex;
     justify-content: space-between;
     align-items: center;
+    z-index: 1000;  /* assicurarsi resti sopra */
   }
-  /* Streamlit block-container ridotto a solo angoli arrotondati in basso */
+  /* Streamlit block-container con angoli arrotondati in basso */
   .block-container {
     background-color: white !important;
     padding: 2rem !important;
     border-bottom-left-radius: 10px !important;
     border-bottom-right-radius: 10px !important;
     box-shadow: 0 0 15px rgba(0,0,0,0.15) !important;
+    margin-top: -1px;  /* salta via la linea orizzontale duplicata */
   }
-  /* Sfondo della seconda colonna */
+  /* Sfondo colonna centrale */
   section.main div[data-testid="column"]:nth-of-type(2) {
     background-color: #f0f7fc !important;
     padding-left: 1.5rem !important;
@@ -36,8 +38,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- Header HTML con titolo e logo Flowserve ---
-flowserve_url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1456.png"
+# --- Header in HTML ---
+flowserve_url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/e4824ece0063e60c57011c8b5b29ad6df90fdcd6/assets/IMG_1456.png"
 st.markdown(f"""
 <div class="header-container">
   <h1 style="margin:0; font-size:2.8rem;">Oracle Item Setup - Web App</h1>
@@ -57,7 +59,11 @@ def load_config_data():
     materials_df = materials_df.drop_duplicates(
         subset=["Material Type", "Prefix", "Name"]
     ).reset_index(drop=True)
-    return {"size_df": size_df, "features_df": features_df, "materials_df": materials_df}
+    return {
+        "size_df":      size_df,
+        "features_df":  features_df,
+        "materials_df": materials_df
+    }
 
 data           = load_config_data()
 size_df        = data["size_df"]
@@ -65,18 +71,17 @@ features_df    = data["features_df"]
 materials_df   = data["materials_df"]
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 
-# --- Scelta della parte da configurare ---
+# --- Selezione della parte da configurare ---
 part_options  = ["Gasket, Flat"]
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
 
 # --- Logica per “Gasket, Flat” ---
 if selected_part == "Gasket, Flat":
-    st.markdown("")  # serve per assicurare che il block-container inizi dopo l'header
     st.markdown("---")
-    col_input, col_output, col_dataload = st.columns([1,1,1])
+    col1, col2, col3 = st.columns([1,1,1])
 
-    # Colonna INPUT
-    with col_input:
+    # INPUT
+    with col1:
         st.markdown("### 🛠️ Input")
         thickness = st.number_input("Thickness (mm)", min_value=0.0, step=0.1, key="flat_thk")
         uom       = st.selectbox("UOM", ["mm","inches"], key="flat_uom")
@@ -133,8 +138,8 @@ if selected_part == "Gasket, Flat":
                 "Quality":""
             }
 
-    # Colonna OUTPUT
-    with col_output:
+    # OUTPUT
+    with col2:
         st.markdown("### 📤 Output")
         if "output_data" in st.session_state:
             for fld in [
@@ -149,8 +154,8 @@ if selected_part == "Gasket, Flat":
                 else:
                     st.text_input(fld, value=val)
 
-    # Colonna DataLoad
-    with col_dataload:
+    # DATALOAD
+    with col3:
         st.markdown("### 🧾 DataLoad")
         mode      = st.radio("Operazione", ["Creazione item","Aggiornamento item"], index=0, horizontal=True)
         item_code = st.text_input("Item Number", placeholder="50158-0001", key="flat_item")
