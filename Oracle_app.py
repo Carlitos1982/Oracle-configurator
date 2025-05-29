@@ -3,54 +3,41 @@ import pandas as pd
 
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# CSS aggiornato
+# Inserimento loghi e titolo
+st.markdown("""
+    <div style='display: flex; justify-content: space-between; align-items: center; padding: 0 2rem;'>
+        <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1452.jpeg" alt="Flowserve Logo" height="60">
+        <h1 style='text-align: center;'>Oracle Item Setup - Web App</h1>
+        <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1451.png" alt="Oracle Logo" height="60">
+    </div>
+    <hr>
+""", unsafe_allow_html=True)
+
+# CSS
 st.markdown("""
     <style>
     body {
         background-color: #e0ecf8 !important;
     }
-
     .block-container {
         background-color: white !important;
         padding: 2rem;
         border-radius: 10px;
         box-shadow: 0 0 15px rgba(0,0,0,0.15);
     }
-
     section.main div[data-testid="column"] {
         position: relative;
     }
-
-    section.main div[data-testid="column"]:nth-of-type(1)::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 2px;
-        height: 100%;
-        background-color: #ccc;
-    }
-
     section.main div[data-testid="column"]:nth-of-type(2) {
         background-color: #f0f7fc;
         padding-left: 1.5rem;
         border-left: 2px solid #ccc;
         border-radius: 0 10px 10px 0;
     }
-
     h3 {
         margin-top: 0;
     }
     </style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div style="display: flex; align-items: center; justify-content: space-between;">
-    <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1452.jpeg" height="60">
-    <h1 style="text-align: center; flex-grow: 1;">Oracle Item Setup - Web App</h1>
-    <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1451.png" height="60">
-</div>
-<hr style="margin-top: 10px; margin-bottom: 20px;">
 """, unsafe_allow_html=True)
 
 @st.cache_data
@@ -68,10 +55,7 @@ def load_config_data():
     }
 
 data = load_config_data()
-size_df = data["size_df"]
-features_df = data["features_df"]
 materials_df = data["materials_df"]
-
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 
 part_options = ["Gasket, Flat"]
@@ -88,9 +72,11 @@ if selected_part == "Gasket, Flat":
         uom = st.selectbox("UOM", ["mm", "inches"], key="flat_uom")
         dwg = st.text_input("Dwg/doc number", key="flat_dwg")
         mtype = st.selectbox("Material Type", [""] + material_types, key="flat_mtype")
+
         pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
         prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="flat_mprefix")
+
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
         else:
@@ -98,6 +84,7 @@ if selected_part == "Gasket, Flat":
                 (materials_df["Material Type"] == mtype) &
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
+
         mname = st.selectbox("Material Name", [""] + names, key="flat_mname")
 
         if st.button("Genera Output", key="gen_flat"):
@@ -114,6 +101,7 @@ if selected_part == "Gasket, Flat":
                     (materials_df["Material Type"] == mtype) &
                     (materials_df["Name"] == mname)
                 ]
+
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
             descr = f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale}"
 
