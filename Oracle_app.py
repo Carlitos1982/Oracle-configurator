@@ -32,43 +32,28 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Loghi e titolo ---
-# --- Loghi e titolo (allineati a sinistra) ---
-st.markdown(
-    """
-    <div style="
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 20px;
-        padding-bottom: 1rem;
-    ">
-        <img
-            src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1456.png"
-            alt="Flowserve Logo"
-            style="height: 80px; object-fit: contain;"
-        >
-        <h1 style="margin: 0; font-size: 2.5rem;">
-            Oracle Item Setup - Web App
-        </h1>
-        <img
-            src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1455.png"
-            alt="Oracle Logo"
-            style="height: 80px; object-fit: contain;"
-        >
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# --- Header con loghi e titolo in puro Streamlit ---
+flowserve = Image.open("assets/IMG_1456.png")
+oracle    = Image.open("assets/IMG_1455.png")
+
+col1, col2, col3 = st.columns([1, 4, 1])
+with col1:
+    st.image(flowserve, width=80)
+with col2:
+    st.markdown("## Oracle Item Setup - Web App")
+with col3:
+    st.image(oracle, width=80)
+
+st.markdown("---")
 
 # --- Caricamento dati da Excel ---
 @st.cache_data
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
     xls = pd.ExcelFile(url)
-    size_df     = pd.read_excel(xls, sheet_name="Pump Size")
-    features_df = pd.read_excel(xls, sheet_name="Features")
-    materials_df= pd.read_excel(xls, sheet_name="Materials")
+    size_df      = pd.read_excel(xls, sheet_name="Pump Size")
+    features_df  = pd.read_excel(xls, sheet_name="Features")
+    materials_df = pd.read_excel(xls, sheet_name="Materials")
     materials_df = materials_df.drop_duplicates(
         subset=["Material Type", "Prefix", "Name"]
     ).reset_index(drop=True)
@@ -84,16 +69,16 @@ features_df  = data["features_df"]
 materials_df = data["materials_df"]
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 
-# --- Selezione parte ---
-part_options   = ["Gasket, Flat"]
-selected_part  = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
+# --- Selezione parte da configurare ---
+part_options  = ["Gasket, Flat"]
+selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
 
 # --- Logica per “Gasket, Flat” ---
 if selected_part == "Gasket, Flat":
     st.markdown("---")
     col1, col2, col3 = st.columns([1,1,1])
 
-    # --- Colonna 1: Input ---
+    # Colonna 1: INPUT
     with col1:
         st.markdown("### 🛠️ Input")
         st.markdown("---")
@@ -132,6 +117,7 @@ if selected_part == "Gasket, Flat":
                     (materials_df["Material Type"] == mtype) &
                     (materials_df["Name"] == mname)
                 ]
+
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
             descr      = f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale}"
 
@@ -152,7 +138,7 @@ if selected_part == "Gasket, Flat":
                 "Quality":            ""
             }
 
-    # --- Colonna 2: Output ---
+    # Colonna 2: OUTPUT
     with col2:
         st.markdown("### 📤 Output")
         st.markdown("---")
@@ -169,7 +155,7 @@ if selected_part == "Gasket, Flat":
                 else:
                     st.text_input(campo, value=valore)
 
-    # --- Colonna 3: DataLoad ---
+    # Colonna 3: DATALOAD
     with col3:
         st.markdown("### 🧾 DataLoad")
         st.markdown("---")
@@ -195,5 +181,4 @@ if selected_part == "Gasket, Flat":
                     f"{item_code}\tAggiorna:\t{data['Description']}\t"
                     f"{data['Material']}\t{data['FPD material code']}"
                 )
-
         st.text_area("Stringa per DataLoad", value=dataload_string, height=200)
