@@ -1,4 +1,4 @@
-import streamlit as st
+=import streamlit as st
 import pandas as pd
 from PIL import Image
 
@@ -9,10 +9,14 @@ st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️"
 flowserve_logo = Image.open("assets/IMG_1456.png")
 
 col_header, col_logo = st.columns([3,1], gap="small")
+# nuovo: titolo | spacer | logo
+col_header, col_spacer, col_logo = st.columns([3,1,1], gap="small")
 with col_header:
     st.markdown("# Oracle Item Setup - Web App")
+with col_spacer:
+    st.empty()  # mantiene lo spazio
 with col_logo:
-    st.image(flowserve_logo, width=150)
+    st.image(flowserve_logo, width=100)
 
 st.markdown("---")
 
