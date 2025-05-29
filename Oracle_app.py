@@ -8,11 +8,14 @@ st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️"
 # --- 2) Header con titolo a sinistra e logo Flowserve a destra
 flowserve_logo = Image.open("assets/IMG_1456.png")
 
-col_header, col_logo = st.columns([3,1], gap="small")
+# titolo | spacer largo | logo
+col_header, col_spacer, col_logo = st.columns([3, 4, 1], gap="small")
 with col_header:
     st.markdown("# Oracle Item Setup - Web App")
+with col_spacer:
+    st.empty()
 with col_logo:
-    st.image(flowserve_logo, width=150)
+    st.image(flowserve_logo, width=100)
 
 st.markdown("---")
 
