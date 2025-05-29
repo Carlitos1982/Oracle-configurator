@@ -37,7 +37,7 @@ col_left, col_right = st.columns([4, 1], gap="small")
 with col_left:
     st.markdown("## Oracle Item Setup - Web App")
 with col_right:
-    st.image(flowserve_logo, width=120)
+    st.image(flowserve_logo, width=100)
 
 st.markdown("---")
 
