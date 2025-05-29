@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
+from PIL import Image
 
-# --- Configurazione pagina in modalità “centered” ---
-st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
+# --- Configurazione pagina in modalità wide ---
+st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# --- CSS personalizzato (sfondo, container e larghezza massima) ---
+# --- CSS personalizzato (solo sfondo e container) ---
 st.markdown("""
     <style>
       body {
@@ -15,39 +16,27 @@ st.markdown("""
         padding: 2rem !important;
         border-radius: 10px !important;
         box-shadow: 0 0 15px rgba(0,0,0,0.15) !important;
-        max-width: 600px !important;
-        margin: auto !important;
       }
-      /* Colonna centrale con sfondo differente */
+      /* Colonna centrale con sfondo diverso */
       section.main div[data-testid="column"]:nth-of-type(2) {
         background-color: #f0f7fc !important;
         padding-left: 1.5rem !important;
         border-left: 2px solid #ccc !important;
         border-radius: 0 10px 10px 0 !important;
       }
-      h3 {
-        margin-top: 0;
-      }
     </style>
 """, unsafe_allow_html=True)
 
 # --- Header con titolo a sinistra e logo Flowserve a destra ---
-st.markdown("""
-<div style="
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-">
-    <h1 style="margin:0; font-size:2.5rem;">Oracle Item Setup - Web App</h1>
-    <img
-        src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1456.png"
-        alt="Flowserve Logo"
-        style="height:120px; object-fit:contain;"
-    >
-</div>
-<hr>
-""", unsafe_allow_html=True)
+flowserve_logo = Image.open("assets/IMG_1456.png")  # Assicurati che esista
+
+col_title, col_logo = st.columns([4,1], gap="small")
+with col_title:
+    st.markdown("## Oracle Item Setup - Web App")
+with col_logo:
+    st.image(flowserve_logo, width=120)
+
+st.markdown("---")
 
 # --- Funzione per caricare i dati di configurazione da Excel ---
 @st.cache_data
@@ -82,14 +71,16 @@ if selected_part == "Gasket, Flat":
     st.markdown("---")
     col_input, col_output, col_dataload = st.columns([1,1,1])
 
-    # Colonna 1: INPUT
+    # Colonna INPUT
     with col_input:
         st.markdown("### 🛠️ Input")
         st.markdown("---")
-        thickness = st.number_input("Thickness", min_value=0.0, step=0.1, format="%.1f", key="flat_thk")
-        uom       = st.selectbox("UOM", ["mm","inches"], key="flat_uom")
-        dwg       = st.text_input("Dwg/doc number", key="flat_dwg")
-        mtype     = st.selectbox("Material Type", [""] + material_types, key="flat_mtype")
+        thickness = st.number_input(
+            "Thickness", min_value=0.0, step=0.1, format="%.1f", key="flat_thk"
+        )
+        uom   = st.selectbox("UOM", ["mm","inches"], key="flat_uom")
+        dwg   = st.text_input("Dwg/doc number", key="flat_dwg")
+        mtype = st.selectbox("Material Type", [""] + material_types, key="flat_mtype")
 
         pref_df  = materials_df[
             (materials_df["Material Type"] == mtype) &
@@ -99,7 +90,9 @@ if selected_part == "Gasket, Flat":
         mprefix  = st.selectbox("Material Prefix", [""] + prefixes, key="flat_mprefix")
 
         if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+            names = materials_df[
+                materials_df["Material Type"] == mtype
+            ]["Name"].dropna().tolist()
         else:
             names = materials_df[
                 (materials_df["Material Type"] == mtype) &
@@ -141,29 +134,31 @@ if selected_part == "Gasket, Flat":
                 "Quality":            ""
             }
 
-    # Colonna 2: OUTPUT
+    # Colonna OUTPUT
     with col_output:
         st.markdown("### 📤 Output")
         st.markdown("---")
         if "output_data" in st.session_state:
             for campo in [
-                "Item","Description","Identificativo","Classe ricambi",
-                "Categories","Catalog","Disegno","Material",
-                "FPD material code","Template","ERP_L1","ERP_L2",
-                "To supplier","Quality"
+                "Item", "Description", "Identificativo", "Classe ricambi",
+                "Categories", "Catalog", "Disegno", "Material",
+                "FPD material code", "Template", "ERP_L1", "ERP_L2",
+                "To supplier", "Quality"
             ]:
-                valore = st.session_state["output_data"].get(campo,"")
+                valore = st.session_state["output_data"].get(campo, "")
                 if campo == "Description":
                     st.text_area(campo, value=valore, height=100)
                 else:
                     st.text_input(campo, value=valore)
 
-    # Colonna 3: DataLoad
+    # Colonna DATALOAD
     with col_dataload:
         st.markdown("### 🧾 DataLoad")
         st.markdown("---")
-        mode      = st.radio("Modalità operazione", ["Creazione item","Aggiornamento item"],
-                             index=0, horizontal=True)
+        mode      = st.radio(
+            "Modalità operazione", ["Creazione item", "Aggiornamento item"],
+            index=0, horizontal=True
+        )
         item_code = st.text_input("Item Number", placeholder="Es. 50158-0001", key="item_code_input")
 
         dataload_string = ""
