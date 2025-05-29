@@ -1,28 +1,10 @@
 import streamlit as st
 import pandas as pd
 
-# --- Configurazione pagina ---
-st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
+# --- Configurazione pagina in modalità “centered” ---
+st.set_page_config(layout="centered", page_title="Oracle Config", page_icon="⚙️")
 
-# --- Header con titolo a sinistra e logo Flowserve a destra ---
-st.markdown("""
-<div style="
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem 0 2rem;
-">
-    <h1 style="margin:0; font-size:3rem;">Oracle Item Setup - Web App</h1>
-    <img
-        src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/e4824ece0063e60c57011c8b5b29ad6df90fdcd6/assets/IMG_1456.png"
-        alt="Flowserve Logo"
-        style="height:120px; object-fit:contain;"
-    >
-</div>
-<hr style="margin:0 2rem 1rem 2rem;">
-""", unsafe_allow_html=True)
-
-# --- CSS personalizzato (sfondo e container) ---
+# --- CSS personalizzato (sfondo, container e larghezza massima) ---
 st.markdown("""
     <style>
       body {
@@ -33,7 +15,10 @@ st.markdown("""
         padding: 2rem !important;
         border-radius: 10px !important;
         box-shadow: 0 0 15px rgba(0,0,0,0.15) !important;
+        max-width: 600px !important;
+        margin: auto !important;
       }
+      /* Colonna centrale con sfondo differente */
       section.main div[data-testid="column"]:nth-of-type(2) {
         background-color: #f0f7fc !important;
         padding-left: 1.5rem !important;
@@ -46,7 +31,25 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Funzione per caricare i dati di configurazione ---
+# --- Header con titolo a sinistra e logo Flowserve a destra ---
+st.markdown("""
+<div style="
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+">
+    <h1 style="margin:0; font-size:2.5rem;">Oracle Item Setup - Web App</h1>
+    <img
+        src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1456.png"
+        alt="Flowserve Logo"
+        style="height:120px; object-fit:contain;"
+    >
+</div>
+<hr>
+""", unsafe_allow_html=True)
+
+# --- Funzione per caricare i dati di configurazione da Excel ---
 @st.cache_data
 def load_config_data():
     url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
@@ -70,7 +73,7 @@ features_df    = data["features_df"]
 materials_df   = data["materials_df"]
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 
-# --- Scelta della parte da configurare ---
+# --- Selezione della parte da configurare ---
 part_options  = ["Gasket, Flat"]
 selected_part = st.selectbox("Seleziona il tipo di parte da configurare:", part_options)
 
@@ -79,7 +82,7 @@ if selected_part == "Gasket, Flat":
     st.markdown("---")
     col_input, col_output, col_dataload = st.columns([1,1,1])
 
-    # Colonna INPUT
+    # Colonna 1: INPUT
     with col_input:
         st.markdown("### 🛠️ Input")
         st.markdown("---")
@@ -118,7 +121,6 @@ if selected_part == "Gasket, Flat":
                     (materials_df["Material Type"] == mtype) &
                     (materials_df["Name"] == mname)
                 ]
-
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
             descr      = f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale}"
 
@@ -139,7 +141,7 @@ if selected_part == "Gasket, Flat":
                 "Quality":            ""
             }
 
-    # Colonna OUTPUT
+    # Colonna 2: OUTPUT
     with col_output:
         st.markdown("### 📤 Output")
         st.markdown("---")
@@ -156,7 +158,7 @@ if selected_part == "Gasket, Flat":
                 else:
                     st.text_input(campo, value=valore)
 
-    # Colonna DATALOAD
+    # Colonna 3: DataLoad
     with col_dataload:
         st.markdown("### 🧾 DataLoad")
         st.markdown("---")
