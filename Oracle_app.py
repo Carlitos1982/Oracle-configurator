@@ -44,7 +44,14 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("Oracle Item Setup - Web App")
+st.markdown("""
+<div style="display: flex; align-items: center; justify-content: space-between;">
+    <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1452.jpeg" height="60">
+    <h1 style="text-align: center; flex-grow: 1;">Oracle Item Setup - Web App</h1>
+    <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1451.png" height="60">
+</div>
+<hr style="margin-top: 10px; margin-bottom: 20px;">
+""", unsafe_allow_html=True)
 
 @st.cache_data
 def load_config_data():
