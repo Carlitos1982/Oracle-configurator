@@ -6,9 +6,9 @@ st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️"
 # Inserimento loghi e titolo
 st.markdown("""
     <div style='display: flex; justify-content: space-between; align-items: center; padding: 0 2rem;'>
-        <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1452.jpeg" alt="Flowserve Logo" height="60">
+        <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1452.jpeg?raw=true" alt="Flowserve" height="60">
         <h1 style='text-align: center;'>Oracle Item Setup - Web App</h1>
-        <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1451.png" alt="Oracle Logo" height="60">
+        <img src="https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/assets/IMG_1451.png?raw=true" alt="Oracle" height="60">
     </div>
     <hr>
 """, unsafe_allow_html=True)
