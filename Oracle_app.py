@@ -73,8 +73,9 @@ with col1:
         )
     mname = st.selectbox("Material Name", [""] + names, key="mname")
 
-    if st.button("Genera Output", key="gen"):
+   if st.button("Genera Output", key="gen"):
     st.session_state["output"] = {}
+
     # costruisco materia e FPD code
     if mtype != "MISCELLANEOUS":
         materiale = f"{mtype} {mprefix} {mname}".strip()
@@ -83,31 +84,33 @@ with col1:
             (materials_df["Prefix"] == mprefix) &
             (materials_df["Name"] == mname)
         ]
-        else:
-            materiale = mname
-            match = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Name"] == mname)
-            ]
-        codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
-        descr = f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale}"
+    else:
+        materiale = mname
+        match = materials_df[
+            (materials_df["Material Type"] == mtype) &
+            (materials_df["Name"] == mname)
+        ]
 
-        st.session_state.output = {
-            "Item":              "50158…",
-            "Description":       descr,
-            "Identificativo":    "4590-GASKET",
-            "Classe ricambi":    "1-2-3",
-            "Categories":        "FASCIA ITE 5",
-            "Catalog":           "ARTVARI",
-            "Disegno":           dwg,
-            "Material":          materiale,
-            "FPD material code": codice_fpd,
-            "Template":          "FPD_BUY_2",
-            "ERP_L1":            "55_GASKETS_OR_SEAL",
-            "ERP_L2":            "20_OTHER",
-            "To supplier":       "",
-            "Quality":           ""
-        }
+    codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
+    descr = f"GASKET, FLAT - THK: {thickness}{uom}, MATERIAL: {materiale}"
+
+    st.session_state["output"] = {
+        "Item":              "50158…",
+        "Description":       descr,
+        "Identificativo":    "4590-GASKET",
+        "Classe ricambi":    "1-2-3",
+        "Categories":        "FASCIA ITE 5",
+        "Catalog":           "ARTVARI",
+        "Disegno":           dwg,
+        "Material":          materiale,
+        "FPD material code": codice_fpd,
+        "Template":          "FPD_BUY_2",
+        "ERP_L1":            "55_GASKETS_OR_SEAL",
+        "ERP_L2":            "20_OTHER",
+        "To supplier":       "",
+        "Quality":           ""
+    }
+
 
 # ---- COLONNA 2: OUTPUT
 with col2:
