@@ -128,65 +128,73 @@ with col3:
     if st.session_state.get("output") and dataload_mode == "Crea nuovo item":
         data = st.session_state["output"]
 
-        def val(k): return data.get(k, "").strip() or "."
+        def val(k):
+            return data.get(k, "").strip() if data.get(k, "").strip() else "."
+
+        # Estrae il solo numero da "FASCIA ITE X"
+        fascia = val("Categories").split()[-1] if "Categories" in data else "."
 
         dataload_string = (
-            "%FN\n"
+            "\\%FN\n"
             f"{item_code_input if item_code_input else val('Item')}\n"
-            "%TC\n"
+            "\\%TC\n"
             f"{val('Template')}\n"
             "TAB\n"
-            "%D\n"
+            "\\%D\n"
+            "\\%O\n"
+            "TAB\n"
             f"{val('Description')}\n"
             "TAB\n" * 6 +
             f"{val('Identificativo')}\n"
             "TAB\n"
             f"{val('Classe ricambi')}\n"
             "TAB\n"
-            "%O\n"
-            "^S\n"
-            "%TA\n"
+            "\\%O\n"
+            "\\^S\n"
+            "\\%TA\n"
+            "TAB\n"
+            f"{val('ERP_L1')}.{val('ERP_L2')}\n"
             "TAB\n"
             "FASCIA ITE\n"
-            f"{val('Categories').split()[-1]}\n"
-            "^S\n"
-            "^{{F4}}\n"
-            "%TG\n"
-            "TAB\n" * 2 +
-            f"{val('Catalog')}\n"
             "TAB\n"
+            f"{fascia}\n"
+            "\\^S\n"
+            "\\^{F4}\n"
+            "\\%TG\n"
+            f"{val('Catalog')}\n"
+            "TAB\n" * 3 +
             f"{val('Disegno')}\n"
             "TAB\n"
-            "^S\n"
-            "^{{F4}}\n"
-            "%TR\n"
-            f"{val('Material')}+{val('FPD material code')}\n"
+            "\\^S\n"
+            "\\^{F4}\n"
+            "\\%TR\n"
+            "MATER+DESCR_FPD\n"
             "TAB\n" * 2 +
             f"{val('FPD material code')}\n"
             "TAB\n"
             f"{val('Material')}\n"
-            "^S\n"
-            "^{{F4}}\n"
-            "%VA\n"
+            "\\^S\n"
+            "\\^{F4}\n"
+            "\\%VA\n"
             "TAB\n"
-            "TAB\n"
-            "TAB\n"
-            "TAB\n"
-            f"{val('Quality') if val('Quality') != '.' else '.'}\n"
-            "%VA\n"
+            "Quality\n"
+            "TAB\n" * 4 +
+            f"{val('Quality')}\n"
+            "\\^S\n"
+            "\\%FN\n"
             "TAB\n"
             "To Supplier\n"
-            "TAB\n"
-            "TAB\n"
-            "TAB\n"
+            "TAB\n" * 3 +
             "Short Text\n"
             "TAB\n"
-            f"{val('To supplier') if val('To supplier') != '.' else '.'}\n"
-            "^S\n" * 2 +
-            "^{{F4}}\n" * 2
+            f"{val('To supplier')}\n"
+            "\\^S\n" * 2 +
+            "\\^{F4}\n"
+            "\\^S"
         )
 
-        st.text_area("Stringa DataLoad (Creazione)", dataload_string, height=500)
+        st.text_area("Stringa DataLoad (Creazione)", dataload_string, height=550)
+
     
     # … (tutto il tuo Oracle_app.py) …
 
