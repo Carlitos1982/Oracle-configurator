@@ -120,7 +120,7 @@ with col2:
 
 # ---- COLONNA 3: DATALOAD
 with col3:
-    st.markdown("### DataLoad")
+    st.subheader("DataLoad")
 
     dataload_mode = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="dataload_mode")
     item_code_input = st.text_input("Codice item", key="item_code")
@@ -128,33 +128,65 @@ with col3:
     if st.session_state.get("output") and dataload_mode == "Crea nuovo item":
         data = st.session_state["output"]
 
-        def get_value(key):
-            val = data.get(key, "").strip()
-            return val if val else "."
+        def val(k): return data.get(k, "").strip() or "."
 
         dataload_string = (
             "%FN\n"
-            f"{item_code_input if item_code_input else get_value('Item')}\n"
+            f"{item_code_input if item_code_input else val('Item')}\n"
             "%TC\n"
-            f"{get_value('Template')}\n"
+            f"{val('Template')}\n"
             "TAB\n"
             "%D\n"
-            f"{get_value('Description')}\n"
-            f"{get_value('Identificativo')}\n"
-            f"{get_value('Classe ricambi')}\n"
-            f"{get_value('Categories')}\n"
-            f"{get_value('Catalog')}\n"
-            f"{get_value('Disegno')}\n"
-            f"{get_value('FPD material code')}\n"
-            f"{get_value('Material')}\n"
-            f"{get_value('ERP_L1')}.{get_value('ERP_L2')}\n"
-            f"{get_value('Quality')}\n"
-            f"{get_value('To supplier')}\n"
+            f"{val('Description')}\n"
+            "TAB\n" * 6 +
+            f"{val('Identificativo')}\n"
+            "TAB\n"
+            f"{val('Classe ricambi')}\n"
+            "TAB\n"
+            "%O\n"
+            "^S\n"
+            "%TA\n"
+            "TAB\n"
+            "FASCIA ITE\n"
+            f"{val('Categories').split()[-1]}\n"
+            "^S\n"
+            "^{{F4}}\n"
+            "%TG\n"
+            "TAB\n" * 2 +
+            f"{val('Catalog')}\n"
+            "TAB\n"
+            f"{val('Disegno')}\n"
+            "TAB\n"
+            "^S\n"
+            "^{{F4}}\n"
+            "%TR\n"
+            f"{val('Material')}+{val('FPD material code')}\n"
+            "TAB\n" * 2 +
+            f"{val('FPD material code')}\n"
+            "TAB\n"
+            f"{val('Material')}\n"
+            "^S\n"
+            "^{{F4}}\n"
+            "%VA\n"
+            "TAB\n"
+            "TAB\n"
+            "TAB\n"
+            "TAB\n"
+            f"{val('Quality') if val('Quality') != '.' else '.'}\n"
+            "%VA\n"
+            "TAB\n"
+            "To Supplier\n"
+            "TAB\n"
+            "TAB\n"
+            "TAB\n"
+            "Short Text\n"
+            "TAB\n"
+            f"{val('To supplier') if val('To supplier') != '.' else '.'}\n"
+            "^S\n" * 2 +
+            "^{{F4}}\n" * 2
         )
 
-        st.subheader("Stringa DataLoad (Creazione)")
-        st.text_area(" ", dataload_string, height=300)
-
+        st.text_area("Stringa DataLoad (Creazione)", dataload_string, height=500)
     
     # … (tutto il tuo Oracle_app.py) …
 
