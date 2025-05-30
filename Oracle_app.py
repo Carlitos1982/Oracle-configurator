@@ -126,7 +126,7 @@ with col3:
     item_code_input = st.text_input("Codice item", key="item_code")
 
     if st.session_state.get("output") and dataload_mode == "Crea nuovo item":
-    data = st.session_state["output"]
+        data = st.session_state["output"]
 
         def get_value(key):
             val = data.get(key, "").strip()
