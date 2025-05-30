@@ -139,3 +139,27 @@ with col3:
                 f"{out['Material']}\t{out['FPD material code']}"
             )
     st.text_area("Stringa per DataLoad", value=dl, height=150)
+    
+    
+    # … (tutto il tuo Oracle_app.py) …
+
+# Footer minimale
+st.markdown("---")
+st.markdown("<div style='text-align:center;'><small>v1.0 • © 2025 Flowserve Engineering</small></div>", unsafe_allow_html=True)
+
+# Nota del creatore / contatti
+st.markdown("""
+<div style="
+    background-color:#f9f9f9;
+    padding:0.8rem;
+    border-radius:8px;
+    text-align:center;
+    font-size:0.9rem;
+    color:#555;
+    margin-top:1rem;
+">
+    Created by **dzecchinel** • 
+    <a href="mailto:dzecchinel@flowserve.com" style="color:#d21f2d; text-decoration:none;">
+    </a>
+</div>
+""", unsafe_allow_html=True)
