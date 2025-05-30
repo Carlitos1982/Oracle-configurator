@@ -120,26 +120,41 @@ with col2:
 
 # ---- COLONNA 3: DATALOAD
 with col3:
-    st.subheader("🧾 DataLoad")
-    mode      = st.radio("Operazione", ["Creazione item","Aggiornamento item"], index=0, horizontal=True)
-    item_code = st.text_input("Item Number", placeholder="Es. 50158-0001", key="item_code")
+    st.markdown("### DataLoad")
 
-    dl = ""
-    if "output" in st.session_state and item_code:
-        out = st.session_state.output
-        if mode == "Creazione item":
-            dl = (
-                f"{item_code}\t{out['Description']}\t{out['Template']}\t"
-                f"{out['Identificativo']}\t{out['ERP_L1']}\t{out['ERP_L2']}\t"
-                f"{out['Catalog']}\t{out['Material']}\t{out['FPD material code']}"
-            )
-        else:
-            dl = (
-                f"{item_code}\tAggiornamento:\t{out['Description']}\t"
-                f"{out['Material']}\t{out['FPD material code']}"
-            )
-    st.text_area("Stringa per DataLoad", value=dl, height=150)
-    
+    dataload_mode = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="dataload_mode")
+    item_code_input = st.text_input("Codice item", key="item_code")
+
+    if st.session_state.get("output_data") and dataload_mode == "Crea nuovo item":
+        data = st.session_state["output_data"]
+
+        def get_value(key):
+            val = data.get(key, "").strip()
+            return val if val else "."
+
+        dataload_string = (
+            "%FN\n"
+            f"{item_code_input if item_code_input else get_value('Item')}\n"
+            "%TC\n"
+            f"{get_value('Template')}\n"
+            "TAB\n"
+            "%D\n"
+            f"{get_value('Description')}\n"
+            f"{get_value('Identificativo')}\n"
+            f"{get_value('Classe ricambi')}\n"
+            f"{get_value('Categories')}\n"
+            f"{get_value('Catalog')}\n"
+            f"{get_value('Disegno')}\n"
+            f"{get_value('FPD material code')}\n"
+            f"{get_value('Material')}\n"
+            f"{get_value('ERP_L1')}.{get_value('ERP_L2')}\n"
+            f"{get_value('Quality')}\n"
+            f"{get_value('To supplier')}\n"
+        )
+
+        st.subheader("Stringa DataLoad (Creazione)")
+        st.text_area(" ", dataload_string, height=300)
+
     
     # … (tutto il tuo Oracle_app.py) …
 
