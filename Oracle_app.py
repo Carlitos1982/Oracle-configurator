@@ -125,8 +125,8 @@ with col3:
     dataload_mode = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="dataload_mode")
     item_code_input = st.text_input("Codice item", key="item_code")
 
-    if st.session_state.get("output_data") and dataload_mode == "Crea nuovo item":
-        data = st.session_state["output_data"]
+    if st.session_state.get("output") and dataload_mode == "Crea nuovo item":
+    data = st.session_state["output"]
 
         def get_value(key):
             val = data.get(key, "").strip()
