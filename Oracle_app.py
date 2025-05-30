@@ -143,9 +143,6 @@ with col3:
     
     # … (tutto il tuo Oracle_app.py) …
 
-# Footer minimale
-st.markdown("---")
-st.markdown("<div style='text-align:center;'><small>v1.0 • © 2025 Flowserve Engineering</small></div>", unsafe_allow_html=True)
 
 # Nota del creatore / contatti
 # Footer minimale
