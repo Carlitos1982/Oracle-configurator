@@ -74,15 +74,15 @@ with col1:
     mname = st.selectbox("Material Name", [""] + names, key="mname")
 
     if st.button("Genera Output", key="gen"):
-       st.session_state["output"] = {}
-        # costruisco materia e FPD code
-        if mtype != "MISCELLANEOUS":
-            materiale = f"{mtype} {mprefix} {mname}".strip()
-            match = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix) &
-                (materials_df["Name"] == mname)
-            ]
+    st.session_state["output"] = {}
+    # costruisco materia e FPD code
+    if mtype != "MISCELLANEOUS":
+        materiale = f"{mtype} {mprefix} {mname}".strip()
+        match = materials_df[
+            (materials_df["Material Type"] == mtype) &
+            (materials_df["Prefix"] == mprefix) &
+            (materials_df["Name"] == mname)
+        ]
         else:
             materiale = mname
             match = materials_df[
