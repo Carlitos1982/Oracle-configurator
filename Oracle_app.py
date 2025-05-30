@@ -73,7 +73,7 @@ with col1:
         )
     mname = st.selectbox("Material Name", [""] + names, key="mname")
 
-   if st.button("Genera Output", key="gen"):
+    if st.button("Genera Output", key="gen"):
     st.session_state["output"] = {}
 
     # costruisco materia e FPD code
