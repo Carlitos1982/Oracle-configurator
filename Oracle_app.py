@@ -148,6 +148,11 @@ st.markdown("---")
 st.markdown("<div style='text-align:center;'><small>v1.0 • © 2025 Flowserve Engineering</small></div>", unsafe_allow_html=True)
 
 # Nota del creatore / contatti
+# Footer minimale
+st.markdown("---")
+st.markdown("<div style='text-align:center;'><small>v1.0 • © 2025 Flowserve Desio Order Engineering</small></div>", unsafe_allow_html=True)
+
+# Nota del creatore / contatti (link mailto funzionante)
 st.markdown("""
 <div style="
     background-color:#f9f9f9;
@@ -158,8 +163,6 @@ st.markdown("""
     color:#555;
     margin-top:1rem;
 ">
-    Created by **dzecchinel** • 
-    <a href="mailto:dzecchinel@flowserve.com" style="color:#d21f2d; text-decoration:none;">
-    </a>
+    Created by **dzecchinel** • (mailto:dzecchinel@gmail.com)
 </div>
 """, unsafe_allow_html=True)
