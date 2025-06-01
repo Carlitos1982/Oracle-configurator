@@ -151,21 +151,21 @@ with col3:
                     get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
 
-                # Stringa orizzontale per visualizzazione/copia manuale
+                # Stringa orizzontale per copia manuale
                 dataload_string = "\t".join(dataload_fields)
                 st.text_area("Anteprima (per copia manuale)", dataload_string, height=200)
 
-                # Stringa verticale per file DataLoad Classic
+                # Versione verticale per salvataggio .dld
                 dataload_string_vertical = "\n".join(dataload_fields)
 
                 st.download_button(
-                    label="💾 Scarica file per DataLoad Classic (.txt)",
+                    label="💾 Scarica file per DataLoad Classic (.dld)",
                     data=dataload_string_vertical,
-                    file_name=f"dataload_vertical_{item_code_input}.txt",
+                    file_name=f"dataload_vertical_{item_code_input}.dld",
                     mime="text/plain"
                 )
 
-                st.caption("📁 Il file verrà salvato nella tua cartella di download. Aprilo da **DataLoad Classic → File → Open...**")
+                st.caption("📁 Il file sarà salvato nella cartella Download. Aprilo in **DataLoad Classic → File → Open**")
 
 # --- Footer
 st.markdown("---")
