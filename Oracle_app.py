@@ -40,7 +40,7 @@ col1, col2, col3 = st.columns(3)
 
 # ---- COLONNA 1: INPUT
 with col1:
-    st.subheader("🛠️ Input")
+    st.subheader("✏️ Input")
     thickness = st.number_input("Thickness (mm)", min_value=0.0, step=0.1, key="thk")
     uom = st.selectbox("UOM", ["mm", "inches"], key="uom")
     dwg = st.text_input("Dwg/doc number", key="dwg")
@@ -110,7 +110,7 @@ with col2:
 
 # ---- COLONNA 3: DATALOAD
 with col3:
-    st.subheader("📥 DataLoad")
+    st.subheader("🧾 DataLoad")
 
     dataload_mode = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="dataload_mode")
     item_code_input = st.text_input("Codice item", key="item_code")
@@ -123,59 +123,47 @@ with col3:
             return val if val else "."
 
         if dataload_mode == "Crea nuovo item":
-            dataload_string = (
-                "\\%FN\n"
-                f"{item_code_input if item_code_input else get_val('Item')}\n"
-                "\\%TC\n"
-                f"{get_val('Template')}\n"
-                "TAB\n"
-                "\\%D\n"
-                "\\%O\n"
-                "TAB\n"
-                f"{get_val('Description')}\n"
-                "TAB\nTAB\nTAB\nTAB\nTAB\nTAB\n"
-                f"{get_val('Identificativo')}\n"
-                "TAB\n"
-                f"{get_val('Classe ricambi')}\n"
-                "TAB\n"
-                "\\%O\n"
-                "\\^S\n"
-                "\\%TA\n"
-                "TAB\n"
-                f"{get_val('ERP_L1')}.{get_val('ERP_L2')}\n"
-                "TAB\nFASCIA ITE\n"
-                "TAB\n"
-                f"{get_val('Categories').split()[-1]}\n"
-                "\\^S\n\\^{F4}\n"
-                "\\%TG\n"
-                f"{get_val('Catalog')}\n"
-                "TAB\nTAB\nTAB\n"
-                f"{get_val('Disegno')}\n"
-                "TAB\n\\^S\n\\^{F4}\n"
-                "\\%TR\n"
-                "MATER+DESCR_FPD\n"
-                "TAB\nTAB\n"
-                f"{get_val('FPD material code')}\n"
-                "TAB\n"
-                f"{get_val('Material')}\n"
-                "\\^S\n\\^{F4}\n"
-                "\\%VA\n"
-                "TAB\n"
-                f"{get_val('Quality')}\n"
-                "TAB\nTAB\nTAB\nTAB\n"
-                f"{get_val('Quality') if get_val('Quality') != '.' else '.'}\n"
-                "\\^S\n"
-                "\\%FN\n"
-                "TAB\n"
-                f"{get_val('To supplier')}\n"
-                "TAB\nTAB\nTAB\n"
-                "Short Text\n"
-                "TAB\n"
-                f"{get_val('To supplier') if get_val('To supplier') != '.' else '.'}\n"
-                "\\^S\n\\^S\n\\^{F4}\n\\^S"
-            )
+            if not item_code_input:
+                st.warning("Inserisci il codice item per generare la stringa DataLoad.")
+            else:
+                dataload_fields = [
+                    "\\%FN", item_code_input,
+                    "\\%TC", get_val("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val("Identificativo"), "TAB",
+                    get_val("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
+                    get_val("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val("FPD material code"), "TAB",
+                    get_val("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val("Quality") if get_val("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
 
-            st.text_area("Stringa per DataLoad (creazione)", dataload_string, height=400)
+                dataload_string = "\t".join(dataload_fields)
+
+                st.text_area("Stringa per DataLoad (creazione)", dataload_string, height=200, key="dataload_text")
+
+                st.markdown("""
+                <button onclick="navigator.clipboard.writeText(document.getElementById('dataload_textarea').value)"
+                        style="margin-top: 5px; padding: 6px 12px; border:none; background-color:#e74c3c; color:white; border-radius:5px; cursor:pointer;">
+                    📋 Copia negli appunti
+                </button>
+                <script>
+                    document.getElementById('dataload_textarea').id = 'dataload_textarea';
+                </script>
+                """, unsafe_allow_html=True)
 
 # --- Footer
 st.markdown("---")
@@ -190,6 +178,6 @@ st.markdown("""
     color:#555;
     margin-top:1rem;
 ">
-    Created by <strong>dzecchinel</strong> • (mailto:dzecchinel@gmail.com)
+    Created by <strong>dzecchinel</strong> • <a href="mailto:dzecchinel@gmail.com">dzecchinel@gmail.com</a>
 </div>
 """, unsafe_allow_html=True)
