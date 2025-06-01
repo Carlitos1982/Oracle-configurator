@@ -151,19 +151,21 @@ with col3:
                     get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
 
+                # Stringa orizzontale per visualizzazione/copia manuale
                 dataload_string = "\t".join(dataload_fields)
+                st.text_area("Anteprima (per copia manuale)", dataload_string, height=200)
 
-                st.text_area("Stringa per DataLoad (creazione)", dataload_string, height=200, key="dataload_text")
+                # Stringa verticale per file DataLoad Classic
+                dataload_string_vertical = "\n".join(dataload_fields)
 
-                st.markdown("""
-                <button onclick="navigator.clipboard.writeText(document.getElementById('dataload_textarea').value)"
-                        style="margin-top: 5px; padding: 6px 12px; border:none; background-color:#e74c3c; color:white; border-radius:5px; cursor:pointer;">
-                    📋 Copia negli appunti
-                </button>
-                <script>
-                    document.getElementById('dataload_textarea').id = 'dataload_textarea';
-                </script>
-                """, unsafe_allow_html=True)
+                st.download_button(
+                    label="💾 Scarica file per DataLoad Classic (.txt)",
+                    data=dataload_string_vertical,
+                    file_name=f"dataload_vertical_{item_code_input}.txt",
+                    mime="text/plain"
+                )
+
+                st.caption("📁 Il file verrà salvato nella tua cartella di download. Aprilo da **DataLoad Classic → File → Open...**")
 
 # --- Footer
 st.markdown("---")
