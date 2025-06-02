@@ -46,9 +46,9 @@ st.markdown("---")
 
 # --- SHAFT, PUMP
 
-# --- GASKET, FLAT
+# --- FLANGE, PIPE
 
-elif part == "Flange, Pipe":
+if part == "Flange, Pipe":
     col1, col2, col3 = st.columns(3)
 
     with col1:
