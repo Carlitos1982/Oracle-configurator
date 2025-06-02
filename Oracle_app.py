@@ -115,56 +115,61 @@ with col3:
     dataload_mode = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="dataload_mode")
     item_code_input = st.text_input("Codice item", key="item_code")
 
-    if st.button("Genera stringa DataLoad") and item_code_input and "output" in st.session_state:
-        data = st.session_state["output"]
+    if st.button("Genera stringa DataLoad"):
+        if not item_code_input:
+            st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+        elif "output" not in st.session_state:
+            st.error("❌ Genera prima l'output dalla colonna 1.")
+        else:
+            data = st.session_state["output"]
 
-        def get_val(key):
-            val = data.get(key, "").strip()
-            return val if val else "."
+            def get_val(key):
+                val = data.get(key, "").strip()
+                return val if val else "."
 
-        dataload_fields = [
-            "\\%FN", item_code_input,
-            "\\%TC", get_val("Template"), "TAB",
-            "\\%D", "\\%O", "TAB",
-            get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-            get_val("Identificativo"), "TAB",
-            get_val("Classe ricambi"), "TAB",
-            "\\%O", "\\^S",
-            "\\%TA", "TAB",
-            f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-            get_val("Categories").split()[-1], "\\^S", "\\^{F4}",
-            "\\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
-            get_val("Disegno"), "TAB", "\\^S", "\\^{F4}",
-            "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-            get_val("FPD material code"), "TAB",
-            get_val("Material"), "\\^S", "\\^{F4}",
-            "\\%VA", "TAB",
-            get_val("Quality"), "TAB", "TAB", "TAB", "TAB",
-            get_val("Quality") if get_val("Quality") != "." else ".", "\\^S",
-            "\\%FN", "TAB",
-            get_val("To supplier"), "TAB", "TAB", "TAB",
-            "Short Text", "TAB",
-            get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-        ]
+            dataload_fields = [
+                "\\%FN", item_code_input,
+                "\\%TC", get_val("Template"), "TAB",
+                "\\%D", "\\%O", "TAB",
+                get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                get_val("Identificativo"), "TAB",
+                get_val("Classe ricambi"), "TAB",
+                "\\%O", "\\^S",
+                "\\%TA", "TAB",
+                f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                get_val("Categories").split()[-1], "\\^S", "\\^{F4}",
+                "\\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
+                get_val("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                get_val("FPD material code"), "TAB",
+                get_val("Material"), "\\^S", "\\^{F4}",
+                "\\%VA", "TAB",
+                get_val("Quality"), "TAB", "TAB", "TAB", "TAB",
+                get_val("Quality") if get_val("Quality") != "." else ".", "\\^S",
+                "\\%FN", "TAB",
+                get_val("To supplier"), "TAB", "TAB", "TAB",
+                "Short Text", "TAB",
+                get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+            ]
 
-        # Stringa orizzontale per copia
-        dataload_string = "\t".join(dataload_fields)
-        st.text_area("Anteprima (per copia manuale)", dataload_string, height=200)
+            # Stringa orizzontale per copia manuale
+            dataload_string = "\t".join(dataload_fields)
+            st.text_area("Anteprima (per copia manuale)", dataload_string, height=200)
 
-        # CSV per DataLoad Classic
-        csv_buffer = io.StringIO()
-        writer = csv.writer(csv_buffer, quoting=csv.QUOTE_MINIMAL)
-        for riga in dataload_fields:
-            writer.writerow([riga])
+            # CSV per DataLoad Classic
+            csv_buffer = io.StringIO()
+            writer = csv.writer(csv_buffer, quoting=csv.QUOTE_MINIMAL)
+            for riga in dataload_fields:
+                writer.writerow([riga])
 
-        st.download_button(
-            label="💾 Scarica file CSV per Import Data",
-            data=csv_buffer.getvalue(),
-            file_name=f"dataload_{item_code_input}.csv",
-            mime="text/csv"
-        )
+            st.download_button(
+                label="💾 Scarica file CSV per Import Data",
+                data=csv_buffer.getvalue(),
+                file_name=f"dataload_{item_code_input}.csv",
+                mime="text/csv"
+            )
 
-        st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+            st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # --- Footer
 st.markdown("---")
