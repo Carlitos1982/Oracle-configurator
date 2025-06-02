@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
+import io
+import csv
 
 # --- 1) Configurazione pagina wide
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
@@ -155,17 +157,20 @@ with col3:
                 dataload_string = "\t".join(dataload_fields)
                 st.text_area("Anteprima (per copia manuale)", dataload_string, height=200)
 
-                # Versione verticale per salvataggio .dld
-                dataload_string_vertical = "\n".join(dataload_fields)
+                # Stringa verticale per file CSV
+                csv_buffer = io.StringIO()
+                writer = csv.writer(csv_buffer, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields:
+                    writer.writerow([riga])  # una colonna sola
 
                 st.download_button(
-                    label="💾 Scarica file per DataLoad Classic (.dld)",
-                    data=dataload_string_vertical,
-                    file_name=f"dataload_vertical_{item_code_input}.dld",
-                    mime="text/plain"
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer.getvalue(),
+                    file_name=f"dataload_{item_code_input}.csv",
+                    mime="text/csv"
                 )
 
-                st.caption("📁 Il file sarà salvato nella cartella Download. Aprilo in **DataLoad Classic → File → Open**")
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # --- Footer
 st.markdown("---")
