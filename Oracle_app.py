@@ -53,20 +53,20 @@ if part == "Flange, Pipe":
 
     with col1:
         st.subheader("✏️ Input")
-        pipe_type = st.selectbox("Pipe Type", ["SW", "WN"])
-        size = st.selectbox("Size", ["1/8\"", "1/4\"", "3/8\"", "1/2\"", "3/4\"", "1\"", "1 1/4\"", "1 1/2\"", "2\"", "2 1/2\"", "3\"", "4\""])
-        face_type = st.selectbox("Face Type", ["RF", "FF", "RJ"])
-        pressure_class = st.text_input("Class")
-        material = st.text_input("Material")
-        add_feat = st.text_input("Additional features (opzionale)")
+        pipe_type = st.selectbox("Pipe type", ["SW", "WN"], key="flange_pipe_type")
+        size = st.selectbox("Size", ["1/8\"", "1/4\"", "3/8\"", "1/2\"", "3/4\"", "1\"", "1-1/4\"", "1-1/2\"", "2\"", "2-1/2\"", "3\"", "4\""], key="flange_size")
+        face_type = st.selectbox("Face type", ["RF", "FF", "RJ"], key="flange_face_type")
+        flange_class = st.text_input("Class", key="flange_class")
+        material = st.text_input("Material", key="flange_material")
+        note = st.text_input("Additional features (opzionale)", key="flange_note")
 
-        if st.button("Genera Output", key="gen_flange"):
-            desc = f"FLANGE - TYPE: {pipe_type}, SIZE: {size}, FACE: {face_type}, CLASS: {pressure_class}, MATERIAL: {material}"
-            if add_feat:
-                desc += f", FEATURES: {add_feat}"
+        if st.button("Genera Output", key="gen_flange_output"):
+            descr = f"FLANGE - TYPE: {pipe_type}, SIZE: {size}, FACE: {face_type}, CLASS: {flange_class}, MAT: {material}"
+            if note:
+                descr += f", NOTE: {note}"
             st.session_state["output"] = {
                 "Item": "50155…",
-                "Description": desc,
+                "Description": descr,
                 "Identificativo": "1245-FLANGE",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
@@ -86,9 +86,9 @@ if part == "Flange, Pipe":
         if "output" in st.session_state:
             for k, v in st.session_state.output.items():
                 if k == "Description":
-                    st.text_area(k, value=v, height=80)
+                    st.text_area(k, value=v, height=80, key=f"flange_{k}")
                 else:
-                    st.text_input(k, value=v)
+                    st.text_input(k, value=v, key=f"flange_{k}")
 
     with col3:
         st.subheader("🧾 DataLoad")
