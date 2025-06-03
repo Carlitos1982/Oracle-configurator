@@ -2913,6 +2913,173 @@ elif selected_part == "Pin, Dowel":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+elif selected_part == "Shaft, Pump":
+    st.subheader("Configurazione - Shaft, Pump")
+    col1, col2, col3 = st.columns(3)
+
+    # --- COLONNA 1: INPUT ---
+    with col1:
+        # Modello e taglia
+        model_shaft = st.selectbox("Product/Pump Model", [""] + pump_models, key="shaft_model")
+        size_list_shaft = size_df[size_df["Pump Model"] == model_shaft]["Size"].dropna().tolist()
+        size_shaft = st.selectbox("Product/Pump Size", [""] + size_list_shaft, key="shaft_size")
+
+        # Feature 1
+        feature_1_shaft = ""
+        if model_shaft not in ["HDO", "DMX", "WXB", "WIK"]:
+            f1_list_shaft = features_df[
+                (features_df["Pump Model"] == model_shaft) &
+                (features_df["Feature Type"] == "features1")
+            ]["Feature"].dropna().tolist()
+            feature_1_shaft = st.selectbox("Additional Feature 1", [""] + f1_list_shaft, key="f1_shaft")
+
+        # Feature 2
+        feature_2_shaft = ""
+        if model_shaft in ["HPX", "HED"]:
+            f2_list_shaft = features_df[
+                (features_df["Pump Model"] == model_shaft) &
+                (features_df["Feature Type"] == "features2")
+            ]["Feature"].dropna().tolist()
+            feature_2_shaft = st.selectbox("Additional Feature 2", [""] + f2_list_shaft, key="f2_shaft")
+
+        # Campi extra per shaft
+        brg_type = st.text_input("Bearing type", key="shaft_brg_type")
+        brg_size = st.text_input("Bearing size", key="shaft_brg_size")
+        max_dia  = st.number_input("Max diameter (mm)", min_value=0, step=1, format="%d", key="shaft_max_dia")
+        max_len  = st.number_input("Max length (mm)", min_value=0, step=1, format="%d", key="shaft_max_len")
+
+        # Note e disegno
+        note_shaft = st.text_area("Note (opzionale)", height=80, key="shaft_note")
+        dwg_shaft  = st.text_input("Dwg/doc number", key="shaft_dwg")
+
+        # Selezione materiale
+        mtype_shaft   = st.selectbox("Material Type", [""] + material_types, key="mtype_shaft")
+        pref_df_shaft = materials_df[
+            (materials_df["Material Type"] == mtype_shaft) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_shaft = sorted(pref_df_shaft["Prefix"].unique()) if mtype_shaft != "MISCELLANEOUS" else []
+        mprefix_shaft  = st.selectbox("Material Prefix", [""] + prefixes_shaft, key="mprefix_shaft")
+
+        if mtype_shaft == "MISCELLANEOUS":
+            names_shaft = materials_df[materials_df["Material Type"] == mtype_shaft]["Name"].dropna().tolist()
+        else:
+            names_shaft = materials_df[
+                (materials_df["Material Type"] == mtype_shaft) &
+                (materials_df["Prefix"] == mprefix_shaft)
+            ]["Name"].dropna().tolist()
+        mname_shaft = st.selectbox("Material Name", [""] + names_shaft, key="mname_shaft")
+
+        # Bottone per generare output
+        if st.button("Genera Output", key="gen_shaft"):
+            # Costruzione Material / FPD code
+            if mtype_shaft != "MISCELLANEOUS":
+                materiale_shaft = f"{mtype_shaft} {mprefix_shaft} {mname_shaft}".strip()
+                match_shaft     = materials_df[
+                    (materials_df["Material Type"] == mtype_shaft) &
+                    (materials_df["Prefix"] == mprefix_shaft) &
+                    (materials_df["Name"] == mname_shaft)
+                ]
+            else:
+                materiale_shaft = mname_shaft
+                match_shaft     = materials_df[
+                    (materials_df["Material Type"] == mtype_shaft) &
+                    (materials_df["Name"] == mname_shaft)
+                ]
+            codice_fpd_shaft = match_shaft["FPD Code"].values[0] if not match_shaft.empty else ""
+
+            # Costruzione descrizione (con asterisco)
+            descr_shaft = (
+                f"*SHAFT, PUMP - MODEL: {model_shaft}, SIZE: {size_shaft}, "
+                f"FEATURES: {feature_1_shaft}, {feature_2_shaft}, "
+                f"Brg type: {brg_type}, Brg size: {brg_size}, "
+                f"Max dia: {int(max_dia)}mm, Max len: {int(max_len)}mm"
+            )
+            if note_shaft:
+                descr_shaft += f", NOTE: {note_shaft}"
+
+            st.session_state["output_data"] = {
+                "Item":               "40231…",
+                "Description":        descr_shaft,
+                "Identificativo":     "2100-SHAFT",
+                "Classe ricambi":     "2-3",
+                "Categories":         "FASCIA ITE 4",
+                "Catalog":            "ALBERO",
+                "Disegno":            dwg_shaft,
+                "Material":           materiale_shaft,
+                "FPD material code":  codice_fpd_shaft,
+                "Template":           "FPD_MAKE",
+                "ERP_L1":             "20_TURNKEY_MACHINING",
+                "ERP_L2":             "25_SHAFTS",
+                "To supplier":        "",
+                "Quality":            ""
+            }
+
+    # --- COLONNA 2: OUTPUT ---
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"shaft_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"shaft_{campo}")
+
+    # --- COLONNA 3: DATALOAD ---
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_shaft = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="shaft_dl_mode")
+        item_code_shaft    = st.text_input("Codice item", key="shaft_item_code")
+        if st.button("Genera stringa DataLoad", key="gen_dl_shaft"):
+            if not item_code_shaft:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output nella colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_shaft(k):
+                    v = data.get(k, "").strip()
+                    return v if v else "."
+
+                dataload_fields_shaft = [
+                    "\\%FN", item_code_shaft,
+                    "\\%TC", get_val_shaft("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_shaft("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_shaft("Identificativo"), "TAB",
+                    get_val_shaft("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_shaft('ERP_L1')}.{get_val_shaft('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_shaft("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_shaft("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_shaft("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_shaft("FPD material code"), "TAB",
+                    get_val_shaft("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_shaft("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_shaft("Quality") if get_val_shaft("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_shaft("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_shaft("To supplier") if get_val_shaft("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+                dataload_string_shaft = "\t".join(dataload_fields_shaft)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_shaft, height=200)
+
+                csv_buffer_shaft = io.StringIO()
+                writer_shaft     = csv.writer(csv_buffer_shaft, quoting=csv.QUOTE_MINIMAL)
+                for r in dataload_fields_shaft:
+                    writer_shaft.writerow([r])
+
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_shaft.getvalue(),
+                    file_name=f"dataload_{item_code_shaft}.csv",
+                    mime="text/csv"
+                )
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
