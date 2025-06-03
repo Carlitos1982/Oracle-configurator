@@ -193,7 +193,7 @@ elif selected_part == "Casing, Pump":
         size     = st.selectbox("Product/Pump Size", [""] + size_list, key="casing_size")
         feature_1 = ""
         special = ["HDO", "DMX", "WXB", "WIK"]
-        if not (model in special and selected_part != "Casing, Pump"):
+        if model not in special:
             f1_list = features_df[
                 (features_df["Pump Model"] == model) & (features_df["Feature Type"] == "features1")
             ]["Feature"].dropna().tolist()
@@ -203,9 +203,7 @@ elif selected_part == "Casing, Pump":
             f2_list = features_df[
                 (features_df["Pump Model"] == model) & (features_df["Feature Type"] == "features2")
             ]["Feature"].dropna().tolist()
-            feature_2 = st.selectbox("Additional Feature 2", [""] + f2_list, key="f2_casing")
-        int_dia  = st.number_input("Diametro interno (mm)", min_value=0, step=1, format="%d", key="int_dia_casing")
-        ext_dia  = st.number_input("Diametro esterno (mm)", min_value=0, step=1, format="%d", key="ext_dia_casing")
+            feature_2 = st.selectbox("Additional Feature 2", [""] + f2_list, key="f2_casing") (mm)", min_value=0, step=1, format="%d", key="int_dia_casing") (mm)", min_value=0, step=1, format="%d", key="ext_dia_casing")
         note     = st.text_area("Note (opzionale)", height=80, key="note_casing")
         dwg      = st.text_input("Dwg/doc number", key="dwg_casing")
         mtype    = st.selectbox("Material Type", [""] + material_types, key="mtype_casing")
@@ -221,7 +219,7 @@ elif selected_part == "Casing, Pump":
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
             match = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix) & (materials_df["Name"] == mname)]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
-            descr = f"CASING, PUMP - MODEL: {model}, SIZE: {size}, ID: {int(int_dia)}mm, OD: {int(ext_dia)}mm, FEATURES: {feature_1}, {feature_2}, NOTE: {note}"
+            descr = f"CASING, PUMP - MODEL: {model}, SIZE: {size}, FEATURES: {feature_1}, {feature_2}, NOTE: {note}"
             st.session_state["output_data"] = {
                 "Item": "40202…",
                 "Description": descr,
