@@ -113,6 +113,14 @@ with col2:
         [""] + part_list,
         key="selected_part"
     )
+# ——— Gestione “output_data” per ogni cambio di selected_part ———
+if "prev_part" not in st.session_state:
+    st.session_state.prev_part = ""
+
+if selected_part != st.session_state.prev_part:
+    st.session_state.pop("output_data", None)
+    st.session_state.prev_part = selected_part
+# —————————————————————————————————————————————————————————
 
 st.markdown("---")
 # --- CASING, PUMP
