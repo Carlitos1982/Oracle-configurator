@@ -2764,7 +2764,155 @@ elif selected_part == "Ring, Wear":
                 )
 
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+elif selected_part == "Pin, Dowel":
+    col1, col2, col3 = st.columns(3)
 
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        diameter     = st.number_input("Diameter", min_value=0, step=1, format="%d", key="pin_diameter")
+        uom_diameter = st.selectbox("UOM", ["mm", "inches"], key="pin_uom_diameter")
+        length       = st.number_input("Length", min_value=0, step=1, format="%d", key="pin_length")
+        uom_length   = st.selectbox("UOM", ["mm", "inches"], key="pin_uom_length")
+
+        # Standard (può restare vuoto)
+        standard     = st.selectbox("Standard", [""] + ["ISO 2338"], key="pin_standard")
+
+        # Selezione materiale
+        mtype_pin   = st.selectbox("Material Type", [""] + material_types, key="mtype_pin")
+        pref_df_pin = materials_df[
+            (materials_df["Material Type"] == mtype_pin) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_pin = sorted(pref_df_pin["Prefix"].unique()) if mtype_pin != "MISCELLANEOUS" else []
+        mprefix_pin  = st.selectbox("Material Prefix", [""] + prefixes_pin, key="mprefix_pin")
+
+        if mtype_pin == "MISCELLANEOUS":
+            names_pin = materials_df[
+                materials_df["Material Type"] == mtype_pin
+            ]["Name"].dropna().drop_duplicates().tolist()
+        else:
+            names_pin = materials_df[
+                (materials_df["Material Type"] == mtype_pin) &
+                (materials_df["Prefix"] == mprefix_pin)
+            ]["Name"].dropna().drop_duplicates().tolist()
+        mname_pin = st.selectbox("Material Name", [""] + names_pin, key="mname_pin")
+
+        # Nuovo campo Material Note
+        material_note_pin = st.text_area("Material Note (opzionale)", height=80, key="pin_matnote")
+
+        # Generazione output
+        if st.button("Genera Output", key="gen_pin"):
+            # Costruzione Material / FPD code
+            if mtype_pin != "MISCELLANEOUS":
+                materiale_pin = f"{mtype_pin} {mprefix_pin} {mname_pin}".strip()
+                match_pin     = materials_df[
+                    (materials_df["Material Type"] == mtype_pin) &
+                    (materials_df["Prefix"] == mprefix_pin) &
+                    (materials_df["Name"] == mname_pin)
+                ]
+            else:
+                materiale_pin = mname_pin
+                match_pin     = materials_df[
+                    (materials_df["Material Type"] == mtype_pin) &
+                    (materials_df["Name"] == mname_pin)
+                ]
+            codice_fpd_pin = match_pin["FPD Code"].values[0] if not match_pin.empty else ""
+
+            # Costruzione descrizione
+            descr_pin = (
+                f"PIN, DOWEL - DIAMETER: {int(diameter)}{uom_diameter}, "
+                f"LENGTH: {int(length)}{uom_length}"
+            )
+            if standard:
+                descr_pin += f", {standard}"
+            if material_note_pin:
+                descr_pin += f", {material_note_pin}"
+
+            # Aggiungi sempre l’asterisco all’inizio
+            descr_pin = "*" + descr_pin
+
+            # Memorizzo in session_state
+            st.session_state["output_data"] = {
+                "Item":               "56230…",
+                "Description":        descr_pin,
+                "Identificativo":     "6810-DOWEL PIN",
+                "Classe ricambi":     "",
+                "Categories":         "FASCIA ITE 5",
+                "Catalog":            "",
+                "Material":           materiale_pin,
+                "FPD material code":  codice_fpd_pin,
+                "Template":           "FPD_BUY_2",
+                "ERP_L1":             "64_HARDWARE",
+                "ERP_L2":             "14_PINS",
+                "To supplier":        "",
+                "Quality":            ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"pin_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"pin_{campo}")
+
+    # COLONNA 3: DataLoad
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_pin = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="pin_dl_mode")
+        item_code_pin    = st.text_input("Codice item", key="pin_item_code")
+        if st.button("Genera stringa DataLoad", key="gen_dl_pin"):
+            if not item_code_pin:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_pin(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+
+                dataload_fields_pin = [
+                    "\\%FN", item_code_pin,
+                    "\\%TC", get_val_pin("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_pin("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_pin("Identificativo"), "TAB",
+                    get_val_pin("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_pin('ERP_L1')}.{get_val_pin('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_pin("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_pin("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_pin("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_pin("FPD material code"), "TAB",
+                    get_val_pin("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_pin("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_pin("Quality") if get_val_pin("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_pin("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_pin("To supplier") if get_val_pin("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+                dataload_string_pin = "\t".join(dataload_fields_pin)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_pin, height=200)
+
+                csv_buffer_pin = io.StringIO()
+                writer_pin    = csv.writer(csv_buffer_pin, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_pin:
+                    writer_pin.writerow([riga])
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_pin.getvalue(),
+                    file_name=f"dataload_{item_code_pin}.csv",
+                    mime="text/csv"
+                )
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
