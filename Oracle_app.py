@@ -94,21 +94,7 @@ st.markdown("---")
 #     sapendo che `selected_part` sarà vuoto finché non scelgo una categoria.
 #     Esempio del blocco già visto:
 
-if selected_part == "Baseplate, Pump":
-    st.subheader("Configurazione - Baseplate, Pump")
-    genera_output(
-        "baseplate", "477…", "6110-BASE PLATE", "",
-        "ARTVARI", "18_FOUNDATION_PLATE", extra_fields="baseplate"
-    )
 
-elif selected_part == "Casing, Pump":
-    st.subheader("Configurazione - Casing, Pump")
-    genera_output(
-        "casing", "40202…", "1100-CASING", "3",
-        "CORPO", "17_CASING", template_fisso="FPD_MAKE"
-    )
-
-# … e così via per tutte le altre parti …
 
 
 # -----------------------
