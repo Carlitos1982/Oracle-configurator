@@ -7,7 +7,7 @@ import csv
 # --- Configurazione pagina wide
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
-# --- Header con titolo e logo Flowserve
+# --- Header
 flowserve_logo = Image.open("assets/IMG_1456.png")
 col_header, col_spacer, col_logo = st.columns([3, 4, 1], gap="small")
 with col_header:
@@ -25,43 +25,91 @@ def load_config_data():
     size_df      = pd.read_excel(xls, sheet_name="Pump Size")
     features_df  = pd.read_excel(xls, sheet_name="Features")
     materials_df = pd.read_excel(xls, sheet_name="Materials")
-    materials_df = materials_df.drop_duplicates(subset=["Material Type", "Prefix", "Name"]).reset_index(drop=True)
+    materials_df = materials_df.drop_duplicates(
+        subset=["Material Type", "Prefix", "Name"]
+    ).reset_index(drop=True)
     return size_df, features_df, materials_df
 
 size_df, features_df, materials_df = load_config_data()
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 
-# Lista completa delle parti
-part_options = [
-    "Baseplate, Pump",
-    "Casing, Pump",
-    "Casing Cover, Pump",
-    "Impeller, Pump",
-    "Balance Bushing, Pump",
-    "Balance Drum, Pump",
-    "Balance Disc, Pump",
-    "Shaft, Pump",
-    "Flange, Pipe",
-    "Gate, Valve",
-    "Gasket, Spiral Wound",
-    "Gasket, Flat",
-    "Bearing, Hydrostatic/Hydrodynamic",
-    "Bearing, Rolling",
-    "Bolt, Eye",
-    "Bolt, Hexagonal",
-    "Gasket, Ring Type Joint",
-    "Gusset, Other",
-    "Nut, Hex",
-    "Stud, Threaded",
-    "Ring, Wear",
-    "Pin, Dowel",
-    "Screw, Cap",
-    "Screw, Grub"
-]
+# --- Definizione delle categorie
+categories = {
+    "Machined Parts": [
+        "Baseplate, Pump",
+        "Casing, Pump",
+        "Casing Cover, Pump",
+        "Impeller, Pump",
+        "Balance Bushing, Pump",
+        "Balance Drum, Pump",
+        "Balance Disc, Pump",
+        "Shaft, Pump",
+        "Ring, Wear"
+    ],
+    "Piping": [
+        "Flange, Pipe",
+        "Gate, Valve",
+        "Gasket, Flat",
+        "Gasket, Ring Type Joint"
+    ],
+    "Fasteners": [
+        "Bolt, Eye",
+        "Bolt, Hexagonal",
+        "Nut, Hex",
+        "Stud, Threaded",
+        "Screw, Cap",
+        "Screw, Grub",
+        "Pin, Dowel"
+    ],
+    "Commercial Parts": [
+        "Bearing, Hydrostatic/Hydrodynamic",
+        "Bearing, Rolling",
+        "Gusset, Other",
+        "Gasket, Spiral Wound"
+    ]
+}
 
-# Selezione parte
-selected_part = st.selectbox("Seleziona Parte", part_options)
+# --- Selezione categoria
+selected_category = st.selectbox(
+    "Seleziona categoria:",
+    [""] + list(categories.keys()),
+    index=0
+)
+
+# --- Selezione parte in base alla categoria
+if selected_category:
+    part_list = categories[selected_category]
+else:
+    part_list = []
+
+selected_part = st.selectbox(
+    "Seleziona il tipo di parte da configurare:",
+    [""] + part_list,
+    key="selected_part"
+)
+
 st.markdown("---")
+
+# --- Ora inserisci tutti i blocchi `elif selected_part == "..."` come prima,
+#     sapendo che `selected_part` sarà vuoto finché non scelgo una categoria.
+#     Esempio del blocco già visto:
+
+if selected_part == "Baseplate, Pump":
+    st.subheader("Configurazione - Baseplate, Pump")
+    genera_output(
+        "baseplate", "477…", "6110-BASE PLATE", "",
+        "ARTVARI", "18_FOUNDATION_PLATE", extra_fields="baseplate"
+    )
+
+elif selected_part == "Casing, Pump":
+    st.subheader("Configurazione - Casing, Pump")
+    genera_output(
+        "casing", "40202…", "1100-CASING", "3",
+        "CORPO", "17_CASING", template_fisso="FPD_MAKE"
+    )
+
+# … e così via per tutte le altre parti …
+
 
 # -----------------------
 # Ogni blocco: 3 colonne
