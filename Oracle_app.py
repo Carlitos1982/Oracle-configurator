@@ -2853,7 +2853,7 @@ footer_html = """
 }
 </style>
 <div class="footer">
-    © 2025 Flowserve - Order Engineering – <a href="dzecchinel@gflowserve.com"_blank">Privacy Policy</a>
+    © 2025 Flowserve - Desio Order Engineering – mailto:dzecchinel@flowserve.com
 </div>
 """
 st.markdown(footer_html, unsafe_allow_html=True)
