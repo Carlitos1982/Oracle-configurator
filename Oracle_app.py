@@ -2920,7 +2920,11 @@ elif selected_part == "Shaft, Pump":
     # --- COLONNA 1: INPUT ---
     with col1:
         # Modello e taglia
-        model_shaft = st.selectbox("Product/Pump Model", [""] + pump_models, key="shaft_model")
+        model_shaft = st.selectbox(
+            "Product/Pump Model",
+            [""] + sorted(size_df["Pump Model"].dropna().unique()),
+            key="shaft_model"
+        )
         size_list_shaft = size_df[size_df["Pump Model"] == model_shaft]["Size"].dropna().tolist()
         size_shaft = st.selectbox("Product/Pump Size", [""] + size_list_shaft, key="shaft_size")
 
@@ -3080,6 +3084,7 @@ elif selected_part == "Shaft, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
