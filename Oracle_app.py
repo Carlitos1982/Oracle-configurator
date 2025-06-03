@@ -1004,46 +1004,7 @@ elif selected_part == "Balance Disc, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-# --- GATE, VALVE
-elif selected_part == "Gate, Valve":
-    col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1: INPUT
-    with col1:
-        st.subheader("✏️ Input")
-        size_gate   = st.selectbox(
-            "Size",
-            ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”'],
-            key="gate_size"
-        )
-        pclass      = st.selectbox("Pressure class", ["150", "300", "600", "1500", "2500"], key="gate_pressure")
-        inlet_type  = st.selectbox("Inlet connection type", ["SW", "WN"], key="gate_inlet_type")
-        inlet_size  = st.selectbox(
-            "Inlet connection size",
-            ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”'],
-            key="gate_inlet_size"
-        )
-        outlet_type = st.selectbox("Outlet connection type", ["SW", "WN"], key="gate_outlet_type")
-        outlet_size = st.selectbox(
-            "Outlet connection size",
-            ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”'],
-            key="gate_outlet_size"
-        )
-        valve_mat   = st.selectbox(
-            "Valve material",
-            [
-                "A105", "A106-GR B", "UNS-S31803", "UNS-S32760", "A350 LF2", "A182-F316L",
-                "ALLOY 825", "GALVANIZED CARBON STEEL"
-            ],
-            key="gate_material"
-        )
-        schedule_g  = st.selectbox(
-            "Schedule",
-            ["5", "10", "20", "30", "40", "60", "80", "100", "120", "140", "160"],
-            key="gate_schedule"
-        )
-        note_gate   = st.text_area("Note (opzionale)", height=80, key="gate_note")
-        dwg_gate    = st.text_input("Dwg/d
 # --- GATE, VALVE
 elif selected_part == "Gate, Valve":
     col1, col2, col3 = st.columns(3)
