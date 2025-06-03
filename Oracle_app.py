@@ -153,6 +153,7 @@ if selected_part == "Baseplate, Pump":
             )
             if note_bp:
                 descr_bp += f", NOTE: {note_bp}"
+                descr_bp = "*" + descr_bp
             st.session_state["output_data"] = {
                 "Item": "477…",
                 "Description": descr_bp,
