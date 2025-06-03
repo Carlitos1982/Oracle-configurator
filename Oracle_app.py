@@ -11,7 +11,12 @@ st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️"
 flowserve_logo = Image.open("assets/IMG_1456.png")
 col_header, col_spacer, col_logo = st.columns([3, 4, 1], gap="small")
 with col_header:
-    st.markdown("# Oracle Item Setup - Web App")
+    st.markdown(
+        '<h1 style="white-space: nowrap; margin: 0; font-size: 2rem;">'
+        'Oracle Item Setup - Web App'
+        '</h1>',
+        unsafe_allow_html=True
+    )
 with col_logo:
     st.image(flowserve_logo, width=100)
 
