@@ -261,7 +261,12 @@ elif selected_part == "Casing, Pump":
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
             match = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix) & (materials_df["Name"] == mname)]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
-            descr = f"CASING, PUMP - MODEL: {model}, SIZE: {size}, FEATURES: {feature_1}, {feature_2}, NOTE: {note}"
+            descr = f"CASING, PUMP - MODEL: {model}, SIZE: {size}, FEATURES: {feature_1}, {feature_2}"
+if note:
+    descr += f", NOTE: {note}"
+
+# 2) Subito dopo, aggiungi sempre l'asterisco all’inizio
+descr = "*" + descr
             st.session_state["output_data"] = {
                 "Item": "40202…",
                 "Description": descr,
@@ -373,7 +378,12 @@ elif selected_part == "Casing Cover, Pump":
                 (materials_df["Material Type"] == mtype_cc) & (materials_df["Prefix"] == mprefix_cc) & (materials_df["Name"] == mname_cc)
             ]
             codice_fpd_cc = match_cc["FPD Code"].values[0] if not match_cc.empty else ""
-            descr_cc = f"CASING COVER, PUMP - MODEL: {model_cc}, SIZE: {size_cc}, FEATURES: {feature_1_cc}, {feature_2_cc}, NOTE: {note_cc}"
+           descr_cc = f"CASING COVER, PUMP - MODEL: {model_cc}, SIZE: {size_cc}, FEATURES: {feature_1_cc}, {feature_2_cc}"
+if note_cc:
+    descr_cc += f", NOTE: {note_cc}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_cc = "*" + descr_cc
             st.session_state["output_data"] = {
                 "Item": "40205…",
                 "Description": descr_cc,
@@ -476,7 +486,12 @@ elif selected_part == "Impeller, Pump":
             materiale_imp = f"{mtype_imp} {mprefix_imp} {mname_imp}".strip() if mtype_imp != "MISCELLANEOUS" else mname_imp
             match_imp    = materials_df[(materials_df["Material Type"] == mtype_imp) & (materials_df["Prefix"] == mprefix_imp) & (materials_df["Name"] == mname_imp)]
             codice_fpd_imp = match_imp["FPD Code"].values[0] if not match_imp.empty else ""
-            descr_imp = f"IMPELLER, PUMP - MODEL: {model_imp}, SIZE: {size_imp}, FEATURES: {feature_1_imp}, {feature_2_imp}, NOTE: {note_imp}"
+            descr_imp = f"IMPELLER, PUMP - MODEL: {model_imp}, SIZE: {size_imp}, FEATURES: {feature_1_imp}, {feature_2_imp}"
+if note_imp:
+    descr_imp += f", NOTE: {note_imp}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_imp = "*" + descr_imp
             st.session_state["output_data"] = {
                 "Item": "40229…",
                 "Description": descr_imp,
@@ -608,11 +623,17 @@ elif selected_part == "Balance Bushing, Pump":
                 (materials_df["Name"] == mname_bb)
             ]
             codice_fpd_bb = match_bb["FPD Code"].values[0] if not match_bb.empty else ""
-            descr_bb = (
-                f"BALANCE BUSHING, PUMP - MODEL: {model_bb}, SIZE: {size_bb}, "
-                f"ID: {int(int_dia_bb)}mm, OD: {int(int_dia_bb) + 2*int(ext_dia_bb)}mm, "  # oppure formula corretta
-                f"FEATURES: {feature_1_bb}, {feature_2_bb}, NOTE: {note_bb}"
-            )
+           # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_bb = (
+    f"BALANCE BUSHING, PUMP - MODEL: {model_bb}, SIZE: {size_bb}, "
+    f"ID: {int(int_dia_bb)}mm, OD: {int(int_dia_bb) + 2*int(ext_dia_bb)}mm, "
+    f"FEATURES: {feature_1_bb}, {feature_2_bb}"
+)
+if note_bb:
+    descr_bb += f", NOTE: {note_bb}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_bb = "*" + descr_bb
             st.session_state["output_data"] = {
                 "Item": "40226…",
                 "Description": descr_bb,
@@ -753,11 +774,17 @@ elif selected_part == "Balance Drum, Pump":
                 (materials_df["Name"] == mname_bd)
             ]
             codice_fpd_bd = match_bd["FPD Code"].values[0] if not match_bd.empty else ""
-            descr_bd = (
-                f"BALANCE DRUM, PUMP - MODEL: {model_bd}, SIZE: {size_bd}, "
-                f"ID: {int(int_dia_bd)}mm, OD: {int(int_dia_bd) + 2*int(ext_dia_bd)}mm, "
-                f"FEATURES: {feature_1_bd}, {feature_2_bd}, NOTE: {note_bd}"
-            )
+            # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_bd = (
+    f"BALANCE DRUM, PUMP - MODEL: {model_bd}, SIZE: {size_bd}, "
+    f"ID: {int(int_dia_bd)}mm, OD: {int(int_dia_bd) + 2*int(ext_dia_bd)}mm, "
+    f"FEATURES: {feature_1_bd}, {feature_2_bd}"
+)
+if note_bd:
+    descr_bd += f", NOTE: {note_bd}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_bd = "*" + descr_bd
             st.session_state["output_data"] = {
                 "Item": "40227…",
                 "Description": descr_bd,
@@ -878,12 +905,16 @@ elif selected_part == "Flange, Pipe":
         dwg_fp  = st.text_input("Dwg/doc number", key="dwg_fp")
 
         if st.button("Genera Output", key="gen_flange"):
-            descr_fp = (
-                f"FLANGE, PIPE - TYPE: {flange_type}, SIZE: {size_fp}, "
-                f"FACE TYPE: {face_type}, CLASS: {flange_cls}, SCHEDULE: {schedule_fp}, MATERIAL: {flange_mat}"
-            )
-            if note_fp:
-                descr_fp += f", NOTE: {note_fp}"
+         # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_fp = (
+    f"FLANGE, PIPE - TYPE: {flange_type}, SIZE: {size_fp}, "
+    f"FACE TYPE: {face_type}, CLASS: {flange_cls}, SCHEDULE: {schedule_fp}, MATERIAL: {flange_mat}"
+)
+if note_fp:
+    descr_fp += f", NOTE: {note_fp}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_fp = "*" + descr_fp
             st.session_state["output_data"] = {
                 "Item": "50155…",
                 "Description": descr_fp,
@@ -1027,11 +1058,17 @@ elif selected_part == "Balance Disc, Pump":
                 (materials_df["Name"] == mname_bdsc)
             ]
             codice_fpd_bdsc = match_bdsc["FPD Code"].values[0] if not match_bdsc.empty else ""
-            descr_bdsc = (
-                f"BALANCE DISC, PUMP - MODEL: {model_bdsc}, SIZE: {size_bdsc}, "
-                f"ID: {int(int_dia_bdsc)}mm, OD: {int(int_dia_bdsc) + 2*int(ext_dia_bdsc)}mm, "
-                f"FEATURES: {feature_1_bdsc}, {feature_2_bdsc}, NOTE: {note_bdsc}"
-            )
+          # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_bdsc = (
+    f"BALANCE DISC, PUMP - MODEL: {model_bdsc}, SIZE: {size_bdsc}, "
+    f"ID: {int(int_dia_bdsc)}mm, OD: {int(int_dia_bdsc) + 2*int(ext_dia_bdsc)}mm, "
+    f"FEATURES: {feature_1_bdsc}, {feature_2_bdsc}"
+)
+if note_bdsc:
+    descr_bdsc += f", NOTE: {note_bdsc}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_bdsc = "*" + descr_bdsc
             st.session_state["output_data"] = {
                 "Item": "40228…",
                 "Description": descr_bdsc,
@@ -1166,13 +1203,17 @@ elif selected_part == "Gate, Valve":
         dwg_gate    = st.text_input("Dwg/doc number", key="dwg_gate")
 
         if st.button("Genera Output", key="gen_gate"):
-            descr_gate = (
-                f"GATE, VALVE - SIZE: {size_gate}, CLASS: {pclass}, "
-                f"INLET: {inlet_type}-{inlet_size}, OUTLET: {outlet_type}-{outlet_size}, "
-                f"BODY MATERIAL: {valve_mat}, SCHEDULE: {schedule_g}"
-            )
-            if note_gate:
-                descr_gate += f", NOTE: {note_gate}"
+          # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_gate = (
+    f"GATE, VALVE - SIZE: {size_gate}, CLASS: {pclass}, "
+    f"INLET: {inlet_type}-{inlet_size}, OUTLET: {outlet_type}-{outlet_size}, "
+    f"BODY MATERIAL: {valve_mat}, SCHEDULE: {schedule_g}"
+)
+if note_gate:
+    descr_gate += f", NOTE: {note_gate}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_gate = "*" + descr_gate
             st.session_state["output_data"] = {
                 "Item": "50186…",
                 "Description": descr_gate,
@@ -1311,13 +1352,17 @@ elif selected_part == "Gasket, Spiral Wound":
             c1     = winding_colors[winding]
             c2     = filler_colors[filler]
             stripe = rating_stripes[rating]
-            descr_sw = (
-                f"GASKET, SPIRAL WOUND - WINDING: {winding}, FILLER: {filler}, "
-                f"ID: {inner_dia}mm, OD: {outer_dia}mm, THK: {thickness}mm, "
-                f"RATING: {rating}, COLOR CODE: {c1}/{c2}, {stripe}"
-            )
-            if note_sw:
-                descr_sw += f", NOTE: {note_sw}"
+        # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_sw = (
+    f"GASKET, SPIRAL WOUND - WINDING: {winding}, FILLER: {filler}, "
+    f"ID: {inner_dia}mm, OD: {outer_dia}mm, THK: {thickness}mm, "
+    f"RATING: {rating}, COLOR CODE: {c1}/{c2}, {stripe}"
+)
+if note_sw:
+    descr_sw += f", NOTE: {note_sw}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_sw = "*" + descr_sw
 
             st.session_state["output_data"] = {
                 "Item": "50415…",
@@ -1452,16 +1497,19 @@ elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
                 ]
             codice_fpd_b = match_b["FPD Code"].values[0] if not match_b.empty else ""
             
-            descr_b = (
-                f"BEARING, HYDROSTATIC/HYDRODYNAMIC - InsDia: {ins_dia}mm, OutDia: {out_dia}mm, "
-                f"Width: {width}mm"
-            )
-            if add_feat:
-                descr_b += f", {add_feat}"
-            descr_b += f", Material: {materiale_b}"
-            if mat_feat_bearing:
-                descr_b += f", {mat_feat_bearing}"
-            
+            # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_b = (
+    f"BEARING, HYDROSTATIC/HYDRODYNAMIC - InsDia: {ins_dia}mm, OutDia: {out_dia}mm, "
+    f"Width: {width}mm"
+)
+if add_feat:
+    descr_b += f", {add_feat}"
+descr_b += f", Material: {materiale_b}"
+if mat_feat_bearing:
+    descr_b += f", {mat_feat_bearing}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_b = "*" + descr_b
             st.session_state["output_data"] = {
                 "Item":               "50122…",
                 "Description":        descr_b,
@@ -1570,12 +1618,16 @@ elif selected_part == "Bearing, Rolling":
         add_feat_r    = st.text_input("Additional Features", key="feat_rolling")
         dwg_rolling   = st.text_input("Dwg/doc number", key="dwg_rolling")
         if st.button("Genera Output", key="gen_rolling"):
-            descr_rolling = (
-                f"BEARING, ROLLING - TYPE: {bearing_type}, DESIGNATION: {designation}, "
-                f"InsDia: {ins_dia_r}mm, OutDia: {out_dia_r}mm, Width: {width_r}mm"
-            )
-            if add_feat_r:
-                descr_rolling += f", {add_feat_r}"
+           # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_rolling = (
+    f"BEARING, ROLLING - TYPE: {bearing_type}, DESIGNATION: {designation}, "
+    f"InsDia: {ins_dia_r}mm, OutDia: {out_dia_r}mm, Width: {width_r}mm"
+)
+if add_feat_r:
+    descr_rolling += f", {add_feat_r}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_rolling = "*" + descr_rolling
             st.session_state["output_data"] = {
                 "Item":               "50122…",
                 "Description":        descr_rolling,
@@ -1731,12 +1783,16 @@ elif selected_part == "Bolt, Eye":
                 ]
             codice_fpd_be = match_be["FPD Code"].values[0] if not match_be.empty else ""
 
-            descr_be = f"BOLT, EYE - THREAD: {thread_be}, LENGTH: {length_be}"
-            if note1_be:
-                descr_be += f", {note1_be}"
-            descr_be += f", {materiale_be}"
-            if note2_be:
-                descr_be += f", {note2_be}"
+            # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_be = f"BOLT, EYE - THREAD: {thread_be}, LENGTH: {length_be}"
+if note1_be:
+    descr_be += f", {note1_be}"
+descr_be += f", {materiale_be}"
+if note2_be:
+    descr_be += f", {note2_be}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_be = "*" + descr_be
 
             st.session_state["output_data"] = {
                 "Item": "50150…",
@@ -1878,17 +1934,20 @@ elif selected_part == "Bolt, Hexagonal":
                 ]
             codice_fpd_hex = match_hex["FPD Code"].values[0] if not match_hex.empty else ""
 
-            descr_hex = f"BOLT, HEXAGONAL - SIZE: {size_hex}, LENGTH: {length_hex}"
-            if full_thd == "Yes":
-                descr_hex += ", FULL THREADED"
-            if zinc == "Yes":
-                descr_hex += ", ZINC PLATED AS PER ASTM B633"
-            if note1_hex:
-                descr_hex += f", {note1_hex}"
-            descr_hex += f", {materiale_hex}"
-            if note2_hex:
-                descr_hex += f", {note2_hex}"
+            # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_hex = f"BOLT, HEXAGONAL - SIZE: {size_hex}, LENGTH: {length_hex}"
+if full_thd == "Yes":
+    descr_hex += ", FULL THREADED"
+if zinc == "Yes":
+    descr_hex += ", ZINC PLATED AS PER ASTM B633"
+if note1_hex:
+    descr_hex += f", {note1_hex}"
+descr_hex += f", {materiale_hex}"
+if note2_hex:
+    descr_hex += f", {note2_hex}"
 
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_hex = "*" + descr_hex
             st.session_state["output_data"] = {
                 "Item": "56230…",
                 "Description": descr_hex,
@@ -2049,12 +2108,16 @@ elif selected_part == "Gasket, Ring Type Joint":
                 ]
             codice_fpd_rtj = match_rtj["FPD Code"].values[0] if not match_rtj.empty else ""
 
-            descr_rtj = f"GASKET, RING TYPE JOINT - TYPE: {rtj_type}, SIZE: {rtj_size}"
-            if note1_rtj:
-                descr_rtj += f", {note1_rtj}"
-            descr_rtj += f", {materiale_rtj}"
-            if note2_rtj:
-                descr_rtj += f", {note2_rtj}"
+           # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_rtj = f"GASKET, RING TYPE JOINT - TYPE: {rtj_type}, SIZE: {rtj_size}"
+if note1_rtj:
+    descr_rtj += f", {note1_rtj}"
+descr_rtj += f", {materiale_rtj}"
+if note2_rtj:
+    descr_rtj += f", {note2_rtj}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_rtj = "*" + descr_rtj
 
             st.session_state["output_data"] = {
                 "Item": "50158…",
@@ -2195,15 +2258,19 @@ elif selected_part == "Gusset, Other":
                 ]
             codice_fpd_gusset = match_gusset["FPD Code"].values[0] if not match_gusset.empty else ""
 
-            descr_gusset = (
-                f"GUSSET, OTHER - WIDTH: {int(width_gusset)}{uom_gusset}, "
-                f"THK: {int(thickness_gusset)}{uom_gusset}"
-            )
-            if note1_gusset:
-                descr_gusset += f", {note1_gusset}"
-            descr_gusset += f", {materiale_gusset}"
-            if note2_gusset:
-                descr_gusset += f", {note2_gusset}"
+            # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_gusset = (
+    f"GUSSET, OTHER - WIDTH: {int(width_gusset)}{uom_gusset}, "
+    f"THK: {int(thickness_gusset)}{uom_gusset}"
+)
+if note1_gusset:
+    descr_gusset += f", {note1_gusset}"
+descr_gusset += f", {materiale_gusset}"
+if note2_gusset:
+    descr_gusset += f", {note2_gusset}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_gusset = "*" + descr_gusset
 
             st.session_state["output_data"] = {
                 "Item": "565G…",
@@ -2370,14 +2437,18 @@ elif selected_part == "Stud, Threaded":
                 ]
             codice_fpd_stud = match_stud["FPD Code"].values[0] if not match_stud.empty else ""
 
-            descr_stud = (
-                f"STUD, THREADED - THREAD: {threaded_type}, SIZE: {size_stud}, LENGTH: {length_stud}"
-            )
-            if note1_stud:
-                descr_stud += f", {note1_stud}"
-            descr_stud += f", {materiale_stud}"
-            if note2_stud:
-                descr_stud += f", {note2_stud}"
+           # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_stud = (
+    f"STUD, THREADED - THREAD: {threaded_type}, SIZE: {size_stud}, LENGTH: {length_stud}"
+)
+if note1_stud:
+    descr_stud += f", {note1_stud}"
+descr_stud += f", {materiale_stud}"
+if note2_stud:
+    descr_stud += f", {note2_stud}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_stud = "*" + descr_stud
 
             st.session_state["output_data"] = {
                 "Item": "56146…",
@@ -2519,12 +2590,16 @@ elif selected_part == "Nut, Hex":
                 ]
             codice_fpd_nut = match_nut["FPD Code"].values[0] if not match_nut.empty else ""
 
-            descr_nut = f"NUT, HEX - TYPE: {nut_type}, SIZE: {size_nut}"
-            if note1_nut:
-                descr_nut += f", {note1_nut}"
-            descr_nut += f", {materiale_nut}"
-            if note2_nut:
-                descr_nut += f", {note2_nut}"
+            # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_nut = f"NUT, HEX - TYPE: {nut_type}, SIZE: {size_nut}"
+if note1_nut:
+    descr_nut += f", {note1_nut}"
+descr_nut += f", {materiale_nut}"
+if note2_nut:
+    descr_nut += f", {note2_nut}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_nut = "*" + descr_nut
 
             st.session_state["output_data"] = {
                 "Item": "56030…",
@@ -2735,18 +2810,22 @@ elif selected_part == "Ring, Wear":
                 item_code      = "40223…"
 
             # Costruzione descrizione
-            descr_ring = (
-                f"RING, WEAR - {ring_type} {model_ring} {size_ring}, "
-                f"ID: {int(int_dia_ring)}mm, OD: {int(int_dia_ring) + 2*int(ext_dia_ring)}mm, "
-                f"LENGTH: {int(length_ring)}mm"
-            )
-            if note_ring:
-                descr_ring += f", {note_ring}"
-            if clearance == "Yes":
-                descr_ring += ", INCREASED CLEARANCE"
-            descr_ring += f", {materiale_ring}"
-            if note2_ring:
-                descr_ring += f", {note2_ring}"
+            # 1) Costruisci prima la descrizione base (senza asterisco)
+descr_ring = (
+    f"RING, WEAR - {ring_type} {model_ring} {size_ring}, "
+    f"ID: {int(int_dia_ring)}mm, OD: {int(int_dia_ring) + 2*int(ext_dia_ring)}mm, "
+    f"LENGTH: {int(length_ring)}mm"
+)
+if note_ring:
+    descr_ring += f", {note_ring}"
+if clearance == "Yes":
+    descr_ring += ", INCREASED CLEARANCE"
+descr_ring += f", {materiale_ring}"
+if note2_ring:
+    descr_ring += f", {note2_ring}"
+
+# 2) Aggiungi sempre l’asterisco all’inizio
+descr_ring = "*" + descr_ring
 
             st.session_state["output_data"] = {
                 "Item":               item_code,
