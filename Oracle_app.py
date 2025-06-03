@@ -2835,3 +2835,25 @@ elif selected_part == "Ring, Wear":
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # (continua inserendo i restanti blocchi nello stesso formato)
+
+
+
+# --- Footer (non fisso, subito dopo i contenuti)
+footer_html = """
+<style>
+.footer {
+    width: 100%;
+    background-color: #f0f2f6;
+    color: #444444;
+    text-align: center;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    border-top: 1px solid #e1e3e6;
+    margin-top: 2rem;
+}
+</style>
+<div class="footer">
+    © 2025 Flowserve - Order Engineering – <a href="dzecchinel@gflowserve.com"_blank">Privacy Policy</a>
+</div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)
