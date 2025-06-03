@@ -70,23 +70,25 @@ categories = {
 }
 
 # --- Selezione categoria
-selected_category = st.selectbox(
-    "Seleziona categoria:",
-    [""] + list(categories.keys()),
-    index=0
-)
+# --- Selezione categoria e parte affiancate
+col1, col2 = st.columns([1, 1], gap="small")
+with col1:
+    selected_category = st.selectbox(
+        "Categoria:",
+        [""] + list(categories.keys()),
+        index=0
+    )
+with col2:
+    if selected_category:
+        part_list = categories[selected_category]
+    else:
+        part_list = []
+    selected_part = st.selectbox(
+        "Parte:",
+        [""] + part_list,
+        key="selected_part"
+    )
 
-# --- Selezione parte in base alla categoria
-if selected_category:
-    part_list = categories[selected_category]
-else:
-    part_list = []
-
-selected_part = st.selectbox(
-    "Seleziona il tipo di parte da configurare:",
-    [""] + part_list,
-    key="selected_part"
-)
 
 st.markdown("---")
 
