@@ -203,7 +203,7 @@ elif selected_part == "Casing, Pump":
             f2_list = features_df[
                 (features_df["Pump Model"] == model) & (features_df["Feature Type"] == "features2")
             ]["Feature"].dropna().tolist()
-            feature_2 = st.selectbox("Additional Feature 2", [""] + f2_list, key="f2_casing") (mm)", min_value=0, step=1, format="%d", key="int_dia_casing") (mm)", min_value=0, step=1, format="%d", key="ext_dia_casing")
+            feature_2 = st.selectbox("Additional Feature 2", [""] + f2_list, key="f2_casing")
         note     = st.text_area("Note (opzionale)", height=80, key="note_casing")
         dwg      = st.text_input("Dwg/doc number", key="dwg_casing")
         mtype    = st.selectbox("Material Type", [""] + material_types, key="mtype_casing")
