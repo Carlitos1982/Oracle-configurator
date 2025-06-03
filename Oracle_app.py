@@ -924,5 +924,1878 @@ elif selected_part == "Flange, Pipe":
                 )
 
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+# --- BALANCE DISC, PUMP
+elif selected_part == "Balance Disc, Pump":
+    col1, col2, col3 = st.columns(3)
+
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        model_bdsc     = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="bdsc_model")
+        size_list_bdsc = size_df[size_df["Pump Model"] == model_bdsc]["Size"].dropna().tolist()
+        size_bdsc      = st.selectbox("Product/Pump Size", [""] + size_list_bdsc, key="bdsc_size")
+
+        feature_1_bdsc = ""
+        special_bdsc = ["HDO", "DMX", "WXB", "WIK"]
+        if model_bdsc not in special_bdsc:
+            f1_list_bdsc = features_df[
+                (features_df["Pump Model"] == model_bdsc) & (features_df["Feature Type"] == "features1")
+            ]["Feature"].dropna().tolist()
+            feature_1_bdsc = st.selectbox("Additional Feature 1", [""] + f1_list_bdsc, key="f1_bdsc")
+
+        feature_2_bdsc = ""
+        if model_bdsc in ["HPX", "HED"]:
+            f2_list_bdsc = features_df[
+                (features_df["Pump Model"] == model_bdsc) & (features_df["Feature Type"] == "features2")
+            ]["Feature"].dropna().tolist()
+            feature_2_bdsc = st.selectbox("Additional Feature 2", [""] + f2_list_bdsc, key="f2_bdsc")
+
+        note_bdsc    = st.text_area("Note (opzionale)", height=80, key="note_bdsc")
+        dwg_bdsc     = st.text_input("Dwg/doc number", key="dwg_bdsc")
+
+        # Campi extra diametri
+        int_dia_bdsc = st.number_input("Diametro interno (mm)", min_value=0, step=1, format="%d", key="int_dia_bdsc")
+        ext_dia_bdsc = st.number_input("Diametro esterno (mm)", min_value=0, step=1, format="%d", key="ext_dia_bdsc")
+
+        mtype_bdsc   = st.selectbox("Material Type", [""] + material_types, key="mtype_bdsc")
+        pref_df_bdsc = materials_df[
+            (materials_df["Material Type"] == mtype_bdsc) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_bdsc = sorted(pref_df_bdsc["Prefix"].unique()) if mtype_bdsc != "MISCELLANEOUS" else []
+        mprefix_bdsc  = st.selectbox("Material Prefix", [""] + prefixes_bdsc, key="mprefix_bdsc")
+
+        if mtype_bdsc == "MISCELLANEOUS":
+            names_bdsc = materials_df[materials_df["Material Type"] == mtype_bdsc]["Name"].dropna().tolist()
+        else:
+            names_bdsc = materials_df[
+                (materials_df["Material Type"] == mtype_bdsc) &
+                (materials_df["Prefix"] == mprefix_bdsc)
+            ]["Name"].dropna().tolist()
+        mname_bdsc = st.selectbox("Material Name", [""] + names_bdsc, key="mname_bdsc")
+
+        if st.button("Genera Output", key="gen_bdsc"):
+            materiale_bdsc = (
+                f"{mtype_bdsc} {mprefix_bdsc} {mname_bdsc}".strip()
+                if mtype_bdsc != "MISCELLANEOUS" else mname_bdsc
+            )
+            match_bdsc = materials_df[
+                (materials_df["Material Type"] == mtype_bdsc) &
+                (materials_df["Prefix"] == mprefix_bdsc) &
+                (materials_df["Name"] == mname_bdsc)
+            ]
+            codice_fpd_bdsc = match_bdsc["FPD Code"].values[0] if not match_bdsc.empty else ""
+            descr_bdsc = (
+                f"BALANCE DISC, PUMP - MODEL: {model_bdsc}, SIZE: {size_bdsc}, "
+                f"ID: {int(int_dia_bdsc)}mm, OD: {int(int_dia_bdsc) + 2*int(ext_dia_bdsc)}mm, "
+                f"FEATURES: {feature_1_bdsc}, {feature_2_bdsc}, NOTE: {note_bdsc}"
+            )
+            st.session_state["output_data"] = {
+                "Item": "40228…",
+                "Description": descr_bdsc,
+                "Identificativo": "6210-BALANCE DISC",
+                "Classe ricambi": "1-2-3",
+                "Categories": "FASCIA ITE 4",
+                "Catalog": "ARTVARI",
+                "Disegno": dwg_bdsc,
+                "Material": materiale_bdsc,
+                "FPD material code": codice_fpd_bdsc,
+                "Template": "FPD_BUY_1",
+                "ERP_L1": "20_TURNKEY_MACHINING",
+                "ERP_L2": "30_DISK",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"bdsc_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"bdsc_{campo}")
+
+    # COLONNA 3: DATALOAD
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_bdsc = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="bdsc_dl_mode")
+        item_code_bdsc = st.text_input("Codice item", key="bdsc_item_code")
+        if st.button("Genera stringa DataLoad", key="gen_dl_bdsc"):
+            if not item_code_bdsc:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_bdsc(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+                dataload_fields_bdsc = [
+                    "\\%FN", item_code_bdsc,
+                    "\\%TC", get_val_bdsc("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_bdsc("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_bdsc("Identificativo"), "TAB",
+                    get_val_bdsc("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_bdsc('ERP_L1')}.{get_val_bdsc('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_bdsc("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_bdsc("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_bdsc("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_bdsc("FPD material code"), "TAB",
+                    get_val_bdsc("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_bdsc("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_bdsc("Quality") if get_val_bdsc("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_bdsc("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_bdsc("To supplier") if get_val_bdsc("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+                dataload_string_bdsc = "\t".join(dataload_fields_bdsc)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_bdsc, height=200)
+                csv_buffer_bdsc = io.StringIO()
+                writer_bdsc = csv.writer(csv_buffer_bdsc, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_bdsc:
+                    writer_bdsc.writerow([riga])
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_bdsc.getvalue(),
+                    file_name=f"dataload_{item_code_bdsc}.csv",
+                    mime="text/csv"
+                )
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
+# --- GATE, VALVE
+elif selected_part == "Gate, Valve":
+    col1, col2, col3 = st.columns(3)
+
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        size_gate   = st.selectbox(
+            "Size",
+            ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”'],
+            key="gate_size"
+        )
+        pclass      = st.selectbox(
+            "Pressure class",
+            ["150", "300", "600", "1500", "2500"],
+            key="gate_pressure"
+        )
+        inlet_type  = st.selectbox(
+            "Inlet connection type",
+            ["SW", "WN"],
+            key="gate_inlet_type"
+        )
+        inlet_size  = st.selectbox(
+            "Inlet connection size",
+            ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”'],
+            key="gate_inlet_size"
+        )
+        outlet_type = st.selectbox(
+            "Outlet connection type",
+            ["SW", "WN"],
+            key="gate_outlet_type"
+        )
+        outlet_size = st.selectbox(
+            "Outlet connection size",
+            ['1/8”', '1/4”', '3/8”', '1/2”', '3/4”', '1”', '1-1/4”', '1-1/2”', '2”', '2-1/2”', '3”', '4”'],
+            key="gate_outlet_size"
+        )
+        valve_mat   = st.selectbox(
+            "Valve material",
+            [
+                "A105", "A106-GR B", "UNS-S31803", "UNS-S32760", "A350 LF2", "A182-F316L",
+                "ALLOY 825", "GALVANIZED CARBON STEEL"
+            ],
+            key="gate_material"
+        )
+        schedule_g  = st.selectbox(
+            "Schedule",
+            ["5", "10", "20", "30", "40", "60", "80", "100", "120", "140", "160"],
+            key="gate_schedule"
+        )
+        note_gate   = st.text_area("Note (opzionale)", height=80, key="gate_note")
+        dwg_gate    = st.text_input("Dwg/doc number", key="dwg_gate")
+
+        if st.button("Genera Output", key="gen_gate"):
+            descr_gate = (
+                f"GATE, VALVE - SIZE: {size_gate}, CLASS: {pclass}, "
+                f"INLET: {inlet_type}-{inlet_size}, OUTLET: {outlet_type}-{outlet_size}, "
+                f"BODY MATERIAL: {valve_mat}, SCHEDULE: {schedule_g}"
+            )
+            if note_gate:
+                descr_gate += f", NOTE: {note_gate}"
+            st.session_state["output_data"] = {
+                "Item": "50186…",
+                "Description": descr_gate,
+                "Identificativo": "VALVOLA (GLOBO,SARAC,SFERA,NEEDLE,MANIF,CONTR)",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "",
+                "Disegno": dwg_gate,
+                "Material": "NOT AVAILABLE",
+                "FPD material code": "BO-NA",
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "72_VALVE",
+                "ERP_L2": "18_GATE_VALVE",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"gate_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"gate_{campo}")
+
+    # COLONNA 3: DATALOAD
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_gate = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="gate_dl_mode")
+        item_code_gate = st.text_input("Codice item", key="gate_item_code")
+
+        if st.button("Genera stringa DataLoad", key="gen_dl_gate"):
+            if not item_code_gate:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_gate(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+
+                dataload_fields_gate = [
+                    "\\%FN", item_code_gate,
+                    "\\%TC", get_val_gate("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_gate("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_gate("Identificativo"), "TAB",
+                    get_val_gate("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_gate('ERP_L1')}.{get_val_gate('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_gate("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_gate("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_gate("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_gate("FPD material code"), "TAB",
+                    get_val_gate("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_gate("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_gate("Quality") if get_val_gate("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_gate("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_gate("To supplier") if get_val_gate("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+
+                dataload_string_gate = "\t".join(dataload_fields_gate)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_gate, height=200)
+
+                csv_buffer_gate = io.StringIO()
+                writer_gate = csv.writer(csv_buffer_gate, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_gate:
+                    writer_gate.writerow([riga])
+
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_gate.getvalue(),
+                    file_name=f"dataload_{item_code_gate}.csv",
+                    mime="text/csv"
+                )
+
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+# --- GASKET, SPIRAL WOUND
+elif selected_part == "Gasket, Spiral Wound":
+    col1, col2, col3 = st.columns(3)
+
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        winding_colors = {
+            "304 stainless steel": "Yellow RAL1021",
+            "316L stainless steel": "Green RAL6005",
+            "317L stainless steel": "Maroon RAL3003",
+            "321 stainless steel": "Turquoise RAL5018",
+            "347 stainless steel": "Blue RAL5017",
+            "MONEL": "Orange RAL2003",
+            "Nickel": "Red RAL3024",
+            "Titanium": "Purple RAL4003",
+            "Alloy20": "Black RAL9005",
+            "INCONEL 600": "Gold RAL1004",
+            "HASTELLOY B": "Brown RAL8003",
+            "HASTELLOY C": "Beige RAL1001",
+            "INCOLOY800": "White RAL9010",
+            "DUPLEX": "Yellow+Blue RAL1021+5017",
+            "SUPERDUPLEX": "Red+Black RAL3024+9005",
+            "ALLOY 825": "Orange+Green RAL2003+6005",
+            "UNS S31254": "Orange+Blue RAL2003+5017",
+            "ZYRCONIUM 702": "Gold+Green RAL1004+6005",
+            "INCONEL X750HT": "Gold+Black RAL1004+9005"
+        }
+        filler_colors = {
+            "Graphite": "Gray RAL7011",
+            "PTFE": "White RAL9010",
+            "Ceramic": "Ceramic Lt. Green RAL6021",
+            "Verdicarb (Mica Graphite)": "Pink RAL3015"
+        }
+        rating_stripes = {
+            "STANDARD PRESSURE m=3 y=10000 psi": "(1 stripe)",
+            "HIGH PRESSURE m=3 y=17500 psi": "(2 stripes)",
+            "ULTRA HIGH PRESSURE m=3 y=23500 psi": "(3 stripes)"
+        }
+
+        winding   = st.selectbox("Winding material", list(winding_colors.keys()), key="winding_sw")
+        filler    = st.selectbox("Filler", list(filler_colors.keys()), key="filler_sw")
+        inner_dia = st.number_input("Diametro interno (mm)", min_value=0.0, step=0.1, format="%.1f", key="inner_dia_sw")
+        outer_dia = st.number_input("Diametro esterno (mm)", min_value=0.0, step=0.1, format="%.1f", key="outer_dia_sw")
+        thickness = st.number_input("Spessore (mm)", min_value=0.0, step=0.1, format="%.1f", key="thickness_sw")
+        rating    = st.selectbox("Rating", list(rating_stripes.keys()), key="rating_sw")
+        dwg_sw    = st.text_input("Dwg/doc number", key="dwg_sw")
+        note_sw   = st.text_area("Note (opzionale)", height=80, key="note_sw")
+
+        if st.button("Genera Output", key="gen_sw"):
+            c1     = winding_colors[winding]
+            c2     = filler_colors[filler]
+            stripe = rating_stripes[rating]
+            descr_sw = (
+                f"GASKET, SPIRAL WOUND - WINDING: {winding}, FILLER: {filler}, "
+                f"ID: {inner_dia}mm, OD: {outer_dia}mm, THK: {thickness}mm, "
+                f"RATING: {rating}, COLOR CODE: {c1}/{c2}, {stripe}"
+            )
+            if note_sw:
+                descr_sw += f", NOTE: {note_sw}"
+
+            st.session_state["output_data"] = {
+                "Item": "50415…",
+                "Description": descr_sw,
+                "Identificativo": "4510-JOINT",
+                "Classe ricambi": "1-2-3",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ARTVARI",
+                "Disegno": dwg_sw,
+                "Material": "NA",
+                "FPD material code": "NOT AVAILABLE",
+                "Template": "FPD_BUY_1",
+                "ERP_L1": "55_GASKETS_OR_SEAL",
+                "ERP_L2": "16_SPIRAL_WOUND",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"sw_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"sw_{campo}")
+
+    # COLONNA 3: DataLoad
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_sw = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="sw_dl_mode")
+        item_code_sw = st.text_input("Codice item", key="sw_item_code")
+
+        if st.button("Genera stringa DataLoad", key="gen_dl_sw"):
+            if not item_code_sw:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_sw(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+
+                dataload_fields_sw = [
+                    "\\%FN", item_code_sw,
+                    "\\%TC", get_val_sw("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_sw("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_sw("Identificativo"), "TAB",
+                    get_val_sw("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_sw('ERP_L1')}.{get_val_sw('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_sw("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_sw("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_sw("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_sw("FPD material code"), "TAB",
+                    get_val_sw("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_sw("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_sw("Quality") if get_val_sw("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_sw("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_sw("To supplier") if get_val_sw("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+
+                dataload_string_sw = "\t".join(dataload_fields_sw)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_sw, height=200)
+
+                csv_buffer_sw = io.StringIO()
+                writer_sw = csv.writer(csv_buffer_sw, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_sw:
+                    writer_sw.writerow([riga])
+
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_sw.getvalue(),
+                    file_name=f"dataload_{item_code_sw}.csv",
+                    mime="text/csv"
+                )
+
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+# --- BEARING, HYDROSTATIC/HYDRODYNAMIC
+elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
+    col1, col2, col3 = st.columns(3)
+
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        ins_dia        = st.number_input("InsDia (mm)", min_value=0.0, step=0.1, format="%.1f", key="insdia_bearing")
+        out_dia        = st.number_input("OutDia (mm)", min_value=0.0, step=0.1, format="%.1f", key="outdia_bearing")
+        width          = st.number_input("Width (mm)", min_value=0.0, step=0.1, format="%.1f", key="width_bearing")
+        add_feat       = st.text_input("Additional Features", key="feat_bearing")
+        dwg_bearing    = st.text_input("Dwg/doc number", key="dwg_bearing")
+        
+        mtype_bearing  = st.selectbox("Material Type", [""] + material_types, key="mtype_bearing")
+        pref_df_bearing = materials_df[
+            (materials_df["Material Type"] == mtype_bearing) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_bearing = sorted(pref_df_bearing["Prefix"].unique()) if mtype_bearing != "MISCELLANEOUS" else []
+        mprefix_bearing = st.selectbox("Prefix (only if ASTM or EN)", [""] + prefixes_bearing, key="mprefix_bearing")
+        
+        if mtype_bearing == "MISCELLANEOUS":
+            names_bearing = materials_df[materials_df["Material Type"] == mtype_bearing]["Name"].dropna().tolist()
+        else:
+            names_bearing = materials_df[
+                (materials_df["Material Type"] == mtype_bearing) &
+                (materials_df["Prefix"] == mprefix_bearing)
+            ]["Name"].dropna().tolist()
+        mname_bearing    = st.selectbox("Name", [""] + names_bearing, key="mname_bearing")
+        
+        mat_feat_bearing = st.text_input("Material add. Features", key="matfeat_bearing")
+
+        if st.button("Genera Output", key="gen_bearing"):
+            if mtype_bearing != "MISCELLANEOUS":
+                materiale_b = f"{mtype_bearing} {mprefix_bearing} {mname_bearing}".strip()
+                match_b     = materials_df[
+                    (materials_df["Material Type"] == mtype_bearing) &
+                    (materials_df["Prefix"] == mprefix_bearing) &
+                    (materials_df["Name"] == mname_bearing)
+                ]
+            else:
+                materiale_b = mname_bearing
+                match_b     = materials_df[
+                    (materials_df["Material Type"] == mtype_bearing) &
+                    (materials_df["Name"] == mname_bearing)
+                ]
+            codice_fpd_b = match_b["FPD Code"].values[0] if not match_b.empty else ""
+            
+            descr_b = (
+                f"BEARING, HYDROSTATIC/HYDRODYNAMIC - InsDia: {ins_dia}mm, OutDia: {out_dia}mm, "
+                f"Width: {width}mm"
+            )
+            if add_feat:
+                descr_b += f", {add_feat}"
+            descr_b += f", Material: {materiale_b}"
+            if mat_feat_bearing:
+                descr_b += f", {mat_feat_bearing}"
+            
+            st.session_state["output_data"] = {
+                "Item":               "50122…",
+                "Description":        descr_b,
+                "Identificativo":     "3010-ANTI-FRICTION BEARING",
+                "Classe ricambi":     "1-2-3",
+                "Categories":         "FASCIA ITE 5",
+                "Catalog":            "ALBERO",
+                "Disegno":            dwg_bearing,
+                "Material":           materiale_b,
+                "FPD material code":  codice_fpd_b,
+                "Template":           "FPD_BUY_1",
+                "ERP_L1":             "31_COMMERCIAL_BEARING",
+                "ERP_L2":             "18_OTHER",
+                "To supplier":        "",
+                "Quality":            ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"bear_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"bear_{campo}")
+
+    # COLONNA 3: DataLoad
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_bear = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="bear_dl_mode")
+        item_code_bear = st.text_input("Codice item", key="bear_item_code")
+
+        if st.button("Genera stringa DataLoad", key="gen_dl_bear"):
+            if not item_code_bear:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_bear(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+
+                dataload_fields_bear = [
+                    "\\%FN", item_code_bear,
+                    "\\%TC", get_val_bear("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_bear("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_bear("Identificativo"), "TAB",
+                    get_val_bear("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_bear('ERP_L1')}.{get_val_bear('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_bear("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_bear("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_bear("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_bear("FPD material code"), "TAB",
+                    get_val_bear("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_bear("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_bear("Quality") if get_val_bear("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_bear("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_bear("To supplier") if get_val_bear("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+
+                dataload_string_bear = "\t".join(dataload_fields_bear)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_bear, height=200)
+
+                csv_buffer_bear = io.StringIO()
+                writer_bear = csv.writer(csv_buffer_bear, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_bear:
+                    writer_bear.writerow([riga])
+
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_bear.getvalue(),
+                    file_name=f"dataload_{item_code_bear}.csv",
+                    mime="text/csv"
+                )
+
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+# --- BEARING, ROLLING
+elif selected_part == "Bearing, Rolling":
+    col1, col2, col3 = st.columns(3)
+
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        type_options  = [
+            "ANGULAR_CONTACT_BEARING",
+            "BALL_BEARING",
+            "ROLLER_BEARING",
+            "TAPERED_BEARING",
+            "ANTIFRICTION_THRUST_BEARING",
+            "OTHER"
+        ]
+        bearing_type  = st.selectbox("Type", type_options, key="rolling_type")
+        designation   = st.text_input("Designation", key="rolling_designation")
+        ins_dia_r     = st.number_input("InsDia (mm)", min_value=0.0, step=0.1, format="%.1f", key="insdia_rolling")
+        out_dia_r     = st.number_input("OutDia (mm)", min_value=0.0, step=0.1, format="%.1f", key="outdia_rolling")
+        width_r       = st.number_input("Width (mm)", min_value=0.0, step=0.1, format="%.1f", key="width_rolling")
+        add_feat_r    = st.text_input("Additional Features", key="feat_rolling")
+        dwg_rolling   = st.text_input("Dwg/doc number", key="dwg_rolling")
+        if st.button("Genera Output", key="gen_rolling"):
+            descr_rolling = (
+                f"BEARING, ROLLING - TYPE: {bearing_type}, DESIGNATION: {designation}, "
+                f"InsDia: {ins_dia_r}mm, OutDia: {out_dia_r}mm, Width: {width_r}mm"
+            )
+            if add_feat_r:
+                descr_rolling += f", {add_feat_r}"
+            st.session_state["output_data"] = {
+                "Item":               "50122…",
+                "Description":        descr_rolling,
+                "Identificativo":     "3010-ANTI-FRICTION BEARING",
+                "Classe ricambi":     "1-2-3",
+                "Categories":         "FASCIA ITE 5",
+                "Catalog":            "ALBERO",
+                "Disegno":            dwg_rolling,
+                "Material":           "BUY OUT NOT AVAILABLE",
+                "FPD material code":  "BO-NA",
+                "Template":           "FPD_BUY_2",
+                "ERP_L1":             "31_COMMERCIAL_BEARING",
+                "ERP_L2":             "11_BALL_BEARING",
+                "To supplier":        "",
+                "Quality":            ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"rolling_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"rolling_{campo}")
+
+    # COLONNA 3: DataLoad
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_rolling = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="rolling_dl_mode")
+        item_code_rolling    = st.text_input("Codice item", key="rolling_item_code")
+        if st.button("Genera stringa DataLoad", key="gen_dl_rolling"):
+            if not item_code_rolling:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_rolling(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+
+                dataload_fields_rolling = [
+                    "\\%FN", item_code_rolling,
+                    "\\%TC", get_val_rolling("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_rolling("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_rolling("Identificativo"), "TAB",
+                    get_val_rolling("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_rolling('ERP_L1')}.{get_val_rolling('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_rolling("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_rolling("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_rolling("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_rolling("FPD material code"), "TAB",
+                    get_val_rolling("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_rolling("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_rolling("Quality") if get_val_rolling("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_rolling("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_rolling("To supplier") if get_val_rolling("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+
+                dataload_string_rolling = "\t".join(dataload_fields_rolling)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_rolling, height=200)
+
+                csv_buffer_rolling = io.StringIO()
+                writer_rolling = csv.writer(csv_buffer_rolling, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_rolling:
+                    writer_rolling.writerow([riga])
+
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_rolling.getvalue(),
+                    file_name=f"dataload_{item_code_rolling}.csv",
+                    mime="text/csv"
+                )
+
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+# --- BOLT, EYE
+elif selected_part == "Bolt, Eye":
+    col1, col2, col3 = st.columns(3)
+
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        thread_be = st.selectbox(
+            "Thread type/size",
+            [
+                "#10-24UNC", "5/16\"-18UNC", "3/8\"-16UNC", "1/2\"-13UNC", "3/4\"-16UNF",
+                "7/8\"-9UNC", "7/8\"-14UNF", "1\"-12UNF", "1-1/8\"-12UNF", "1-1/2\"-12UNC",
+                "2\"-4.5UNC", "2-1/2\"-4UNC", "3\"-6UNC", "4\"-8UNC",
+                "M6x1", "M8x1.25", "M10x1.5", "M12x1.75", "M16x2", "M20x2.5", "M24x3",
+                "M30x3.5", "M36x4", "M42x4.5", "M48x5", "M56x5.5", "M64x6", "M72x6",
+                "M80x6", "M90x6", "M100x6"
+            ],
+            key="be_thread"
+        )
+        length_be = st.selectbox(
+            "Length",
+            [
+                "1/8\"in", "1/4\"in", "3/8\"in", "5/16\"in", "1/2\"in", "3/4\"in",
+                "1\"in", "1-1/8\"in", "1-1/4\"in", "1-3/8\"in", "1-1/2\"in", "2\"in",
+                "2-1/8\"in", "2-1/4\"in", "2-3/8\"in", "2-1/2\"in", "2-3/4\"in",
+                "3\"in", "3-1/8\"in", "3-1/4\"in", "3-3/8\"in", "3-1/2\"in", "4\"in",
+                "4-1/8\"in", "4-1/4\"in", "4-3/8\"in", "4-1/2\"in",
+                "50mm", "55mm", "60mm", "65mm", "70mm", "75mm", "80mm", "85mm", "90mm", "95mm",
+                "100mm", "105mm", "110mm", "115mm", "120mm", "125mm", "130mm", "135mm", "140mm",
+                "145mm", "150mm", "155mm", "160mm", "165mm", "170mm", "175mm", "180mm", "185mm",
+                "190mm", "195mm"
+            ],
+            key="be_length"
+        )
+        note1_be = st.text_area("Note (opzionale)", height=80, key="be_note1")
+
+        mtype_be = st.selectbox("Material Type", [""] + material_types, key="be_mtype")
+        pref_df_be = materials_df[
+            (materials_df["Material Type"] == mtype_be) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_be = sorted(pref_df_be["Prefix"].unique()) if mtype_be != "MISCELLANEOUS" else []
+        mprefix_be = st.selectbox("Material Prefix", [""] + prefixes_be, key="be_mprefix")
+
+        if mtype_be == "MISCELLANEOUS":
+            names_be = materials_df[materials_df["Material Type"] == mtype_be]["Name"].dropna().tolist()
+        else:
+            names_be = materials_df[
+                (materials_df["Material Type"] == mtype_be) &
+                (materials_df["Prefix"] == mprefix_be)
+            ]["Name"].dropna().tolist()
+        mname_be = st.selectbox("Material Name", [""] + names_be, key="be_mname")
+
+        note2_be = st.text_area("Material Note (opzionale)", height=80, key="be_note2")
+
+        if st.button("Genera Output", key="gen_be"):
+            if mtype_be != "MISCELLANEOUS":
+                materiale_be = f"{mtype_be} {mprefix_be} {mname_be}".strip()
+                match_be = materials_df[
+                    (materials_df["Material Type"] == mtype_be) &
+                    (materials_df["Prefix"] == mprefix_be) &
+                    (materials_df["Name"] == mname_be)
+                ]
+            else:
+                materiale_be = mname_be
+                match_be = materials_df[
+                    (materials_df["Material Type"] == mtype_be) &
+                    (materials_df["Name"] == mname_be)
+                ]
+            codice_fpd_be = match_be["FPD Code"].values[0] if not match_be.empty else ""
+
+            descr_be = f"BOLT, EYE - THREAD: {thread_be}, LENGTH: {length_be}"
+            if note1_be:
+                descr_be += f", {note1_be}"
+            descr_be += f", {materiale_be}"
+            if note2_be:
+                descr_be += f", {note2_be}"
+
+            st.session_state["output_data"] = {
+                "Item": "50150…",
+                "Description": descr_be,
+                "Identificativo": "6583-EYE BOLT",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "",
+                "Material": materiale_be,
+                "FPD material code": codice_fpd_be,
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "60_FASTENER",
+                "ERP_L2": "74_OTHER_FASTENING_COMPONENTS_EYE_NUTS_LOCK_NUTS_ETC",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"be_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"be_{campo}")
+
+    # COLONNA 3: DataLoad
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_be = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="be_dl_mode")
+        item_code_be = st.text_input("Codice item", key="be_item_code")
+
+        if st.button("Genera stringa DataLoad", key="gen_dl_be"):
+            if not item_code_be:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_be(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+
+                dataload_fields_be = [
+                    "\\%FN", item_code_be,
+                    "\\%TC", get_val_be("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_be("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_be("Identificativo"), "TAB",
+                    get_val_be("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_be('ERP_L1')}.{get_val_be('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_be("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_be("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_be("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_be("FPD material code"), "TAB",
+                    get_val_be("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_be("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_be("Quality") if get_val_be("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_be("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_be("To supplier") if get_val_be("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+
+                dataload_string_be = "\t".join(dataload_fields_be)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_be, height=200)
+
+                csv_buffer_be = io.StringIO()
+                writer_be = csv.writer(csv_buffer_be, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_be:
+                    writer_be.writerow([riga])
+
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_be.getvalue(),
+                    file_name=f"dataload_{item_code_be}.csv",
+                    mime="text/csv"
+                )
+
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+# --- BOLT, HEXAGONAL
+elif selected_part == "Bolt, Hexagonal":
+    col1, col2, col3 = st.columns(3)
+
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        size_hex   = st.selectbox(
+            "Size",
+            bolt_sizes,  # utilizza la lista bolt_sizes già definita in alto
+            key="hex_size"
+        )
+        length_hex = st.selectbox(
+            "Length",
+            bolt_lengths,  # utilizza la lista bolt_lengths già definita in alto
+            key="hex_length"
+        )
+        full_thd   = st.radio("Full threaded?", ["Yes", "No"], horizontal=True, key="hex_fullthread")
+        zinc       = st.radio("Zinc Plated?", ["Yes", "No"], horizontal=True, key="hex_zinc")
+        note1_hex  = st.text_area("Note (opzionale)", height=80, key="hex_note1")
+
+        mtype_hex = st.selectbox("Material Type", [""] + material_types, key="mtype_hex")
+        pref_df_hex = materials_df[
+            (materials_df["Material Type"] == mtype_hex) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_hex = sorted(pref_df_hex["Prefix"].unique()) if mtype_hex != "MISCELLANEOUS" else []
+        mprefix_hex  = st.selectbox("Material Prefix", [""] + prefixes_hex, key="hex_mprefix")
+
+        if mtype_hex == "MISCELLANEOUS":
+            names_hex = materials_df[materials_df["Material Type"] == mtype_hex]["Name"].dropna().tolist()
+        else:
+            names_hex = materials_df[
+                (materials_df["Material Type"] == mtype_hex) &
+                (materials_df["Prefix"] == mprefix_hex)
+            ]["Name"].dropna().tolist()
+        mname_hex = st.selectbox("Material Name", [""] + names_hex, key="hex_mname")
+
+        note2_hex = st.text_area("Material Note (opzionale)", height=80, key="hex_note2")
+
+        if st.button("Genera Output", key="gen_hex"):
+            if mtype_hex != "MISCELLANEOUS":
+                materiale_hex = f"{mtype_hex} {mprefix_hex} {mname_hex}".strip()
+                match_hex = materials_df[
+                    (materials_df["Material Type"] == mtype_hex) &
+                    (materials_df["Prefix"] == mprefix_hex) &
+                    (materials_df["Name"] == mname_hex)
+                ]
+            else:
+                materiale_hex = mname_hex
+                match_hex = materials_df[
+                    (materials_df["Material Type"] == mtype_hex) &
+                    (materials_df["Name"] == mname_hex)
+                ]
+            codice_fpd_hex = match_hex["FPD Code"].values[0] if not match_hex.empty else ""
+
+            descr_hex = f"BOLT, HEXAGONAL - SIZE: {size_hex}, LENGTH: {length_hex}"
+            if full_thd == "Yes":
+                descr_hex += ", FULL THREADED"
+            if zinc == "Yes":
+                descr_hex += ", ZINC PLATED AS PER ASTM B633"
+            if note1_hex:
+                descr_hex += f", {note1_hex}"
+            descr_hex += f", {materiale_hex}"
+            if note2_hex:
+                descr_hex += f", {note2_hex}"
+
+            st.session_state["output_data"] = {
+                "Item": "56230…",
+                "Description": descr_hex,
+                "Identificativo": "6577-HEXAGON HEAD BOLT",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "",
+                "Material": materiale_hex,
+                "FPD material code": codice_fpd_hex,
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "60_FASTENER",
+                "ERP_L2": "10_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"hex_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"hex_{campo}")
+
+    # COLONNA 3: DataLoad
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_hex = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="hex_dl_mode")
+        item_code_hex = st.text_input("Codice item", key="hex_item_code")
+
+        if st.button("Genera stringa DataLoad", key="gen_dl_hex"):
+            if not item_code_hex:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_hex(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+
+                dataload_fields_hex = [
+                    "\\%FN", item_code_hex,
+                    "\\%TC", get_val_hex("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_hex("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_hex("Identificativo"), "TAB",
+                    get_val_hex("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_hex('ERP_L1')}.{get_val_hex('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_hex("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_hex("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_hex("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_hex("FPD material code"), "TAB",
+                    get_val_hex("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_hex("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_hex("Quality") if get_val_hex("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_hex("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_hex("To supplier") if get_val_hex("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+
+                dataload_string_hex = "\t".join(dataload_fields_hex)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_hex, height=200)
+
+                csv_buffer_hex = io.StringIO()
+                writer_hex = csv.writer(csv_buffer_hex, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_hex:
+                    writer_hex.writerow([riga])
+
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_hex.getvalue(),
+                    file_name=f"dataload_{item_code_hex}.csv",
+                    mime="text/csv"
+                )
+
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+# --- GASKET, RING TYPE JOINT
+elif selected_part == "Gasket, Ring Type Joint":
+    col1, col2, col3 = st.columns(3)
+
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        rtj_type = st.selectbox(
+            "Type",
+            ["Oval", "Octagonal"],
+            key="rtj_type"
+        )
+        rtj_size = st.selectbox(
+            "Size",
+            [f"R{i}" for i in range(11, 61)],
+            key="rtj_size"
+        )
+        note1_rtj = st.text_area(
+            "Note (opzionale)",
+            height=80,
+            key="rtj_note1"
+        )
+
+        mtype_rtj = st.selectbox(
+            "Material Type",
+            [""] + material_types,
+            key="mtype_rtj"
+        )
+        pref_df_rtj = materials_df[
+            (materials_df["Material Type"] == mtype_rtj) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_rtj = sorted(pref_df_rtj["Prefix"].unique()) if mtype_rtj != "MISCELLANEOUS" else []
+        mprefix_rtj = st.selectbox(
+            "Material Prefix",
+            [""] + prefixes_rtj,
+            key="mprefix_rtj"
+        )
+
+        if mtype_rtj == "MISCELLANEOUS":
+            names_rtj = materials_df[
+                materials_df["Material Type"] == mtype_rtj
+            ]["Name"].dropna().tolist()
+        else:
+            names_rtj = materials_df[
+                (materials_df["Material Type"] == mtype_rtj) &
+                (materials_df["Prefix"] == mprefix_rtj)
+            ]["Name"].dropna().tolist()
+        mname_rtj = st.selectbox(
+            "Material Name",
+            [""] + names_rtj,
+            key="mname_rtj"
+        )
+
+        note2_rtj = st.text_area(
+            "Material Note (opzionale)",
+            height=80,
+            key="rtj_note2"
+        )
+
+        if st.button("Genera Output", key="gen_rtj"):
+            if mtype_rtj != "MISCELLANEOUS":
+                materiale_rtj = f"{mtype_rtj} {mprefix_rtj} {mname_rtj}".strip()
+                match_rtj = materials_df[
+                    (materials_df["Material Type"] == mtype_rtj) &
+                    (materials_df["Prefix"] == mprefix_rtj) &
+                    (materials_df["Name"] == mname_rtj)
+                ]
+            else:
+                materiale_rtj = mname_rtj
+                match_rtj = materials_df[
+                    (materials_df["Material Type"] == mtype_rtj) &
+                    (materials_df["Name"] == mname_rtj)
+                ]
+            codice_fpd_rtj = match_rtj["FPD Code"].values[0] if not match_rtj.empty else ""
+
+            descr_rtj = f"GASKET, RING TYPE JOINT - TYPE: {rtj_type}, SIZE: {rtj_size}"
+            if note1_rtj:
+                descr_rtj += f", {note1_rtj}"
+            descr_rtj += f", {materiale_rtj}"
+            if note2_rtj:
+                descr_rtj += f", {note2_rtj}"
+
+            st.session_state["output_data"] = {
+                "Item": "50158…",
+                "Description": descr_rtj,
+                "Identificativo": "ANELLO SFERICO RING JOINT",
+                "Classe ricambi": "1-2-3",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "",
+                "Material": materiale_rtj,
+                "FPD material code": codice_fpd_rtj,
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "55_GASKETS_OR_SEAL",
+                "ERP_L2": "20_OTHER",
+                "Disegno": "",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"rtj_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"rtj_{campo}")
+
+    # COLONNA 3: DataLoad
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_rtj = st.radio(
+            "Tipo operazione:",
+            ["Crea nuovo item", "Aggiorna item"],
+            key="rtj_dl_mode"
+        )
+        item_code_rtj = st.text_input(
+            "Codice item",
+            key="rtj_item_code"
+        )
+
+        if st.button("Genera stringa DataLoad", key="gen_dl_rtj"):
+            if not item_code_rtj:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_rtj(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+
+                dataload_fields_rtj = [
+                    "\\%FN", item_code_rtj,
+                    "\\%TC", get_val_rtj("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_rtj("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_rtj("Identificativo"), "TAB",
+                    get_val_rtj("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_rtj('ERP_L1')}.{get_val_rtj('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_rtj("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_rtj("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_rtj("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_rtj("FPD material code"), "TAB",
+                    get_val_rtj("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_rtj("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_rtj("Quality") if get_val_rtj("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_rtj("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_rtj("To supplier") if get_val_rtj("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+
+                dataload_string_rtj = "\t".join(dataload_fields_rtj)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_rtj, height=200)
+
+                csv_buffer_rtj = io.StringIO()
+                writer_rtj = csv.writer(csv_buffer_rtj, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_rtj:
+                    writer_rtj.writerow([riga])
+
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_rtj.getvalue(),
+                    file_name=f"dataload_{item_code_rtj}.csv",
+                    mime="text/csv"
+                )
+
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+# --- GUSSET, OTHER
+elif selected_part == "Gusset, Other":
+    col1, col2, col3 = st.columns(3)
+
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        width_gusset    = st.number_input("Width", min_value=0, step=1, format="%d", key="gusset_width")
+        thickness_gusset = st.number_input("Thickness", min_value=0, step=1, format="%d", key="gusset_thickness")
+        uom_gusset      = st.selectbox("Unità di misura", ["mm", "inches"], key="gusset_uom")
+        note1_gusset    = st.text_area("Note (opzionale)", height=80, key="gusset_note1")
+
+        mtype_gusset    = st.selectbox("Material Type", [""] + material_types, key="mtype_gusset")
+        pref_df_gusset  = materials_df[
+            (materials_df["Material Type"] == mtype_gusset) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_gusset = sorted(pref_df_gusset["Prefix"].unique()) if mtype_gusset != "MISCELLANEOUS" else []
+        mprefix_gusset  = st.selectbox("Material Prefix", [""] + prefixes_gusset, key="mprefix_gusset")
+
+        if mtype_gusset == "MISCELLANEOUS":
+            names_gusset = materials_df[materials_df["Material Type"] == mtype_gusset]["Name"].dropna().tolist()
+        else:
+            names_gusset = materials_df[
+                (materials_df["Material Type"] == mtype_gusset) &
+                (materials_df["Prefix"] == mprefix_gusset)
+            ]["Name"].dropna().tolist()
+        mname_gusset   = st.selectbox("Material Name", [""] + names_gusset, key="mname_gusset")
+
+        note2_gusset   = st.text_area("Material Note (opzionale)", height=80, key="gusset_note2")
+
+        if st.button("Genera Output", key="gen_gusset"):
+            if mtype_gusset != "MISCELLANEOUS":
+                materiale_gusset = f"{mtype_gusset} {mprefix_gusset} {mname_gusset}".strip()
+                match_gusset     = materials_df[
+                    (materials_df["Material Type"] == mtype_gusset) &
+                    (materials_df["Prefix"] == mprefix_gusset) &
+                    (materials_df["Name"] == mname_gusset)
+                ]
+            else:
+                materiale_gusset = mname_gusset
+                match_gusset     = materials_df[
+                    (materials_df["Material Type"] == mtype_gusset) &
+                    (materials_df["Name"] == mname_gusset)
+                ]
+            codice_fpd_gusset = match_gusset["FPD Code"].values[0] if not match_gusset.empty else ""
+
+            descr_gusset = (
+                f"GUSSET, OTHER - WIDTH: {int(width_gusset)}{uom_gusset}, "
+                f"THK: {int(thickness_gusset)}{uom_gusset}"
+            )
+            if note1_gusset:
+                descr_gusset += f", {note1_gusset}"
+            descr_gusset += f", {materiale_gusset}"
+            if note2_gusset:
+                descr_gusset += f", {note2_gusset}"
+
+            st.session_state["output_data"] = {
+                "Item": "565G…",
+                "Description": descr_gusset,
+                "Identificativo": "GUSSETING",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ARTVARI",
+                "Disegno": "",
+                "Material": materiale_gusset,
+                "FPD material code": codice_fpd_gusset,
+                "Template": "FPD_BUY_1",
+                "ERP_L1": "21_FABRICATION_OR_BASEPLATES",
+                "ERP_L2": "29_OTHER",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"gusset_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"gusset_{campo}")
+
+    # COLONNA 3: DataLoad
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_gusset = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="gusset_dl_mode")
+        item_code_gusset     = st.text_input("Codice item", key="gusset_item_code")
+
+        if st.button("Genera stringa DataLoad", key="gen_dl_gusset"):
+            if not item_code_gusset:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_gusset(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+
+                dataload_fields_gusset = [
+                    "\\%FN", item_code_gusset,
+                    "\\%TC", get_val_gusset("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_gusset("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_gusset("Identificativo"), "TAB",
+                    get_val_gusset("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_gusset('ERP_L1')}.{get_val_gusset('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_gusset("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_gusset("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_gusset("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_gusset("FPD material code"), "TAB",
+                    get_val_gusset("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_gusset("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_gusset("Quality") if get_val_gusset("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_gusset("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_gusset("To supplier") if get_val_gusset("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+
+                dataload_string_gusset = "\t".join(dataload_fields_gusset)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_gusset, height=200)
+
+                csv_buffer_gusset = io.StringIO()
+                writer_gusset     = csv.writer(csv_buffer_gusset, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_gusset:
+                    writer_gusset.writerow([riga])
+
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_gusset.getvalue(),
+                    file_name=f"dataload_{item_code_gusset}.csv",
+                    mime="text/csv"
+                )
+
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+# --- STUD, THREADED
+elif selected_part == "Stud, Threaded":
+    col1, col2, col3 = st.columns(3)
+
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        threaded_type = st.selectbox(
+            "Threaded",
+            ["Partial", "Full"],
+            key="stud_threaded"
+        )
+
+        stud_sizes = [
+            "#10-24UNC", "5/16\"-18UNC", "3/8\"-16UNC", "1/2\"-13UNC",
+            "3/4\"-16UNF", "7/8\"-9UNC", "7/8\"-14UNF", "1\"-12UNF",
+            "1-1/8\"-12UNF", "1-1/2\"-12UNC", "2\"-4.5UNC", "2-1/2\"-4UNC",
+            "3\"-6UNC", "4\"-8UNC", "M6x1", "M8x1.25", "M10x1.5", "M12x1.75",
+            "M16x2", "M20x2.5", "M24x3", "M30x3.5", "M36x4", "M42x4.5",
+            "M48x5", "M56x5.5", "M64x6", "M72x6", "M80x6", "M90x6", "M100x6"
+        ]
+
+        size_stud   = st.selectbox("Size", stud_sizes, key="stud_size")
+        length_stud = st.selectbox(
+            "Length",
+            [
+                "1/8\"in", "1/4\"in", "3/8\"in", "5/16\"in", "1/2\"in",
+                "3/4\"in", "1\"in", "1-1/8\"in", "1-1/4\"in", "1-3/8\"in",
+                "1-1/2\"in", "2\"in", "2-1/8\"in", "2-1/4\"in", "2-3/8\"in",
+                "2-1/2\"in", "2-3/4\"in", "3\"in", "3-1/8\"in", "3-1/4\"in",
+                "3-3/8\"in", "3-1/2\"in", "4\"in", "4-1/8\"in", "4-1/4\"in",
+                "4-3/8\"in", "4-1/2\"in", "50mm", "55mm", "60mm", "65mm",
+                "70mm", "75mm", "80mm", "85mm", "90mm", "95mm", "100mm",
+                "105mm", "110mm", "115mm", "120mm", "125mm", "130mm",
+                "135mm", "140mm", "145mm", "150mm", "155mm", "160mm",
+                "165mm", "170mm", "175mm", "180mm", "185mm", "190mm",
+                "195mm"
+            ],
+            key="stud_length"
+        )
+        note1_stud = st.text_area("Note (opzionale)", height=80, key="stud_note1")
+        dwg_stud   = st.text_input("Dwg/doc number", key="stud_dwg")
+
+        mtype_stud = st.selectbox("Material Type", [""] + material_types, key="mtype_stud")
+        pref_df_stud = materials_df[
+            (materials_df["Material Type"] == mtype_stud) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_stud = sorted(pref_df_stud["Prefix"].unique()) if mtype_stud != "MISCELLANEOUS" else []
+        mprefix_stud  = st.selectbox("Material Prefix", [""] + prefixes_stud, key="mprefix_stud")
+
+        if mtype_stud == "MISCELLANEOUS":
+            names_stud = materials_df[
+                materials_df["Material Type"] == mtype_stud
+            ]["Name"].dropna().tolist()
+        else:
+            names_stud = materials_df[
+                (materials_df["Material Type"] == mtype_stud) &
+                (materials_df["Prefix"] == mprefix_stud)
+            ]["Name"].dropna().tolist()
+        mname_stud = st.selectbox("Material Name", [""] + names_stud, key="mname_stud")
+
+        note2_stud = st.text_area("Material Note (opzionale)", height=80, key="stud_note2")
+
+        if st.button("Genera Output", key="gen_stud"):
+            if mtype_stud != "MISCELLANEOUS":
+                materiale_stud = f"{mtype_stud} {mprefix_stud} {mname_stud}".strip()
+                match_stud = materials_df[
+                    (materials_df["Material Type"] == mtype_stud) &
+                    (materials_df["Prefix"] == mprefix_stud) &
+                    (materials_df["Name"] == mname_stud)
+                ]
+            else:
+                materiale_stud = mname_stud
+                match_stud = materials_df[
+                    (materials_df["Material Type"] == mtype_stud) &
+                    (materials_df["Name"] == mname_stud)
+                ]
+            codice_fpd_stud = match_stud["FPD Code"].values[0] if not match_stud.empty else ""
+
+            descr_stud = (
+                f"STUD, THREADED - THREAD: {threaded_type}, SIZE: {size_stud}, LENGTH: {length_stud}"
+            )
+            if note1_stud:
+                descr_stud += f", {note1_stud}"
+            descr_stud += f", {materiale_stud}"
+            if note2_stud:
+                descr_stud += f", {note2_stud}"
+
+            st.session_state["output_data"] = {
+                "Item": "56146…",
+                "Description": descr_stud,
+                "Identificativo": "6572-STUD",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ARTVARI",
+                "Disegno": dwg_stud,
+                "Material": materiale_stud,
+                "FPD material code": codice_fpd_stud,
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "60_FASTENER",
+                "ERP_L2": "12_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"stud_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"stud_{campo}")
+
+    # COLONNA 3: DataLoad
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_stud = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="stud_dl_mode")
+        item_code_stud     = st.text_input("Codice item", key="stud_item_code")
+
+        if st.button("Genera stringa DataLoad", key="gen_dl_stud"):
+            if not item_code_stud:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_stud(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+
+                dataload_fields_stud = [
+                    "\\%FN", item_code_stud,
+                    "\\%TC", get_val_stud("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_stud("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_stud("Identificativo"), "TAB",
+                    get_val_stud("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_stud('ERP_L1')}.{get_val_stud('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_stud("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_stud("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_stud("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_stud("FPD material code"), "TAB",
+                    get_val_stud("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_stud("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_stud("Quality") if get_val_stud("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_stud("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_stud("To supplier") if get_val_stud("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+
+                dataload_string_stud = "\t".join(dataload_fields_stud)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_stud, height=200)
+
+                csv_buffer_stud = io.StringIO()
+                writer_stud     = csv.writer(csv_buffer_stud, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_stud:
+                    writer_stud.writerow([riga])
+
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_stud.getvalue(),
+                    file_name=f"dataload_{item_code_stud}.csv",
+                    mime="text/csv"
+                )
+
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+# --- NUT, HEX
+elif selected_part == "Nut, Hex":
+    col1, col2, col3 = st.columns(3)
+
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        nut_type = "Heavy"  # fisso, non modificabile
+        st.markdown(f"**Type:** {nut_type}")
+        nut_sizes = [
+            "#10-24UNC", "5/16\"-18UNC", "3/8\"-16UNC", "1/2\"-13UNC",
+            "3/4\"-16UNF", "7/8\"-9UNC", "7/8\"-14UNF", "1\"-12UNF",
+            "1-1/8\"-12UNF", "1-1/2\"-12UNC", "2\"-4.5UNC", "2-1/2\"-4UNC",
+            "3\"-6UNC", "4\"-8UNC", "M6x1", "M8x1.25", "M10x1.5", "M12x1.75",
+            "M16x2", "M20x2.5", "M24x3", "M30x3.5", "M36x4", "M42x4.5",
+            "M48x5", "M56x5.5", "M64x6", "M72x6", "M80x6", "M90x6", "M100x6"
+        ]
+        size_nut = st.selectbox("Size", nut_sizes, key="nut_size")
+        note1_nut = st.text_area("Note (opzionale)", height=80, key="nut_note1")
+
+        mtype_nut = st.selectbox("Material Type", [""] + material_types, key="mtype_nut")
+        pref_df_nut = materials_df[
+            (materials_df["Material Type"] == mtype_nut) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_nut = sorted(pref_df_nut["Prefix"].unique()) if mtype_nut != "MISCELLANEOUS" else []
+        mprefix_nut = st.selectbox("Material Prefix", [""] + prefixes_nut, key="nut_mprefix")
+
+        if mtype_nut == "MISCELLANEOUS":
+            names_nut = materials_df[materials_df["Material Type"] == mtype_nut]["Name"].dropna().tolist()
+        else:
+            names_nut = materials_df[
+                (materials_df["Material Type"] == mtype_nut) &
+                (materials_df["Prefix"] == mprefix_nut)
+            ]["Name"].dropna().tolist()
+        mname_nut = st.selectbox("Material Name", [""] + names_nut, key="nut_mname")
+
+        note2_nut = st.text_area("Material Note (opzionale)", height=80, key="nut_note2")
+
+        if st.button("Genera Output", key="gen_nut"):
+            if mtype_nut != "MISCELLANEOUS":
+                materiale_nut = f"{mtype_nut} {mprefix_nut} {mname_nut}".strip()
+                match_nut = materials_df[
+                    (materials_df["Material Type"] == mtype_nut) &
+                    (materials_df["Prefix"] == mprefix_nut) &
+                    (materials_df["Name"] == mname_nut)
+                ]
+            else:
+                materiale_nut = mname_nut
+                match_nut = materials_df[
+                    (materials_df["Material Type"] == mtype_nut) &
+                    (materials_df["Name"] == mname_nut)
+                ]
+            codice_fpd_nut = match_nut["FPD Code"].values[0] if not match_nut.empty else ""
+
+            descr_nut = f"NUT, HEX - TYPE: {nut_type}, SIZE: {size_nut}"
+            if note1_nut:
+                descr_nut += f", {note1_nut}"
+            descr_nut += f", {materiale_nut}"
+            if note2_nut:
+                descr_nut += f", {note2_nut}"
+
+            st.session_state["output_data"] = {
+                "Item": "56030…",
+                "Description": descr_nut,
+                "Identificativo": "6581-HEXAGON NUT",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "",
+                "Material": materiale_nut,
+                "FPD material code": codice_fpd_nut,
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "60_FASTENER",
+                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"nut_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"nut_{campo}")
+
+    # COLONNA 3: DataLoad
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_nut = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="nut_dl_mode")
+        item_code_nut = st.text_input("Codice item", key="nut_item_code")
+
+        if st.button("Genera stringa DataLoad", key="gen_dl_nut"):
+            if not item_code_nut:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_nut(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+
+                dataload_fields_nut = [
+                    "\\%FN", item_code_nut,
+                    "\\%TC", get_val_nut("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_nut("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_nut("Identificativo"), "TAB",
+                    get_val_nut("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_nut('ERP_L1')}.{get_val_nut('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_nut("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_nut("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_nut("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_nut("FPD material code"), "TAB",
+                    get_val_nut("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_nut("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_nut("Quality") if get_val_nut("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_nut("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_nut("To supplier") if get_val_nut("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+
+                dataload_string_nut = "\t".join(dataload_fields_nut)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_nut, height=200)
+
+                csv_buffer_nut = io.StringIO()
+                writer_nut     = csv.writer(csv_buffer_nut, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_nut:
+                    writer_nut.writerow([riga])
+
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_nut.getvalue(),
+                    file_name=f"dataload_{item_code_nut}.csv",
+                    mime="text/csv"
+                )
+
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+# --- RING, WEAR
+elif selected_part == "Ring, Wear":
+    col1, col2, col3 = st.columns(3)
+
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        ring_type    = st.selectbox(
+            "Type",
+            ["Stationary", "Rotary"],
+            key="ring_type"
+        )
+        model_ring   = st.selectbox(
+            "Product/Pump Model",
+            [""] + sorted(size_df["Pump Model"].dropna().unique()),
+            key="ring_model"
+        )
+        size_list    = size_df[size_df["Pump Model"] == model_ring]["Size"].dropna().tolist()
+        size_ring    = st.selectbox(
+            "Product/Pump Size",
+            [""] + size_list,
+            key="ring_size"
+        )
+
+        int_dia_ring = st.number_input(
+            "Internal Diameter (mm)",
+            min_value=0,
+            step=1,
+            format="%d",
+            key="ring_int_dia"
+        )
+        ext_dia_ring = st.number_input(
+            "External Diameter (mm)",
+            min_value=0,
+            step=1,
+            format="%d",
+            key="ring_ext_dia"
+        )
+        length_ring  = st.number_input(
+            "Length (mm)",
+            min_value=0,
+            step=1,
+            format="%d",
+            key="ring_length"
+        )
+
+        note_ring    = st.text_area(
+            "Note (opzionale)",
+            height=80,
+            key="ring_note"
+        )
+        clearance    = st.radio(
+            "Increased clearance?",
+            ["No", "Yes"],
+            horizontal=True,
+            key="ring_clearance"
+        )
+        dwg_ring     = st.text_input(
+            "Dwg/doc number",
+            key="ring_dwg"
+        )
+
+        mtype_ring   = st.selectbox(
+            "Material Type",
+            [""] + material_types,
+            key="mtype_ring"
+        )
+        pref_df_ring = materials_df[
+            (materials_df["Material Type"] == mtype_ring) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_ring = sorted(pref_df_ring["Prefix"].unique()) if mtype_ring != "MISCELLANEOUS" else []
+        mprefix_ring  = st.selectbox(
+            "Material Prefix",
+            [""] + prefixes_ring,
+            key="mprefix_ring"
+        )
+
+        if mtype_ring == "MISCELLANEOUS":
+            names_ring = materials_df[
+                materials_df["Material Type"] == mtype_ring
+            ]["Name"].dropna().tolist()
+        else:
+            names_ring = materials_df[
+                (materials_df["Material Type"] == mtype_ring) &
+                (materials_df["Prefix"] == mprefix_ring)
+            ]["Name"].dropna().tolist()
+        mname_ring = st.selectbox(
+            "Material Name",
+            [""] + names_ring,
+            key="mname_ring"
+        )
+
+        note2_ring = st.text_area(
+            "Material Note (opzionale)",
+            height=80,
+            key="ring_note2"
+        )
+
+        if st.button("Genera Output", key="gen_ring"):
+            # Costruzione Materiale e codice FPD
+            if mtype_ring != "MISCELLANEOUS":
+                materiale_ring = f"{mtype_ring} {mprefix_ring} {mname_ring}".strip()
+                match_ring = materials_df[
+                    (materials_df["Material Type"] == mtype_ring) &
+                    (materials_df["Prefix"] == mprefix_ring) &
+                    (materials_df["Name"] == mname_ring)
+                ]
+            else:
+                materiale_ring = mname_ring
+                match_ring = materials_df[
+                    (materials_df["Material Type"] == mtype_ring) &
+                    (materials_df["Name"] == mname_ring)
+                ]
+            codice_fpd_ring = match_ring["FPD Code"].values[0] if not match_ring.empty else ""
+
+            # Identificativo e Item in base al tipo di ring
+            if ring_type == "Rotary":
+                identificativo = "2300-IMPELLER WEAR RING"
+                item_code      = "40224…"
+            else:
+                identificativo = "1500-CASING WEAR RING"
+                item_code      = "40223…"
+
+            # Costruzione descrizione
+            descr_ring = (
+                f"RING, WEAR - {ring_type} {model_ring} {size_ring}, "
+                f"ID: {int(int_dia_ring)}mm, OD: {int(int_dia_ring) + 2*int(ext_dia_ring)}mm, "
+                f"LENGTH: {int(length_ring)}mm"
+            )
+            if note_ring:
+                descr_ring += f", {note_ring}"
+            if clearance == "Yes":
+                descr_ring += ", INCREASED CLEARANCE"
+            descr_ring += f", {materiale_ring}"
+            if note2_ring:
+                descr_ring += f", {note2_ring}"
+
+            st.session_state["output_data"] = {
+                "Item":               item_code,
+                "Description":        descr_ring,
+                "Identificativo":     identificativo,
+                "Classe ricambi":     "1-2-3",
+                "Categories":         "FASCIA ITE 4",
+                "Catalog":            "ALBERO",
+                "Disegno":            dwg_ring,
+                "Material":           materiale_ring,
+                "FPD material code":  codice_fpd_ring,
+                "Template":           "FPD_BUY_1",
+                "ERP_L1":             "20_TURNKEY_MACHINING",
+                "ERP_L2":             "24_RINGS",
+                "To supplier":        ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"ring_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"ring_{campo}")
+
+    # COLONNA 3: DataLoad
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_ring = st.radio(
+            "Tipo operazione:",
+            ["Crea nuovo item", "Aggiorna item"],
+            key="ring_dl_mode"
+        )
+        item_code_ring = st.text_input(
+            "Codice item",
+            key="ring_item_code"
+        )
+
+        if st.button("Genera stringa DataLoad", key="gen_dl_ring"):
+            if not item_code_ring:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_ring(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+
+                dataload_fields_ring = [
+                    "\\%FN", item_code_ring,
+                    "\\%TC", get_val_ring("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_ring("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_ring("Identificativo"), "TAB",
+                    get_val_ring("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_ring('ERP_L1')}.{get_val_ring('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_ring("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_ring("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_ring("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_ring("FPD material code"), "TAB",
+                    get_val_ring("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_ring("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_ring("Quality") if get_val_ring("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_ring("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_ring("To supplier") if get_val_ring("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+
+                dataload_string_ring = "\t".join(dataload_fields_ring)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_ring, height=200)
+
+                csv_buffer_ring = io.StringIO()
+                writer_ring     = csv.writer(csv_buffer_ring, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_ring:
+                    writer_ring.writerow([riga])
+
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_ring.getvalue(),
+                    file_name=f"dataload_{item_code_ring}.csv",
+                    mime="text/csv"
+                )
+
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # (continua inserendo i restanti blocchi nello stesso formato)
