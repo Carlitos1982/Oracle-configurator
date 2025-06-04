@@ -242,7 +242,7 @@ if selected_part == "Casing, Pump":
                 "Template": "FPD_MAKE",
                 "ERP_L1": "20_TURNKEY_MACHINING",
                 "ERP_L2": "17_CASING",
-                "To supplier": "",  # multilinea opzionale
+                "To supplier": "",
                 "Quality": quality
             }
 
@@ -251,8 +251,8 @@ if selected_part == "Casing, Pump":
         st.subheader("📦 Output")
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
-                if k in ["Quality", "To supplier"]:
-                    st.code(v, language="text")
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=80)
                 else:
                     st.text_input(k, value=v)
 
