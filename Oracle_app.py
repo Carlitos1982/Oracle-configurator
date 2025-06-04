@@ -1640,112 +1640,62 @@ elif selected_part == "Bearing, Rolling":
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 # --- BOLT, EYE
-elif selected_part == "Bolt, Eye":
+if selected_part == "Bolt, Eye":
     col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1: INPUT
     with col1:
         st.subheader("✏️ Input")
-        thread_be = st.selectbox(
-            "Thread type/size",
-            [
-                "#10-24UNC", "5/16\"-18UNC", "3/8\"-16UNC", "1/2\"-13UNC", "3/4\"-16UNF",
-                "7/8\"-9UNC", "7/8\"-14UNF", "1\"-12UNF", "1-1/8\"-12UNF", "1-1/2\"-12UNC",
-                "2\"-4.5UNC", "2-1/2\"-4UNC", "3\"-6UNC", "4\"-8UNC",
-                "M6x1", "M8x1.25", "M10x1.5", "M12x1.75", "M16x2", "M20x2.5", "M24x3",
-                "M30x3.5", "M36x4", "M42x4.5", "M48x5", "M56x5.5", "M64x6", "M72x6",
-                "M80x6", "M90x6", "M100x6"
-            ],
-            key="be_thread"
-        )
-        length_be = st.selectbox(
-            "Length",
-            [
-                "1/8\"in", "1/4\"in", "3/8\"in", "5/16\"in", "1/2\"in", "3/4\"in",
-                "1\"in", "1-1/8\"in", "1-1/4\"in", "1-3/8\"in", "1-1/2\"in", "2\"in",
-                "2-1/8\"in", "2-1/4\"in", "2-3/8\"in", "2-1/2\"in", "2-3/4\"in",
-                "3\"in", "3-1/8\"in", "3-1/4\"in", "3-3/8\"in", "3-1/2\"in", "4\"in",
-                "4-1/8\"in", "4-1/4\"in", "4-3/8\"in", "4-1/2\"in",
-                "50mm", "55mm", "60mm", "65mm", "70mm", "75mm", "80mm", "85mm", "90mm", "95mm",
-                "100mm", "105mm", "110mm", "115mm", "120mm", "125mm", "130mm", "135mm", "140mm",
-                "145mm", "150mm", "155mm", "160mm", "165mm", "170mm", "175mm", "180mm", "185mm",
-                "190mm", "195mm"
-            ],
-            key="be_length"
-        )
-        note1_be = st.text_area("Note (opzionale)", height=80, key="be_note1")
+        size = st.text_input("Size", key="beye_size")
+        length = st.text_input("Length", key="beye_length")
+        material = st.text_input("Material", key="beye_material")
+        note = st.text_area("Note", height=80, key="beye_note")
+        dwg = st.text_input("Dwg/doc number", key="beye_dwg")
 
-        mtype_be = st.selectbox("Material Type", [""] + material_types, key="be_mtype")
-        pref_df_be = materials_df[
-            (materials_df["Material Type"] == mtype_be) &
-            (materials_df["Prefix"].notna())
-        ]
-        prefixes_be = sorted(pref_df_be["Prefix"].unique()) if mtype_be != "MISCELLANEOUS" else []
-        mprefix_be = st.selectbox("Material Prefix", [""] + prefixes_be, key="be_mprefix")
+        # Stamicarbon checkbox
+        stamicarbon = st.checkbox("Stamicarbon?", key="beye_stamicarbon")
 
-        if mtype_be == "MISCELLANEOUS":
-            names_be = materials_df[materials_df["Material Type"] == mtype_be]["Name"].dropna().tolist()
-        else:
-            names_be = materials_df[
-                (materials_df["Material Type"] == mtype_be) &
-                (materials_df["Prefix"] == mprefix_be)
-            ]["Name"].dropna().tolist()
-        mname_be = st.selectbox("Material Name", [""] + names_be, key="be_mname")
+        if st.button("Genera Output", key="beye_gen"):
+            sq_tags = []
+            quality_lines = []
 
-        note2_be = st.text_area("Material Note (opzionale)", height=80, key="be_note2")
+            if stamicarbon:
+                sq_tags.append("[SQ172]")
+                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
-        if st.button("Genera Output", key="gen_be"):
-            if mtype_be != "MISCELLANEOUS":
-                materiale_be = f"{mtype_be} {mprefix_be} {mname_be}".strip()
-                match_be = materials_df[
-                    (materials_df["Material Type"] == mtype_be) &
-                    (materials_df["Prefix"] == mprefix_be) &
-                    (materials_df["Name"] == mname_be)
-                ]
-            else:
-                materiale_be = mname_be
-                match_be = materials_df[
-                    (materials_df["Material Type"] == mtype_be) &
-                    (materials_df["Name"] == mname_be)
-                ]
-            codice_fpd_be = match_be["FPD Code"].values[0] if not match_be.empty else ""
+            quality = "\n".join(quality_lines)
+            tag_string = " ".join(sq_tags)
 
-            # 1) Costruisci prima la descrizione base (senza asterisco)
-            descr_be = f"BOLT, EYE - THREAD: {thread_be}, LENGTH: {length_be}"
-            if note1_be:
-                descr_be += f", {note1_be}"
-            descr_be += f", {materiale_be}"
-            if note2_be:
-                descr_be += f", {note2_be}"
-
-            # 2) Aggiungi sempre l’asterisco all’inizio
-            descr_be = "*" + descr_be
+            descr = f"EYE BOLT - SIZE: {size}, LENGTH: {length}, MATERIAL: {material}"
+            if note:
+                descr += f", NOTE: {note}"
+            descr += f" {tag_string}"
+            descr = "*" + descr
 
             st.session_state["output_data"] = {
-                "Item": "50150…",
-                "Description": descr_be,
-                "Identificativo": "6583-EYE BOLT",
+                "Item": "56120…",
+                "Description": descr,
+                "Identificativo": "6540-EYE BOLT",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
-                "Catalog": "",
-                "Material": materiale_be,
-                "FPD material code": codice_fpd_be,
+                "Catalog": "ARTVARI",
+                "Disegno": dwg,
+                "Material": material,
+                "FPD material code": "NA",
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
-                "ERP_L2": "74_OTHER_FASTENING_COMPONENTS_EYE_NUTS_LOCK_NUTS_ETC",
+                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
                 "To supplier": "",
-                "Quality": ""
+                "Quality": quality
             }
 
-    # COLONNA 2: OUTPUT
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
-                if campo == "Description":
-                    st.text_area(campo, value=valore, height=80, key=f"be_{campo}")
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=160)
                 else:
-                    st.text_input(campo, value=valore, key=f"be_{campo}")
+                    st.text_input(k, value=v)
 
     # COLONNA 3: DataLoad
     with col3:
