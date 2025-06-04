@@ -154,9 +154,7 @@ st.markdown("---")
 if selected_part == "Casing, Pump":
     col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1: INPUT
-    if selected_part == "Casing, Pump":
-    col1, col2, col3 = st.columns(3)
+
 
     # COLONNA 1 – INPUT
     with col1:
