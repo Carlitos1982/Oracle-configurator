@@ -2842,8 +2842,11 @@ if selected_part == "Shaft, Pump":
 
         mname = st.selectbox("Material Name", [""] + names, key="sh_mname")
 
-        hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="sh_hf")
-        tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="sh_tmt")
+        # ✅ Checkbox aggiuntive
+        overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="sh_overlay")
+        hvof = st.checkbox("HVOF coating?", key="sh_hvof")
+        water = st.checkbox("Water service?", key="sh_water")
+        stamicarbon = st.checkbox("Stamicarbon?", key="sh_stamicarbon")
 
         if st.button("Genera Output", key="sh_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
@@ -2854,18 +2857,29 @@ if selected_part == "Shaft, Pump":
             ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-            sq_tags = ["[SQ58]"]
-            quality_lines = ["SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche"]
+            # QUALITY
+            quality_lines = [
+                "SQ 60 - Procedura di Esecuzione del Run-Out per Alberi e Rotori di Pompe",
+                "DE 3513.014 - Shaft Demagnetization",
+                "CORP-ENG-0115 - General Surface Quality Requirements G1-1"
+            ]
+            sq_tags = ["[SQ60]", "[DE3513.014]", "[CORP-ENG-0115]"]
 
-            if hf_service:
-                sq_tags.append("[SQ113]")
-                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
-            if tmt_service:
-                sq_tags.append("[SQ137]")
-                quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
+            if overlay:
+                sq_tags.append("[PQ72]")
+                quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
+            if hvof:
+                sq_tags.append("[DE2500.002]")
+                quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
+            if water:
+                sq_tags.append("[PI23]")
+                quality_lines.append("PI 23 - Pompe per Acqua Potabile")
+            if stamicarbon:
+                sq_tags.append("[SQ172]")
+                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
-            tag_string = " ".join(sq_tags)
             quality = "\n".join(quality_lines)
+            tag_string = " ".join(sq_tags)
 
             descr = f"SHAFT, PUMP - MODEL: {model}, SIZE: {size}, BRG TYPE: {brg_type}, BRG SIZE: {brg_size}, DIAM: {diameter}, LENGTH: {length}, FEATURES: {feature_1}, {feature_2}"
             if note:
@@ -2898,6 +2912,7 @@ if selected_part == "Shaft, Pump":
                     st.text_area(k, value=v, height=80)
                 else:
                     st.text_input(k, value=v)
+
 
     # --- COLONNA 3: DATALOAD ---
     with col3:
