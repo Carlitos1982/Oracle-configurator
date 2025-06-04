@@ -248,7 +248,7 @@ if selected_part == "Casing, Pump":
 
     # COLONNA 2: OUTPUT
     with col2:
-        st.subheader("📦 Output")
+        st.subheader("📤 Output")
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
@@ -311,7 +311,7 @@ if selected_part == "Casing, Pump":
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
-# --- CASING COVER, PUMP
+
 # --- CASING COVER, PUMP
 if selected_part == "Casing Cover, Pump":
     col1, col2, col3 = st.columns(3)
