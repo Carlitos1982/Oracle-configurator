@@ -2530,92 +2530,99 @@ if selected_part == "Nut, Hex":
 
 
 # --- RING, WEAR
-# --- RING, WEAR
+
 if selected_part == "Ring, Wear":
     col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1: INPUT
+    # COLONNA 1 – INPUT
     with col1:
         st.subheader("✏️ Input")
-        type_wr = st.selectbox("Type", ["Stationary", "Rotary"], key="wr_type")
-        model_wr = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="wr_model")
-        int_dia_wr = st.text_input("Internal diameter (mm)", key="wr_int_dia")
-        out_dia_wr = st.text_input("Outer diameter (mm)", key="wr_out_dia")
-        note_wr = st.text_area("Note (opzionale)", height=80, key="wr_note")
-        clearance_wr = st.radio("Increased clearance", ["No", "Yes"], key="wr_clearance")
-        dwg_wr = st.text_input("Dwg/doc number", key="wr_dwg")
+        ring_type = st.selectbox("Type", ["Stationary", "Rotary"], key="ring_type")
+        model = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="ring_model")
+        in_dia = st.text_input("Internal diameter (mm)", key="ring_in_dia")
+        out_dia = st.text_input("Outer diameter (mm)", key="ring_out_dia")
+        note = st.text_area("Note", key="ring_note", height=80)
+        increased_clearance = st.checkbox("Increased clearance", key="ring_clearance")
+        dwg = st.text_input("Dwg/doc number", key="ring_dwg")
 
-        mtype_wr = st.selectbox("Material Type", [""] + material_types, key="wr_mtype")
-        pref_df_wr = materials_df[(materials_df["Material Type"] == mtype_wr) & (materials_df["Prefix"].notna())]
-        prefixes_wr = sorted(pref_df_wr["Prefix"].unique()) if mtype_wr != "MISCELLANEOUS" else []
-        mprefix_wr = st.selectbox("Material Prefix", [""] + prefixes_wr, key="wr_mprefix")
+        mtype = st.selectbox("Material Type", [""] + material_types, key="ring_mtype")
+        pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
+        prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
+        mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="ring_mprefix")
 
-        if mtype_wr == "MISCELLANEOUS":
-            names_wr = materials_df[materials_df["Material Type"] == mtype_wr]["Name"].dropna().tolist()
+        if mtype == "MISCELLANEOUS":
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
         else:
-            names_wr = materials_df[
-                (materials_df["Material Type"] == mtype_wr) &
-                (materials_df["Prefix"] == mprefix_wr)
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname_wr = st.selectbox("Material Name", [""] + names_wr, key="wr_mname")
+        mname = st.selectbox("Material Name", [""] + names, key="ring_mname")
 
-        # ✅ Checkbox HF in fondo
-        hf_service_wr = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="wr_hf")
+        # ✅ Checkbox SQ113 e SQ137
+        hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="ring_hf")
+        tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="ring_tmt")
 
-        if st.button("Genera Output", key="wr_gen"):
-            materiale_wr = f"{mtype_wr} {mprefix_wr} {mname_wr}".strip() if mtype_wr != "MISCELLANEOUS" else mname_wr
-            match_wr = materials_df[
-                (materials_df["Material Type"] == mtype_wr) &
-                (materials_df["Prefix"] == mprefix_wr) &
-                (materials_df["Name"] == mname_wr)
+        if st.button("Genera Output", key="ring_gen"):
+            materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
+            match = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix) &
+                (materials_df["Name"] == mname)
             ]
-            codice_fpd_wr = match_wr["FPD Code"].values[0] if not match_wr.empty else ""
+            codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-            descr_wr = f"{type_wr.upper()} WEAR RING - MODEL: {model_wr}, ID: {int_dia_wr}, OD: {out_dia_wr}"
-            if clearance_wr == "Yes":
-                descr_wr += ", INCREASED CLEARANCE"
-            if note_wr:
-                descr_wr += f", NOTE: {note_wr}"
-            if hf_service_wr:
-                descr_wr += " [SQ113]"
-            descr_wr = "*" + descr_wr
+            sq_tags = []
+            quality_lines = []
+            if hf_service:
+                sq_tags.append("[SQ113]")
+                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
+            if tmt_service:
+                sq_tags.append("[SQ137]")
+                quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
 
-            if type_wr == "Rotary":
-                item_wr = "40224…"
-                identificativo = "2300-IMPELLER WEAR RING"
-            else:
-                item_wr = "40223…"
-                identificativo = "1500-CASING WEAR RING"
+            tag_string = " ".join(sq_tags)
+            quality = "\n".join(quality_lines)
 
-            quality_wr = "Applicable procedure: SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)" if hf_service_wr else ""
+            descr = f"{ring_type.upper()} WEAR RING - MODEL: {model}, IN DIA: {in_dia}, OUT DIA: {out_dia}"
+            if increased_clearance:
+                descr += ", INCREASED CLEARANCE"
+            if note:
+                descr += f", NOTE: {note}"
+            if tag_string:
+                descr += f" {tag_string}"
+            descr = "*" + descr
+
+            item = "40223…" if ring_type == "Stationary" else "40224…"
+            identificativo = "1500-CASING WEAR RING" if ring_type == "Stationary" else "2300-IMPELLER WEAR RING"
 
             st.session_state["output_data"] = {
-                "Item": item_wr,
-                "Description": descr_wr,
+                "Item": item,
+                "Description": descr,
                 "Identificativo": identificativo,
                 "Classe ricambi": "1-2-3",
                 "Categories": "FASCIA ITE 4",
                 "Catalog": "ALBERO",
-                "Disegno": dwg_wr,
-                "Material": materiale_wr,
-                "FPD material code": codice_fpd_wr,
+                "Disegno": dwg,
+                "Material": materiale,
+                "FPD material code": codice_fpd,
                 "Template": "FPD_BUY_1",
                 "ERP_L1": "20_TURNKEY_MACHINING",
                 "ERP_L2": "24_RINGS",
                 "To supplier": "",
-                "Quality": quality_wr
+                "Quality": quality
             }
 
-    # COLONNA 2: OUTPUT
+    # COLONNA 2 – OUTPUT
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
-                if campo == "Description":
-                    st.text_area(campo, value=valore, height=80, key=f"ring_{campo}")
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=80)
                 else:
-                    st.text_input(campo, value=valore, key=f"ring_{campo}")
+                    st.text_input(k, value=v)
 
     # COLONNA 3: DataLoad
     with col3:
