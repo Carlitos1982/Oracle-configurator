@@ -149,6 +149,7 @@ if selected_part != st.session_state.prev_part:
 st.markdown("---")
 
 
+
 # --- CASING, PUMP
 if selected_part == "Casing, Pump":
     col1, col2, col3 = st.columns(3)
@@ -195,8 +196,9 @@ if selected_part == "Casing, Pump":
 
         mname = st.selectbox("Material Name", [""] + names, key="cas_mname")
 
-        # ✅ Checkbox HF in fondo
+        # ✅ Doppia checkbox: SQ113 + SQ137
         hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="cas_hf")
+        tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="cas_tmt")
 
         if st.button("Genera Output", key="cas_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
@@ -207,14 +209,28 @@ if selected_part == "Casing, Pump":
             ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
+            # --- SQ Tags
+            sq_tags = []
+            if hf_service:
+                sq_tags.append("[SQ113]")
+            if tmt_service:
+                sq_tags.append("[SQ137]")
+            tag_string = " ".join(sq_tags)
+
             descr = f"CASING, PUMP - MODEL: {model}, SIZE: {size}, FEATURES: {feature_1}, {feature_2}"
             if note:
                 descr += f", NOTE: {note}"
-            if hf_service:
-                descr += " [SQ113]"
+            if tag_string:
+                descr += f" {tag_string}"
             descr = "*" + descr
 
-            quality = "Applicable procedure: SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)" if hf_service else ""
+            # --- Quality text
+            quality_lines = []
+            if hf_service:
+                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
+            if tmt_service:
+                quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
+            quality = ", ".join(quality_lines)
 
             st.session_state["output_data"] = {
                 "Item": "40202…",
@@ -232,6 +248,7 @@ if selected_part == "Casing, Pump":
                 "To supplier": "",
                 "Quality": quality
             }
+
 
 
     # COLONNA 2: OUTPUT
