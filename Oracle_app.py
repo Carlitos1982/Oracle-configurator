@@ -316,94 +316,107 @@ if selected_part == "Casing, Pump":
 if selected_part == "Casing Cover, Pump":
     col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1: INPUT
+    # COLONNA 1 – INPUT
     with col1:
         st.subheader("✏️ Input")
-        model_cc = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="cc_model")
-        size_list_cc = size_df[size_df["Pump Model"] == model_cc]["Size"].dropna().tolist()
-        size_cc = st.selectbox("Product/Pump Size", [""] + size_list_cc, key="cc_size")
+        model = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="cc_model")
+        size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
+        size = st.selectbox("Product/Pump Size", [""] + size_list, key="cc_size")
 
-        feature_1_cc = ""
-        special_cc = ["HDO", "DMX", "WXB", "WIK"]
-        if model_cc not in special_cc:
-            f1_list_cc = features_df[
-                (features_df["Pump Model"] == model_cc) &
+        feature_1 = ""
+        special = ["HDO", "DMX", "WXB", "WIK"]
+        if model not in special:
+            f1_list = features_df[
+                (features_df["Pump Model"] == model) &
                 (features_df["Feature Type"] == "features1")
             ]["Feature"].dropna().tolist()
-            feature_1_cc = st.selectbox("Additional Feature 1", [""] + f1_list_cc, key="cc_f1")
+            feature_1 = st.selectbox("Additional Feature 1", [""] + f1_list, key="cc_f1")
 
-        feature_2_cc = ""
-        if model_cc in ["HPX", "HED"]:
-            f2_list_cc = features_df[
-                (features_df["Pump Model"] == model_cc) &
+        feature_2 = ""
+        if model in ["HPX", "HED"]:
+            f2_list = features_df[
+                (features_df["Pump Model"] == model) &
                 (features_df["Feature Type"] == "features2")
             ]["Feature"].dropna().tolist()
-            feature_2_cc = st.selectbox("Additional Feature 2", [""] + f2_list_cc, key="cc_f2")
+            feature_2 = st.selectbox("Additional Feature 2", [""] + f2_list, key="cc_f2")
 
-        note_cc = st.text_area("Note (opzionale)", height=80, key="cc_note")
-        dwg_cc = st.text_input("Dwg/doc number", key="cc_dwg")
+        note = st.text_area("Note (opzionale)", height=80, key="cc_note")
+        dwg = st.text_input("Dwg/doc number", key="cc_dwg")
 
-        mtype_cc = st.selectbox("Material Type", [""] + material_types, key="cc_mtype")
-        pref_df_cc = materials_df[(materials_df["Material Type"] == mtype_cc) & (materials_df["Prefix"].notna())]
-        prefixes_cc = sorted(pref_df_cc["Prefix"].unique()) if mtype_cc != "MISCELLANEOUS" else []
-        mprefix_cc = st.selectbox("Material Prefix", [""] + prefixes_cc, key="cc_mprefix")
+        mtype = st.selectbox("Material Type", [""] + material_types, key="cc_mtype")
+        pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
+        prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
+        mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="cc_mprefix")
 
-        if mtype_cc == "MISCELLANEOUS":
-            names_cc = materials_df[materials_df["Material Type"] == mtype_cc]["Name"].dropna().tolist()
+        if mtype == "MISCELLANEOUS":
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
         else:
-            names_cc = materials_df[
-                (materials_df["Material Type"] == mtype_cc) &
-                (materials_df["Prefix"] == mprefix_cc)
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
-        mname_cc = st.selectbox("Material Name", [""] + names_cc, key="cc_mname")
 
-        # ✅ HF checkbox in fondo
-        hf_service_cc = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="cc_hf")
+        mname = st.selectbox("Material Name", [""] + names, key="cc_mname")
+
+        # ✅ Checkbox SQ113 e SQ137
+        hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="cc_hf")
+        tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="cc_tmt")
 
         if st.button("Genera Output", key="cc_gen"):
-            materiale_cc = f"{mtype_cc} {mprefix_cc} {mname_cc}".strip() if mtype_cc != "MISCELLANEOUS" else mname_cc
-            match_cc = materials_df[
-                (materials_df["Material Type"] == mtype_cc) &
-                (materials_df["Prefix"] == mprefix_cc) &
-                (materials_df["Name"] == mname_cc)
+            materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
+            match = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix) &
+                (materials_df["Name"] == mname)
             ]
-            codice_fpd_cc = match_cc["FPD Code"].values[0] if not match_cc.empty else ""
+            codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-            descr_cc = f"CASING COVER, PUMP - MODEL: {model_cc}, SIZE: {size_cc}, FEATURES: {feature_1_cc}, {feature_2_cc}"
-            if note_cc:
-                descr_cc += f", NOTE: {note_cc}"
-            if hf_service_cc:
-                descr_cc += " [SQ113]"
-            descr_cc = "*" + descr_cc
+            # SQ tag + quality
+            sq_tags = []
+            quality_lines = []
+            if hf_service:
+                sq_tags.append("[SQ113]")
+                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
+            if tmt_service:
+                sq_tags.append("[SQ137]")
+                quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
 
-            quality_cc = "Applicable procedure: SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)" if hf_service_cc else ""
+            tag_string = " ".join(sq_tags)
+            quality = "\n".join(quality_lines)
+
+            descr = f"CASING COVER, PUMP - MODEL: {model}, SIZE: {size}, FEATURES: {feature_1}, {feature_2}"
+            if note:
+                descr += f", NOTE: {note}"
+            if tag_string:
+                descr += f" {tag_string}"
+            descr = "*" + descr
 
             st.session_state["output_data"] = {
-                "Item": "40205…",
-                "Description": descr_cc,
-                "Identificativo": "1221-CASING COVER",
+                "Item": "40203…",
+                "Description": descr,
+                "Identificativo": "1200-COVER",
                 "Classe ricambi": "3",
                 "Categories": "FASCIA ITE 4",
                 "Catalog": "COPERCHIO",
-                "Disegno": dwg_cc,
-                "Material": materiale_cc,
-                "FPD material code": codice_fpd_cc,
+                "Disegno": dwg,
+                "Material": materiale,
+                "FPD material code": codice_fpd,
                 "Template": "FPD_MAKE",
                 "ERP_L1": "20_TURNKEY_MACHINING",
-                "ERP_L2": "13_OTHER",
+                "ERP_L2": "18_COVER",
                 "To supplier": "",
-                "Quality": quality_cc
+                "Quality": quality
             }
 
-    # COLONNA 2: OUTPUT
+    # COLONNA 2 – OUTPUT
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
-                if campo == "Description":
-                    st.text_area(campo, value=valore, height=80, key=f"cc_{campo}")
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=80)
                 else:
-                    st.text_input(campo, value=valore, key=f"cc_{campo}")
+                    st.text_input(k, value=v)
 
     # COLONNA 3: DataLoad
     with col3:
