@@ -196,7 +196,7 @@ if selected_part == "Casing, Pump":
 
         mname = st.selectbox("Material Name", [""] + names, key="cas_mname")
 
-        # ✅ Checkbox per le due procedure
+        # ✅ Checkbox per SQ113 e SQ137
         hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="cas_hf")
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="cas_tmt")
 
@@ -242,22 +242,20 @@ if selected_part == "Casing, Pump":
                 "Template": "FPD_MAKE",
                 "ERP_L1": "20_TURNKEY_MACHINING",
                 "ERP_L2": "17_CASING",
-                "To supplier": "",  # può essere multilinea se necessario
+                "To supplier": "",  # multilinea opzionale
                 "Quality": quality
             }
 
-  
-
-
     # COLONNA 2: OUTPUT
     with col2:
-        st.subheader("📤 Output")
+        st.subheader("📦 Output")
         if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
-                if campo == "Description":
-                    st.text_area(campo, value=valore, height=80, key=f"casing_{campo}")
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier"]:
+                    st.code(v, language="text")
                 else:
-                    st.text_input(campo, value=valore, key=f"casing_{campo}")
+                    st.text_input(k, value=v)
+
 
     # COLONNA 3: DataLoad
     with col3:
