@@ -2857,7 +2857,6 @@ if selected_part == "Shaft, Pump":
             ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-            # QUALITY
             quality_lines = [
                 "SQ 60 - Procedura di Esecuzione del Run-Out per Alberi e Rotori di Pompe",
                 "DE 3513.014 - Shaft Demagnetization",
@@ -2909,7 +2908,7 @@ if selected_part == "Shaft, Pump":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=80)
+                    st.text_area(k, value=v, height=160)
                 else:
                     st.text_input(k, value=v)
 
