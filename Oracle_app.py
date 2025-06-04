@@ -230,7 +230,7 @@ if selected_part == "Casing, Pump":
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
             if tmt_service:
                 quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
-            quality = ", ".join(quality_lines)
+            quality = "\n".join(quality_lines)
 
             st.session_state["output_data"] = {
                 "Item": "40202…",
