@@ -196,7 +196,7 @@ if selected_part == "Casing, Pump":
 
         mname = st.selectbox("Material Name", [""] + names, key="cas_mname")
 
-        # ✅ Doppia checkbox: SQ113 + SQ137
+        # ✅ Checkbox per le due procedure
         hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="cas_hf")
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="cas_tmt")
 
@@ -209,13 +209,18 @@ if selected_part == "Casing, Pump":
             ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-            # --- SQ Tags
+            # Costruzione tag e quality
             sq_tags = []
+            quality_lines = []
             if hf_service:
                 sq_tags.append("[SQ113]")
+                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
             if tmt_service:
                 sq_tags.append("[SQ137]")
+                quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
+
             tag_string = " ".join(sq_tags)
+            quality = "\n".join(quality_lines)
 
             descr = f"CASING, PUMP - MODEL: {model}, SIZE: {size}, FEATURES: {feature_1}, {feature_2}"
             if note:
@@ -223,14 +228,6 @@ if selected_part == "Casing, Pump":
             if tag_string:
                 descr += f" {tag_string}"
             descr = "*" + descr
-
-            # --- Quality text
-            quality_lines = []
-            if hf_service:
-                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
-            if tmt_service:
-                quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
-            quality = "\n".join(quality_lines)
 
             st.session_state["output_data"] = {
                 "Item": "40202…",
@@ -245,10 +242,11 @@ if selected_part == "Casing, Pump":
                 "Template": "FPD_MAKE",
                 "ERP_L1": "20_TURNKEY_MACHINING",
                 "ERP_L2": "17_CASING",
-                "To supplier": "",
+                "To supplier": "",  # può essere multilinea se necessario
                 "Quality": quality
             }
 
+  
 
 
     # COLONNA 2: OUTPUT
