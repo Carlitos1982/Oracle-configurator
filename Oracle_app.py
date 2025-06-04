@@ -1172,6 +1172,7 @@ if selected_part == "Gate, Valve":
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
+
 # --- GASKET, SPIRAL WOUND
 # --- GASKET, SPIRAL WOUND
 if selected_part == "Gasket, Spiral Wound":
@@ -1196,7 +1197,11 @@ if selected_part == "Gasket, Spiral Wound":
             color_code_1 = color_codes.get(winding_gsw, "")
             color_code_2 = color_codes.get(filler_gsw, "")
 
-            descr_gsw = f"GASKET, SPIRAL WOUND - WINDING: {winding_gsw}, FILLER: {filler_gsw}, OD: {out_dia_gsw}, ID: {in_dia_gsw}, THK: {thickness_gsw}, RATING: {rating_gsw}, COLOR CODE 1: {color_code_1}, COLOR CODE 2: {color_code_2}"
+            descr_gsw = (
+                f"GASKET, SPIRAL WOUND - WINDING: {winding_gsw}, FILLER: {filler_gsw}, "
+                f"OD: {out_dia_gsw}, ID: {in_dia_gsw}, THK: {thickness_gsw}, RATING: {rating_gsw}, "
+                f"COLOR CODE 1: {color_code_1}, COLOR CODE 2: {color_code_2}"
+            )
             if note_gsw:
                 descr_gsw += f", NOTE: {note_gsw}"
             if hf_service_gsw:
@@ -1221,6 +1226,7 @@ if selected_part == "Gasket, Spiral Wound":
                 "To supplier": "",
                 "Quality": quality_gsw
             }
+
 
 
     # COLONNA 2: OUTPUT
