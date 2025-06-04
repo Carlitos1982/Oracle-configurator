@@ -59,6 +59,30 @@ bolt_lengths = [
     "145mm", "150mm", "155mm", "160mm", "165mm", "170mm", "175mm", "180mm", "185mm",
     "190mm", "195mm"
 ]
+
+
+# --- Liste materiali Gasket Spiral Wound
+winding_materials = [
+    "SS316L", "SS304", "MONEL", "INCONEL", "DUPLEX", "HASTELLOY C276"
+]
+
+filler_materials = [
+    "GRAPHITE", "PTFE", "MICA", "CERAMIC", "GLASS", "SS304"
+]
+
+color_codes = {
+    "SS316L": "Green",
+    "SS304": "Red",
+    "MONEL": "Blue",
+    "INCONEL": "Yellow",
+    "DUPLEX": "Purple",
+    "HASTELLOY C276": "Orange",
+    "GRAPHITE": "Black",
+    "PTFE": "White",
+    "MICA": "Gray",
+    "CERAMIC": "Light Gray",
+    "GLASS": "Clear"
+}
 # --- Definizione delle categorie
 categories = {
     "Machined Parts": [
@@ -1173,7 +1197,7 @@ if selected_part == "Gate, Valve":
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 
-# --- GASKET, SPIRAL WOUND
+
 # --- GASKET, SPIRAL WOUND
 if selected_part == "Gasket, Spiral Wound":
     col1, col2, col3 = st.columns(3)
