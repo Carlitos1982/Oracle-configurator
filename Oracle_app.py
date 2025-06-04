@@ -2641,100 +2641,62 @@ if selected_part == "Ring, Wear":
                 )
 
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-elif selected_part == "Pin, Dowel":
+if selected_part == "Pin, Dowel":
     col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1: INPUT
     with col1:
         st.subheader("✏️ Input")
-        diameter     = st.number_input("Diameter", min_value=0, step=1, format="%d", key="pin_diameter")
-        uom_diameter = st.selectbox("UOM", ["mm", "inches"], key="pin_uom_diameter")
-        length       = st.number_input("Length", min_value=0, step=1, format="%d", key="pin_length")
-        uom_length   = st.selectbox("UOM", ["mm", "inches"], key="pin_uom_length")
+        size = st.text_input("Size", key="pdowel_size")
+        length = st.text_input("Length", key="pdowel_length")
+        material = st.text_input("Material", key="pdowel_material")
+        note = st.text_area("Note", height=80, key="pdowel_note")
+        dwg = st.text_input("Dwg/doc number", key="pdowel_dwg")
 
-        # Standard (può restare vuoto)
-        standard     = st.selectbox("Standard", [""] + ["ISO 2338"], key="pin_standard")
+        # Stamicarbon checkbox
+        stamicarbon = st.checkbox("Stamicarbon?", key="pdowel_stamicarbon")
 
-        # Selezione materiale
-        mtype_pin   = st.selectbox("Material Type", [""] + material_types, key="mtype_pin")
-        pref_df_pin = materials_df[
-            (materials_df["Material Type"] == mtype_pin) &
-            (materials_df["Prefix"].notna())
-        ]
-        prefixes_pin = sorted(pref_df_pin["Prefix"].unique()) if mtype_pin != "MISCELLANEOUS" else []
-        mprefix_pin  = st.selectbox("Material Prefix", [""] + prefixes_pin, key="mprefix_pin")
+        if st.button("Genera Output", key="pdowel_gen"):
+            sq_tags = []
+            quality_lines = []
 
-        if mtype_pin == "MISCELLANEOUS":
-            names_pin = materials_df[
-                materials_df["Material Type"] == mtype_pin
-            ]["Name"].dropna().drop_duplicates().tolist()
-        else:
-            names_pin = materials_df[
-                (materials_df["Material Type"] == mtype_pin) &
-                (materials_df["Prefix"] == mprefix_pin)
-            ]["Name"].dropna().drop_duplicates().tolist()
-        mname_pin = st.selectbox("Material Name", [""] + names_pin, key="mname_pin")
+            if stamicarbon:
+                sq_tags.append("[SQ172]")
+                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
-        # Nuovo campo Material Note
-        material_note_pin = st.text_area("Material Note (opzionale)", height=80, key="pin_matnote")
+            quality = "\n".join(quality_lines)
+            tag_string = " ".join(sq_tags)
 
-        # Generazione output
-        if st.button("Genera Output", key="gen_pin"):
-            # Costruzione Material / FPD code
-            if mtype_pin != "MISCELLANEOUS":
-                materiale_pin = f"{mtype_pin} {mprefix_pin} {mname_pin}".strip()
-                match_pin     = materials_df[
-                    (materials_df["Material Type"] == mtype_pin) &
-                    (materials_df["Prefix"] == mprefix_pin) &
-                    (materials_df["Name"] == mname_pin)
-                ]
-            else:
-                materiale_pin = mname_pin
-                match_pin     = materials_df[
-                    (materials_df["Material Type"] == mtype_pin) &
-                    (materials_df["Name"] == mname_pin)
-                ]
-            codice_fpd_pin = match_pin["FPD Code"].values[0] if not match_pin.empty else ""
+            descr = f"DOWEL PIN - SIZE: {size}, LENGTH: {length}, MATERIAL: {material}"
+            if note:
+                descr += f", NOTE: {note}"
+            descr += f" {tag_string}"
+            descr = "*" + descr
 
-            # Costruzione descrizione
-            descr_pin = (
-                f"PIN, DOWEL - DIAMETER: {int(diameter)}{uom_diameter}, "
-                f"LENGTH: {int(length)}{uom_length}"
-            )
-            if standard:
-                descr_pin += f", {standard}"
-            if material_note_pin:
-                descr_pin += f", {material_note_pin}"
-
-            # Aggiungi sempre l’asterisco all’inizio
-            descr_pin = "*" + descr_pin
-
-            # Memorizzo in session_state
             st.session_state["output_data"] = {
-                "Item":               "56230…",
-                "Description":        descr_pin,
-                "Identificativo":     "6810-DOWEL PIN",
-                "Classe ricambi":     "",
-                "Categories":         "FASCIA ITE 5",
-                "Catalog":            "",
-                "Material":           materiale_pin,
-                "FPD material code":  codice_fpd_pin,
-                "Template":           "FPD_BUY_2",
-                "ERP_L1":             "64_HARDWARE",
-                "ERP_L2":             "14_PINS",
-                "To supplier":        "",
-                "Quality":            ""
+                "Item": "56300…",
+                "Description": descr,
+                "Identificativo": "6560-DOWEL PIN",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ARTVARI",
+                "Disegno": dwg,
+                "Material": material,
+                "FPD material code": "NA",
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "60_FASTENER",
+                "ERP_L2": "13_STANDARD_PIN",
+                "To supplier": "",
+                "Quality": quality
             }
 
-    # COLONNA 2: OUTPUT
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
-                if campo == "Description":
-                    st.text_area(campo, value=valore, height=80, key=f"pin_{campo}")
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=160)
                 else:
-                    st.text_input(campo, value=valore, key=f"pin_{campo}")
+                    st.text_input(k, value=v)
 
     # COLONNA 3: DataLoad
     with col3:
@@ -3319,87 +3281,62 @@ if selected_part == "Gasket, Flat":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-elif selected_part == "Screw, Cap":
-    st.subheader("Configurazione - Screw, Cap")
+if selected_part == "Screw, Cap":
     col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1: INPUT
     with col1:
-        screw_type = st.selectbox("Type", ["Socket Head", "Button Head", "Flat Head"], key="sc_type")
-        size_sc    = st.text_input("Size", key="sc_size")
-        length_sc  = st.text_input("Length", key="sc_length")
-        note1_sc   = st.text_area("Note (opzionale)", height=60, key="sc_note1")
+        st.subheader("✏️ Input")
+        size = st.text_input("Size", key="scap_size")
+        length = st.text_input("Length", key="scap_length")
+        material = st.text_input("Material", key="scap_material")
+        note = st.text_area("Note", height=80, key="scap_note")
+        dwg = st.text_input("Dwg/doc number", key="scap_dwg")
 
-        mtype_sc   = st.selectbox("Material Type", [""] + material_types, key="sc_mtype")
-        pref_df_sc = materials_df[
-            (materials_df["Material Type"] == mtype_sc) &
-            (materials_df["Prefix"].notna())
-        ]
-        prefixes_sc = sorted(pref_df_sc["Prefix"].unique()) if mtype_sc != "MISCELLANEOUS" else []
-        mprefix_sc  = st.selectbox("Material Prefix", [""] + prefixes_sc, key="sc_mprefix")
+        # Stamicarbon checkbox
+        stamicarbon = st.checkbox("Stamicarbon?", key="scap_stamicarbon")
 
-        if mtype_sc == "MISCELLANEOUS":
-            names_sc = materials_df[
-                materials_df["Material Type"] == mtype_sc
-            ]["Name"].dropna().drop_duplicates().tolist()
-        else:
-            names_sc = materials_df[
-                (materials_df["Material Type"] == mtype_sc) &
-                (materials_df["Prefix"] == mprefix_sc)
-            ]["Name"].dropna().drop_duplicates().tolist()
-        mname_sc = st.selectbox("Material Name", [""] + names_sc, key="sc_mname")
+        if st.button("Genera Output", key="scap_gen"):
+            sq_tags = []
+            quality_lines = []
 
-        material_note_sc = st.text_area("Material Note (opzionale)", height=60, key="sc_matnote")
+            if stamicarbon:
+                sq_tags.append("[SQ172]")
+                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
-        if st.button("Genera Output", key="gen_sc"):
-            if mtype_sc != "MISCELLANEOUS":
-                materiale_sc = f"{mtype_sc} {mprefix_sc} {mname_sc}".strip()
-                match_sc     = materials_df[
-                    (materials_df["Material Type"] == mtype_sc) &
-                    (materials_df["Prefix"] == mprefix_sc) &
-                    (materials_df["Name"] == mname_sc)
-                ]
-            else:
-                materiale_sc = mname_sc
-                match_sc     = materials_df[
-                    (materials_df["Material Type"] == mtype_sc) &
-                    (materials_df["Name"] == mname_sc)
-                ]
-            codice_fpd_sc = match_sc["FPD Code"].values[0] if not match_sc.empty else ""
+            quality = "\n".join(quality_lines)
+            tag_string = " ".join(sq_tags)
 
-            descr_sc = f"*SCREW, CAP - TYPE: {screw_type}, SIZE: {size_sc}, LENGTH: {length_sc}"
-            if note1_sc:
-                descr_sc += f", {note1_sc}"
-            descr_sc += f", {materiale_sc}"
-            if material_note_sc:
-                descr_sc += f", {material_note_sc}"
+            descr = f"CAP SCREW - SIZE: {size}, LENGTH: {length}, MATERIAL: {material}"
+            if note:
+                descr += f", NOTE: {note}"
+            descr += f" {tag_string}"
+            descr = "*" + descr
 
             st.session_state["output_data"] = {
-                "Item":              "56310…",
-                "Description":       descr_sc,
-                "Identificativo":    "6805-CAP SCREW",
-                "Classe ricambi":    "",
-                "Categories":        "FASCIA ITE 5",
-                "Catalog":           "ARTVARI",
-                "Disegno":           "",
-                "Material":          materiale_sc,
-                "FPD material code": codice_fpd_sc,
-                "Template":          "FPD_BUY_2",
-                "ERP_L1":            "64_HARDWARE",
-                "ERP_L2":            "15_SCREWS",
-                "To supplier":       "",
-                "Quality":           ""
+                "Item": "56200…",
+                "Description": descr,
+                "Identificativo": "6530-CAP SCREW",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ARTVARI",
+                "Disegno": dwg,
+                "Material": material,
+                "FPD material code": "NA",
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "60_FASTENER",
+                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "To supplier": "",
+                "Quality": quality
             }
 
-    # COLONNA 2: OUTPUT
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
-                if campo == "Description":
-                    st.text_area(campo, value=valore, height=80, key=f"sc_{campo}")
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=160)
                 else:
-                    st.text_input(campo, value=valore, key=f"sc_{campo}")
+                    st.text_input(k, value=v)
 
     # COLONNA 3: DATALOAD
     with col3:
@@ -3455,86 +3392,63 @@ elif selected_part == "Screw, Cap":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-elif selected_part == "Screw, Grub":
-    st.subheader("Configurazione - Screw, Grub")
+if selected_part == "Screw, Grub":
     col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1: INPUT
     with col1:
-        size_sg    = st.text_input("Size", key="sg_size")
-        length_sg  = st.text_input("Length", key="sg_length")
-        note1_sg   = st.text_area("Note (opzionale)", height=60, key="sg_note1")
+        st.subheader("✏️ Input")
+        size = st.text_input("Size", key="sgrub_size")
+        length = st.text_input("Length", key="sgrub_length")
+        material = st.text_input("Material", key="sgrub_material")
+        note = st.text_area("Note", height=80, key="sgrub_note")
+        dwg = st.text_input("Dwg/doc number", key="sgrub_dwg")
 
-        mtype_sg   = st.selectbox("Material Type", [""] + material_types, key="sg_mtype")
-        pref_df_sg = materials_df[
-            (materials_df["Material Type"] == mtype_sg) &
-            (materials_df["Prefix"].notna())
-        ]
-        prefixes_sg = sorted(pref_df_sg["Prefix"].unique()) if mtype_sg != "MISCELLANEOUS" else []
-        mprefix_sg  = st.selectbox("Material Prefix", [""] + prefixes_sg, key="sg_mprefix")
+        # Stamicarbon checkbox
+        stamicarbon = st.checkbox("Stamicarbon?", key="sgrub_stamicarbon")
 
-        if mtype_sg == "MISCELLANEOUS":
-            names_sg = materials_df[
-                materials_df["Material Type"] == mtype_sg
-            ]["Name"].dropna().drop_duplicates().tolist()
-        else:
-            names_sg = materials_df[
-                (materials_df["Material Type"] == mtype_sg) &
-                (materials_df["Prefix"] == mprefix_sg)
-            ]["Name"].dropna().drop_duplicates().tolist()
-        mname_sg = st.selectbox("Material Name", [""] + names_sg, key="sg_mname")
+        if st.button("Genera Output", key="sgrub_gen"):
+            sq_tags = []
+            quality_lines = []
 
-        material_note_sg = st.text_area("Material Note (opzionale)", height=60, key="sg_matnote")
+            if stamicarbon:
+                sq_tags.append("[SQ172]")
+                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
-        if st.button("Genera Output", key="gen_sg"):
-            if mtype_sg != "MISCELLANEOUS":
-                materiale_sg = f"{mtype_sg} {mprefix_sg} {mname_sg}".strip()
-                match_sg     = materials_df[
-                    (materials_df["Material Type"] == mtype_sg) &
-                    (materials_df["Prefix"] == mprefix_sg) &
-                    (materials_df["Name"] == mname_sg)
-                ]
-            else:
-                materiale_sg = mname_sg
-                match_sg     = materials_df[
-                    (materials_df["Material Type"] == mtype_sg) &
-                    (materials_df["Name"] == mname_sg)
-                ]
-            codice_fpd_sg = match_sg["FPD Code"].values[0] if not match_sg.empty else ""
+            quality = "\n".join(quality_lines)
+            tag_string = " ".join(sq_tags)
 
-            descr_sg = f"*SCREW, GRUB - SIZE: {size_sg}, LENGTH: {length_sg}"
-            if note1_sg:
-                descr_sg += f", {note1_sg}"
-            descr_sg += f", {materiale_sg}"
-            if material_note_sg:
-                descr_sg += f", {material_note_sg}"
+            descr = f"GRUB SCREW - SIZE: {size}, LENGTH: {length}, MATERIAL: {material}"
+            if note:
+                descr += f", NOTE: {note}"
+            descr += f" {tag_string}"
+            descr = "*" + descr
 
             st.session_state["output_data"] = {
-                "Item":              "56320…",
-                "Description":       descr_sg,
-                "Identificativo":    "6806-GRUB SCREW",
-                "Classe ricambi":    "",
-                "Categories":        "FASCIA ITE 5",
-                "Catalog":           "ARTVARI",
-                "Disegno":           "",
-                "Material":          materiale_sg,
-                "FPD material code": codice_fpd_sg,
-                "Template":          "FPD_BUY_2",
-                "ERP_L1":            "64_HARDWARE",
-                "ERP_L2":            "15_SCREWS",
-                "To supplier":       "",
-                "Quality":           ""
+                "Item": "56210…",
+                "Description": descr,
+                "Identificativo": "6520-GRUB SCREW",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ARTVARI",
+                "Disegno": dwg,
+                "Material": material,
+                "FPD material code": "NA",
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "60_FASTENER",
+                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "To supplier": "",
+                "Quality": quality
             }
 
-    # COLONNA 2: OUTPUT
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
-                if campo == "Description":
-                    st.text_area(campo, value=valore, height=80, key=f"sg_{campo}")
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=160)
                 else:
-                    st.text_input(campo, value=valore, key=f"sg_{campo}")
+                    st.text_input(k, value=v)
+
 
     # COLONNA 3: DATALOAD
     with col3:
