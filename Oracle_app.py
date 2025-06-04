@@ -130,9 +130,9 @@ if selected_part == "Casing, Pump":
     # COLONNA 1: INPUT
     with col1:
         st.subheader("✏️ Input")
-        model    = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="casing_model")
+        model = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="casing_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
-        size     = st.selectbox("Product/Pump Size", [""] + size_list, key="casing_size")
+        size = st.selectbox("Product/Pump Size", [""] + size_list, key="casing_size")
 
         feature_1 = ""
         special = ["HDO", "DMX", "WXB", "WIK"]
@@ -144,19 +144,24 @@ if selected_part == "Casing, Pump":
             feature_1 = st.selectbox("Additional Feature 1", [""] + f1_list, key="f1_casing")
 
         feature_2 = ""
-        if (model == "HPX") or (model == "HED"):
+        if model in ["HPX", "HED"]:
             f2_list = features_df[
                 (features_df["Pump Model"] == model) &
                 (features_df["Feature Type"] == "features2")
             ]["Feature"].dropna().tolist()
             feature_2 = st.selectbox("Additional Feature 2", [""] + f2_list, key="f2_casing")
 
-        note     = st.text_area("Note (opzionale)", height=80, key="note_casing")
-        dwg      = st.text_input("Dwg/doc number", key="dwg_casing")
-        mtype    = st.selectbox("Material Type", [""] + material_types, key="mtype_casing")
-        pref_df  = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
+        note = st.text_area("Note (opzionale)", height=80, key="note_casing")
+        dwg = st.text_input("Dwg/doc number", key="dwg_casing")
+
+        # ✅ Nuova checkbox HF
+        hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="hf_casing")
+
+        mtype = st.selectbox("Material Type", [""] + material_types, key="mtype_casing")
+        pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
         prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
-        mprefix  = st.selectbox("Material Prefix", [""] + prefixes, key="mprefix_casing")
+        mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="mprefix_casing")
+
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
         else:
@@ -164,7 +169,8 @@ if selected_part == "Casing, Pump":
                 (materials_df["Material Type"] == mtype) &
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
-        mname    = st.selectbox("Material Name", [""] + names, key="mname_casing")
+
+        mname = st.selectbox("Material Name", [""] + names, key="mname_casing")
 
         if st.button("Genera Output", key="gen_casing"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
@@ -175,13 +181,13 @@ if selected_part == "Casing, Pump":
             ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-            # 1) Costruisci prima la descrizione base (senza asterisco)
             descr = f"CASING, PUMP - MODEL: {model}, SIZE: {size}, FEATURES: {feature_1}, {feature_2}"
             if note:
                 descr += f", NOTE: {note}"
-
-            # 2) Aggiungi sempre l’asterisco all’inizio
             descr = "*" + descr
+
+            # ✅ Aggiunta campo Quality solo se HF selezionato
+            quality = "Applicable procedure: SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)" if hf_service else ""
 
             st.session_state["output_data"] = {
                 "Item": "40202…",
@@ -197,7 +203,7 @@ if selected_part == "Casing, Pump":
                 "ERP_L1": "20_TURNKEY_MACHINING",
                 "ERP_L2": "17_CASING",
                 "To supplier": "",
-                "Quality": ""
+                "Quality": quality
             }
 
     # COLONNA 2: OUTPUT
