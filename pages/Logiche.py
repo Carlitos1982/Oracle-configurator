@@ -19,8 +19,8 @@ st.markdown(
     '''
 )
 
-# Carica il file Excel
-file_path = "Logiche_Parziali.xlsx"
+# Carica il file Excel definitivo
+file_path = "Logiche_Item_Config.xlsx"
 df = pd.read_excel(file_path)
 
 # Mostra tabella interattiva
@@ -34,4 +34,3 @@ with open(file_path, "rb") as f:
         file_name="Logiche_Item_Config.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-
