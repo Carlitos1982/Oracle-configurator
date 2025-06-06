@@ -3524,6 +3524,7 @@ if selected_part == "Screw, Grub":
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 
+# --- CASTING PARTS ---
 if selected_part in [
     "Casing cover casting",
     "Casing casting",
@@ -3542,24 +3543,6 @@ if selected_part in [
     "Shaft wear sleeve casting"
 ]:
     part_name = selected_part
-    identificativo = part_name
-        "Casing cover casting",
-        "Casing casting",
-        "Bearing housing casting",
-        "Impeller casting",
-        "Impeller nut casting",
-        "Shaft casting",
-        "Throttling bush casting",
-        "Pump bowl casting",
-        "Bearing bracket casting",
-        "Discharge elbow casting",
-        "Bearing cover casting",
-        "Diffuser casting",
-        "Inducer casting",
-        "Wear plate casting",
-        "Shaft wear sleeve casting"
-    ])
-
     identificativo = part_name
 
     with st.container():
@@ -3624,6 +3607,7 @@ if selected_part in [
 
         with col3:
             st.markdown("### ⚙️ Dataload (Coming soon...)")
+
 
 
 # --- Footer (non fisso, subito dopo i contenuti)
