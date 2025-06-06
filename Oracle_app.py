@@ -3527,6 +3527,7 @@ if selected_part == "Screw, Grub":
 
 # --- CASTING PARTS ---
 # --- CASTING PARTS ---
+# --- CASTING PARTS ---
 if selected_part in [
     "Casing cover casting",
     "Casing casting",
@@ -3599,7 +3600,6 @@ if selected_part in [
         pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
         pattern_full = "/".join([base_pattern] + pattern_parts) if base_pattern else "/".join(pattern_parts)
 
-        # 🚀 DESCRIPTION ora coerente con le altre parti:
         description = f"*{identificativo} " + pattern_full + " " + str(note) + " [" + str(prefix) + "] " + str(name) + " " + str(material_note)
         description = description.strip()
 
@@ -3609,10 +3609,8 @@ if selected_part in [
             st.text_input("Classe ricambi", value="")
             st.text_input("Categories", value="FASCIA ITE 7")
             st.text_input("Catalog", value="FUSIONI")
-            st.text_input("Casting Drawing", value=casting_drawing)
-            st.text_input("Material", value=name)
-            st.text_input("Material Prefix", value=prefix)
-            st.text_input("Material Name", value=name)
+            st.text_input("Disegno", value=casting_drawing)  # <--- coerente con Casing Pump
+            st.text_input("Material", value=f"{prefix} {name}")  # <--- Material = Prefix + Name
             st.text_input("FPD Material Code", value=fpd_material_code)
             st.text_input("Template", value="FPD_BUY_CASTING")
             st.text_input("ERP L1", value="10_CASTING")
@@ -3624,8 +3622,6 @@ if selected_part in [
     with col_dataload:
         st.markdown("### ⚙️ Dataload")
         st.write("Coming soon...")
-
-
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
