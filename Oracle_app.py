@@ -135,7 +135,7 @@ categories = {
         "Shaft wear sleeve casting"
     ]
 }
-}
+
 
 # --- Selezione categoria e parte affiancate
 col1, col2 = st.columns([1, 1], gap="small")
