@@ -3524,7 +3524,6 @@ if selected_part == "Screw, Grub":
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
-
 # --- CASTING PARTS ---
 if selected_part in [
     "Casing cover casting",
@@ -3563,12 +3562,13 @@ if selected_part in [
         st.markdown("**Material selection**")
         material_type = st.selectbox("Material Type", [""] + material_types, key="casting_type")
 
+        prefix_options = materials_df[materials_df["Material Type"] == material_type]["Prefix"].dropna().unique().tolist()
+        prefix = st.selectbox("Prefix", [""] + prefix_options, key="casting_prefix")
 
-        prefix_options = materials_df[materials_df["Material Type"] == material_type]["Prefix"].unique()
-        prefix = st.selectbox("Prefix", prefix_options, key="casting_prefix")
-
-        name_options = materials_df[(materials_df["Material Type"] == material_type) & (materials_df["Prefix"] == prefix)]["Name"].unique()
-        name = st.selectbox("Name", name_options, key="casting_name")
+        name_options = materials_df[
+            (materials_df["Material Type"] == material_type) & (materials_df["Prefix"] == prefix)
+        ]["Name"].dropna().unique().tolist()
+        name = st.selectbox("Name", [""] + name_options, key="casting_name")
 
         material_note = st.text_input("Material Note", key="casting_mnote")
 
@@ -3617,6 +3617,7 @@ if selected_part in [
     with col_dataload:
         st.markdown("### ⚙️ Dataload")
         st.write("Coming soon...")
+
 
 
 # --- Footer (non fisso, subito dopo i contenuti)
