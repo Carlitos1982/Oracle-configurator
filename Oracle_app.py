@@ -3528,6 +3528,7 @@ if selected_part == "Screw, Grub":
 # --- CASTING PARTS ---
 # --- CASTING PARTS ---
 # --- CASTING PARTS ---
+# --- CASTING PARTS ---
 if selected_part in [
     "Casing cover casting",
     "Casing casting",
@@ -3583,7 +3584,7 @@ if selected_part in [
         item_prefix = "7"
         casting_code = "XX"
         fpd_material_code = "NA"
-        try:
+        if material_type != "" and prefix != "" and name != "":
             casting_code_lookup = materials_df[
                 (materials_df["Material Type"] == material_type) &
                 (materials_df["Prefix"] == prefix) &
@@ -3592,15 +3593,14 @@ if selected_part in [
             if not casting_code_lookup.empty:
                 casting_code = str(casting_code_lookup["Casting Code"].values[0]).zfill(2)
                 fpd_material_code = casting_code_lookup["FPD Material Code"].values[0]
-        except:
-            pass
 
         item_number = item_prefix + casting_code + "001"
 
         pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
         pattern_full = "/".join([base_pattern] + pattern_parts) if base_pattern else "/".join(pattern_parts)
 
-        description = f"*{identificativo} " + pattern_full + " " + str(note) + " [" + str(prefix) + "] " + str(name) + " " + str(material_note)
+        # DESCRIPTION senza parentesi quadre su Material (solo se metti codici qualità in futuro andranno quadre)
+        description = f"*{identificativo} " + pattern_full + " " + str(note) + " " + f"{prefix} {name}" + " " + str(material_note)
         description = description.strip()
 
         if generate_output:
@@ -3609,8 +3609,8 @@ if selected_part in [
             st.text_input("Classe ricambi", value="")
             st.text_input("Categories", value="FASCIA ITE 7")
             st.text_input("Catalog", value="FUSIONI")
-            st.text_input("Disegno", value=casting_drawing)  # <--- coerente con Casing Pump
-            st.text_input("Material", value=f"{prefix} {name}")  # <--- Material = Prefix + Name
+            st.text_input("Disegno", value=casting_drawing)  # <-- coerente con Casing Pump
+            st.text_input("Material", value=f"{prefix} {name}")  # <-- Material = Prefix + Name (senza parentesi quadre)
             st.text_input("FPD Material Code", value=fpd_material_code)
             st.text_input("Template", value="FPD_BUY_CASTING")
             st.text_input("ERP L1", value="10_CASTING")
