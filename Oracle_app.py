@@ -3525,6 +3525,7 @@ if selected_part == "Screw, Grub":
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # --- CASTING PARTS ---
+# --- CASTING PARTS ---
 if selected_part in [
     "Casing cover casting",
     "Casing casting",
@@ -3597,6 +3598,7 @@ if selected_part in [
         pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
         pattern_full = "/".join([base_pattern] + pattern_parts) if base_pattern else "/".join(pattern_parts)
         description = f"*{identificativo} " + pattern_full + " " + str(note) + " " + str(name) + " " + str(material_note)
+        description = description.strip()
 
         if generate_output:
             st.text_input("Item", value=item_number, key="casting_item")
@@ -3606,6 +3608,7 @@ if selected_part in [
             st.text_input("Catalog", value="FUSIONI")
             st.text_input("Casting Drawing", value=casting_drawing)
             st.text_input("Material", value=name)
+            st.text_input("Material Prefix", value=prefix)  # ✅ aggiunto Material Prefix
             st.text_input("FPD Material Code", value=fpd_material_code)
             st.text_input("Template", value="FPD_BUY_CASTING")
             st.text_input("ERP L1", value="10_CASTING")
