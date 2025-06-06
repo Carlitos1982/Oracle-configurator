@@ -3596,7 +3596,7 @@ if selected_part in [
 
         pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
         pattern_full = "/".join([base_pattern] + pattern_parts) if base_pattern else "/".join(pattern_parts)
-        description = f"*{identificativo} " + pattern_full + " " + note + " " + name + " " + material_note
+        description = f"*{identificativo} " + pattern_full + " " + str(note) + " " + str(name) + " " + str(material_note)
 
         if generate_output:
             st.text_input("Item", value=item_number, key="casting_item")
