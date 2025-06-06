@@ -3545,51 +3545,58 @@ if selected_part in [
     part_name = selected_part
     identificativo = part_name
 
-    with st.container():
-        st.markdown(f"### 🧱 {identificativo}")
+    col_input, col_output, col_dataload = st.columns(3, gap="small")
 
-        col1, col2, col3 = st.columns(3)
+    with col_input:
+        st.markdown("### 📥 Input")
 
-        with col1:
-            base_pattern = st.text_input("Base pattern", key="casting_bp")
-            mod1 = st.text_input("Pattern modification 1", key="casting_mod1")
-            mod2 = st.text_input("Pattern modification 2", key="casting_mod2")
-            mod3 = st.text_input("Pattern modification 3", key="casting_mod3")
-            mod4 = st.text_input("Pattern modification 4", key="casting_mod4")
-            mod5 = st.text_input("Pattern modification 5", key="casting_mod5")
-            note = st.text_input("Note", key="casting_note")
-            casting_drawing = st.text_input("Casting Drawing", key="casting_cd")
+        base_pattern = st.text_input("Base pattern", key="casting_bp")
+        mod1 = st.text_input("Pattern modification 1", key="casting_mod1")
+        mod2 = st.text_input("Pattern modification 2", key="casting_mod2")
+        mod3 = st.text_input("Pattern modification 3", key="casting_mod3")
+        mod4 = st.text_input("Pattern modification 4", key="casting_mod4")
+        mod5 = st.text_input("Pattern modification 5", key="casting_mod5")
+        note = st.text_input("Note", key="casting_note")
+        casting_drawing = st.text_input("Casting Drawing", key="casting_cd")
 
-            st.markdown("**Material selection**")
-            material_type = st.selectbox("Material Type", ["ASTM", "EN", "Miscellaneous"], key="casting_type")
-            prefix = st.text_input("Prefix", key="casting_prefix")
-            name = st.text_input("Name", key="casting_name")
-            material_note = st.text_input("Material Note", key="casting_mnote")
+        st.markdown("**Material selection**")
+        material_type = st.selectbox("Material Type", df_materials["Material Type"].unique(), key="casting_type")
 
-        with col2:
-            st.markdown("### 📤 Output")
-            item_prefix = "7"
+        prefix_options = df_materials[df_materials["Material Type"] == material_type]["Prefix"].unique()
+        prefix = st.selectbox("Prefix", prefix_options, key="casting_prefix")
 
-            casting_code = "XX"
-            fpd_material_code = "NA"
-            try:
-                casting_code_lookup = df_materials[
-                    (df_materials["Material Type"] == material_type) &
-                    (df_materials["Prefix"] == prefix) &
-                    (df_materials["Name"] == name)
-                ]
-                if not casting_code_lookup.empty:
-                    casting_code = str(casting_code_lookup["Casting Code"].values[0]).zfill(2)
-                    fpd_material_code = casting_code_lookup["FPD Material Code"].values[0]
-            except:
-                pass
+        name_options = df_materials[(df_materials["Material Type"] == material_type) & (df_materials["Prefix"] == prefix)]["Name"].unique()
+        name = st.selectbox("Name", name_options, key="casting_name")
 
-            item_number = item_prefix + casting_code + "001"
+        material_note = st.text_input("Material Note", key="casting_mnote")
 
-            pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
-            pattern_full = "/".join([base_pattern] + pattern_parts) if base_pattern else "/".join(pattern_parts)
-            description = f"*{identificativo} " + pattern_full + " " + note + " " + name + " " + material_note
+        generate_output = st.button("Genera Output", key="generate_casting_output")
 
+    with col_output:
+        st.markdown("### 📤 Output")
+
+        item_prefix = "7"
+        casting_code = "XX"
+        fpd_material_code = "NA"
+        try:
+            casting_code_lookup = df_materials[
+                (df_materials["Material Type"] == material_type) &
+                (df_materials["Prefix"] == prefix) &
+                (df_materials["Name"] == name)
+            ]
+            if not casting_code_lookup.empty:
+                casting_code = str(casting_code_lookup["Casting Code"].values[0]).zfill(2)
+                fpd_material_code = casting_code_lookup["FPD Material Code"].values[0]
+        except:
+            pass
+
+        item_number = item_prefix + casting_code + "001"
+
+        pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
+        pattern_full = "/".join([base_pattern] + pattern_parts) if base_pattern else "/".join(pattern_parts)
+        description = f"*{identificativo} " + pattern_full + " " + note + " " + name + " " + material_note
+
+        if generate_output:
             st.text_input("Item", value=item_number, key="casting_item")
             st.text_input("Identificativo", value=identificativo)
             st.text_input("Classe ricambi", value="")
@@ -3605,9 +3612,9 @@ if selected_part in [
             st.text_area("Quality", value="", height=100)
             st.text_area("Description", value=description, height=100)
 
-        with col3:
-            st.markdown("### ⚙️ Dataload (Coming soon...)")
-
+    with col_dataload:
+        st.markdown("### ⚙️ Dataload")
+        st.write("Coming soon...")
 
 
 # --- Footer (non fisso, subito dopo i contenuti)
