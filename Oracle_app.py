@@ -3560,7 +3560,8 @@ if selected_part in [
         casting_drawing = st.text_input("Casting Drawing", key="casting_cd")
 
         st.markdown("**Material selection**")
-        material_type = st.selectbox("Material Type", df_materials["Material Type"].unique(), key="casting_type")
+        material_type = st.selectbox("Material Type", [""] + material_types, key="casting_type")
+
 
         prefix_options = df_materials[df_materials["Material Type"] == material_type]["Prefix"].unique()
         prefix = st.selectbox("Prefix", prefix_options, key="casting_prefix")
