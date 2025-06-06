@@ -116,7 +116,25 @@ categories = {
         "Bearing, Rolling",
         "Gusset, Other",
         "Gasket, Spiral Wound"
+    ],
+      "Casting": [
+        "Casing cover casting",
+        "Casing casting",
+        "Bearing housing casting",
+        "Impeller casting",
+        "Impeller nut casting",
+        "Shaft casting",
+        "Throttling bush casting",
+        "Pump bowl casting",
+        "Bearing bracket casting",
+        "Discharge elbow casting",
+        "Bearing cover casting",
+        "Diffuser casting",
+        "Inducer casting",
+        "Wear plate casting",
+        "Shaft wear sleeve casting"
     ]
+}
 }
 
 # --- Selezione categoria e parte affiancate
@@ -3504,6 +3522,108 @@ if selected_part == "Screw, Grub":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
+
+if selected_part in [
+    "Casing cover casting",
+    "Casing casting",
+    "Bearing housing casting",
+    "Impeller casting",
+    "Impeller nut casting",
+    "Shaft casting",
+    "Throttling bush casting",
+    "Pump bowl casting",
+    "Bearing bracket casting",
+    "Discharge elbow casting",
+    "Bearing cover casting",
+    "Diffuser casting",
+    "Inducer casting",
+    "Wear plate casting",
+    "Shaft wear sleeve casting"
+]:
+    part_name = selected_part
+    identificativo = part_name
+        "Casing cover casting",
+        "Casing casting",
+        "Bearing housing casting",
+        "Impeller casting",
+        "Impeller nut casting",
+        "Shaft casting",
+        "Throttling bush casting",
+        "Pump bowl casting",
+        "Bearing bracket casting",
+        "Discharge elbow casting",
+        "Bearing cover casting",
+        "Diffuser casting",
+        "Inducer casting",
+        "Wear plate casting",
+        "Shaft wear sleeve casting"
+    ])
+
+    identificativo = part_name
+
+    with st.container():
+        st.markdown(f"### 🧱 {identificativo}")
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            base_pattern = st.text_input("Base pattern", key="casting_bp")
+            mod1 = st.text_input("Pattern modification 1", key="casting_mod1")
+            mod2 = st.text_input("Pattern modification 2", key="casting_mod2")
+            mod3 = st.text_input("Pattern modification 3", key="casting_mod3")
+            mod4 = st.text_input("Pattern modification 4", key="casting_mod4")
+            mod5 = st.text_input("Pattern modification 5", key="casting_mod5")
+            note = st.text_input("Note", key="casting_note")
+            casting_drawing = st.text_input("Casting Drawing", key="casting_cd")
+
+            st.markdown("**Material selection**")
+            material_type = st.selectbox("Material Type", ["ASTM", "EN", "Miscellaneous"], key="casting_type")
+            prefix = st.text_input("Prefix", key="casting_prefix")
+            name = st.text_input("Name", key="casting_name")
+            material_note = st.text_input("Material Note", key="casting_mnote")
+
+        with col2:
+            st.markdown("### 📤 Output")
+            item_prefix = "7"
+
+            casting_code = "XX"
+            fpd_material_code = "NA"
+            try:
+                casting_code_lookup = df_materials[
+                    (df_materials["Material Type"] == material_type) &
+                    (df_materials["Prefix"] == prefix) &
+                    (df_materials["Name"] == name)
+                ]
+                if not casting_code_lookup.empty:
+                    casting_code = str(casting_code_lookup["Casting Code"].values[0]).zfill(2)
+                    fpd_material_code = casting_code_lookup["FPD Material Code"].values[0]
+            except:
+                pass
+
+            item_number = item_prefix + casting_code + "001"
+
+            pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
+            pattern_full = "/".join([base_pattern] + pattern_parts) if base_pattern else "/".join(pattern_parts)
+            description = f"*{identificativo} " + pattern_full + " " + note + " " + name + " " + material_note
+
+            st.text_input("Item", value=item_number, key="casting_item")
+            st.text_input("Identificativo", value=identificativo)
+            st.text_input("Classe ricambi", value="")
+            st.text_input("Categories", value="FASCIA ITE 7")
+            st.text_input("Catalog", value="FUSIONI")
+            st.text_input("Casting Drawing", value=casting_drawing)
+            st.text_input("Material", value=name)
+            st.text_input("FPD Material Code", value=fpd_material_code)
+            st.text_input("Template", value="FPD_BUY_CASTING")
+            st.text_input("ERP L1", value="10_CASTING")
+            st.text_input("ERP L2", value="")
+            st.text_input("To Supplier", value="")
+            st.text_area("Quality", value="", height=100)
+            st.text_area("Description", value=description, height=100)
+
+        with col3:
+            st.markdown("### ⚙️ Dataload (Coming soon...)")
 
 
 # --- Footer (non fisso, subito dopo i contenuti)
