@@ -38,6 +38,7 @@ def load_config_data():
 size_df, features_df, materials_df = load_config_data()
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 
+
 # --- Definizione di dimensioni comuni per bulloni
 bolt_sizes = [
     "#10-24UNC", "5/16\"-18UNC", "3/8\"-16UNC", "1/2\"-13UNC", "3/4\"-16UNF",
@@ -3563,10 +3564,10 @@ if selected_part in [
         material_type = st.selectbox("Material Type", [""] + material_types, key="casting_type")
 
 
-        prefix_options = df_materials[df_materials["Material Type"] == material_type]["Prefix"].unique()
+        prefix_options = materials_df[materials_df["Material Type"] == material_type]["Prefix"].unique()
         prefix = st.selectbox("Prefix", prefix_options, key="casting_prefix")
 
-        name_options = df_materials[(df_materials["Material Type"] == material_type) & (df_materials["Prefix"] == prefix)]["Name"].unique()
+        name_options = materials_df[(materials_df["Material Type"] == material_type) & (materials_df["Prefix"] == prefix)]["Name"].unique()
         name = st.selectbox("Name", name_options, key="casting_name")
 
         material_note = st.text_input("Material Note", key="casting_mnote")
@@ -3580,10 +3581,10 @@ if selected_part in [
         casting_code = "XX"
         fpd_material_code = "NA"
         try:
-            casting_code_lookup = df_materials[
-                (df_materials["Material Type"] == material_type) &
-                (df_materials["Prefix"] == prefix) &
-                (df_materials["Name"] == name)
+            casting_code_lookup = materials_df[
+                (materials_df["Material Type"] == material_type) &
+                (materials_df["Prefix"] == prefix) &
+                (materials_df["Name"] == name)
             ]
             if not casting_code_lookup.empty:
                 casting_code = str(casting_code_lookup["Casting Code"].values[0]).zfill(2)
