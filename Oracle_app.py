@@ -3591,7 +3591,7 @@ if selected_part in [
                 (materials_df["Name"] == name)
             ]
             if not casting_code_lookup.empty:
-                casting_code = str(casting_code_lookup["Casting Code"].values[0]).zfill(2)
+                casting_code = str(casting_code_lookup["Casting code"].values[0]).zfill(2)
                 fpd_material_code = casting_code_lookup["FPD Material Code"].values[0]
 
         item_number = item_prefix + casting_code + "001"
