@@ -3578,7 +3578,7 @@ if selected_category == "Casting" and selected_part:
             if mods_str:
                 descr_lines.append(f"MODS: {mods_str}")
             if note:
-                descr_lines.append(f"NOTE: {note}")
+                descr_lines.append(note.strip())
             descr_lines.append(f"{mprefix} {mname}".strip())
             if mat_note:
                 descr_lines.append(mat_note.strip())
@@ -3650,6 +3650,7 @@ if selected_category == "Casting" and selected_part:
                     get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
                 dataload_string = "\t".join(dataload_fields)
+
                 st.text_area("Anteprima (per copia manuale)", dataload_string, height=200)
 
                 csv_buffer = io.StringIO()
@@ -3663,6 +3664,7 @@ if selected_category == "Casting" and selected_part:
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
