@@ -3525,7 +3525,7 @@ if selected_part == "Screw, Grub":
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 
-## --- CASTING PARTS ---
+# --- CASTING PARTS ---
 if selected_category == "Casting" and selected_part:
     col1, col2, col3 = st.columns(3)
 
@@ -3567,24 +3567,26 @@ if selected_category == "Casting" and selected_part:
             ]
 
             fpd_material_code = casting_code_lookup.get("FPD Code", pd.Series([""])).values[0]
-            casting_code = casting_code_lookup.get("Casting code", pd.Series([""])).values[0]
+            casting_code = str(casting_code_lookup.get("Casting code", pd.Series([""])).values[0]).zfill(2)
 
-            pattern_parts = [base_pattern, mod1, mod2, mod3, mod4, mod5]
-            pattern_str = "/".join([p for p in pattern_parts if p])
+            pattern_mods = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
+            mods_str = "/".join(pattern_mods)
 
-            descr = f"{selected_part.upper()} - BASE PATTERN: {base_pattern}"
-            if pattern_str:
-                descr += f", MODIFICATIONS: {pattern_str}"
+            descr_lines = [f"*{selected_part.upper()}"]
+            if base_pattern:
+                descr_lines.append(f"BASE PATTERN: {base_pattern}")
+            if mods_str:
+                descr_lines.append(f"MODS: {mods_str}")
             if note:
-                descr += f", NOTE: {note}"
-            descr += f", MATERIAL: {materiale_completo}"
-            descr = "*" + descr
+                descr_lines.append(f"NOTE: {note}")
+            descr_lines.append(f"{mprefix} {mname}".strip())
+            if mat_note:
+                descr_lines.append(mat_note.strip())
 
-            quality = "[CASTING STD]"
-            quality_detail = "Standard casting visual and dimensional check"
+            descr = ", ".join(descr_lines)
 
             st.session_state["output_data"] = {
-                "Item": casting_code if casting_code else "xxxxxx",
+                "Item": f"7{casting_code}" if casting_code else "7xx",
                 "Description": descr,
                 "Identificativo": selected_part.upper(),
                 "Classe ricambi": "",
@@ -3597,7 +3599,7 @@ if selected_category == "Casting" and selected_part:
                 "ERP_L1": "10_CASTING",
                 "ERP_L2": "",
                 "To supplier": "",
-                "Quality": quality_detail
+                "Quality": "Standard casting visual and dimensional check"
             }
 
     with col2:
@@ -3661,8 +3663,6 @@ if selected_category == "Casting" and selected_part:
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
-
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
