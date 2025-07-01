@@ -3567,7 +3567,8 @@ if selected_category == "Casting" and selected_part:
             ]
 
             fpd_material_code = casting_code_lookup.get("FPD Code", pd.Series([""])).values[0]
-            casting_code = str(casting_code_lookup.get("Casting code", pd.Series([""])).values[0]).zfill(2)
+            casting_code_raw = casting_code_lookup.get("Casting code", pd.Series([""])).values[0]
+            casting_code = str(casting_code_raw).zfill(2)
 
             pattern_mods = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
             mods_str = "/".join(pattern_mods)
@@ -3586,7 +3587,7 @@ if selected_category == "Casting" and selected_part:
             descr = ", ".join(descr_lines)
 
             st.session_state["output_data"] = {
-                "Item": f"7{casting_code}" if casting_code else "7xx",
+                "Item": f"7{str(casting_code)[-2:]}" if casting_code else "7xx",
                 "Description": descr,
                 "Identificativo": selected_part.upper(),
                 "Classe ricambi": "",
