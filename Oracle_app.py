@@ -245,16 +245,16 @@ if selected_part == "Casing, Pump":
                 sq_tags.append("[SQ137]")
                 quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
             if overlay:
-                sq_tags.append("[PQ72]")
+                sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("[DE2500.002]")
+                sq_tags.append("<DE2500.002>")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
-                sq_tags.append("[PI23]")
+                sq_tags.append("<PI23>")
                 quality_lines.append("PI 23 - Pompe per Acqua Potabile")
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             tag_string = " ".join(sq_tags)
@@ -408,16 +408,16 @@ if selected_part == "Casing Cover, Pump":
                 sq_tags.append("[SQ137]")
                 quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
             if overlay:
-                sq_tags.append("[PQ72]")
+                sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("[DE2500.002]")
+                sq_tags.append("<DE2500.002>")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
-                sq_tags.append("[PI23]")
+                sq_tags.append("<PI23>")
                 quality_lines.append("PI 23 - Pompe per Acqua Potabile")
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
@@ -569,16 +569,16 @@ if selected_part == "Impeller, Pump":
                 sq_tags.append("[SQ137]")
                 quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
             if overlay:
-                sq_tags.append("[PQ72]")
+                sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("[DE2500.002]")
+                sq_tags.append("<DE2500.002>")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
-                sq_tags.append("[PI23]")
+                sq_tags.append("<PI23>")
                 quality_lines.append("PI 23 - Pompe per Acqua Potabile")
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
@@ -726,16 +726,16 @@ if selected_part == "Balance Bushing, Pump":
                 sq_tags.append("[SQ137]")
                 quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
             if overlay:
-                sq_tags.append("[PQ72]")
+                sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("[DE2500.002]")
+                sq_tags.append("<DE2500.002>")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
-                sq_tags.append("[PI23]")
+                sq_tags.append("<PI23>")
                 quality_lines.append("PI 23 - Pompe per Acqua Potabile")
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
@@ -884,16 +884,16 @@ if selected_part == "Balance Drum, Pump":
                 sq_tags.append("[SQ137]")
                 quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
             if overlay:
-                sq_tags.append("[PQ72]")
+                sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("[DE2500.002]")
+                sq_tags.append("<DE2500.002>")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
-                sq_tags.append("[PI23]")
+                sq_tags.append("<PI23>")
                 quality_lines.append("PI 23 - Pompe per Acqua Potabile")
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
@@ -1041,16 +1041,16 @@ if selected_part == "Balance Disc, Pump":
                 sq_tags.append("[SQ137]")
                 quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
             if overlay:
-                sq_tags.append("[PQ72]")
+                sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("[DE2500.002]")
+                sq_tags.append("<DE2500.002>")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
-                sq_tags.append("[PI23]")
+                sq_tags.append("<PI23>")
                 quality_lines.append("PI 23 - Pompe per Acqua Potabile")
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
@@ -1189,7 +1189,7 @@ if selected_part == "Gate, Valve":
                 sq_tags.append("[SQ113]")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
@@ -1678,7 +1678,7 @@ if selected_part == "Bolt, Eye":
             quality_lines = []
 
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
@@ -1946,7 +1946,7 @@ if selected_part == "Gasket, Ring Type Joint":
             quality_lines = []
 
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
@@ -2543,16 +2543,16 @@ if selected_part == "Ring, Wear":
                 sq_tags.append("[SQ137]")
                 quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
             if overlay:
-                sq_tags.append("[PQ72]")
+                sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("[DE2500.002]")
+                sq_tags.append("<DE2500.002>")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
-                sq_tags.append("[PI23]")
+                sq_tags.append("<PI23>")
                 quality_lines.append("PI 23 - Pompe per Acqua Potabile")
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
@@ -2679,7 +2679,7 @@ if selected_part == "Pin, Dowel":
             quality_lines = []
 
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
@@ -2828,16 +2828,16 @@ if selected_part == "Shaft, Pump":
             sq_tags = ["[SQ60]", "[DE3513.014]", "[CORP-ENG-0115]"]
 
             if overlay:
-                sq_tags.append("[PQ72]")
+                sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("[DE2500.002]")
+                sq_tags.append("<DE2500.002>")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
-                sq_tags.append("[PI23]")
+                sq_tags.append("<PI23>")
                 quality_lines.append("PI 23 - Pompe per Acqua Potabile")
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
@@ -3208,7 +3208,7 @@ if selected_part == "Gasket, Flat":
             quality_lines = []
 
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
@@ -3319,7 +3319,7 @@ if selected_part == "Screw, Cap":
             quality_lines = []
 
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
@@ -3430,7 +3430,7 @@ if selected_part == "Screw, Grub":
             quality_lines = []
 
             if stamicarbon:
-                sq_tags.append("[SQ172]")
+                sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             quality = "\n".join(quality_lines)
