@@ -3526,148 +3526,132 @@ if selected_part == "Screw, Grub":
 
 
 # --- CASTING PARTS ---
-if selected_category == "Casting" and selected_part:
-    col1, col2, col3 = st.columns(3)
+if selected_part in [
+    "Casing cover casting",
+    "Casing casting",
+    "Bearing housing casting",
+    "Impeller casting",
+    "Impeller nut casting",
+    "Shaft casting",
+    "Throttling bush casting",
+    "Pump bowl casting",
+    "Bearing bracket casting",
+    "Discharge elbow casting",
+    "Bearing cover casting",
+    "Diffuser casting",
+    "Inducer casting",
+    "Wear plate casting",
+    "Shaft wear sleeve casting"
+]:
+    part_name = selected_part
+    identificativo = part_name
 
-    with col1:
-        st.subheader("✏️ Input")
-        base_pattern = st.text_input("Base pattern", key="cast_base")
-        mod1 = st.text_input("Pattern modification 1", key="cast_mod1")
-        mod2 = st.text_input("Pattern modification 2", key="cast_mod2")
-        mod3 = st.text_input("Pattern modification 3", key="cast_mod3")
-        mod4 = st.text_input("Pattern modification 4", key="cast_mod4")
-        mod5 = st.text_input("Pattern modification 5", key="cast_mod5")
-        note = st.text_area("Note (opzionale)", height=80, key="cast_note")
-        cast_dwg = st.text_input("Casting Drawing", key="cast_dwg")
+    col_input, col_output, col_dataload = st.columns(3, gap="small")
 
-        mtype = st.selectbox("Material Type", [""] + material_types, key="cast_mtype")
-        pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
-        prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
-        mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="cast_mprefix")
+    with col_input:
+        st.markdown("### 📥 Input")
 
-        if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().unique()
-        else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
-            ]["Name"].dropna().unique()
+        base_pattern = st.text_input("Base pattern", key="casting_bp")
+        mod1 = st.text_input("Pattern modification 1", key="casting_mod1")
+        mod2 = st.text_input("Pattern modification 2", key="casting_mod2")
+        mod3 = st.text_input("Pattern modification 3", key="casting_mod3")
+        mod4 = st.text_input("Pattern modification 4", key="casting_mod4")
+        mod5 = st.text_input("Pattern modification 5", key="casting_mod5")
+        note = st.text_input("Note", key="casting_note")
+        casting_drawing = st.text_input("Casting Drawing", key="casting_cd")
 
-        mname = st.selectbox("Material Name", [""] + sorted(names), key="cast_mname")
-        mat_note = st.text_input("Material Note", key="cast_matnote")
+        st.markdown("**Material selection**")
+        material_type = st.selectbox("Material Type", [""] + material_types, key="casting_type")
 
-        if st.button("Genera Output", key="cast_gen"):
-            materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
-            materiale_completo = f"{materiale} {mat_note}".strip()
+        prefix_options = materials_df[materials_df["Material Type"] == material_type]["Prefix"].dropna().unique().tolist()
+        prefix = st.selectbox("Prefix", [""] + prefix_options, key="casting_prefix")
 
+        name_options = materials_df[
+            (materials_df["Material Type"] == material_type) & (materials_df["Prefix"] == prefix)
+        ]["Name"].dropna().unique().tolist()
+        name = st.selectbox("Name", [""] + name_options, key="casting_name")
+
+        material_note = st.text_input("Material Note", key="casting_mnote")
+
+        generate_output = st.button("Genera Output", key="generate_casting_output")
+
+    with col_output:
+        st.markdown("### 📤 Output")
+
+        item_prefix = "7"
+        casting_code = "XX"
+        fpd_material_code = "NA"
+        if material_type != "" and prefix != "" and name != "":
             casting_code_lookup = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix) &
-                (materials_df["Name"] == mname)
+                (materials_df["Material Type"] == material_type) &
+                (materials_df["Prefix"] == prefix) &
+                (materials_df["Name"] == name)
             ]
+            if not casting_code_lookup.empty:
+                casting_code = str(casting_code_lookup["Casting code"].values[0])
+                fpd_material_code = casting_code_lookup["FPD Code"].values[0]
 
-            fpd_material_code = casting_code_lookup.get("FPD Code", pd.Series([""])).values[0]
-            casting_code_raw = casting_code_lookup.get("Casting code", pd.Series([""])).values[0]
-            casting_code = str(casting_code_raw).zfill(2)
+        item_number = item_prefix + casting_code if casting_code != "XX" else "7XX"
 
-            pattern_mods = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
-            mods_str = "/".join(pattern_mods)
+        pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
+        pattern_full = "/".join(pattern_parts)
 
-            quality_notes = "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings"
+        # SQ95: materiali speciali
+        trigger_materials = [
+            ("ASTM", "A351_", "CG8M"),
+            ("ASTM", "A351_", "CG3M"),
+            ("ASTM", "A351_", "CG8M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY"),
+            ("ASTM", "A351_", "CG3M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY + PTA STELLITE 6 OVERLAY"),
+            ("ASTM", "A743_", "CG3M"),
+            ("ASTM", "A743_", "CG8M"),
+            ("ASTM", "A743_", "CG3M + PTA STELLITE 12 OVERLAY"),
+            ("ASTM", "A743_", "CG3M + PTA STELLITE 6 OVERLAY"),
+            ("ASTM", "A743_", "CG3M + DLD WC-Ni 60-40"),
+            ("ASTM", "A744_", "CG3M"),
+        ]
+        apply_sq95 = (material_type, prefix, name) in trigger_materials
 
-            descr_lines = [f"*{selected_part.upper()}"]
-            if base_pattern:
-                descr_lines.append(f"BASE PATTERN: {base_pattern}")
-            if mods_str:
-                descr_lines.append(f"MODS: {mods_str}")
-            if note:
-                descr_lines.append(note.strip())
-            descr_lines.append(f"{mprefix} {mname}".strip())
-            if mat_note:
-                descr_lines.append(mat_note.strip())
-            descr_lines.append("[DE2390.002]")
+        # DESCRIPTION
+        description_parts = [f"*{identificativo.upper()}"]
+        if base_pattern:
+            description_parts.append(f"BASE PATTERN: {base_pattern}")
+        if pattern_full:
+            description_parts.append(f"MODS: {pattern_full}")
+        if note:
+            description_parts.append(note)
+        description_parts.append(f"{prefix} {name}".strip())
+        if material_note:
+            description_parts.append(material_note)
+        description_parts.append("[DE2390.002]")
+        if apply_sq95:
+            description_parts.append("[SQ95]")
+        description = ", ".join(description_parts)
 
-            descr = ", ".join(descr_lines)
+        # QUALITY
+        quality_field = "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings"
+        if apply_sq95:
+            quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
 
-            st.session_state["output_data"] = {
-                "Item": f"7{str(casting_code)[-2:]}" if casting_code else "7xx",
-                "Description": descr,
-                "Identificativo": selected_part.upper(),
-                "Classe ricambi": "",
-                "Categories": "FASCIA ITE 7",
-                "Catalog": "FUSIONI",
-                "Casting Drawing": cast_dwg,
-                "Material": materiale,
-                "FPD material code": fpd_material_code,
-                "Template": "FPD_BUY_CASTING",
-                "ERP_L1": "10_CASTING",
-                "ERP_L2": "",
-                "To supplier": "",
-                "Quality": quality_notes
-            }
+        if generate_output:
+            st.text_input("Item", value=item_number, key="casting_item")
+            st.text_input("Identificativo", value=identificativo)
+            st.text_input("Classe ricambi", value="")
+            st.text_input("Categories", value="FASCIA ITE 7")
+            st.text_input("Catalog", value="FUSIONI")
+            st.text_input("Disegno", value=casting_drawing)
+            st.text_input("Material", value=f"{prefix} {name}")
+            st.text_input("FPD Material Code", value=fpd_material_code)
+            st.text_input("Template", value="FPD_BUY_CASTING")
+            st.text_input("ERP L1", value="10_CASTING")
+            st.text_input("ERP L2", value="")
+            st.text_input("To Supplier", value="")
+            st.text_area("Quality", value=quality_field, height=100)
+            st.text_area("Description", value=description, height=100)
 
-    with col2:
-        st.subheader("📤 Output")
-        if "output_data" in st.session_state:
-            for k, v in st.session_state["output_data"].items():
-                if k in ["Description", "Quality"]:
-                    st.text_area(k, value=v, height=100)
-                else:
-                    st.text_input(k, value=v)
+    with col_dataload:
+        st.markdown("### ⚙️ Dataload")
+        st.write("Coming soon...")
 
-    with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_cast = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="cast_dl_mode")
-        item_code_cast = st.text_input("Codice item", key="cast_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_cast"):
-            if not item_code_cast:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields = [
-                    "\\%FN", item_code_cast,
-                    "\\%TC", get_val("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val("Identificativo"), "TAB",
-                    get_val("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
-                    get_val("Casting Drawing"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val("FPD material code"), "TAB",
-                    get_val("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val("Quality") if get_val("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string = "\t".join(dataload_fields)
-
-                st.text_area("Anteprima (per copia manuale)", dataload_string, height=200)
-
-                csv_buffer = io.StringIO()
-                writer = csv.writer(csv_buffer, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields:
-                    writer.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer.getvalue(),
-                    file_name=f"dataload_{item_code_cast}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
