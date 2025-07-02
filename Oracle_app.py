@@ -3587,7 +3587,8 @@ if selected_part in [
                 (materials_df["Name"] == name)
             ]
             if not casting_code_lookup.empty:
-                casting_code = str(casting_code_lookup["Casting code"].values[0])
+                raw_code = str(casting_code_lookup["Casting code"].values[0])
+                casting_code = raw_code[-2:] if len(raw_code) >= 2 else raw_code
                 fpd_material_code = casting_code_lookup["FPD Code"].values[0]
 
         item_number = "7" + casting_code if casting_code != "XX" else "7XX"
@@ -3595,7 +3596,7 @@ if selected_part in [
         pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
         pattern_full = "/".join(pattern_parts)
 
-        # SQ95 su materiali specifici
+        # SQ95 logica per materiali specifici
         trigger_materials = [
             ("ASTM", "A351_", "CG8M"),
             ("ASTM", "A351_", "CG3M"),
@@ -3633,6 +3634,7 @@ if selected_part in [
 
         if generate_output:
             st.text_input("Item", value=item_number, key="casting_item")
+            st.text_area("Description", value=description, height=100)
             st.text_input("Identificativo", value=identificativo)
             st.text_input("Classe ricambi", value="")
             st.text_input("Categories", value="FASCIA ITE 7")
@@ -3644,7 +3646,6 @@ if selected_part in [
             st.text_input("ERP L1", value="10_CASTING")
             st.text_input("ERP L2", value="")
             st.text_input("To Supplier", value="")
-            st.text_area("Description", value=description, height=100)
             st.text_area("Quality", value=quality_field, height=100)
 
     with col_dataload:
