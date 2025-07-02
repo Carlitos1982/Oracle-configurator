@@ -3578,10 +3578,9 @@ if selected_part in [
     with col_output:
         st.markdown("### 📤 Output")
 
-        item_prefix = "7"
         casting_code = "XX"
         fpd_material_code = "NA"
-        if material_type != "" and prefix != "" and name != "":
+        if material_type and prefix and name:
             casting_code_lookup = materials_df[
                 (materials_df["Material Type"] == material_type) &
                 (materials_df["Prefix"] == prefix) &
@@ -3591,12 +3590,12 @@ if selected_part in [
                 casting_code = str(casting_code_lookup["Casting code"].values[0])
                 fpd_material_code = casting_code_lookup["FPD Code"].values[0]
 
-        item_number = item_prefix + casting_code if casting_code != "XX" else "7XX"
+        item_number = "7" + casting_code if casting_code != "XX" else "7XX"
 
         pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
         pattern_full = "/".join(pattern_parts)
 
-        # SQ95: materiali speciali
+        # SQ95 su materiali specifici
         trigger_materials = [
             ("ASTM", "A351_", "CG8M"),
             ("ASTM", "A351_", "CG3M"),
@@ -3645,13 +3644,12 @@ if selected_part in [
             st.text_input("ERP L1", value="10_CASTING")
             st.text_input("ERP L2", value="")
             st.text_input("To Supplier", value="")
-            st.text_area("Quality", value=quality_field, height=100)
             st.text_area("Description", value=description, height=100)
+            st.text_area("Quality", value=quality_field, height=100)
 
     with col_dataload:
         st.markdown("### ⚙️ Dataload")
         st.write("Coming soon...")
-
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
