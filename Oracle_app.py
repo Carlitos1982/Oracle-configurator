@@ -3573,6 +3573,8 @@ if selected_category == "Casting" and selected_part:
             pattern_mods = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
             mods_str = "/".join(pattern_mods)
 
+            quality_notes = "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings"
+
             descr_lines = [f"*{selected_part.upper()}"]
             if base_pattern:
                 descr_lines.append(f"BASE PATTERN: {base_pattern}")
@@ -3583,6 +3585,7 @@ if selected_category == "Casting" and selected_part:
             descr_lines.append(f"{mprefix} {mname}".strip())
             if mat_note:
                 descr_lines.append(mat_note.strip())
+            descr_lines.append("[DE2390.002]")
 
             descr = ", ".join(descr_lines)
 
@@ -3600,7 +3603,7 @@ if selected_category == "Casting" and selected_part:
                 "ERP_L1": "10_CASTING",
                 "ERP_L2": "",
                 "To supplier": "",
-                "Quality": "Standard casting visual and dimensional check"
+                "Quality": quality_notes
             }
 
     with col2:
@@ -3665,7 +3668,6 @@ if selected_category == "Casting" and selected_part:
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
