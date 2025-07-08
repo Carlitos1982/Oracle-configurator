@@ -3585,6 +3585,11 @@ if selected_part in [
 
         is_dmx_flagged = st.checkbox("Is it for a DMX pump?", key="dmx_flag") if selected_part == "Impeller casting" else False
 
+        apply_desalination = (
+            material_type == "ASTM" and prefix in ["A890_", "A995_"] and any(kw in name for kw in ["5A", "6A", "CE3MN", "CD3MWCuN"])
+        )
+        is_desal_flagged = st.checkbox("Desalination service?", key="desal_flag") if apply_desalination else False
+
         generate_output = st.button("Genera Output", key="generate_casting_output")
 
     with col_output:
@@ -3655,6 +3660,8 @@ if selected_part in [
             description_parts.append("[CORP-ENG-0149]")
         if is_dmx_flagged:
             description_parts.append("[CORP-ENG-0229]")
+        if is_desal_flagged:
+            description_parts.append("[CORP-ENG-0381]")
 
         description = ", ".join(description_parts)
 
@@ -3675,6 +3682,8 @@ if selected_part in [
             quality_field += "\nCORP-ENG-0149 - A-320-37 Specification for Producing 254 SMO A-320.37"
         if is_dmx_flagged:
             quality_field += "\nCORP-ENG-0229 - Inspection Procedures and Requirements for DMX Impeller Castings J4-6"
+        if is_desal_flagged:
+            quality_field += "\nCORP-ENG-0381 - Additional Technical Requirements (ATR) for Casted Casings in Superduplex Material for Desalination Services"
 
         if generate_output:
             st.text_input("Item", value=item_number, key="casting_item")
