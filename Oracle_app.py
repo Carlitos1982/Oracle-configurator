@@ -239,7 +239,7 @@ if selected_part == "Casing, Pump":
             ]
 
             if hf_service:
-                sq_tags.append("[SQ113]")
+                sq_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
             if tmt_service:
                 sq_tags.append("[SQ137]")
@@ -402,7 +402,7 @@ if selected_part == "Casing Cover, Pump":
             ]
 
             if hf_service:
-                sq_tags.append("[SQ113]")
+                sq_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
             if tmt_service:
                 sq_tags.append("[SQ137]")
@@ -563,7 +563,7 @@ if selected_part == "Impeller, Pump":
             ]
 
             if hf_service:
-                sq_tags.append("[SQ113]")
+                sq_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
             if tmt_service:
                 sq_tags.append("[SQ137]")
@@ -720,7 +720,7 @@ if selected_part == "Balance Bushing, Pump":
             ]
 
             if hf_service:
-                sq_tags.append("[SQ113]")
+                sq_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
             if tmt_service:
                 sq_tags.append("[SQ137]")
@@ -878,7 +878,7 @@ if selected_part == "Balance Drum, Pump":
             ]
 
             if hf_service:
-                sq_tags.append("[SQ113]")
+                sq_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
             if tmt_service:
                 sq_tags.append("[SQ137]")
@@ -1035,7 +1035,7 @@ if selected_part == "Balance Disc, Pump":
             ]
 
             if hf_service:
-                sq_tags.append("[SQ113]")
+                sq_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
             if tmt_service:
                 sq_tags.append("[SQ137]")
@@ -1186,7 +1186,7 @@ if selected_part == "Gate, Valve":
             quality_lines = []
 
             if hf_service:
-                sq_tags.append("[SQ113]")
+                sq_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
             if stamicarbon:
                 sq_tags.append("<SQ172>")
@@ -1314,7 +1314,7 @@ if selected_part == "Gasket, Spiral Wound":
             if note_gsw:
                 descr_gsw += f", NOTE: {note_gsw}"
             if hf_service_gsw:
-                descr_gsw += " [SQ113]"
+                descr_gsw += " <SQ113>"
             descr_gsw = "*" + descr_gsw
 
             quality_gsw = "Applicable procedure: SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)" if hf_service_gsw else ""
@@ -1948,7 +1948,7 @@ if selected_part == "Gasket, Ring Type Joint":
             if note_rtj:
                 descr_rtj += f", NOTE: {note_rtj}"
             if hf_service_rtj:
-                descr_rtj += " [SQ113]"
+                descr_rtj += " <SQ113>"
                 quality = "SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)"
             else:
                 quality = ""
@@ -2236,7 +2236,7 @@ if selected_part == "Stud, Threaded":
             if material_note_stu:
                 descr_stu += f", MATERIAL NOTE: {material_note_stu}"
             if hf_service_stu:
-                descr_stu += " [SQ113]"
+                descr_stu += " <SQ113>"
             descr_stu = "*" + descr_stu
 
             quality_stu = "Applicable procedure: SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)" if hf_service_stu else ""
@@ -2376,7 +2376,7 @@ if selected_part == "Nut, Hex":
             if material_note_nut:
                 descr_nut += f", MATERIAL NOTE: {material_note_nut}"
             if hf_service_nut:
-                descr_nut += " [SQ113]"
+                descr_nut += " <SQ113>"
             descr_nut = "*" + descr_nut
 
             quality_nut = "Applicable procedure: SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)" if hf_service_nut else ""
@@ -2523,7 +2523,7 @@ if selected_part == "Ring, Wear":
             ]
 
             if hf_service:
-                sq_tags.append("[SQ113]")
+                sq_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
             if tmt_service:
                 sq_tags.append("[SQ137]")
@@ -3093,7 +3093,7 @@ if selected_part == "Flange, Pipe":
             if note_flange:
                 descr += f", NOTE: {note_flange}"
             if hf_service_flange:
-                descr += " [SQ113]"
+                descr += " <SQ113>"
                 quality = "SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)"
             else:
                 quality = ""
@@ -3204,7 +3204,7 @@ if selected_part == "Gasket, Flat":
             if note_gf:
                 descr_gf += f", NOTE: {note_gf}"
             if hf_service_gf:
-                descr_gf += " [SQ113]"
+                descr_gf += " <SQ113>"
                 quality = "SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)"
             else:
                 quality = ""
@@ -3626,7 +3626,7 @@ if selected_part in [
         if apply_sq95:
             description_parts.append("[SQ95]")
         if hf_service_casting:
-            description_parts.append("[SQ113]")
+            description_parts.append("<SQ113>")
 
         description = ", ".join(description_parts)
 
