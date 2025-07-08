@@ -3519,7 +3519,6 @@ if selected_part == "Screw, Grub":
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 
-
 # --- CASTING PARTS ---
 if selected_part in [
     "Casing cover casting",
@@ -3565,6 +3564,29 @@ if selected_part in [
         name = st.selectbox("Name", [""] + name_options, key="casting_name")
         material_note = st.text_input("Material Note", key="casting_mnote")
 
+        # Checkbox per DE3509.022 su WCB
+        de3509_materials = [
+            "WCB",
+            "WCB 22 HRC Max.",
+            "WCB - AOD refined with C 0.2 max. / S 0.01 max. - Carbon equivalent shall be 0.43 max",
+            "WCB Normalized and Tempered - HB 200 max.",
+            "WCB C.0.25 MAX. C.E.0.45 max",
+            "WCB (C.Max.0,2% & CE.Max.0.43) HRC 22 Max.",
+            "WCB NACE S.0,003/P.0,01/Nb.0,02/V.0,02/Nb+V.0,03/Ca-S>1,5 & CE.0,40",
+            "WCB NACE (C 0.2 max. / Mn 1.35 max. / P 0.025 to 0.03 / S 0.02 to 0.025 / CE 0.43 max.)",
+            "WCB(ACCORD.TO SQ113/E)+undercoat NICKEL 141+coating MONEL 19",
+            "WCB + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY"
+        ]
+        apply_de3509_check = (
+            selected_part == "Casing casting" and
+            material_type == "ASTM" and
+            prefix == "A216_" and
+            name in de3509_materials
+        )
+        is_de3509_flagged = False
+        if apply_de3509_check:
+            is_de3509_flagged = st.checkbox("Is it a welded nozzles barrel?", key="de3509_flag")
+
         generate_output = st.button("Genera Output", key="generate_casting_output")
 
     with col_output:
@@ -3602,7 +3624,6 @@ if selected_part in [
         ]
         apply_sq95 = (material_type, prefix, name) in trigger_materials
 
-        # Nuova logica per DE2980.001
         apply_de2980 = (
             selected_part == "Impeller casting" and
             material_type == "ASTM" and
@@ -3631,9 +3652,10 @@ if selected_part in [
             description_parts.append("[DE2390.001]")
             description_parts.append("[CORP-ENG-0523]")
             description_parts.append("[CORP-ENG-0090]")
+        if is_de3509_flagged:
+            description_parts.append("[DE3509.022]")
         description = ", ".join(description_parts)
 
-        # Campo QUALITY
         quality_field = "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings"
         if apply_sq95:
             quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
@@ -3645,6 +3667,8 @@ if selected_part in [
             quality_field += "\nDE 2390.001 - Procurement and Cleaning Requirements for Hydraulic Castings-API, Vertical, Submersible and Specially Pumps"
             quality_field += "\nCORP-ENG-0523 - As-Cast Surface Finish and Cleaning Requirements for Hydraulic Castings"
             quality_field += "\nCORP-ENG-0090 - Procurement and Cleaning Requirement for Hydraulic Castings - API, Vertical, Submersible, and Specialty Pumps P-5"
+        if is_de3509_flagged:
+            quality_field += "\nDE3509.022 - Post weld heat treatment procedure for ASTM A336F11 C12 Barrel and ASTM A216 WCB nozzle PWHT"
 
         if generate_output:
             st.text_input("Item", value=item_number, key="casting_item")
@@ -3665,7 +3689,6 @@ if selected_part in [
     with col_dataload:
         st.markdown("### ⚙️ Dataload")
         st.write("Coming soon...")
-
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
