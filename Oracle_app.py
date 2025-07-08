@@ -3681,4 +3681,3 @@ footer_html = """
 </div>
 """
 st.markdown(footer_html, unsafe_allow_html=True)
-
