@@ -3621,13 +3621,22 @@ if selected_part in [
             description_parts.append("[SQ95]")
         if selected_part == "Impeller casting":
             description_parts.append("[DE2920.025]")
+        if selected_part in ["Casing cover casting", "Casing casting", "Impeller casting", "Pump bowl casting", "Diffuser casting"]:
+            description_parts.append("[DE2390.001]")
+            description_parts.append("[CORP-ENG-0523]")
+            description_parts.append("[CORP-ENG-0090]")
         description = ", ".join(description_parts)
 
+        # Campo QUALITY
         quality_field = "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings"
         if apply_sq95:
             quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
         if selected_part == "Impeller casting":
             quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
+        if selected_part in ["Casing cover casting", "Casing casting", "Impeller casting", "Pump bowl casting", "Diffuser casting"]:
+            quality_field += "\nDE 2390.001 - Procurement and Cleaning Requirements for Hydraulic Castings-API, Vertical, Submersible and Specially Pumps"
+            quality_field += "\nCORP-ENG-0523 - As-Cast Surface Finish and Cleaning Requirements for Hydraulic Castings"
+            quality_field += "\nCORP-ENG-0090 - Procurement and Cleaning Requirement for Hydraulic Castings - API, Vertical, Submersible, and Specialty Pumps P-5"
 
         if generate_output:
             st.text_input("Item", value=item_number, key="casting_item")
@@ -3648,7 +3657,6 @@ if selected_part in [
     with col_dataload:
         st.markdown("### ⚙️ Dataload")
         st.write("Coming soon...")
-
 
 
 # --- Footer (non fisso, subito dopo i contenuti)
