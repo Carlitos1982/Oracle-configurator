@@ -3613,6 +3613,7 @@ if selected_part in [
 
         # DESCRIPTION
         description_parts = [f"*{identificativo.upper()}"]
+        description_parts.append('[SQ58]')
         if base_pattern:
             description_parts.append(f"BASE PATTERN: {base_pattern}")
         if pattern_full:
@@ -3639,7 +3640,7 @@ if selected_part in [
         if hf_service_casting:
             quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
 
-        quality_field = "\n".join(quality_lines)
+        quality_field = "\n".join(quality_lines) + "\nSQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche"
 
         if generate_output:
             st.text_input("Item", value=item_number, key="casting_item")
@@ -3680,3 +3681,4 @@ footer_html = """
 </div>
 """
 st.markdown(footer_html, unsafe_allow_html=True)
+
