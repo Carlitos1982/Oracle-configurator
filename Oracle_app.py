@@ -3652,7 +3652,7 @@ if selected_part in [
             st.text_input("ERP L1", value="10_CASTING")
             st.text_input("ERP L2", value="")
             st.text_input("To Supplier", value="")
-            st.text_area("Quality", value=quality_field, height=100)
+            st.text_area("Quality", value=quality_field, height=250)
 
     with col_dataload:
         st.markdown("### ⚙️ Dataload")
