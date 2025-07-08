@@ -3557,15 +3557,12 @@ if selected_part in [
 
         st.markdown("**Material selection**")
         material_type = st.selectbox("Material Type", [""] + material_types, key="casting_type")
-
         prefix_options = materials_df[materials_df["Material Type"] == material_type]["Prefix"].dropna().unique().tolist()
         prefix = st.selectbox("Prefix", [""] + prefix_options, key="casting_prefix")
-
         name_options = materials_df[
             (materials_df["Material Type"] == material_type) & (materials_df["Prefix"] == prefix)
         ]["Name"].dropna().unique().tolist()
         name = st.selectbox("Name", [""] + name_options, key="casting_name")
-
         material_note = st.text_input("Material Note", key="casting_mnote")
 
         generate_output = st.button("Genera Output", key="generate_casting_output")
@@ -3587,7 +3584,6 @@ if selected_part in [
                 fpd_material_code = casting_code_lookup["FPD Code"].values[0]
 
         item_number = "7" + casting_code if casting_code != "XX" else "7XX"
-
         pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
         pattern_full = "/".join(pattern_parts)
 
@@ -3606,6 +3602,14 @@ if selected_part in [
         ]
         apply_sq95 = (material_type, prefix, name) in trigger_materials
 
+        # Nuova logica per DE2980.001
+        apply_de2980 = (
+            selected_part == "Impeller casting" and
+            material_type == "ASTM" and
+            prefix == "A747_" and
+            name == "Tp. CB7Cu-1 (H1150 DBL)"
+        )
+
         description_parts = [f"*{identificativo.upper()}"]
         if base_pattern:
             description_parts.append(f"BASE PATTERN: {base_pattern}")
@@ -3621,6 +3625,8 @@ if selected_part in [
             description_parts.append("[SQ95]")
         if selected_part == "Impeller casting":
             description_parts.append("[DE2920.025]")
+        if apply_de2980:
+            description_parts.append("[DE2980.001]")
         if selected_part in ["Casing cover casting", "Casing casting", "Impeller casting", "Pump bowl casting", "Diffuser casting"]:
             description_parts.append("[DE2390.001]")
             description_parts.append("[CORP-ENG-0523]")
@@ -3633,6 +3639,8 @@ if selected_part in [
             quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
         if selected_part == "Impeller casting":
             quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
+        if apply_de2980:
+            quality_field += "\nDE2980.001 - Progettazione e Produzione giranti in 17-4 PH"
         if selected_part in ["Casing cover casting", "Casing casting", "Impeller casting", "Pump bowl casting", "Diffuser casting"]:
             quality_field += "\nDE 2390.001 - Procurement and Cleaning Requirements for Hydraulic Castings-API, Vertical, Submersible and Specially Pumps"
             quality_field += "\nCORP-ENG-0523 - As-Cast Surface Finish and Cleaning Requirements for Hydraulic Castings"
