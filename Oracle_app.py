@@ -216,7 +216,7 @@ if selected_part == "Casing, Pump":
         mname = st.selectbox("Material Name", [""] + names, key="casing_mname")
 
         # ✅ Checkbox qualità extra
-        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal service)?", key="casing_hf")
+        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="casing_hf")
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="casing_tmt")
         overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="casing_overlay")
         hvof = st.checkbox("HVOF coating?", key="casing_hvof")
@@ -379,7 +379,7 @@ if selected_part == "Casing Cover, Pump":
         mname = st.selectbox("Material Name", [""] + names, key="ccov_mname")
 
         # Checkbox qualità
-        hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="ccov_hf")
+        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="ccov_hf")
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="ccov_tmt")
         overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="ccov_overlay")
         hvof = st.checkbox("HVOF coating?", key="ccov_hvof")
@@ -540,7 +540,7 @@ if selected_part == "Impeller, Pump":
         mname = st.selectbox("Material Name", [""] + names, key="imp_mname")
 
         # Checkbox qualità
-        hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="imp_hf")
+        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="imp_hf")
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="imp_tmt")
         overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="imp_overlay")
         hvof = st.checkbox("HVOF coating?", key="imp_hvof")
@@ -697,7 +697,7 @@ if selected_part == "Balance Bushing, Pump":
         mname = st.selectbox("Material Name", [""] + names, key="bbush_mname")
 
         # Checkbox qualità
-        hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="bbush_hf")
+        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="bbush_hf")
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="bbush_tmt")
         overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="bbush_overlay")
         hvof = st.checkbox("HVOF coating?", key="bbush_hvof")
@@ -855,7 +855,7 @@ if selected_part == "Balance Drum, Pump":
         mname = st.selectbox("Material Name", [""] + names, key="bdrum_mname")
 
         # Checkbox qualità
-        hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="bdrum_hf")
+        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="bdrum_hf")
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="bdrum_tmt")
         overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="bdrum_overlay")
         hvof = st.checkbox("HVOF coating?", key="bdrum_hvof")
@@ -1012,7 +1012,7 @@ if selected_part == "Balance Disc, Pump":
         mname = st.selectbox("Material Name", [""] + names, key="bdisc_mname")
 
         # Checkbox qualità
-        hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="bdisc_hf")
+        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="bdisc_hf")
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="bdisc_tmt")
         overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="bdisc_overlay")
         hvof = st.checkbox("HVOF coating?", key="bdisc_hvof")
@@ -1170,7 +1170,7 @@ if selected_part == "Gate, Valve":
         mname = st.selectbox("Material Name", [""] + names, key="gate_mname")
 
         # Checkbox solo per HF e Stamicarbon
-        hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="gate_hf")
+        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="gate_hf")
         stamicarbon = st.checkbox("Stamicarbon?", key="gate_stamicarbon")
 
         if st.button("Genera Output", key="gate_gen"):
@@ -1300,7 +1300,7 @@ if selected_part == "Gasket, Spiral Wound":
         note_gsw = st.text_area("Note (opzionale)", height=80, key="gsw_note")
 
         # ✅ Checkbox HF
-        hf_service_gsw = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="gsw_hf")
+        hf_service_gsw = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="gsw_hf")
 
         if st.button("Genera Output", key="gsw_gen"):
             color_code_1 = color_codes.get(winding_gsw, "")
@@ -2231,7 +2231,7 @@ if selected_part == "Stud, Threaded":
         material_note_stu = st.text_input("Material Note (opzionale)", key="stu_mnote")
 
         # ✅ Checkbox HF
-        hf_service_stu = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="stu_hf")
+        hf_service_stu = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="stu_hf")
 
         if st.button("Genera Output", key="stu_gen"):
             materiale_stu = f"{mtype_stu} {mprefix_stu} {mname_stu}".strip() if mtype_stu != "MISCELLANEOUS" else mname_stu
@@ -2371,7 +2371,7 @@ if selected_part == "Nut, Hex":
         material_note_nut = st.text_input("Material Note (opzionale)", key="nut_mnote")
 
         # ✅ Checkbox HF
-        hf_service_nut = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="nut_hf")
+        hf_service_nut = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="nut_hf")
 
         if st.button("Genera Output", key="nut_gen"):
             materiale_nut = f"{mtype_nut} {mprefix_nut} {mname_nut}".strip() if mtype_nut != "MISCELLANEOUS" else mname_nut
@@ -2514,7 +2514,7 @@ if selected_part == "Ring, Wear":
         mname = st.selectbox("Material Name", [""] + names, key="ring_mname")
 
         # Checkbox qualità
-        hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="ring_hf")
+        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="ring_hf")
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="ring_tmt")
         overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="ring_overlay")
         hvof = st.checkbox("HVOF coating?", key="ring_hvof")
@@ -3096,7 +3096,7 @@ if selected_part == "Flange, Pipe":
         add_feat_fp = st.text_input("Additional Features (opzionale)", key="fp_feat")
 
         # ✅ Checkbox HF
-        hf_service_fp = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="fp_hf")
+        hf_service_fp = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="fp_hf")
 
         if st.button("Genera Output", key="fp_gen"):
             descr_fp = f"FLANGE TYPE: {pipe_type_fp}, SIZE: {size_fp}, FACE: {face_fp}, CLASS: {class_fp}, MATERIAL: {material_fp}"
