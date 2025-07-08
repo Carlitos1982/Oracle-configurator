@@ -3564,6 +3564,27 @@ if selected_part in [
         name = st.selectbox("Name", [""] + name_options, key="casting_name")
         material_note = st.text_input("Material Note", key="casting_mnote")
 
+        apply_de3509_check = (
+            selected_part == "Casing casting" and
+            material_type == "ASTM" and
+            prefix == "A216_" and
+            name in [
+                "WCB",
+                "WCB 22 HRC Max.",
+                "WCB - AOD refined with C 0.2 max. / S 0.01 max. - Carbon equivalent shall be 0.43 max",
+                "WCB Normalized and Tempered - HB 200 max.",
+                "WCB C.0.25 MAX. C.E.0.45 max",
+                "WCB (C.Max.0,2% & CE.Max.0.43) HRC 22 Max.",
+                "WCB NACE S.0,003/P.0,01/Nb.0,02/V.0,02/Nb+V.0,03/Ca-S>1,5 & CE.0,40",
+                "WCB NACE (C 0.2 max. / Mn 1.35 max. / P 0.025 to 0.03 / S 0.02 to 0.025 / CE 0.43 max.)",
+                "WCB(ACCORD.TO SQ113/E)+undercoat NICKEL 141+coating MONEL 19",
+                "WCB + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY"
+            ]
+        )
+        is_de3509_flagged = st.checkbox("Is it a welded nozzles barrel?", key="de3509_flag") if apply_de3509_check else False
+
+        is_dmx_flagged = st.checkbox("Is it for a DMX pump?", key="dmx_flag") if selected_part == "Impeller casting" else False
+
         generate_output = st.button("Genera Output", key="generate_casting_output")
 
     with col_output:
@@ -3586,7 +3607,6 @@ if selected_part in [
         pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
         pattern_full = "/".join(pattern_parts)
 
-        # SQ95 logica per materiali specifici
         trigger_materials = [
             ("ASTM", "A351_", "CG8M"),
             ("ASTM", "A351_", "CG3M"),
@@ -3597,7 +3617,7 @@ if selected_part in [
             ("ASTM", "A743_", "CG3M + PTA STELLITE 12 OVERLAY"),
             ("ASTM", "A743_", "CG3M + PTA STELLITE 6 OVERLAY"),
             ("ASTM", "A743_", "CG3M + DLD WC-Ni 60-40"),
-            ("ASTM", "A744_", "CG3M"),
+            ("ASTM", "A744_", "CG3M")
         ]
         apply_sq95 = (material_type, prefix, name) in trigger_materials
 
@@ -3608,33 +3628,7 @@ if selected_part in [
             name == "Tp. CB7Cu-1 (H1150 DBL)"
         )
 
-        apply_corp_eng_0149 = (
-            material_type == "ASTM" and
-            prefix == "A351_" and
-            name == "CK3MCuN"
-        )
-
-        de3509_materials = [
-            "WCB",
-            "WCB 22 HRC Max.",
-            "WCB - AOD refined with C 0.2 max. / S 0.01 max. - Carbon equivalent shall be 0.43 max",
-            "WCB Normalized and Tempered - HB 200 max.",
-            "WCB C.0.25 MAX. C.E.0.45 max",
-            "WCB (C.Max.0,2% & CE.Max.0.43) HRC 22 Max.",
-            "WCB NACE S.0,003/P.0,01/Nb.0,02/V.0,02/Nb+V.0,03/Ca-S>1,5 & CE.0,40",
-            "WCB NACE (C 0.2 max. / Mn 1.35 max. / P 0.025 to 0.03 / S 0.02 to 0.025 / CE 0.43 max.)",
-            "WCB(ACCORD.TO SQ113/E)+undercoat NICKEL 141+coating MONEL 19",
-            "WCB + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY"
-        ]
-        apply_de3509_check = (
-            selected_part == "Casing casting" and
-            material_type == "ASTM" and
-            prefix == "A216_" and
-            name in de3509_materials
-        )
-        is_de3509_flagged = False
-        if apply_de3509_check:
-            is_de3509_flagged = st.checkbox("Is it a welded nozzles barrel?", key="de3509_flag")
+        apply_corp_149 = (material_type == "ASTM" and prefix == "A351_" and name == "CK3MCuN")
 
         description_parts = [f"*{identificativo.upper()}"]
         if base_pattern:
@@ -3653,14 +3647,15 @@ if selected_part in [
             description_parts.append("[DE2920.025]")
         if apply_de2980:
             description_parts.append("[DE2980.001]")
-        if apply_corp_eng_0149:
-            description_parts.append("[CORP-ENG-0149]")
+        if selected_part in ["Casing cover casting", "Casing casting", "Impeller casting", "Pump bowl casting", "Diffuser casting"]:
+            description_parts.extend(["[DE2390.001]", "[CORP-ENG-0523]", "[CORP-ENG-0090]"])
         if is_de3509_flagged:
             description_parts.append("[DE3509.022]")
-        if selected_part in ["Casing cover casting", "Casing casting", "Impeller casting", "Pump bowl casting", "Diffuser casting"]:
-            description_parts.append("[DE2390.001]")
-            description_parts.append("[CORP-ENG-0523]")
-            description_parts.append("[CORP-ENG-0090]")
+        if apply_corp_149:
+            description_parts.append("[CORP-ENG-0149]")
+        if is_dmx_flagged:
+            description_parts.append("[CORP-ENG-0229]")
+
         description = ", ".join(description_parts)
 
         quality_field = "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings"
@@ -3670,14 +3665,16 @@ if selected_part in [
             quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
         if apply_de2980:
             quality_field += "\nDE2980.001 - Progettazione e Produzione giranti in 17-4 PH"
-        if apply_corp_eng_0149:
-            quality_field += "\nCORP-ENG-0149 - A-320-37 Specification for Producing 254 SMO A-320.37"
-        if is_de3509_flagged:
-            quality_field += "\nDE3509.022 - Post weld heat treatment procedure for ASTM A336F11 C12 Barrel and ASTM A216 WCB nozzle PWHT"
         if selected_part in ["Casing cover casting", "Casing casting", "Impeller casting", "Pump bowl casting", "Diffuser casting"]:
             quality_field += "\nDE 2390.001 - Procurement and Cleaning Requirements for Hydraulic Castings-API, Vertical, Submersible and Specially Pumps"
             quality_field += "\nCORP-ENG-0523 - As-Cast Surface Finish and Cleaning Requirements for Hydraulic Castings"
             quality_field += "\nCORP-ENG-0090 - Procurement and Cleaning Requirement for Hydraulic Castings - API, Vertical, Submersible, and Specialty Pumps P-5"
+        if is_de3509_flagged:
+            quality_field += "\nDE3509.022 - Post weld heat treatment procedure for ASTM A336F11 C12 Barrel and ASTM A216 WCB nozzle PWHT"
+        if apply_corp_149:
+            quality_field += "\nCORP-ENG-0149 - A-320-37 Specification for Producing 254 SMO A-320.37"
+        if is_dmx_flagged:
+            quality_field += "\nCORP-ENG-0229 - Inspection Procedures and Requirements for DMX Impeller Castings J4-6"
 
         if generate_output:
             st.text_input("Item", value=item_number, key="casting_item")
