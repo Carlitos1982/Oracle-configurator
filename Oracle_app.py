@@ -216,7 +216,7 @@ if selected_part == "Casing, Pump":
         mname = st.selectbox("Material Name", [""] + names, key="casing_mname")
 
         # ✅ Checkbox qualità extra
-        hf_service = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="casing_hf")
+        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal service)?", key="casing_hf")
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="casing_tmt")
         overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="casing_overlay")
         hvof = st.checkbox("HVOF coating?", key="casing_hvof")
