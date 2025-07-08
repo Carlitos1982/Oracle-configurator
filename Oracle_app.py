@@ -248,7 +248,7 @@ if selected_part == "Casing, Pump":
                 sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("<DE2500.002>")
+                sq_tags.append("[DE2500.002]")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
                 sq_tags.append("<PI23>")
@@ -411,7 +411,7 @@ if selected_part == "Casing Cover, Pump":
                 sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("<DE2500.002>")
+                sq_tags.append("[DE2500.002]")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
                 sq_tags.append("<PI23>")
@@ -572,7 +572,7 @@ if selected_part == "Impeller, Pump":
                 sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("<DE2500.002>")
+                sq_tags.append("[DE2500.002]")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
                 sq_tags.append("<PI23>")
@@ -729,7 +729,7 @@ if selected_part == "Balance Bushing, Pump":
                 sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("<DE2500.002>")
+                sq_tags.append("[DE2500.002]")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
                 sq_tags.append("<PI23>")
@@ -887,7 +887,7 @@ if selected_part == "Balance Drum, Pump":
                 sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("<DE2500.002>")
+                sq_tags.append("[DE2500.002]")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
                 sq_tags.append("<PI23>")
@@ -1044,7 +1044,7 @@ if selected_part == "Balance Disc, Pump":
                 sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("<DE2500.002>")
+                sq_tags.append("[DE2500.002]")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
                 sq_tags.append("<PI23>")
@@ -2532,7 +2532,7 @@ if selected_part == "Ring, Wear":
                 sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("<DE2500.002>")
+                sq_tags.append("[DE2500.002]")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
                 sq_tags.append("<PI23>")
@@ -2817,7 +2817,7 @@ if selected_part == "Shaft, Pump":
                 sq_tags.append("<PQ72>")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
-                sq_tags.append("<DE2500.002>")
+                sq_tags.append("[DE2500.002]")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
             if water:
                 sq_tags.append("<PI23>")
