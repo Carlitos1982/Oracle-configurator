@@ -5,7 +5,7 @@ import io
 import csv
 
 # Caricamento dati materiali da file Excel
-material_df = pd.read_excel("dati_config4 (5).xlsx", sheet_name="Materials")
+material_df = pd.read_excel("dati_config4.xlsx", sheet_name="Materials")
 
 # --- Configurazione pagina wide
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
