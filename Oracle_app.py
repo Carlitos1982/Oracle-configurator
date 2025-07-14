@@ -4,6 +4,9 @@ from PIL import Image
 import io
 import csv
 
+# Caricamento dati materiali da file Excel
+material_df = pd.read_excel("dati_config4 (5).xlsx", sheet_name="Materials")
+
 # --- Configurazione pagina wide
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
@@ -3520,137 +3523,234 @@ if selected_part == "Screw, Grub":
 
 
 
-elif selected_category == "Casting":
-    col1, col2, col3 = st.columns(3)
+# --- CASTING PARTS ---
+if selected_part in [
+    "Casing cover casting",
+    "Casing casting",
+    "Bearing housing casting",
+    "Impeller casting",
+    "Impeller nut casting",
+    "Shaft casting",
+    "Throttling bush casting",
+    "Pump bowl casting",
+    "Bearing bracket casting",
+    "Discharge elbow casting",
+    "Bearing cover casting",
+    "Diffuser casting",
+    "Inducer casting",
+    "Wear plate casting",
+    "Shaft wear sleeve casting"
+]:
+    part_name = selected_part
+    identificativo = part_name
 
-    with col1:
-        st.subheader("✏️ Input")
+    col_input, col_output, col_dataload = st.columns(3, gap="small")
 
-        base_pattern = st.text_input("Base pattern", key="cast_base")
-        mod1 = st.text_input("Pattern modification 1", key="cast_mod1")
-        mod2 = st.text_input("Pattern modification 2", key="cast_mod2")
-        mod3 = st.text_input("Pattern modification 3", key="cast_mod3")
-        mod4 = st.text_input("Pattern modification 4", key="cast_mod4")
-        mod5 = st.text_input("Pattern modification 5", key="cast_mod5")
-        note_casting = st.text_area("Note", height=70, key="cast_note")
-        casting_drawing = st.text_input("Casting drawing", key="cast_drawing")
+    with col_input:
+        st.markdown("### 📥 Input")
 
-        st.markdown("### Materiale")
-        mat_type_cast = st.selectbox("Material Type", material_df["Material Type"].dropna().unique(), key="cast_type")
-        prefix_cast = st.selectbox("Prefix", material_df[material_df["Material Type"] == mat_type_cast]["Prefix"].dropna().unique(), key="cast_prefix")
-        name_cast = st.selectbox("Name", material_df[(material_df["Material Type"] == mat_type_cast) & (material_df["Prefix"] == prefix_cast)]["Name"].dropna().unique(), key="cast_name")
-        mat_note_cast = st.text_input("Material note", key="cast_mat_note")
+        base_pattern = st.text_input("Base pattern", key="casting_bp")
+        mod1 = st.text_input("Pattern modification 1", key="casting_mod1")
+        mod2 = st.text_input("Pattern modification 2", key="casting_mod2")
+        mod3 = st.text_input("Pattern modification 3", key="casting_mod3")
+        mod4 = st.text_input("Pattern modification 4", key="casting_mod4")
+        mod5 = st.text_input("Pattern modification 5", key="casting_mod5")
+        note = st.text_input("Note", key="casting_note")
+        casting_drawing = st.text_input("Casting Drawing", key="casting_cd")
 
-        # Qualità
-        apply_sq95 = False
-        if (mat_type_cast == "ASTM") and (prefix_cast == "A351_") and (name_cast in ["CG3M", "CG8M", "CG3M + HVOF TUNGS. CARBIDE", "CG8M + HVOF TUNGS. CARBIDE"]):
-            apply_sq95 = True
+        st.markdown("**Material selection**")
+        material_type = st.selectbox("Material Type", [""] + material_types, key="casting_type")
 
-        if st.button("Genera Output", key="cast_gen"):
-            full_material_cast = f"{mat_type_cast} {prefix_cast}{name_cast}"
-            fpd_code_cast = material_df.loc[
-                (material_df["Material Type"] == mat_type_cast) &
-                (material_df["Prefix"] == prefix_cast) &
-                (material_df["Name"] == name_cast),
-                "FPD Code"
+        prefix_options = materials_df[materials_df["Material Type"] == material_type]["Prefix"].dropna().unique().tolist()
+        prefix = st.selectbox("Prefix", [""] + prefix_options, key="casting_prefix")
+
+        name_options = materials_df[
+            (materials_df["Material Type"] == material_type) & (materials_df["Prefix"] == prefix)
+        ]["Name"].dropna().unique().tolist()
+        name = st.selectbox("Name", [""] + name_options, key="casting_name")
+
+        material_note = st.text_input("Material Note", key="casting_mnote")
+
+        generate_output = st.button("Genera Output", key="generate_casting_output")
+
+    with col_output:
+        st.markdown("### 📤 Output")
+
+        casting_code = "XX"
+        fpd_material_code = "NA"
+        if material_type and prefix and name:
+            casting_code_lookup = materials_df[
+                (materials_df["Material Type"] == material_type) &
+                (materials_df["Prefix"] == prefix) &
+                (materials_df["Name"] == name)
             ]
-            fpd_code_cast = fpd_code_cast.values[0] if not fpd_code_cast.empty else "NOT FOUND"
+            if not casting_code_lookup.empty:
+                raw_code = str(casting_code_lookup["Casting code"].values[0])
+                casting_code = raw_code[-2:] if len(raw_code) >= 2 else raw_code
+                fpd_material_code = casting_code_lookup["FPD Code"].values[0]
 
-            casting_code = material_df.loc[
-                (material_df["Material Type"] == mat_type_cast) &
-                (material_df["Prefix"] == prefix_cast) &
-                (material_df["Name"] == name_cast),
-                "Casting code"
+        item_number = "7" + casting_code if casting_code != "XX" else "7XX"
+
+        pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
+        pattern_full = "/".join(pattern_parts)
+
+        # SQ95 logica per materiali specifici
+        trigger_materials = [
+            ("ASTM", "A351_", "CG8M"),
+            ("ASTM", "A351_", "CG3M"),
+            ("ASTM", "A351_", "CG8M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY"),
+            ("ASTM", "A351_", "CG3M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY + PTA STELLITE 6 OVERLAY"),
+            ("ASTM", "A743_", "CG3M"),
+            ("ASTM", "A743_", "CG8M"),
+            ("ASTM", "A743_", "CG3M + PTA STELLITE 12 OVERLAY"),
+            ("ASTM", "A743_", "CG3M + PTA STELLITE 6 OVERLAY"),
+            ("ASTM", "A743_", "CG3M + DLD WC-Ni 60-40"),
+            ("ASTM", "A744_", "CG3M"),
+        ]
+        apply_sq95 = (material_type, prefix, name) in trigger_materials
+
+        description_parts = [f"*{identificativo.upper()}"]
+        if base_pattern:
+            description_parts.append(f"BASE PATTERN: {base_pattern}")
+        if pattern_full:
+            description_parts.append(f"MODS: {pattern_full}")
+        if note:
+            description_parts.append(note)
+        description_parts.append(f"{prefix} {name}".strip())
+        if material_note:
+            description_parts.append(material_note)
+        description_parts.append("[DE2390.002]")
+if apply_sq95:
+    quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
+if selected_part == "Impeller casting":
+    description = ", ".join(description_parts)
+    quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
+
+        quality_field = "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings"
+if apply_sq95:
+    quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
+    quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
+quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
+if selected_part == "Impeller casting":
+    description = ", ".join(description_parts)
+    quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
+    quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
+quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
+
+        if generate_output:
+            st.text_input("Item", value=item_number, key="casting_item")
+            st.text_area("Description", value=description, height=100)
+            st.text_input("Identificativo", value=identificativo)
+            st.text_input("Classe ricambi", value="")
+            st.text_input("Categories", value="FASCIA ITE 7")
+            st.text_input("Catalog", value="FUSIONI")
+            st.text_input("Disegno", value=casting_drawing)
+            st.text_input("Material", value=f"{prefix} {name}")
+            st.text_input("FPD Material Code", value=fpd_material_code)
+            st.text_input("Template", value="FPD_BUY_CASTING")
+            st.text_input("ERP L1", value="10_CASTING")
+            st.text_input("ERP L2", value="")
+            st.text_input("To Supplier", value="")
+            st.text_area("Quality", value=quality_field, height=100)
+
+    with col_dataload:
+        st.markdown("### ⚙️ Dataload")
+        st.write("Coming soon...")
+
+
+        # ✅ SQ113 solo se NON è bearing housing casting
+        if selected_part != "Bearing housing casting":
+            hf_service_casting = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="casting_hf")
+        else:
+            hf_service_casting = False
+
+        generate_output = st.button("Genera Output", key="generate_casting_output")
+
+    with col_output:
+        st.markdown("### 📤 Output")
+
+        casting_code = "XX"
+        fpd_material_code = "NA"
+        if material_type and prefix and name:
+            casting_code_lookup = materials_df[
+                (materials_df["Material Type"] == material_type) &
+                (materials_df["Prefix"] == prefix) &
+                (materials_df["Name"] == name)
             ]
-            casting_code = casting_code.values[0] if not casting_code.empty else ""
+            if not casting_code_lookup.empty:
+                raw_code = str(casting_code_lookup["Casting code"].values[0])
+                casting_code = raw_code[-2:] if len(raw_code) >= 2 else raw_code
+                fpd_material_code = casting_code_lookup["FPD Code"].values[0]
 
-            # Descrizione
-            description_parts = [selected_part, base_pattern]
-            for mod in [mod1, mod2, mod3, mod4, mod5]:
-                if mod:
-                    description_parts.append(mod)
-            if note_casting:
-                description_parts.append(note_casting)
-            description_parts.append(full_material_cast)
-            if mat_note_cast:
-                description_parts.append(mat_note_cast)
+        item_number = "7" + casting_code if casting_code != "XX" else "7XX"
 
-            description = ", ".join(description_parts)
+        pattern_parts = [mod for mod in [mod1, mod2, mod3, mod4, mod5] if mod.strip()]
+        pattern_full = "/".join(pattern_parts)
 
-            # Qualità
-            quality_field = ""
-            if apply_sq95:
-                quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
-            if selected_part == "Impeller casting":
-                quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
+        # SQ95 logica per materiali specifici
+        trigger_materials = [
+            ("ASTM", "A351_", "CG8M"),
+            ("ASTM", "A351_", "CG3M"),
+            ("ASTM", "A351_", "CG8M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY"),
+            ("ASTM", "A351_", "CG3M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY + PTA STELLITE 6 OVERLAY"),
+            ("ASTM", "A743_", "CG3M"),
+            ("ASTM", "A743_", "CG8M"),
+            ("ASTM", "A743_", "CG3M + PTA STELLITE 12 OVERLAY"),
+            ("ASTM", "A743_", "CG3M + PTA STELLITE 6 OVERLAY"),
+            ("ASTM", "A743_", "CG3M + DLD WC-Ni 60-40"),
+            ("ASTM", "A744_", "CG3M"),
+        ]
+        apply_sq95 = (material_type, prefix, name) in trigger_materials
 
-            st.session_state["output_data"] = {
-                "Item": "",
-                "Description": "*" + description,
-                "Identificativo": selected_part,
-                "Classe ricambi": "",
-                "Categories": "FASCIA ITE 7",
-                "Catalog": "FUSIONI",
-                "Disegno": casting_drawing,
-                "Material": full_material_cast,
-                "FPD material code": fpd_code_cast,
-                "Template": "FPD_BUY_CASTING",
-                "ERP_L1": "10_CASTING",
-                "ERP_L2": "",
-                "To supplier": "",
-                "Quality": quality_field.strip()
-            }
+        # DESCRIPTION
+        description_parts = [f"*{identificativo.upper()}"]
+        description_parts.append('[SQ58]')
+        if base_pattern:
+            description_parts.append(f"BASE PATTERN: {base_pattern}")
+        if pattern_full:
+            description_parts.append(f"MODS: {pattern_full}")
+        if note:
+            description_parts.append(note)
+        description_parts.append(f"{prefix} {name}".strip())
+        if material_note:
+            description_parts.append(material_note)
+        description_parts.append("[DE2390.002]")
+if apply_sq95:
+    quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
+        if hf_service_casting:
+            description_parts.append("<SQ113>")
 
-    # COLONNA 2: OUTPUT
-    with col2:
-        st.subheader("📤 Output")
-        if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
-                if campo == "Description":
-                    st.text_area(campo, value=valore, height=100, key=f"cast_{campo}")
-                else:
-                    st.text_input(campo, value=valore, key=f"cast_{campo}")
 
-    # COLONNA 3: DataLoad
-    with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_cast = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="cast_dl_mode")
-        item_code_cast = st.text_input("Codice item", key="cast_item_code")
-        if st.button("Genera stringa DataLoad", key="cast_dl_btn"):
-            if not item_code_cast:
-                st.error("❌ Inserisci prima il codice item.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output nella colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val(k): return data.get(k, "").strip() or "."
-                dataload_fields = [
-                    "\\%FN", item_code_cast,
-                    "\\%TC", get_val("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val("Identificativo"), "TAB",
-                    get_val("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
-                    get_val("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val("FPD material code"), "TAB",
-                    get_val("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val("Quality") if get_val("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string = "\t".join(dataload_fields)
-                st.text_area("Anteprima (per copia manuale)", dataload_string, height=200)
+        # QUALITY
+        quality_lines = [
+            "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings"
+        ]
+if apply_sq95:
+    quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
+        if hf_service_casting:
+            quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
 
+        quality_field = "\n".join(quality_lines) + "\nSQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche"
+
+        if generate_output:
+            st.text_input("Item", value=item_number, key="casting_item")
+            st.text_area("Description", value=description, height=100)
+            st.text_input("Identificativo", value=identificativo)
+            st.text_input("Classe ricambi", value="")
+            st.text_input("Categories", value="FASCIA ITE 7")
+            st.text_input("Catalog", value="FUSIONI")
+            st.text_input("Disegno", value=casting_drawing)
+            st.text_input("Material", value=f"{prefix} {name}")
+            st.text_input("FPD Material Code", value=fpd_material_code)
+            st.text_input("Template", value="FPD_BUY_CASTING")
+            st.text_input("ERP L1", value="10_CASTING")
+            st.text_input("ERP L2", value="")
+            st.text_input("To Supplier", value="")
+            st.text_area("Quality", value=quality_field, height=100)
+
+    with col_dataload:
+        st.markdown("### ⚙️ Dataload")
+        st.write("Coming soon...")
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
