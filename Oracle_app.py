@@ -3617,17 +3617,19 @@ if selected_part in [
         if material_note:
             description_parts.append(material_note)
         description_parts.append("[DE2390.002]")
-        if apply_sq95:
+if apply_sq95:
     quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
 if selected_part == "Impeller casting":
     quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
         description = ", ".join(description_parts)
 
         quality_field = "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings"
-        if apply_sq95:
+if apply_sq95:
+    quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
     quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
 quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
-        if selected_part == "Impeller casting":
+if selected_part == "Impeller casting":
+    quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
     quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
 quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
 
@@ -3709,7 +3711,8 @@ quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.
         if material_note:
             description_parts.append(material_note)
         description_parts.append("[DE2390.002]")
-        if apply_sq95:
+if apply_sq95:
+    quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
         if hf_service_casting:
             description_parts.append("<SQ113>")
 
@@ -3719,7 +3722,8 @@ quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.
         quality_lines = [
             "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings"
         ]
-        if apply_sq95:
+if apply_sq95:
+    quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
         if hf_service_casting:
             quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
 
