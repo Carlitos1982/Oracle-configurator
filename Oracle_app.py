@@ -2547,15 +2547,15 @@ if selected_part == "Ring, Wear":
 if selected_part == "Pin, Dowel":
     col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1 - INPUT
     with col1:
         st.subheader("✏️ Input")
 
-        size_options = ["M2", "M3", "M4", "M5", "M6", "M8", "M10", "M12", "M14", "M16", "M18", "M20", "M22", "M24"]
-        length_options = [str(l) for l in range(6, 101, 2)]  # da 6 a 100mm ogni 2mm
+        size_options = ["2", "3", "4", "5", "6", "8", "10", "12", "14", "16", "20"]
+        length_options = ["6", "8", "10", "12", "16", "20", "25", "30", "35", "40", "45", "50",
+                          "55", "60", "65", "70", "75", "80", "85", "90", "95", "100"]
 
         pin_type = st.selectbox("Type", ["Cylindrical", "Taper", "Grooved"], key="pin_type")
-        pin_size = st.selectbox("Size", size_options, key="pin_size")
+        pin_size = st.selectbox("Size (MM)", size_options, key="pin_size")
         pin_length = st.selectbox("Length (MM)", length_options, key="pin_length")
         note1 = st.text_area("Note", height=80, key="pin_note")
 
