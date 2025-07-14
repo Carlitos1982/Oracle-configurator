@@ -3625,7 +3625,7 @@ if selected_part in [
 
         quality_field = "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings"
         if apply_sq95:
-quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)""
+quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
         if selected_part == "Impeller casting":
 quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)""
 
