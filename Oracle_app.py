@@ -3620,8 +3620,8 @@ if selected_part in [
 if apply_sq95:
     quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
 if selected_part == "Impeller casting":
+    description = ", ".join(description_parts)
     quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
-        description = ", ".join(description_parts)
 
         quality_field = "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings"
 if apply_sq95:
@@ -3629,6 +3629,7 @@ if apply_sq95:
     quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
 quality_field += "\nSQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
 if selected_part == "Impeller casting":
+    description = ", ".join(description_parts)
     quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
     quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
 quality_field += "\nDE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E. (Non Destructive Examination)"
@@ -3716,7 +3717,6 @@ if apply_sq95:
         if hf_service_casting:
             description_parts.append("<SQ113>")
 
-        description = ", ".join(description_parts)
 
         # QUALITY
         quality_lines = [
