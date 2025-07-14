@@ -1289,7 +1289,11 @@ if selected_part == "Gasket, Spiral Wound":
 
     with col1:
         st.subheader("✏️ Input")
-        winding = st.selectbox("Winding material", ["SS316", "SS304", "Monel", "Inconel"], key="gsw_winding")
+        winding = st.selectbox("Winding material", [
+            "SS316L", "SS316", "SS304", "SS321", "SS347",
+            "Monel", "Inconel", "Hastelloy C276", "Titanium", "Nickel", "Duplex"
+        ], key="gsw_winding")
+
         filler = st.selectbox("Filler", ["Graphite", "PTFE", "Ceramic"], key="gsw_filler")
         out_dia = st.text_input("Outer Diameter", key="gsw_outdia")
         in_dia = st.text_input("Inner Diameter", key="gsw_india")
@@ -1307,13 +1311,10 @@ if selected_part == "Gasket, Spiral Wound":
 
         if st.button("Genera Output", key="gsw_gen"):
             color_map = {
-                "SS316": "Green",
-                "SS304": "Red",
-                "Monel": "Orange",
-                "Inconel": "Blue",
-                "Graphite": "Gray",
-                "PTFE": "White",
-                "Ceramic": "Yellow"
+                "SS316L": "Green", "SS316": "Green", "SS304": "Red", "SS321": "Blue", "SS347": "Blue",
+                "Monel": "Orange", "Inconel": "Blue", "Hastelloy C276": "Yellow",
+                "Titanium": "Purple", "Nickel": "Pink", "Duplex": "Brown",
+                "Graphite": "Gray", "PTFE": "White", "Ceramic": "Yellow"
             }
 
             color1 = color_map.get(winding, "NA")
@@ -1404,6 +1405,7 @@ if selected_part == "Gasket, Spiral Wound":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 # --- BEARING, HYDROSTATIC/HYDRODYNAMIC
 elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
