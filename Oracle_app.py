@@ -2547,65 +2547,71 @@ if selected_part == "Ring, Wear":
 if selected_part == "Pin, Dowel":
     col1, col2, col3 = st.columns(3)
 
+    # COLONNA 1 - INPUT
     with col1:
         st.subheader("✏️ Input")
-        size = st.text_input("Size", key="pdowel_size")
-        length = st.text_input("Length", key="pdowel_length")
-        material = st.text_input("Material", key="pdowel_material")
-        note = st.text_area("Note", height=80, key="pdowel_note")
-        dwg = st.text_input("Dwg/doc number", key="pdowel_dwg")
 
-        # Stamicarbon checkbox
-        stamicarbon = st.checkbox("Stamicarbon?", key="pdowel_stamicarbon")
+        size_options = ["M2", "M3", "M4", "M5", "M6", "M8", "M10", "M12", "M14", "M16", "M18", "M20", "M22", "M24"]
+        length_options = [str(l) for l in range(6, 101, 2)]  # da 6 a 100mm ogni 2mm
 
-        if st.button("Genera Output", key="pdowel_gen"):
-            sq_tags = []
-            quality_lines = []
+        pin_type = st.selectbox("Type", ["Cylindrical", "Taper", "Grooved"], key="pin_type")
+        pin_size = st.selectbox("Size", size_options, key="pin_size")
+        pin_length = st.selectbox("Length (MM)", length_options, key="pin_length")
+        note1 = st.text_area("Note", height=80, key="pin_note")
 
-            if stamicarbon:
-                sq_tags.append("<SQ172>")
-                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+        st.markdown("**Materiale**")
+        material_type = st.selectbox("Material Type", ["ASTM", "EN", "Miscellaneous"], key="pin_mat_type")
+        prefix = st.text_input("Prefix", key="pin_prefix")
+        name = st.text_input("Name", key="pin_mat_name")
+        mat_note = st.text_input("Material Note", key="pin_mat_note")
 
-            quality = "\n".join(quality_lines)
-            tag_string = " ".join(sq_tags)
+        drawing_pin = st.text_input("Dwg/doc number", key="pin_dwg")
 
-            descr = f"DOWEL PIN - SIZE: {size}, LENGTH: {length}, MATERIAL: {material}"
-            if note:
-                descr += f", NOTE: {note}"
-            descr += f" {tag_string}"
-            descr = "*" + descr
+        if st.button("Genera Output", key="pin_gen"):
+            material_full = f"{material_type} {prefix} {name}".strip()
+            description = f"*{pin_type.upper()} PIN {pin_size} x {pin_length}MM"
+            if note1:
+                description += f", {note1}"
+            description += f", {material_full}"
+            if mat_note:
+                description += f", {mat_note}"
+
+            fpd_code = fpd_codes.get((material_type, prefix.strip(), name.strip()), "NOT FOUND")
 
             st.session_state["output_data"] = {
-                "Item": "56300…",
-                "Description": descr,
-                "Identificativo": "6560-DOWEL PIN",
+                "Item": "56530…",
+                "Description": description,
+                "Identificativo": "PIN, DOWEL",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
-                "Disegno": dwg,
-                "Material": material,
-                "FPD material code": "NA",
-                "Template": "FPD_BUY_2",
+                "Disegno": drawing_pin,
+                "Material": material_full,
+                "FPD material code": fpd_code,
+                "Template": "FPD_BUY_1",
                 "ERP_L1": "60_FASTENER",
-                "ERP_L2": "13_STANDARD_PIN",
+                "ERP_L2": "14_PIN_DOWEL",
                 "To supplier": "",
-                "Quality": quality
+                "Quality": ""
             }
 
+    # COLONNA 2 - OUTPUT
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for k, v in st.session_state["output_data"].items():
-                if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+            output_data = st.session_state["output_data"]
+            for campo, valore in output_data.items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=100, key=f"pin_{campo}")
                 else:
-                    st.text_input(k, value=v)
+                    st.text_input(campo, value=valore, key=f"pin_{campo}")
 
-    # COLONNA 3: DataLoad
+    # COLONNA 3 - DATALOAD
     with col3:
         st.subheader("🧾 DataLoad")
         dataload_mode_pin = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="pin_dl_mode")
-        item_code_pin    = st.text_input("Codice item", key="pin_item_code")
+        item_code_pin = st.text_input("Codice item", key="pin_item_code")
+
         if st.button("Genera stringa DataLoad", key="gen_dl_pin"):
             if not item_code_pin:
                 st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
@@ -2641,13 +2647,15 @@ if selected_part == "Pin, Dowel":
                     "Short Text", "TAB",
                     get_val_pin("To supplier") if get_val_pin("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
+
                 dataload_string_pin = "\t".join(dataload_fields_pin)
                 st.text_area("Anteprima (per copia manuale)", dataload_string_pin, height=200)
 
                 csv_buffer_pin = io.StringIO()
-                writer_pin    = csv.writer(csv_buffer_pin, quoting=csv.QUOTE_MINIMAL)
+                writer_pin = csv.writer(csv_buffer_pin, quoting=csv.QUOTE_MINIMAL)
                 for riga in dataload_fields_pin:
                     writer_pin.writerow([riga])
+
                 st.download_button(
                     label="💾 Scarica file CSV per Import Data",
                     data=csv_buffer_pin.getvalue(),
@@ -2655,6 +2663,7 @@ if selected_part == "Pin, Dowel":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 # --- SHAFT, PUMP
 if selected_part == "Shaft, Pump":
     col1, col2, col3 = st.columns(3)
