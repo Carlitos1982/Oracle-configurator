@@ -206,12 +206,9 @@ if selected_part == "Casing, Pump":
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="casing_mprefix")
 
         if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
-            ]["Name"].dropna().tolist()
+            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="casing_mname")
 
@@ -369,12 +366,9 @@ if selected_part == "Casing Cover, Pump":
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="ccov_mprefix")
 
         if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
-            ]["Name"].dropna().tolist()
+            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="ccov_mname")
 
@@ -530,12 +524,9 @@ if selected_part == "Impeller, Pump":
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="imp_mprefix")
 
         if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
-            ]["Name"].dropna().tolist()
+            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="imp_mname")
 
@@ -687,12 +678,9 @@ if selected_part == "Balance Bushing, Pump":
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="bbush_mprefix")
 
         if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
-            ]["Name"].dropna().tolist()
+            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="bbush_mname")
 
@@ -845,12 +833,9 @@ if selected_part == "Balance Drum, Pump":
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="bdrum_mprefix")
 
         if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
-            ]["Name"].dropna().tolist()
+            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="bdrum_mname")
 
@@ -1002,12 +987,9 @@ if selected_part == "Balance Disc, Pump":
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="bdisc_mprefix")
 
         if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
-            ]["Name"].dropna().tolist()
+            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="bdisc_mname")
 
@@ -1160,12 +1142,9 @@ if selected_part == "Gate, Valve":
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="gate_mprefix")
 
         if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
-            ]["Name"].dropna().tolist()
+            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="gate_mname")
 
@@ -2186,91 +2165,94 @@ elif selected_part == "Gusset, Other":
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 
-# --- STUD, THREADED ---
+# --- STUD, THREADED
+# --- STUD, THREADED
 if selected_part == "Stud, Threaded":
     col1, col2, col3 = st.columns(3)
 
+    # COLONNA 1: INPUT
     with col1:
         st.subheader("✏️ Input")
-        threading = st.selectbox("Threaded", ["Partial", "Full"], key="stud_threaded")
-        stud_size = st.selectbox("Size", bolt_sizes, key="stud_size")
-        stud_length = st.selectbox("Length", bolt_lengths, key="stud_length")
-        stud_note = st.text_area("Note", height=80, key="stud_note")
-        stud_disegno = st.text_input("Dwg/doc number", key="stud_disegno")
+        threaded_stu = st.selectbox("Threaded", ["Full", "Partial"], key="stu_threaded")
+        size_stu = st.selectbox("Size", ["1/4''", "3/8''", "1/2''", "5/8''", "3/4''", "7/8''", "1''", "1 1/8''", "1 1/4''", "1 3/8''", "1 1/2''"], key="stu_size")
+        length_stu = st.text_input("Length", key="stu_length")
+        note_stu = st.text_area("Note (opzionale)", height=80, key="stu_note")
+        dwg_stu = st.text_input("Dwg/doc number", key="stu_dwg")
 
-        mtype = st.selectbox("Material Type", [""] + material_types, key="stud_mtype")
-        pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
-        prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
-        mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="stud_mprefix")
+        mtype_stu = st.selectbox("Material Type", [""] + material_types, key="stu_mtype")
+        pref_df_stu = materials_df[(materials_df["Material Type"] == mtype_stu) & (materials_df["Prefix"].notna())]
+        prefixes_stu = sorted(pref_df_stu["Prefix"].unique()) if mtype_stu != "MISCELLANEOUS" else []
+        mprefix_stu = st.selectbox("Material Prefix", [""] + prefixes_stu, key="stu_mprefix")
 
-        if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+        if mtype_stu == "MISCELLANEOUS":
+            names_stu = materials_df[materials_df["Material Type"] == mtype_stu]["Name"].dropna().tolist()
         else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
+            names_stu = materials_df[
+                (materials_df["Material Type"] == mtype_stu) &
+                (materials_df["Prefix"] == mprefix_stu)
             ]["Name"].dropna().tolist()
-        mname = st.selectbox("Material Name", [""] + names, key="stud_mname")
-        mnote = st.text_input("Material Note", key="stud_mnote")
 
-        stamicarbon = st.checkbox("Stamicarbon?", key="stud_stamicarbon")
+        mname_stu = st.selectbox("Material Name", [""] + names_stu, key="stu_mname")
+        material_note_stu = st.text_input("Material Note (opzionale)", key="stu_mnote")
 
-        if st.button("Genera Output", key="stud_gen"):
-            materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
-            if mnote:
-                materiale += f" {mnote}"
+        # ✅ Checkbox HF
+        hf_service_stu = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="stu_hf")
 
-            match = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix) &
-                (materials_df["Name"] == mname)
+        if st.button("Genera Output", key="stu_gen"):
+            materiale_stu = f"{mtype_stu} {mprefix_stu} {mname_stu}".strip() if mtype_stu != "MISCELLANEOUS" else mname_stu
+            match_stu = materials_df[
+                (materials_df["Material Type"] == mtype_stu) &
+                (materials_df["Prefix"] == mprefix_stu) &
+                (materials_df["Name"] == mname_stu)
             ]
-            codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
+            codice_fpd_stu = match_stu["FPD Code"].values[0] if not match_stu.empty else ""
 
-            quality_lines = []
-            tag_string = ""
-            if stamicarbon:
-                tag_string = "[SQ172]"
-                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+            descr_stu = f"STUD THREADED - {threaded_stu.upper()}, SIZE: {size_stu}, LENGTH: {length_stu}"
+            if note_stu:
+                descr_stu += f", NOTE: {note_stu}"
+            if materiale_stu:
+                descr_stu += f", MATERIAL: {materiale_stu}"
+            if material_note_stu:
+                descr_stu += f", MATERIAL NOTE: {material_note_stu}"
+            if hf_service_stu:
+                descr_stu += " <SQ113>"
+            descr_stu = "*" + descr_stu
 
-            descr = f"STUD, THREADED - {threading.upper()} - SIZE: {stud_size}, LENGTH: {stud_length}"
-            if stud_note:
-                descr += f", NOTE: {stud_note}"
-            descr += f", {materiale}"
-            if tag_string:
-                descr += f" {tag_string}"
-            descr = "*" + descr
+            quality_stu = "Applicable procedure: SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)" if hf_service_stu else ""
 
             st.session_state["output_data"] = {
                 "Item": "56146…",
-                "Description": descr,
+                "Description": descr_stu,
                 "Identificativo": "6572-STUD",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
-                "Disegno": stud_disegno,
-                "Material": materiale,
-                "FPD material code": codice_fpd,
+                "Disegno": dwg_stu,
+                "Material": materiale_stu,
+                "FPD material code": codice_fpd_stu,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
                 "ERP_L2": "12_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
                 "To supplier": "",
-                "Quality": "\n".join(quality_lines)
+                "Quality": quality_stu
             }
 
+    # COLONNA 2: OUTPUT
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for k, v in st.session_state["output_data"].items():
-                if k in ["Description", "Quality", "To supplier"]:
-                    st.text_area(k, value=v, height=120)
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"stud_{campo}")
                 else:
-                    st.text_input(k, value=v)
+                    st.text_input(campo, value=valore, key=f"stud_{campo}")
 
+    # COLONNA 3: DataLoad
     with col3:
         st.subheader("🧾 DataLoad")
         dataload_mode_stud = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="stud_dl_mode")
-        item_code_stud = st.text_input("Codice item", key="stud_item_code")
+        item_code_stud     = st.text_input("Codice item", key="stud_item_code")
+
         if st.button("Genera stringa DataLoad", key="gen_dl_stud"):
             if not item_code_stud:
                 st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
@@ -2306,21 +2288,23 @@ if selected_part == "Stud, Threaded":
                     "Short Text", "TAB",
                     get_val_stud("To supplier") if get_val_stud("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
+
                 dataload_string_stud = "\t".join(dataload_fields_stud)
                 st.text_area("Anteprima (per copia manuale)", dataload_string_stud, height=200)
 
                 csv_buffer_stud = io.StringIO()
-                writer_stud = csv.writer(csv_buffer_stud, quoting=csv.QUOTE_MINIMAL)
+                writer_stud     = csv.writer(csv_buffer_stud, quoting=csv.QUOTE_MINIMAL)
                 for riga in dataload_fields_stud:
                     writer_stud.writerow([riga])
+
                 st.download_button(
                     label="💾 Scarica file CSV per Import Data",
                     data=csv_buffer_stud.getvalue(),
                     file_name=f"dataload_{item_code_stud}.csv",
                     mime="text/csv"
                 )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 
 # --- NUT, HEX
@@ -2485,12 +2469,9 @@ if selected_part == "Ring, Wear":
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="ring_mprefix")
 
         if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
-            ]["Name"].dropna().tolist()
+            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="ring_mname")
 
@@ -2777,12 +2758,9 @@ if selected_part == "Shaft, Pump":
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="sh_mprefix")
 
         if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
-            ]["Name"].dropna().tolist()
+            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="sh_mname")
 
