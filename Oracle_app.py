@@ -1327,9 +1327,9 @@ if selected_part == "Gasket, Spiral Wound":
 
         winding_gsw = st.selectbox("Winding Material", list(winding_options.keys()), key="gsw_winding")
         filler_gsw = st.selectbox("Filler", list(filler_options.keys()), key="gsw_filler")
-        out_dia_gsw = st.text_input("Outer Diameter", key="gsw_out_dia")
-        in_dia_gsw = st.text_input("Inner Diameter", key="gsw_in_dia")
-        thickness_gsw = st.text_input("Thickness", key="gsw_thick")
+        out_dia_gsw = st.text_input("Outer Diameter (MM)", key="gsw_out_dia")
+        in_dia_gsw = st.text_input("Inner Diameter (MM)", key="gsw_in_dia")
+        thickness_gsw = st.text_input("Thickness (MM)", key="gsw_thick")
         rating_gsw = st.selectbox("Rating", list(rating_mapping.keys()), key="gsw_rating")
         dwg_gsw = st.text_input("Dwg/doc number", key="gsw_dwg")
         note_gsw = st.text_area("Note (opzionale)", height=80, key="gsw_note")
@@ -1347,7 +1347,7 @@ if selected_part == "Gasket, Spiral Wound":
                 f"COLOR CODE: {color1} {ral1} / {color2} {ral2} ({stripe}) [SQ174]"
             )
             if hf_service_gsw:
-                descr_gsw += " [SQ113]"
+                descr_gsw += " <SQ113>"
             if note_gsw:
                 descr_gsw += f", NOTE: {note_gsw}"
 
