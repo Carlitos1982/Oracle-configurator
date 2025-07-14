@@ -1289,71 +1289,71 @@ if selected_part == "Gasket, Spiral Wound":
 
     with col1:
         st.subheader("✏️ Input")
-        winding_materials = [
-            "SS316L", "SS316", "SS304", "SS321", "SS347",
-            "Monel", "Inconel", "Hastelloy C276", "Titanium",
-            "Nickel", "Duplex", "Alloy 20", "SS317L"
-        ]
-        filler_materials = ["Graphite", "PTFE", "Ceramic"]
 
-        detailed_colors = {
-            "SS316L": ("Green", "RAL6001"),
-            "SS316": ("Green", "RAL6001"),
-            "SS304": ("Red", "RAL3000"),
-            "SS321": ("Purple", "RAL4005"),
-            "SS347": ("Blue", "RAL5005"),
-            "Monel": ("Orange", "RAL2003"),
-            "Inconel": ("Blue", "RAL5010"),
-            "Hastelloy C276": ("Yellow", "RAL1021"),
-            "Titanium": ("Purple", "RAL4008"),
-            "Nickel": ("Pink", "RAL3015"),
-            "Duplex": ("Yellow+Blue", "RAL1021+5017"),
-            "Alloy 20": ("Brown", "RAL8003"),
-            "SS317L": ("Blue", "RAL5017"),
-            "Graphite": ("Gray", "RAL7011"),
-            "PTFE": ("White", "RAL9010"),
-            "Ceramic": ("Yellow", "RAL1018")
+        winding_options = {
+            "304 stainless steel": ("Yellow", "RAL1021"),
+            "316L stainless steel": ("Green", "RAL6005"),
+            "317L stainless steel": ("Maroon", "RAL3003"),
+            "321 stainless steel": ("Turquoise", "RAL5018"),
+            "347 stainless steel": ("Blue", "RAL5017"),
+            "MONEL": ("Orange", "RAL2003"),
+            "Nickel": ("Red", "RAL3024"),
+            "Titanium": ("Purple", "RAL4003"),
+            "Alloy 20": ("Black", "RAL9005"),
+            "INCONEL 600": ("Gold", "RAL1004"),
+            "HASTELLOY B": ("Brown", "RAL8003"),
+            "HASTELLOY C": ("Beige", "RAL1011"),
+            "INCOLOY 800": ("White", "RAL9010"),
+            "DUPLEX": ("Yellow+Blue", "RAL1021+5017"),
+            "SUPERDUPLEX": ("Red+Black", "RAL3020+9005"),
+            "ALLOY 825": ("Orange+Green", "RAL2003+6005"),
+            "UNS S31254": ("Orange+Blue", "RAL2003+5017"),
+            "ZYRCONIUM 702": ("Gold+Green", "RAL1004+6005"),
+            "INCONEL X750HT": ("Gold+Black", "RAL1004+9005")
         }
 
-        winding_gsw = st.selectbox("Winding Material", sorted(winding_materials), key="gsw_winding")
-        filler_gsw = st.selectbox("Filler", sorted(filler_materials), key="gsw_filler")
+        filler_options = {
+            "Graphite": ("Gray", "RAL7011"),
+            "PTFE": ("White", "RAL9010"),
+            "Ceramic": ("Light Green", "RAL6021"),
+            "Verdicarb (Mica Graphite)": ("Pink", "RAL3015")
+        }
+
+        rating_mapping = {
+            "STANDARD PRESSURE - m=3; y=10000psi (1 stripe)": ("STANDARD PRESSURE", "m=3; y=10000psi", "1 stripe"),
+            "HIGH PRESSURE - m=3; y=17500psi (2 stripes)": ("HIGH PRESSURE", "m=3; y=17500psi", "2 stripes"),
+            "ULTRA HIGH PRESSURE - m=3; y=23500psi (3 stripes)": ("ULTRA HIGH PRESSURE", "m=3; y=23500psi", "3 stripes")
+        }
+
+        winding_gsw = st.selectbox("Winding Material", list(winding_options.keys()), key="gsw_winding")
+        filler_gsw = st.selectbox("Filler", list(filler_options.keys()), key="gsw_filler")
         out_dia_gsw = st.text_input("Outer Diameter", key="gsw_out_dia")
         in_dia_gsw = st.text_input("Inner Diameter", key="gsw_in_dia")
         thickness_gsw = st.text_input("Thickness", key="gsw_thick")
-        rating_gsw = st.selectbox("Rating", [
-            "150# - m=3.0, y=10000 psi",
-            "300# - m=3.5, y=10000 psi",
-            "600# - m=4.0, y=12000 psi",
-            "900# - m=4.5, y=12000 psi",
-            "1500# - m=5.0, y=14000 psi",
-            "2500# - m=5.5, y=16000 psi"
-        ], key="gsw_rating")
+        rating_gsw = st.selectbox("Rating", list(rating_mapping.keys()), key="gsw_rating")
         dwg_gsw = st.text_input("Dwg/doc number", key="gsw_dwg")
         note_gsw = st.text_area("Note (opzionale)", height=80, key="gsw_note")
-        hf_service_gsw = st.checkbox("Is it an hydrofluoric acid (HF) alkylation service?", key="gsw_hf")
+        hf_service_gsw = st.checkbox("Is it a hydrofluoric acid (HF) alkylation service?", key="gsw_hf")
 
         if st.button("Genera Output", key="gsw_gen"):
-            c1, ral1 = detailed_colors.get(winding_gsw, ("", ""))
-            c2, ral2 = detailed_colors.get(filler_gsw, ("", ""))
-            color_string = f"COLOR CODE: {c1} {ral1} / {c2} {ral2} (1 stripe)"
+            color1, ral1 = winding_options[winding_gsw]
+            color2, ral2 = filler_options[filler_gsw]
+            pressure_label, rating_descr, stripe = rating_mapping[rating_gsw]
 
             descr_gsw = (
-                f"GASKET, SPIRAL WOUND - WINDING: {winding_gsw}, FILLER: {filler_gsw}, "
-                f"OD: {out_dia_gsw}, ID: {in_dia_gsw}, THK: {thickness_gsw}, RATING: {rating_gsw}, "
-                f"{color_string}"
+                f"*GASKET, SPIRAL WOUND - WINDING: {winding_gsw}, FILLER: {filler_gsw}, "
+                f"OD: {out_dia_gsw}, ID: {in_dia_gsw}, THK: {thickness_gsw}, "
+                f"RATING: {pressure_label} - {rating_descr}, "
+                f"COLOR CODE: {color1} {ral1} / {color2} {ral2} ({stripe}) [SQ174]"
             )
-            if note_gsw:
-                descr_gsw += f", NOTE: {note_gsw}"
-            descr_gsw += " [SQ174]"
             if hf_service_gsw:
                 descr_gsw += " [SQ113]"
-            descr_gsw = "*" + descr_gsw
+            if note_gsw:
+                descr_gsw += f", NOTE: {note_gsw}"
 
-            quality_list = [
-                "SQ 174 - Casing/Cover pump spiral wound gaskets: Specification for Mechanical properties, applicable materials and dimensions"
-            ]
+            quality = "SQ 174 - Casing/Cover pump spiral wound gaskets: Specification for Mechanical properties, applicable materials and dimensions"
             if hf_service_gsw:
-                quality_list.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
+                quality += "\nSQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)"
 
             st.session_state["output_data"] = {
                 "Item": "50415…",
@@ -1369,8 +1369,46 @@ if selected_part == "Gasket, Spiral Wound":
                 "ERP_L1": "55_GASKETS_OR_SEAL",
                 "ERP_L2": "16_SPIRAL_WOUND",
                 "To supplier": "",
-                "Quality": "\n".join(quality_list)
+                "Quality": quality
             }
+
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=100, key=f"sw_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"sw_{campo}")
+
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_sw = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="sw_dl_mode")
+        item_code_sw = st.text_input("Codice item", key="sw_item_code")
+        if st.button("Genera stringa DataLoad", key="gen_dl_sw"):
+            if not item_code_sw:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_sw(key): return data.get(key, "").strip() or "."
+                dataload_fields_sw = [
+                    "\\%FN", item_code_sw, "\\%TC", get_val_sw("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB", get_val_sw("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_sw("Identificativo"), "TAB", get_val_sw("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S", "\\%TA", "TAB",
+                    f"{get_val_sw('ERP_L1')}.{get_val_sw('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_sw("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_sw("Catalog"), "TAB", "TAB", "TAB", get_val_sw("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB", get_val_sw("FPD material code"), "TAB", get_val_sw("Material"),
+                    "\\^S", "\\^{F4}", "\\%VA", "TAB", get_val_sw("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_sw("Quality") if get_val_sw("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB", get_val_sw("To supplier"), "TAB", "TAB", "TAB", "Short Text", "TAB",
+                    get_val_sw("To supplier") if get_val_sw("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+                dataload_string_sw = "\t".join(dataload_fields_sw)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_sw, height=200)
 
 # --- BEARING, HYDROSTATIC/HYDRODYNAMIC
 elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
