@@ -208,7 +208,10 @@ if selected_part == "Casing, Pump":
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
+            ]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="casing_mname")
 
@@ -368,7 +371,10 @@ if selected_part == "Casing Cover, Pump":
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
+            ]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="ccov_mname")
 
@@ -526,7 +532,10 @@ if selected_part == "Impeller, Pump":
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
+            ]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="imp_mname")
 
@@ -680,7 +689,10 @@ if selected_part == "Balance Bushing, Pump":
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
+            ]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="bbush_mname")
 
@@ -835,7 +847,10 @@ if selected_part == "Balance Drum, Pump":
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
+            ]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="bdrum_mname")
 
@@ -989,7 +1004,10 @@ if selected_part == "Balance Disc, Pump":
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
+            ]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="bdisc_mname")
 
@@ -1144,7 +1162,10 @@ if selected_part == "Gate, Valve":
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
+            ]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="gate_mname")
 
@@ -1402,12 +1423,12 @@ elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
         mprefix_bearing = st.selectbox("Prefix (only if ASTM or EN)", [""] + prefixes_bearing, key="mprefix_bearing")
 
         if mtype_bearing == "MISCELLANEOUS":
-            names_bearing = materials_df[materials_df["Material Type"] == mtype_bearing]["Name"].dropna().tolist()
+            names_bearing = materials_df[materials_df["Material Type"] == mtype_bearing]["Name"].dropna().drop_duplicates().tolist()
         else:
             names_bearing = materials_df[
                 (materials_df["Material Type"] == mtype_bearing) &
                 (materials_df["Prefix"] == mprefix_bearing)
-            ]["Name"].dropna().tolist()
+            ]["Name"].dropna().drop_duplicates().tolist()
         mname_bearing    = st.selectbox("Name", [""] + names_bearing, key="mname_bearing")
 
         mat_feat_bearing = st.text_input("Material add. Features", key="matfeat_bearing")
@@ -1778,12 +1799,12 @@ elif selected_part == "Bolt, Hexagonal":
         mprefix_hex  = st.selectbox("Material Prefix", [""] + prefixes_hex, key="hex_mprefix")
 
         if mtype_hex == "MISCELLANEOUS":
-            names_hex = materials_df[materials_df["Material Type"] == mtype_hex]["Name"].dropna().tolist()
+            names_hex = materials_df[materials_df["Material Type"] == mtype_hex]["Name"].dropna().drop_duplicates().tolist()
         else:
             names_hex = materials_df[
                 (materials_df["Material Type"] == mtype_hex) &
                 (materials_df["Prefix"] == mprefix_hex)
-            ]["Name"].dropna().tolist()
+            ]["Name"].dropna().drop_duplicates().tolist()
         mname_hex = st.selectbox("Material Name", [""] + names_hex, key="hex_mname")
 
         note2_hex = st.text_area("Material Note (opzionale)", height=80, key="hex_note2")
@@ -2038,12 +2059,12 @@ elif selected_part == "Gusset, Other":
         mprefix_gusset  = st.selectbox("Material Prefix", [""] + prefixes_gusset, key="mprefix_gusset")
 
         if mtype_gusset == "MISCELLANEOUS":
-            names_gusset = materials_df[materials_df["Material Type"] == mtype_gusset]["Name"].dropna().tolist()
+            names_gusset = materials_df[materials_df["Material Type"] == mtype_gusset]["Name"].dropna().drop_duplicates().tolist()
         else:
             names_gusset = materials_df[
                 (materials_df["Material Type"] == mtype_gusset) &
                 (materials_df["Prefix"] == mprefix_gusset)
-            ]["Name"].dropna().tolist()
+            ]["Name"].dropna().drop_duplicates().tolist()
         mname_gusset = st.selectbox("Material Name", [""] + names_gusset, key="mname_gusset")
 
         note2_gusset = st.text_area("Material Note (opzionale)", height=80, key="gusset_note2")
@@ -2185,12 +2206,12 @@ if selected_part == "Stud, Threaded":
         mprefix_stu = st.selectbox("Material Prefix", [""] + prefixes_stu, key="stu_mprefix")
 
         if mtype_stu == "MISCELLANEOUS":
-            names_stu = materials_df[materials_df["Material Type"] == mtype_stu]["Name"].dropna().tolist()
+            names_stu = materials_df[materials_df["Material Type"] == mtype_stu]["Name"].dropna().drop_duplicates().tolist()
         else:
             names_stu = materials_df[
                 (materials_df["Material Type"] == mtype_stu) &
                 (materials_df["Prefix"] == mprefix_stu)
-            ]["Name"].dropna().tolist()
+            ]["Name"].dropna().drop_duplicates().tolist()
 
         mname_stu = st.selectbox("Material Name", [""] + names_stu, key="stu_mname")
         material_note_stu = st.text_input("Material Note (opzionale)", key="stu_mnote")
@@ -2325,12 +2346,12 @@ if selected_part == "Nut, Hex":
         mprefix_nut = st.selectbox("Material Prefix", [""] + prefixes_nut, key="nut_mprefix")
 
         if mtype_nut == "MISCELLANEOUS":
-            names_nut = materials_df[materials_df["Material Type"] == mtype_nut]["Name"].dropna().tolist()
+            names_nut = materials_df[materials_df["Material Type"] == mtype_nut]["Name"].dropna().drop_duplicates().tolist()
         else:
             names_nut = materials_df[
                 (materials_df["Material Type"] == mtype_nut) &
                 (materials_df["Prefix"] == mprefix_nut)
-            ]["Name"].dropna().tolist()
+            ]["Name"].dropna().drop_duplicates().tolist()
 
         mname_nut = st.selectbox("Material Name", [""] + names_nut, key="nut_mname")
         material_note_nut = st.text_input("Material Note (opzionale)", key="nut_mnote")
@@ -2471,7 +2492,10 @@ if selected_part == "Ring, Wear":
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
+            ]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="ring_mname")
 
@@ -2760,7 +2784,10 @@ if selected_part == "Shaft, Pump":
         if mtype == "MISCELLANEOUS":
             names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().drop_duplicates().tolist()
         else:
-            names = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().drop_duplicates().tolist()
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
+            ]["Name"].dropna().drop_duplicates().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="sh_mname")
 
@@ -2922,12 +2949,12 @@ elif selected_part == "Baseplate, Pump":
         mprefix_bp  = st.selectbox("Material Prefix", [""] + prefixes_bp, key="bp_mprefix")
 
         if mtype_bp == "MISCELLANEOUS":
-            names_bp = materials_df[materials_df["Material Type"] == mtype_bp]["Name"].dropna().tolist()
+            names_bp = materials_df[materials_df["Material Type"] == mtype_bp]["Name"].dropna().drop_duplicates().tolist()
         else:
             names_bp = materials_df[
                 (materials_df["Material Type"] == mtype_bp) &
                 (materials_df["Prefix"] == mprefix_bp)
-            ]["Name"].dropna().tolist()
+            ]["Name"].dropna().drop_duplicates().tolist()
         mname_bp = st.selectbox("Material Name", [""] + names_bp, key="bp_mname")
 
         if st.button("Genera Output", key="gen_bp"):
