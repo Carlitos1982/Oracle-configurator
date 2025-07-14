@@ -1295,7 +1295,7 @@ if selected_part == "Gasket, Spiral Wound":
         out_dia_gsw = st.text_input("Outer Diameter", key="gsw_out_dia")
         in_dia_gsw = st.text_input("Inner Diameter", key="gsw_in_dia")
         thickness_gsw = st.text_input("Thickness", key="gsw_thick")
-        rating_gsw = st.text_input("Rating", key="gsw_rating")
+        rating = st.selectbox("Rating", ["150", "300", "600", "900", "1500", "2500"], key="gsw_rating")
         dwg_gsw = st.text_input("Dwg/doc number", key="gsw_dwg")
         note_gsw = st.text_area("Note (opzionale)", height=80, key="gsw_note")
 
