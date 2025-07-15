@@ -2911,8 +2911,8 @@ if selected_part == "Baseplate, Pump":
     with col1:
         st.subheader("✏️ Input")
 
-        model = st.selectbox("Product/Pump Model", df_pump_sizes["Model"].unique())
-        size = st.selectbox("Product/Pump Size", pump_sizes_df[df_pump_sizes["Model"] == model]["Size"].unique())
+        model = st.selectbox("Product/Pump Model", pump_sizes_df["Model"].unique())
+        size = st.selectbox("Product/Pump Size", pump_sizes_df[pump_sizes_df["Model"] == model]["Size"].unique())
 
         length = st.number_input("Length (mm)", min_value=0)
         width = st.number_input("Width (mm)", min_value=0)
@@ -2943,7 +2943,6 @@ if selected_part == "Baseplate, Pump":
             ]
             fpd_code = fpd_row["FPD Code"].values[0] if not fpd_row.empty else "NOT FOUND"
 
-            # Qualità fisse + opzionali
             sq_tags = ["[SQ53]", "[CORP-ENG-0234]"]
             quality_lines = [
                 "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
@@ -2953,14 +2952,13 @@ if selected_part == "Baseplate, Pump":
                 sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
-            # Descrizione
             descr = f"BASEPLATE FOR PUMP {model} SIZE {size} – {length}X{width} mm – WEIGHT: {weight} KG"
             if note:
                 descr += f", NOTE: {note}"
             descr += " " + " ".join(sq_tags)
             descr = "*" + descr
 
-            output_data = {
+            st.session_state["output_data"] = {
                 "Item": "77004…",
                 "Identificativo": "2100-BASEPLATE",
                 "Classe ricambi": "",
@@ -2977,7 +2975,6 @@ if selected_part == "Baseplate, Pump":
                 "Description": descr
             }
 
-            st.session_state["output_data"] = output_data
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
