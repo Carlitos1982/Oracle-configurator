@@ -2911,8 +2911,9 @@ if selected_part == "Baseplate, Pump":
     with col1:
         st.subheader("✏️ Input")
 
-        model = st.selectbox("Product/Pump Model", size_df["Model"].unique())
-        size = st.selectbox("Product/Pump Size", size_df[size_df["Model"] == model]["Size"].unique())
+        model = st.selectbox("Product/Pump Model", size_df["Pump Model"].unique())
+        size = st.selectbox("Product/Pump Size", size_df[size_df["Pump Model"] == model]["Size"].unique())
+
 
         length = st.number_input("Length (mm)", min_value=0)
         width = st.number_input("Width (mm)", min_value=0)
