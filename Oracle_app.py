@@ -40,6 +40,16 @@ def load_config_data():
 
 size_df, features_df, materials_df = load_config_data()
 material_types = materials_df["Material Type"].dropna().unique().tolist()
+@st.cache_data
+def get_fpd_code(mat_type, mat_prefix, mat_name):
+    row = materials_df[
+        (materials_df["Material Type"] == mat_type) &
+        (materials_df["Prefix"] == mat_prefix) &
+        (materials_df["Name"] == mat_name)
+    ]
+    if not row.empty and "FPD Code" in row.columns:
+        return row.iloc[0]["FPD Code"]
+    return "NOT AVAILABLE"
 
 
 # --- Definizione di dimensioni comuni per bulloni
