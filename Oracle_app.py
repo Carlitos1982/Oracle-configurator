@@ -2905,77 +2905,111 @@ if selected_part == "Shaft, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-if selected_part == "Baseplate, Pump":
+elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
 
     with col1:
         st.subheader("✏️ Input")
 
-        model = st.selectbox("Product/Pump Model", size_df["Pump Model"].unique())
-        size = st.selectbox("Product/Pump Size", size_df[size_df["Pump Model"] == model]["Size"].unique())
-
+        model = st.selectbox("Pump Type", size_df["Pump Model"].dropna().unique())
+        size = st.selectbox("Pump Size", size_df[size_df["Pump Model"] == model]["Size"].dropna().unique())
 
         length = st.number_input("Length (mm)", min_value=0)
         width = st.number_input("Width (mm)", min_value=0)
         weight = st.number_input("Weight (kg)", min_value=0)
 
-        sourcing = st.selectbox("Sourcing", ["Europe", "India", "Other"])
-        note = st.text_area("Note (opzionale)")
-        dwg = st.text_input("Dwg/doc number")
+        sourcing = st.text_input("Sourcing")
+        drawing = st.text_input("DWG/Doc")
+        note = st.text_area("Note")
 
-        mat_type = st.selectbox("Material Type", materials_df["Material Type"].unique())
-        filtered_prefix = materials_df[materials_df["Material Type"] == mat_type]["Prefix"].unique()
-        mat_prefix = st.selectbox("Material Prefix", filtered_prefix)
+        st.markdown("---")
+        st.markdown("**Materiale**")
 
+        mat_type = st.selectbox("Material Type", materials_df["Material Type"].dropna().unique(), key="base_mat_type")
+        filtered_prefix = materials_df[materials_df["Material Type"] == mat_type]["Prefix"].dropna().unique()
+        mat_prefix = st.selectbox("Material Prefix", filtered_prefix, key="base_mat_prefix")
         filtered_names = materials_df[
             (materials_df["Material Type"] == mat_type) &
             (materials_df["Prefix"] == mat_prefix)
-        ]["Name"].drop_duplicates()
-        mat_name = st.selectbox("Name", filtered_names)
+        ]["Name"].dropna().drop_duplicates()
+        mat_name = st.selectbox("Material Name", filtered_names, key="base_mat_name")
+        mat_note = st.text_input("Material Note")
 
-        stamicarbon = st.checkbox("Stamicarbon?")
+        stamicarbon = st.checkbox("Stamicarbon?", key="base_stamicarbon")
 
-        if st.button("Genera Output"):
-            full_material = f"{mat_type} {mat_prefix} {mat_name}"
-            fpd_row = materials_df[
-                (materials_df["Material Type"] == mat_type) &
-                (materials_df["Prefix"] == mat_prefix) &
-                (materials_df["Name"] == mat_name)
-            ]
-            fpd_code = fpd_row["FPD Code"].values[0] if not fpd_row.empty else "NOT FOUND"
+    with col2:
+        st.subheader("📎 Output")
 
-            sq_tags = ["[SQ53]", "[CORP-ENG-0234]"]
-            quality_lines = [
-                "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
-                "CORP-ENG-0234 - Procedure for Baseplate Inspection J4-11"
-            ]
-            if stamicarbon:
-                sq_tags.append("<SQ172>")
-                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+        item = "77004..."
+        ident = "BASEPLATE"
+        classe = ""
+        cat = "FASCIA ITE 5"
+        catalog = "BASE"
+        drawing_out = drawing
+        material = f"{mat_type} {mat_prefix} {mat_name}".strip()
+        fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
+        template = "FPD_BUY_4"
+        erp1 = "21_FABRICATION_OR_BASEPLATES"
+        erp2 = "22_BASEPLATE"
+        to_supplier = sourcing
 
-            descr = f"BASEPLATE FOR PUMP {model} SIZE {size} – {length}X{width} mm – WEIGHT: {weight} KG"
-            if note:
-                descr += f", NOTE: {note}"
-            descr += " " + " ".join(sq_tags)
-            descr = "*" + descr
+        descr_parts = [
+            f"*{ident}",
+            f"{model}-{size}",
+            f"{length}x{width} mm",
+            f"{weight} kg",
+            note,
+            material,
+            mat_note,
+            "[SQ53]",
+            "[CORP-ENG-0234]"
+        ]
+        if stamicarbon:
+            descr_parts.append("<SQ172>")
+        descr = " ".join([part for part in descr_parts if part])
 
-            st.session_state["output_data"] = {
-                "Item": "77004…",
-                "Identificativo": "2100-BASEPLATE",
-                "Classe ricambi": "",
-                "Categories": "FASCIA ITE 4",
-                "Catalog": "BASE",
-                "Disegno": dwg,
-                "Material": full_material,
-                "FPD material code": fpd_code,
-                "Template": "FPD_BUY_4",
-                "ERP_L1": "21_FABRICATION_OR_BASEPLATES",
-                "ERP_L2": "17_BASEPLATE",
-                "To Supplier": "",
-                "Quality": "\n".join(quality_lines),
-                "Description": descr
-            }
+        quality = [
+            "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
+            "CORP-ENG-0234 - Procedure for Baseplate Inspection J4-11"
+        ]
+        if stamicarbon:
+            quality.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
+        st.write("**Item**", item)
+        st.write("**Description**", descr)
+        st.write("**Identificativo**", ident)
+        st.write("**Classe ricambi**", classe)
+        st.write("**Categories**", cat)
+        st.write("**Catalog**", catalog)
+        st.write("**Disegno**", drawing_out)
+        st.write("**Material**", material)
+        st.write("**FPD material code**", fpd_code)
+        st.write("**Template**", template)
+        st.write("**ERP L1**", erp1)
+        st.write("**ERP L2**", erp2)
+        st.write("**To Supplier**", to_supplier)
+        st.write("**Quality**", "\n".join(quality))
+
+    with col3:
+        st.subheader("🧩 DataLoad")
+
+        operation = st.radio("Operazione", ["Crea item", "Aggiorna item"], key="base_op")
+        item_code_input = st.text_input("Item Number", key="base_item_number")
+
+        if item_code_input:
+            dataload_string = generate_dataload_string(
+                operation,
+                item_code_input,
+                descr,
+                catalog,
+                template,
+                erp1,
+                erp2,
+                drawing_out,
+                material,
+                fpd_code
+            )
+            st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
