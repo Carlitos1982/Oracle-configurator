@@ -2928,8 +2928,7 @@ elif selected_part == "Baseplate, Pump":
         drawing = st.text_input("DWG/Doc")
         note = st.text_area("Note")
 
-        st.markdown("---")
-        st.markdown("**Materiale**")
+        # **Riga orizzontale RIMOSSA**, proprio come nelle altre sezioni
 
         mat_type = st.selectbox("Material Type", materials_df["Material Type"].dropna().unique(), key="base_mat_type")
         filtered_prefix = materials_df[materials_df["Material Type"] == mat_type]["Prefix"].dropna().unique()
@@ -2943,7 +2942,7 @@ elif selected_part == "Baseplate, Pump":
 
         stamicarbon = st.checkbox("Stamicarbon?", key="base_stamicarbon")
 
-        if st.button("📤 Genera Output"):
+        if st.button("📤 Genera Output", key="base_output"):
             material = f"{mat_type} {mat_prefix} {mat_name}".strip()
             fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
             descr_parts = [
@@ -2987,6 +2986,7 @@ elif selected_part == "Baseplate, Pump":
 
     with col2:
         st.subheader("📤 Output")
+
         if "output_data" in st.session_state:
             for key, value in st.session_state["output_data"].items():
                 st.write(f"**{key}**", value)
@@ -2998,18 +2998,18 @@ elif selected_part == "Baseplate, Pump":
         item_code_input = st.text_input("Item Number", key="base_item_number")
 
         if item_code_input and "output_data" in st.session_state:
-            dl = st.session_state["output_data"]
+            data = st.session_state["output_data"]
             dataload_string = generate_dataload_string(
                 operation,
                 item_code_input,
-                dl["Description"],
-                dl["Catalog"],
-                dl["Template"],
-                dl["ERP L1"],
-                dl["ERP L2"],
-                dl["Disegno"],
-                dl["Material"],
-                dl["FPD material code"]
+                data["Description"],
+                data["Catalog"],
+                data["Template"],
+                data["ERP L1"],
+                data["ERP L2"],
+                data["Disegno"],
+                data["Material"],
+                data["FPD material code"]
             )
             st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
 
