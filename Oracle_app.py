@@ -2927,9 +2927,8 @@ elif selected_part == "Baseplate, Pump":
         sourcing = st.text_input("Sourcing")
         drawing = st.text_input("DWG/Doc")
         note = st.text_area("Note")
-
-        st.subheader("📦 Materiale")
         mat_type = st.selectbox("Material Type", materials_df["Material Type"].dropna().unique(), key="base_mat_type")
+
         filtered_prefix = materials_df[materials_df["Material Type"] == mat_type]["Prefix"].dropna().unique()
         mat_prefix = st.selectbox("Material Prefix", filtered_prefix, key="base_mat_prefix")
         filtered_names = materials_df[
