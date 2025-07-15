@@ -672,6 +672,288 @@ if selected_part == "Impeller, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
+# --- SHAFT, PUMP
+if selected_part == "Shaft, Pump":
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.subheader("✏️ Input")
+        model = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="shaft_model")
+        size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
+        size = st.selectbox("Product/Pump Size", [""] + size_list, key="shaft_size")
+        brg_type = st.text_input("Bearing Type", key="shaft_brg_type")
+        brg_size = st.text_input("Bearing Size", key="shaft_brg_size")
+        max_diam = st.text_input("Max Diameter (mm)", key="shaft_diam")
+        max_len = st.text_input("Max Length (mm)", key="shaft_len")
+        note = st.text_area("Note", height=80, key="shaft_note")
+        dwg = st.text_input("Dwg/doc number", key="shaft_dwg")
+
+        mtype = st.selectbox("Material Type", [""] + material_types, key="shaft_mtype")
+        pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
+        prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
+        mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="shaft_mprefix")
+
+        if mtype == "MISCELLANEOUS":
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().unique().tolist()
+        else:
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
+            ]["Name"].dropna().unique().tolist()
+        mname = st.selectbox("Material Name", [""] + names, key="shaft_mname")
+
+        overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="shaft_overlay")
+        hvof = st.checkbox("HVOF coating?", key="shaft_hvof")
+        water = st.checkbox("Water service?", key="shaft_water")
+        stamicarbon = st.checkbox("Stamicarbon?", key="shaft_stamicarbon")
+
+        if st.button("Genera Output", key="shaft_gen"):
+            materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
+            match = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix) &
+                (materials_df["Name"] == mname)
+            ]
+            codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
+
+            sq_tags = ["[SQ60]", "[DE3513.014]", "[SQ58]", "[CORP-ENG-0115]"]
+            quality_lines = [
+                "SQ 60 - Procedura di Esecuzione del Run-Out per Alberi e Rotori di Pompe",
+                "DE 3513.014 - Shaft Demagnetization",
+                "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
+                "CORP-ENG-0115 - General Surface Quality Requirements G1-1"
+            ]
+            if overlay:
+                sq_tags.append("[PQ72]")
+                quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
+            if hvof:
+                sq_tags.append("[DE2500.002]")
+                quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
+            if water:
+                sq_tags.append("[PI23]")
+                quality_lines.append("PI 23 - Pompe per Acqua Potabile")
+            if stamicarbon:
+                sq_tags.append("<SQ172>")
+                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+
+            descr = f"SHAFT, PUMP - MODEL: {model}, SIZE: {size}, BRG TYPE: {brg_type}, BRG SIZE: {brg_size}, ØMAX: {max_diam}mm, LMAX: {max_len}mm"
+            if note:
+                descr += f", NOTE: {note}"
+            descr += " " + " ".join(sq_tags)
+            descr = "*" + descr
+
+            st.session_state["output_data"] = {
+                "Item": "40231…",
+                "Description": descr,
+                "Identificativo": "2100-SHAFT",
+                "Classe ricambi": "2-3",
+                "Categories": "FASCIA ITE 4",
+                "Catalog": "ALBERO",
+                "Disegno": dwg,
+                "Material": materiale,
+                "FPD material code": codice_fpd,
+                "Template": "FPD_MAKE",
+                "ERP_L1": "20_TURNKEY_MACHINING",
+                "ERP_L2": "25_SHAFTS",
+                "To supplier": "",
+                "Quality": "\n".join(quality_lines)
+            }
+
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=160)
+                else:
+                    st.text_input(k, value=v)
+
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_sh = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="shaft_dl_mode")
+        item_code_sh = st.text_input("Codice item", key="shaft_item_code")
+        if st.button("Genera stringa DataLoad", key="gen_dl_shaft"):
+            if not item_code_sh:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_sh(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+                dataload_fields_sh = [
+                    "\\%FN", item_code_sh,
+                    "\\%TC", get_val_sh("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_sh("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_sh("Identificativo"), "TAB",
+                    get_val_sh("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_sh('ERP_L1')}.{get_val_sh('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_sh("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_sh("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_sh("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_sh("FPD material code"), "TAB",
+                    get_val_sh("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_sh("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_sh("Quality") if get_val_sh("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_sh("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_sh("To supplier") if get_val_sh("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+                dataload_string_sh = "\t".join(dataload_fields_sh)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_sh, height=200)
+
+                csv_buffer_sh = io.StringIO()
+                writer_sh = csv.writer(csv_buffer_sh, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_sh:
+                    writer_sh.writerow([riga])
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_sh.getvalue(),
+                    file_name=f"dataload_{item_code_sh}.csv",
+                    mime="text/csv"
+                )
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
+
+# --- BASEPLATE, PUMP
+if selected_part == "Baseplate, Pump":
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.subheader("✏️ Input")
+        weight = st.text_input("Weight (kg)", key="base_weight")
+        note = st.text_area("Note (opzionale)", height=80, key="base_note")
+        dwg = st.text_input("Dwg/doc number", key="base_dwg")
+
+        mtype = st.selectbox("Material Type", [""] + material_types, key="base_mtype")
+        pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
+        prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
+        mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="base_mprefix")
+
+        if mtype == "MISCELLANEOUS":
+            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().unique().tolist()
+        else:
+            names = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
+            ]["Name"].dropna().unique().tolist()
+        mname = st.selectbox("Material Name", [""] + names, key="base_mname")
+
+        stamicarbon = st.checkbox("Stamicarbon?", key="base_stamicarbon")
+
+        if st.button("Genera Output", key="base_gen"):
+            materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
+            match = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix) &
+                (materials_df["Name"] == mname)
+            ]
+            codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
+
+            sq_tags = ["[SQ53]", "[CORP-ENG-0234]"]
+            quality_lines = [
+                "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
+                "CORP-ENG-0234 - Procedure for Baseplate Inspection J4-11"
+            ]
+            if stamicarbon:
+                sq_tags.append("<SQ172>")
+                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+
+            descr = f"BASEPLATE, PUMP – WEIGHT: {weight} KG"
+            if note:
+                descr += f", NOTE: {note}"
+            descr += " " + " ".join(sq_tags)
+            descr = "*" + descr
+
+            st.session_state["output_data"] = {
+                "Item": "74001…",
+                "Description": descr,
+                "Identificativo": "7400-BASEPLATE",
+                "Classe ricambi": "2",
+                "Categories": "FASCIA ITE 4",
+                "Catalog": "BASE",
+                "Disegno": dwg,
+                "Material": materiale,
+                "FPD material code": codice_fpd,
+                "Template": "FPD_BUY_4",
+                "ERP_L1": "20_TURNKEY_MACHINING",
+                "ERP_L2": "17_BASEPLATE",
+                "To supplier": "",
+                "Quality": "\n".join(quality_lines)
+            }
+
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=160)
+                else:
+                    st.text_input(k, value=v)
+
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_base = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="base_dl_mode")
+        item_code_base = st.text_input("Codice item", key="base_item_code")
+        if st.button("Genera stringa DataLoad", key="gen_dl_base"):
+            if not item_code_base:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_base(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+                dataload_fields_base = [
+                    "\\%FN", item_code_base,
+                    "\\%TC", get_val_base("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_base("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_base("Identificativo"), "TAB",
+                    get_val_base("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_base('ERP_L1')}.{get_val_base('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_base("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_base("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_base("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_base("FPD material code"), "TAB",
+                    get_val_base("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_base("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_base("Quality") if get_val_base("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_base("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_base("To supplier") if get_val_base("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+                dataload_string_base = "\t".join(dataload_fields_base)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_base, height=200)
+
+                csv_buffer_base = io.StringIO()
+                writer_base = csv.writer(csv_buffer_base, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_base:
+                    writer_base.writerow([riga])
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_base.getvalue(),
+                    file_name=f"dataload_{item_code_base}.csv",
+                    mime="text/csv"
+                )
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
+
+
 # --- BALANCE BUSHING, PUMP
 if selected_part == "Balance Bushing, Pump":
     col1, col2, col3 = st.columns(3)
