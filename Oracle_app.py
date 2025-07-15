@@ -2924,12 +2924,12 @@ if selected_part == "Baseplate, Pump":
         dwg = st.text_input("Dwg/doc number")
 
         mat_type = st.selectbox("Material Type", materials_df["Material Type"].unique())
-        filtered_prefix = materials_df[materials_df["Material Type"] == mat_type]["Material Prefix"].unique()
+        filtered_prefix = materials_df[materials_df["Material Type"] == mat_type]["Prefix"].unique()
         mat_prefix = st.selectbox("Material Prefix", filtered_prefix)
 
         filtered_names = materials_df[
             (materials_df["Material Type"] == mat_type) &
-            (materials_df["Material Prefix"] == mat_prefix)
+            (materials_df["Prefix"] == mat_prefix)
         ]["Material Name"].drop_duplicates()
         mat_name = st.selectbox("Material Name", filtered_names)
 
@@ -2939,7 +2939,7 @@ if selected_part == "Baseplate, Pump":
             full_material = f"{mat_type} {mat_prefix} {mat_name}"
             fpd_row = materials_df[
                 (materials_df["Material Type"] == mat_type) &
-                (materials_df["Material Prefix"] == mat_prefix) &
+                (materials_df["Prefix"] == mat_prefix) &
                 (materials_df["Material Name"] == mat_name)
             ]
             fpd_code = fpd_row["FPD Code"].values[0] if not fpd_row.empty else "NOT FOUND"
