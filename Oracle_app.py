@@ -2947,7 +2947,14 @@ elif selected_part == "Baseplate, Pump":
         catalog = "BASE"
         drawing_out = drawing
         material = f"{mat_type} {mat_prefix} {mat_name}".strip()
-        fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
+
+        row = materials_df[
+            (materials_df["Material Type"] == mat_type) &
+            (materials_df["Prefix"] == mat_prefix) &
+            (materials_df["Name"] == mat_name)
+        ]
+        fpd_code = row.iloc[0]["FPD Code"] if not row.empty else "NOT AVAILABLE"
+
         template = "FPD_BUY_4"
         erp1 = "21_FABRICATION_OR_BASEPLATES"
         erp2 = "22_BASEPLATE"
@@ -3010,6 +3017,7 @@ elif selected_part == "Baseplate, Pump":
                 fpd_code
             )
             st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
+
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
