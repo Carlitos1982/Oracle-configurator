@@ -2940,7 +2940,7 @@ elif selected_part == "Baseplate, Pump":
         stamicarbon = st.checkbox("Stamicarbon?", key="base_stamicarbon")
 
         if st.button("Genera Output"):
-            item = "77004..."
+            item = "477..."
             ident = "BASEPLATE"
             classe = ""
             cat = "FASCIA ITE 5"
