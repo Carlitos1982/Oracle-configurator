@@ -2943,80 +2943,76 @@ elif selected_part == "Baseplate, Pump":
 
         stamicarbon = st.checkbox("Stamicarbon?", key="base_stamicarbon")
 
+        if st.button("📤 Genera Output"):
+            material = f"{mat_type} {mat_prefix} {mat_name}".strip()
+            fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
+            descr_parts = [
+                f"*BASEPLATE",
+                f"{model}-{size}",
+                f"{length}x{width} mm",
+                f"{weight} kg",
+                note,
+                material,
+                mat_note,
+                "[SQ53]",
+                "[CORP-ENG-0234]"
+            ]
+            if stamicarbon:
+                descr_parts.append("<SQ172>")
+            descr = " ".join([d for d in descr_parts if d])
+
+            quality = [
+                "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
+                "CORP-ENG-0234 - Procedure for Baseplate Inspection J4-11"
+            ]
+            if stamicarbon:
+                quality.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+
+            st.session_state["output_data"] = {
+                "Item": "77004...",
+                "Description": descr,
+                "Identificativo": "BASEPLATE",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "BASE",
+                "Disegno": drawing,
+                "Material": material,
+                "FPD material code": fpd_code,
+                "Template": "FPD_BUY_4",
+                "ERP L1": "21_FABRICATION_OR_BASEPLATES",
+                "ERP L2": "22_BASEPLATE",
+                "To Supplier": sourcing,
+                "Quality": "\n".join(quality)
+            }
+
     with col2:
         st.subheader("📤 Output")
-
-        item = "77004..."
-        ident = "BASEPLATE"
-        classe = ""
-        cat = "FASCIA ITE 5"
-        catalog = "BASE"
-        drawing_out = drawing
-        material = f"{mat_type} {mat_prefix} {mat_name}".strip()
-        fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
-
-        template = "FPD_BUY_4"
-        erp1 = "21_FABRICATION_OR_BASEPLATES"
-        erp2 = "22_BASEPLATE"
-        to_supplier = sourcing
-
-        descr_parts = [
-            f"*{ident}",
-            f"{model}-{size}",
-            f"{length}x{width} mm",
-            f"{weight} kg",
-            note,
-            material,
-            mat_note,
-            "[SQ53]",
-            "[CORP-ENG-0234]"
-        ]
-        if stamicarbon:
-            descr_parts.append("<SQ172>")
-        descr = " ".join([d for d in descr_parts if d])
-
-        quality = [
-            "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
-            "CORP-ENG-0234 - Procedure for Baseplate Inspection J4-11"
-        ]
-        if stamicarbon:
-            quality.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
-
-        st.write("**Item**", item)
-        st.write("**Description**", descr)
-        st.write("**Identificativo**", ident)
-        st.write("**Classe ricambi**", classe)
-        st.write("**Categories**", cat)
-        st.write("**Catalog**", catalog)
-        st.write("**Disegno**", drawing_out)
-        st.write("**Material**", material)
-        st.write("**FPD material code**", fpd_code)
-        st.write("**Template**", template)
-        st.write("**ERP L1**", erp1)
-        st.write("**ERP L2**", erp2)
-        st.write("**To Supplier**", to_supplier)
-        st.write("**Quality**", "\n".join(quality))
+        if "output_data" in st.session_state:
+            for key, value in st.session_state["output_data"].items():
+                st.write(f"**{key}**", value)
 
     with col3:
-        st.subheader("📝 DataLoad")
+        st.subheader("🧾 DataLoad")
 
         operation = st.radio("Operazione", ["Crea item", "Aggiorna item"], key="base_op")
         item_code_input = st.text_input("Item Number", key="base_item_number")
 
-        if item_code_input:
+        if item_code_input and "output_data" in st.session_state:
+            dl = st.session_state["output_data"]
             dataload_string = generate_dataload_string(
                 operation,
                 item_code_input,
-                descr,
-                catalog,
-                template,
-                erp1,
-                erp2,
-                drawing_out,
-                material,
-                fpd_code
+                dl["Description"],
+                dl["Catalog"],
+                dl["Template"],
+                dl["ERP L1"],
+                dl["ERP L2"],
+                dl["Disegno"],
+                dl["Material"],
+                dl["FPD material code"]
             )
             st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
+
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
