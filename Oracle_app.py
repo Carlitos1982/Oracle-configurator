@@ -2947,13 +2947,7 @@ elif selected_part == "Baseplate, Pump":
         catalog = "BASE"
         drawing_out = drawing
         material = f"{mat_type} {mat_prefix} {mat_name}".strip()
-
-        row = materials_df[
-            (materials_df["Material Type"] == mat_type) &
-            (materials_df["Prefix"] == mat_prefix) &
-            (materials_df["Name"] == mat_name)
-        ]
-        fpd_code = row.iloc[0]["FPD Code"] if not row.empty else "NOT AVAILABLE"
+        fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
 
         template = "FPD_BUY_4"
         erp1 = "21_FABRICATION_OR_BASEPLATES"
@@ -2973,7 +2967,7 @@ elif selected_part == "Baseplate, Pump":
         ]
         if stamicarbon:
             descr_parts.append("<SQ172>")
-        descr = " ".join([part for part in descr_parts if part])
+        descr = " ".join([d for d in descr_parts if d])
 
         quality = [
             "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
@@ -2998,7 +2992,7 @@ elif selected_part == "Baseplate, Pump":
         st.write("**Quality**", "\n".join(quality))
 
     with col3:
-        st.subheader("🧩 DataLoad")
+        st.subheader("📤 DataLoad")
 
         operation = st.radio("Operazione", ["Crea item", "Aggiorna item"], key="base_op")
         item_code_input = st.text_input("Item Number", key="base_item_number")
@@ -3017,7 +3011,6 @@ elif selected_part == "Baseplate, Pump":
                 fpd_code
             )
             st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
-
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
