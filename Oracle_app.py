@@ -216,7 +216,7 @@ if selected_part == "Casing, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name", [""] + names, key="casing_mname")
+        mname = st.selectbox("Material Name", [""] + names, key="casing_mname")
 
         # ✅ Checkbox qualità extra
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="casing_hf")
@@ -379,7 +379,7 @@ if selected_part == "Casing Cover, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name", [""] + names, key="ccov_mname")
+        mname = st.selectbox("Material Name", [""] + names, key="ccov_mname")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="ccov_hf")
@@ -540,7 +540,7 @@ if selected_part == "Impeller, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name", [""] + names, key="imp_mname")
+        mname = st.selectbox("Material Name", [""] + names, key="imp_mname")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="imp_hf")
@@ -672,10 +672,6 @@ if selected_part == "Impeller, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
-
-
-
 # --- BALANCE BUSHING, PUMP
 if selected_part == "Balance Bushing, Pump":
     col1, col2, col3 = st.columns(3)
@@ -701,7 +697,7 @@ if selected_part == "Balance Bushing, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name", [""] + names, key="bbush_mname")
+        mname = st.selectbox("Material Name", [""] + names, key="bbush_mname")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="bbush_hf")
@@ -859,7 +855,7 @@ if selected_part == "Balance Drum, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name", [""] + names, key="bdrum_mname")
+        mname = st.selectbox("Material Name", [""] + names, key="bdrum_mname")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="bdrum_hf")
@@ -1016,7 +1012,7 @@ if selected_part == "Balance Disc, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name", [""] + names, key="bdisc_mname")
+        mname = st.selectbox("Material Name", [""] + names, key="bdisc_mname")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="bdisc_hf")
@@ -1174,7 +1170,7 @@ if selected_part == "Gate, Valve":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name", [""] + names, key="gate_mname")
+        mname = st.selectbox("Material Name", [""] + names, key="gate_mname")
 
         # Checkbox solo per HF e Stamicarbon
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="gate_hf")
@@ -1793,7 +1789,7 @@ elif selected_part == "Bolt, Hexagonal":
                 (materials_df["Material Type"] == mtype_hex) &
                 (materials_df["Prefix"] == mprefix_hex)
             ]["Name"].dropna().tolist()
-        mname_hex = st.selectbox("Name", [""] + names_hex, key="hex_mname")
+        mname_hex = st.selectbox("Material Name", [""] + names_hex, key="hex_mname")
 
         note2_hex = st.text_area("Material Note (opzionale)", height=80, key="hex_note2")
 
@@ -2053,7 +2049,7 @@ elif selected_part == "Gusset, Other":
                 (materials_df["Material Type"] == mtype_gusset) &
                 (materials_df["Prefix"] == mprefix_gusset)
             ]["Name"].dropna().tolist()
-        mname_gusset = st.selectbox("Name", [""] + names_gusset, key="mname_gusset")
+        mname_gusset = st.selectbox("Material Name", [""] + names_gusset, key="mname_gusset")
 
         note2_gusset = st.text_area("Material Note (opzionale)", height=80, key="gusset_note2")
 
@@ -2201,7 +2197,7 @@ if selected_part == "Stud, Threaded":
                 (materials_df["Prefix"] == mprefix_stu)
             ]["Name"].dropna().tolist()
 
-        mname_stu = st.selectbox("Name", [""] + names_stu, key="stu_mname")
+        mname_stu = st.selectbox("Material Name", [""] + names_stu, key="stu_mname")
         material_note_stu = st.text_input("Material Note (opzionale)", key="stu_mnote")
 
         # ✅ Checkbox HF
@@ -2341,7 +2337,7 @@ if selected_part == "Nut, Hex":
                 (materials_df["Prefix"] == mprefix_nut)
             ]["Name"].dropna().tolist()
 
-        mname_nut = st.selectbox("Name", [""] + names_nut, key="nut_mname")
+        mname_nut = st.selectbox("Material Name", [""] + names_nut, key="nut_mname")
         material_note_nut = st.text_input("Material Note (opzionale)", key="nut_mnote")
 
         # ✅ Checkbox HF
@@ -2485,7 +2481,7 @@ if selected_part == "Ring, Wear":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name", [""] + names, key="ring_mname")
+        mname = st.selectbox("Material Name", [""] + names, key="ring_mname")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="ring_hf")
@@ -2777,7 +2773,7 @@ if selected_part == "Shaft, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name", [""] + names, key="sh_mname")
+        mname = st.selectbox("Material Name", [""] + names, key="sh_mname")
 
         # ✅ Checkbox aggiuntive
         overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="sh_overlay")
@@ -2905,7 +2901,156 @@ if selected_part == "Shaft, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+# --- BASEPLATE, PUMP
+elif selected_part == "Baseplate, Pump":
+    col1, col2, col3 = st.columns(3)
 
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        model_bp    = st.selectbox(
+            "Product/Pump Model",
+            [""] + sorted(size_df["Pump Model"].dropna().unique()),
+            key="bp_model"
+        )
+        size_list_bp = size_df[size_df["Pump Model"] == model_bp]["Size"].dropna().tolist()
+        size_bp     = st.selectbox("Product/Pump Size", [""] + size_list_bp, key="bp_size")
+
+        length_bp   = st.number_input("Length (mm)", min_value=0, step=1, format="%d", key="bp_length")
+        width_bp    = st.number_input("Width (mm)",  min_value=0, step=1, format="%d", key="bp_width")
+        weight_bp   = st.number_input("Weight (kg)", min_value=0, step=1, format="%d", key="bp_weight")
+        sourcing_bp = st.selectbox("Sourcing", ["Europe", "India", "China"], key="bp_sourcing")
+
+        note_bp     = st.text_area("Note (opzionale)", height=80, key="bp_note")
+        dwg_bp      = st.text_input("Dwg/doc number", key="bp_dwg")
+
+        mtype_bp    = st.selectbox("Material Type", [""] + material_types, key="bp_mtype")
+        pref_df_bp  = materials_df[
+            (materials_df["Material Type"] == mtype_bp) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_bp = sorted(pref_df_bp["Prefix"].unique()) if mtype_bp != "MISCELLANEOUS" else []
+        mprefix_bp  = st.selectbox("Material Prefix", [""] + prefixes_bp, key="bp_mprefix")
+
+        if mtype_bp == "MISCELLANEOUS":
+            names_bp = materials_df[materials_df["Material Type"] == mtype_bp]["Name"].dropna().tolist()
+        else:
+            names_bp = materials_df[
+                (materials_df["Material Type"] == mtype_bp) &
+                (materials_df["Prefix"] == mprefix_bp)
+            ]["Name"].dropna().tolist()
+        mname_bp = st.selectbox("Material Name", [""] + names_bp, key="bp_mname")
+
+        if st.button("Genera Output", key="gen_bp"):
+            if mtype_bp != "MISCELLANEOUS":
+                materiale_bp = f"{mtype_bp} {mprefix_bp} {mname_bp}".strip()
+                match_bp     = materials_df[
+                    (materials_df["Material Type"] == mtype_bp) &
+                    (materials_df["Prefix"] == mprefix_bp) &
+                    (materials_df["Name"] == mname_bp)
+                ]
+            else:
+                materiale_bp = mname_bp
+                match_bp     = materials_df[
+                    (materials_df["Material Type"] == mtype_bp) &
+                    (materials_df["Name"] == mname_bp)
+                ]
+            codice_fpd_bp = match_bp["FPD Code"].values[0] if not match_bp.empty else ""
+
+            # 1) Costruisci prima la descrizione base (senza asterisco)
+            descr_bp = (
+                f"BASEPLATE, PUMP - MODEL: {model_bp}, SIZE: {size_bp}, "
+                f"LENGTH: {int(length_bp)}mm, WIDTH: {int(width_bp)}mm, WEIGHT: {int(weight_bp)}kg, "
+                f"SOURCING: {sourcing_bp}"
+            )
+            if note_bp:
+                descr_bp += f", NOTE: {note_bp}"
+            descr_bp += f", {materiale_bp}"
+
+            # 2) Aggiungi sempre l’asterisco all’inizio
+            descr_bp = "*" + descr_bp
+
+            st.session_state["output_data"] = {
+                "Item":              "477…",
+                "Description":       descr_bp,
+                "Identificativo":    "6110-BASE PLATE",
+                "Classe ricambi":    "",
+                "Categories":        "FASCIA ITE 5",
+                "Catalog":           "ARTVARI",
+                "Disegno":           dwg_bp,
+                "Material":          materiale_bp,
+                "FPD material code": codice_fpd_bp,
+                "Template":          "FPD_BUY_4",
+                "ERP_L1":            "21_FABRICATIONS_OR_BASEPLATES",
+                "ERP_L2":            "18_FOUNDATION_PLATE",
+                "To supplier":       "",
+                "Quality":           ""
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=80, key=f"bp_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"bp_{campo}")
+
+    # COLONNA 3: DataLoad
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode_bp = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="bp_dl_mode")
+        item_code_bp    = st.text_input("Codice item", key="bp_item_code")
+        if st.button("Genera stringa DataLoad", key="gen_dl_bp"):
+            if not item_code_bp:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val_bp(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+
+                dataload_fields_bp = [
+                    "\\%FN", item_code_bp,
+                    "\\%TC", get_val_bp("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
+                    get_val_bp("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_bp("Identificativo"), "TAB",
+                    get_val_bp("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
+                    f"{get_val_bp('ERP_L1')}.{get_val_bp('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_bp("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_bp("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_bp("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_bp("FPD material code"), "TAB",
+                    get_val_bp("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_bp("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_bp("Quality") if get_val_bp("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_bp("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_bp("To supplier") if get_val_bp("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+                dataload_string_bp = "\t".join(dataload_fields_bp)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_bp, height=200)
+
+                csv_buffer_bp = io.StringIO()
+                writer_bp    = csv.writer(csv_buffer_bp, quoting=csv.QUOTE_MINIMAL)
+                for riga in dataload_fields_bp:
+                    writer_bp.writerow([riga])
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_bp.getvalue(),
+                    file_name=f"dataload_{item_code_bp}.csv",
+                    mime="text/csv"
+                )
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
     col1, col2, col3 = st.columns(3)
