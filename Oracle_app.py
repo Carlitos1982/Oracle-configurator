@@ -216,7 +216,7 @@ if selected_part == "Casing, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name"., [""] + names, key="casing_mname")
+        mname = st.selectbox("Name", [""] + names, key="casing_mname")
 
         # ✅ Checkbox qualità extra
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="casing_hf")
