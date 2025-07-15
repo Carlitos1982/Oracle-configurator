@@ -379,7 +379,7 @@ if selected_part == "Casing Cover, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name"., [""] + names, key="ccov_mname")
+        mname = st.selectbox("Name", [""] + names, key="ccov_mname")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="ccov_hf")
@@ -540,7 +540,7 @@ if selected_part == "Impeller, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name"., [""] + names, key="imp_mname")
+        mname = st.selectbox("Name", [""] + names, key="imp_mname")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="imp_hf")
@@ -701,7 +701,7 @@ if selected_part == "Balance Bushing, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name"., [""] + names, key="bbush_mname")
+        mname = st.selectbox("Name", [""] + names, key="bbush_mname")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="bbush_hf")
@@ -859,7 +859,7 @@ if selected_part == "Balance Drum, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name"., [""] + names, key="bdrum_mname")
+        mname = st.selectbox("Name", [""] + names, key="bdrum_mname")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="bdrum_hf")
@@ -1016,7 +1016,7 @@ if selected_part == "Balance Disc, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name"., [""] + names, key="bdisc_mname")
+        mname = st.selectbox("Name", [""] + names, key="bdisc_mname")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="bdisc_hf")
@@ -1174,7 +1174,7 @@ if selected_part == "Gate, Valve":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name"., [""] + names, key="gate_mname")
+        mname = st.selectbox("Name", [""] + names, key="gate_mname")
 
         # Checkbox solo per HF e Stamicarbon
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="gate_hf")
@@ -1793,7 +1793,7 @@ elif selected_part == "Bolt, Hexagonal":
                 (materials_df["Material Type"] == mtype_hex) &
                 (materials_df["Prefix"] == mprefix_hex)
             ]["Name"].dropna().tolist()
-        mname_hex = st.selectbox("Name"., [""] + names_hex, key="hex_mname")
+        mname_hex = st.selectbox("Name", [""] + names_hex, key="hex_mname")
 
         note2_hex = st.text_area("Material Note (opzionale)", height=80, key="hex_note2")
 
@@ -2053,7 +2053,7 @@ elif selected_part == "Gusset, Other":
                 (materials_df["Material Type"] == mtype_gusset) &
                 (materials_df["Prefix"] == mprefix_gusset)
             ]["Name"].dropna().tolist()
-        mname_gusset = st.selectbox("Name"., [""] + names_gusset, key="mname_gusset")
+        mname_gusset = st.selectbox("Name", [""] + names_gusset, key="mname_gusset")
 
         note2_gusset = st.text_area("Material Note (opzionale)", height=80, key="gusset_note2")
 
@@ -2201,7 +2201,7 @@ if selected_part == "Stud, Threaded":
                 (materials_df["Prefix"] == mprefix_stu)
             ]["Name"].dropna().tolist()
 
-        mname_stu = st.selectbox("Name"., [""] + names_stu, key="stu_mname")
+        mname_stu = st.selectbox("Name", [""] + names_stu, key="stu_mname")
         material_note_stu = st.text_input("Material Note (opzionale)", key="stu_mnote")
 
         # ✅ Checkbox HF
@@ -2341,7 +2341,7 @@ if selected_part == "Nut, Hex":
                 (materials_df["Prefix"] == mprefix_nut)
             ]["Name"].dropna().tolist()
 
-        mname_nut = st.selectbox("Name"., [""] + names_nut, key="nut_mname")
+        mname_nut = st.selectbox("Name", [""] + names_nut, key="nut_mname")
         material_note_nut = st.text_input("Material Note (opzionale)", key="nut_mnote")
 
         # ✅ Checkbox HF
@@ -2485,7 +2485,7 @@ if selected_part == "Ring, Wear":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name"., [""] + names, key="ring_mname")
+        mname = st.selectbox("Name", [""] + names, key="ring_mname")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="ring_hf")
@@ -2777,7 +2777,7 @@ if selected_part == "Shaft, Pump":
                 (materials_df["Prefix"] == mprefix)
             ]["Name"].dropna().tolist()
 
-        mname = st.selectbox("Name"., [""] + names, key="sh_mname")
+        mname = st.selectbox("Name", [""] + names, key="sh_mname")
 
         # ✅ Checkbox aggiuntive
         overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="sh_overlay")
@@ -2930,8 +2930,8 @@ if selected_part == "Baseplate, Pump":
         filtered_names = materials_df[
             (materials_df["Material Type"] == mat_type) &
             (materials_df["Prefix"] == mat_prefix)
-        ]["Name".].drop_duplicates()
-        mat_name = st.selectbox("Name"., filtered_names)
+        ]["Name"].drop_duplicates()
+        mat_name = st.selectbox("Name", filtered_names)
 
         stamicarbon = st.checkbox("Stamicarbon?")
 
@@ -2940,7 +2940,7 @@ if selected_part == "Baseplate, Pump":
             fpd_row = materials_df[
                 (materials_df["Material Type"] == mat_type) &
                 (materials_df["Prefix"] == mat_prefix) &
-                (materials_df["Name".] == mat_name)
+                (materials_df["Name"] == mat_name)
             ]
             fpd_code = fpd_row["FPD Code"].values[0] if not fpd_row.empty else "NOT FOUND"
 
