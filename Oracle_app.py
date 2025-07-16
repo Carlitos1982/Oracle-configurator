@@ -6,8 +6,14 @@ import csv
 
 import io
 
-def export_all_fields_to_excel(input_data, output_data, dataload_info):
     export_dict = {}
+
+    # Inputdef export_all_fields_to_excel(input_data, output_data, dataload_info, categoria="", parte=""):
+    export_dict = {}
+
+    # Intestazione con categoria e parte
+    export_dict["Categoria"] = categoria
+    export_dict["Parte"] = parte
 
     # Input
     for k, v in input_data.items():
@@ -3083,7 +3089,14 @@ elif selected_part == "Baseplate, Pump":
             "Stringa DataLoad": dataload_string if 'dataload_string' in locals() else "(non generata)"
         }
 
-        excel_file = export_all_fields_to_excel(input_data, st.session_state["output_data"], dataload_info)
+        excel_filexcel_file = export_all_fields_to_excel(
+    input_data,
+    st.session_state["output_data"],
+    dataload_info,
+    categoria="Machined",
+    parte="Baseplate, Pump"
+)
+e = export_all_fields_to_excel(input_data, st.session_state["output_data"], dataload_info)
 
         st.download_button(
             label="📥 Scarica tutto in Excel",
