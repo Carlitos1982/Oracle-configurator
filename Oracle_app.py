@@ -2911,7 +2911,7 @@ if selected_part == "Shaft, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-if selected_part == "Baseplate, Pump":
+elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
 
     with col1:
@@ -2926,12 +2926,11 @@ if selected_part == "Baseplate, Pump":
 
         material_type, material_prefix, material_name = material_input_fields(material_df)
         material_note = st.text_input("Material Note")
-
         note = st.text_input("Note")
         stamicarbon = st.checkbox("Stamicarbon?")
 
     with col2:
-        st.subheader("📦 Output")
+        st.subheader("📤 Output")
 
         item = "40221..."
         identificativo = "1501-BASEPLATE"
@@ -2942,16 +2941,19 @@ if selected_part == "Baseplate, Pump":
         category = "FASCIA ITE 4"
         material = format_material(material_type, material_prefix, material_name)
         fpd_code = get_fpd_code(material_df, material_type, material_prefix, material_name)
-        quality = ["SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
-                   "CORP-ENG-0234 - Procedure for Baseplate Inspection J4-11"]
-        description = f"*BASEPLATE FOR {pump_type} {pump_size} {baseplate_length}x{baseplate_width}x{baseplate_weight}mm - {sourcing}"
 
+        description = f"*BASEPLATE FOR {pump_type} {pump_size} {baseplate_length}x{baseplate_width}x{baseplate_weight}mm - {sourcing}"
         if note:
             description += f" - {note}"
         if material:
             description += f" - {material}"
         if material_note:
             description += f" - {material_note}"
+
+        quality = [
+            "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
+            "CORP-ENG-0234 - Procedure for Baseplate Inspection J4-11"
+        ]
         if stamicarbon:
             description += " [SQ172]"
             quality.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
@@ -2977,14 +2979,14 @@ if selected_part == "Baseplate, Pump":
             st.text_area(key, value, height=40)
 
     with col3:
-        st.subheader("📤 DataLoad")
+        st.subheader("🧾 DataLoad")
 
         create_or_update = st.radio("Create or Update?", ["Create", "Update"])
         item_number = st.text_input("Item Number")
 
         if st.button("Genera Stringa DataLoad") and item_number:
-            dataload_string = generate_dataload_string(output_data, item_number, create_or_update)
-            st.text_area("DataLoad String", dataload_string, height=200)
+            dataload_string = generate_dataload_string(output_data, item_number, create_
+
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
