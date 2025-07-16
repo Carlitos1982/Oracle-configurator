@@ -2938,7 +2938,6 @@ elif selected_part == "Baseplate, Pump":
         ]["Name"].dropna().drop_duplicates()
         mat_name = st.selectbox("Material Name", filtered_names, key="base_mat_name")
         mat_note = st.text_input("Material Note")
-        stamicarbon = st.checkbox("Stamicarbon?", key="base_stamicarbon")
 
         if st.button("Genera Output"):
             item = "477..."
@@ -2965,16 +2964,14 @@ elif selected_part == "Baseplate, Pump":
                 "[SQ53]",
                 "[CORP-ENG-0234]"
             ]
-            if stamicarbon:
-                descr_parts.append("<SQ172>")
+
             descr = " ".join([d for d in descr_parts if d])
 
             quality = [
                 "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
                 "CORP-ENG-0234 - Procedure for Baseplate Inspection J4-11"
             ]
-            if stamicarbon:
-                quality.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+
 
             st.session_state["output_data"] = {
                 "Item": item,
