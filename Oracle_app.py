@@ -5,7 +5,6 @@ import io
 import csv
 
 # Caricamento dati materiali da file Excel
-material_df = pd.read_excel("dati_config4.xlsx", sheet_name="Materials")
 
 # --- Configurazione pagina wide
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
@@ -50,6 +49,17 @@ def get_fpd_code(mat_type, mat_prefix, mat_name):
     if not row.empty and "FPD Code" in row.columns:
         return row.iloc[0]["FPD Code"]
     return "NOT AVAILABLE"
+    
+def material_input_fields(materials_df):
+    material_type = st.selectbox("Material Type", sorted(materials_df["Material Type"].dropna().unique()))
+    filtered_prefixes = materials_df[materials_df["Material Type"] == material_type]["Prefix"].dropna().unique()
+    material_prefix = st.selectbox("Prefix", sorted(filtered_prefixes))
+    filtered_names = materials_df[
+        (materials_df["Material Type"] == material_type) &
+        (materials_df["Prefix"] == material_prefix)
+    ]["Name"].dropna().unique()
+    material_name = st.selectbox("Name", sorted(filtered_names))
+    return material_type, material_prefix, material_name
 
 
 # --- Definizione di dimensioni comuni per bulloni
@@ -2924,7 +2934,7 @@ elif selected_part == "Baseplate, Pump":
         baseplate_weight = st.text_input("Weight (kg)")
         sourcing = st.selectbox("Sourcing", ["Cast", "Fabricated", "Composite"])
 
-        material_type, material_prefix, material_name = material_input_fields(material_df)
+        material_type, material_prefix, material_name = material_input_fields(materials_df)
         material_note = st.text_input("Material Note")
         note = st.text_input("Note")
         stamicarbon = st.checkbox("Stamicarbon?")
