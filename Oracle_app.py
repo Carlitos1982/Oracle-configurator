@@ -2939,7 +2939,7 @@ elif selected_part == "Baseplate, Pump":
         ]["Name"].dropna().drop_duplicates()
         mat_name = st.selectbox("Material Name", filtered_names, key="base_mat_name")
         mat_note = st.text_input("Material Note")
-        stamicarbon = st.checkbox("Stamicarbon?", key="base_stamicarbon")
+
 
         if st.button("Genera Output"):
             item = "477..."
