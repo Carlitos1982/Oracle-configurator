@@ -2941,7 +2941,7 @@ elif selected_part == "Baseplate, Pump":
 
         if st.button("Genera Output"):
             item = "477..."
-            ident = "BASEPLATE"
+            ident = "BASE"
             classe = ""
             cat = "FASCIA ITE 5"
             catalog = "ARTVARI"
