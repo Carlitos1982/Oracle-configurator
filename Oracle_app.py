@@ -2944,7 +2944,7 @@ elif selected_part == "Baseplate, Pump":
             ident = "BASEPLATE"
             classe = ""
             cat = "FASCIA ITE 5"
-            catalog = "BASE"
+            catalog = "ARTVARI"
             drawing_out = drawing
             material = f"{mat_type} {mat_prefix} {mat_name}".strip()
             fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
