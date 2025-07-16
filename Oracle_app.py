@@ -2966,16 +2966,15 @@ elif selected_part == "Baseplate, Pump":
                 "[SQ53]",
                 "[CORP-ENG-0234]"
             ]
-            if stamicarbon:
-                descr_parts.append("<SQ172>")
+       
+   
             descr = " ".join([d for d in descr_parts if d])
 
             quality = [
                 "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
                 "CORP-ENG-0234 - Procedure for Baseplate Inspection J4-11"
             ]
-            if stamicarbon:
-                quality.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+        
 
             st.session_state["output_data"] = {
                 "Item": item,
