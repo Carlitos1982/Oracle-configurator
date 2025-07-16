@@ -2930,7 +2930,7 @@ elif selected_part == "Baseplate, Pump":
         stamicarbon = st.checkbox("Stamicarbon?")
 
     with col2:
-        st.subheader("📤 Output")
+        st.subheader("📦 Output")
 
         item = "40221..."
         identificativo = "1501-BASEPLATE"
@@ -2978,7 +2978,7 @@ elif selected_part == "Baseplate, Pump":
         for key, value in output_data.items():
             st.text_area(key, value, height=40)
 
-       with col3:
+    with col3:
         st.subheader("📤 DataLoad")
 
         create_or_update = st.radio("Create or Update?", ["Create", "Update"])
@@ -2987,8 +2987,6 @@ elif selected_part == "Baseplate, Pump":
         if st.button("Genera Stringa DataLoad") and item_number:
             dataload_string = generate_dataload_string(output_data, item_number, create_or_update)
             st.text_area("DataLoad String", dataload_string, height=200)
-
-
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
