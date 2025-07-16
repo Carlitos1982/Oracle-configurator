@@ -3058,45 +3058,46 @@ elif selected_part == "Baseplate, Pump":
             st.text_input("To Supplier", value=data["To Supplier"], key="base_out13")
             st.text_area("Quality", value="\n".join(data["Quality"]), height=100, key="base_out14")
 
-    with col3:
-        st.subheader("🧾 DataLoad")
+   with col3:
+    st.subheader("🧾 DataLoad")
 
-        operation = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="base_op")
-        item_code_input = st.text_input("Codice item", key="base_item_code")
+    operation = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="base_op")
+    item_code_input = st.text_input("Codice item", key="base_item_code")
 
-        if "output_data" in st.session_state and "input_data" in st.session_state and item_code_input:
-            dataload_string = generate_dataload_string(
-                operation,
-                item_code_input,
-                st.session_state["output_data"]["Description"],
-                st.session_state["output_data"]["Catalog"],
-                st.session_state["output_data"]["Template"],
-                st.session_state["output_data"]["ERP L1"],
-                st.session_state["output_data"]["ERP L2"],
-                st.session_state["output_data"]["Disegno"],
-                st.session_state["output_data"]["Material"],
-                st.session_state["output_data"]["FPD material code"]
-            )
-            st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
+    if "output_data" in st.session_state and "input_data" in st.session_state:
+        dataload_string = generate_dataload_string(
+            operation,
+            item_code_input if item_code_input else ".",  # se vuoto, mette un punto
+            st.session_state["output_data"]["Description"],
+            st.session_state["output_data"]["Catalog"],
+            st.session_state["output_data"]["Template"],
+            st.session_state["output_data"]["ERP L1"],
+            st.session_state["output_data"]["ERP L2"],
+            st.session_state["output_data"]["Disegno"],
+            st.session_state["output_data"]["Material"],
+            st.session_state["output_data"]["FPD material code"]
+        )
 
-            excel_file = export_all_fields_to_excel(
-                input_data=st.session_state["input_data"],
-                output_data=st.session_state["output_data"],
-                dataload_info={
-                    "Operazione": operation,
-                    "Codice item": item_code_input,
-                    "Stringa DataLoad": dataload_string
-                },
-                categoria="Machined",
-                parte="Baseplate, Pump"
-            )
+        st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
 
-            st.download_button(
-                label="⬇️ Scarica Excel con tutti i dati",
-                data=excel_file,
-                file_name=f"{item_code_input}_oracle_item.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+        excel_file = export_all_fields_to_excel(
+            input_data=st.session_state["input_data"],
+            output_data=st.session_state["output_data"],
+            dataload_info={
+                "Operazione": operation,
+                "Codice item": item_code_input,
+                "Stringa DataLoad": dataload_string
+            },
+            categoria="Machined",
+            parte="Baseplate, Pump"
+        )
+
+        st.download_button(
+            label="⬇️ Scarica Excel con tutti i dati",
+            data=excel_file,
+            file_name=f"{item_code_input if item_code_input else 'senza_codice'}_oracle_item.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
