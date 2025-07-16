@@ -2945,159 +2945,105 @@ if selected_part == "Shaft, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-                
 elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
 
     with col1:
         st.subheader("✏️ Input")
-
-        model = st.selectbox("Pump Type", size_df["Pump Model"].dropna().unique())
-        size = st.selectbox("Pump Size", size_df[size_df["Pump Model"] == model]["Size"].dropna().unique())
-
-        length = st.number_input("Length (mm)", min_value=0)
-        width = st.number_input("Width (mm)", min_value=0)
-        weight = st.number_input("Weight (kg)", min_value=0)
-
-        sourcing = st.selectbox("Sourcing", ["EUROPEAN", "INDIAN", "CHINESE"])
-
-        drawing = st.text_input("DWG/Doc")
+        pump_type = st.text_input("Pump Type")
+        pump_size = st.text_input("Pump Size")
+        length = st.text_input("Length (mm)")
+        width = st.text_input("Width (mm)")
+        weight = st.text_input("Weight (kg)")
+        disegno = st.text_input("Drawing Number")
         note = st.text_area("Note")
-        mat_type = st.selectbox("Material Type", materials_df["Material Type"].dropna().unique(), key="base_mat_type")
 
-        filtered_prefix = materials_df[materials_df["Material Type"] == mat_type]["Prefix"].dropna().unique()
-        mat_prefix = st.selectbox("Material Prefix", filtered_prefix, key="base_mat_prefix")
-        filtered_names = materials_df[
-            (materials_df["Material Type"] == mat_type) &
-            (materials_df["Prefix"] == mat_prefix)
-        ]["Name"].dropna().drop_duplicates()
-        mat_name = st.selectbox("Material Name", filtered_names, key="base_mat_name")
-        mat_note = st.text_input("Material Note")
+        generate_output = st.button("Genera Output")
 
-        if st.button("Genera Output"):
-            item = "477..."
-            ident = "BASE"
-            classe = ""
-            cat = "FASCIA ITE 5"
-            catalog = "ARTVARI"
-            drawing_out = drawing
-            material = f"{mat_type} {mat_prefix} {mat_name}".strip()
-            fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
-            template = "FPD_BUY_4"
-            erp1 = "21_FABRICATION_OR_BASEPLATES"
-            erp2 = "22_BASEPLATE"
-            to_supplier = sourcing
+    if generate_output:
+        description = f"*BASEPLATE FOR {pump_type} SIZE {pump_size} - L={length}mm W={width}mm WEIGHT={weight}kg"
+        if disegno:
+            description += f" DWG: {disegno}"
+        if note:
+            description += f" NOTE: {note}"
+        description += " [SQ53] [CORP-ENG-0234]"
 
-            descr_parts = [
-                f"*{ident}",
-                f"{model}-{size}",
-                f"{length}x{width} mm",
-                f"{weight} kg",
-                note,
-                material,
-                mat_note,
-                "[SQ53]",
-                "[CORP-ENG-0234]"
-            ]
-
-            descr = " ".join([d for d in descr_parts if d])
-
-            quality = [
+        output_data = {
+            "Item": "47700...",
+            "Description": description,
+            "Identificativo": "BASEPLATE, PUMP",
+            "Classe ricambi": "",
+            "Categories": "FASCIA ITE 4",
+            "Catalog": "BASEPLATE",
+            "Disegno": disegno,
+            "Material": ".",
+            "FPD material code": ".",
+            "Template": "FPD_BUY_4",
+            "ERP_L1": "21_FABRICATION_OR_BASEPLATES",
+            "ERP_L2": "",
+            "To supplier": ".",
+            "Quality": [
                 "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
                 "CORP-ENG-0234 - Procedure for Baseplate Inspection J4-11"
             ]
+        }
 
-            st.session_state["input_data"] = {
-                "Pump Type": model,
-                "Pump Size": size,
-                "Length": length,
-                "Width": width,
-                "Weight": weight,
-                "Sourcing": sourcing,
-                "DWG/Doc": drawing,
-                "Note": note,
-                "Material Type": mat_type,
-                "Material Prefix": mat_prefix,
-                "Material Name": mat_name,
-                "Material Note": mat_note
-            }
+        dataload_info = {
+            "Operation": "Crea nuovo item",
+            "Codice item": ".",
+            "Description": output_data["Description"],
+            "Template": output_data["Template"],
+            "ERP_L1.ERP_L2": f'{output_data["ERP_L1"]}.{output_data["ERP_L2"] or "."}',
+            "Catalog": output_data["Catalog"],
+            "Disegno": disegno or ".",
+            "Material": ".",
+            "FPD material code": ".",
+            "Quality": "\n".join(output_data["Quality"]),
+            "To supplier": "."
+        }
 
-            st.session_state["output_data"] = {
-                "Item": item,
-                "Description": descr,
-                "Identificativo": ident,
-                "Classe ricambi": classe,
-                "Categories": cat,
-                "Catalog": catalog,
-                "Disegno": drawing_out,
-                "Material": material,
-                "FPD material code": fpd_code,
-                "Template": template,
-                "ERP L1": erp1,
-                "ERP L2": erp2,
-                "To Supplier": to_supplier,
-                "Quality": quality
-            }
+        st.session_state["output_data"] = output_data
+        st.session_state["dataload_info"] = dataload_info
+        st.session_state["categoria_corrente"] = "Machined Parts"
+        st.session_state["parte_corrente"] = "Baseplate, Pump"
 
     with col2:
         st.subheader("📤 Output")
-
         if "output_data" in st.session_state:
-            data = st.session_state["output_data"]
-            st.text_input("Item", value=data["Item"], key="base_out1")
-            st.text_area("Description", value=data["Description"], height=120, key="base_out2")
-            st.text_input("Identificativo", value=data["Identificativo"], key="base_out3")
-            st.text_input("Classe ricambi", value=data["Classe ricambi"], key="base_out4")
-            st.text_input("Categories", value=data["Categories"], key="base_out5")
-            st.text_input("Catalog", value=data["Catalog"], key="base_out6")
-            st.text_input("Disegno", value=data["Disegno"], key="base_out7")
-            st.text_input("Material", value=data["Material"], key="base_out8")
-            st.text_input("FPD material code", value=data["FPD material code"], key="base_out9")
-            st.text_input("Template", value=data["Template"], key="base_out10")
-            st.text_input("ERP L1", value=data["ERP L1"], key="base_out11")
-            st.text_input("ERP L2", value=data["ERP L2"], key="base_out12")
-            st.text_input("To Supplier", value=data["To Supplier"], key="base_out13")
-            st.text_area("Quality", value="\n".join(data["Quality"]), height=100, key="base_out14")
+            for k, v in st.session_state["output_data"].items():
+                if isinstance(v, list):
+                    st.text_area(k, value="\n".join(v), height=100, key=f"base_output_{k}")
+                else:
+                    st.text_input(k, value=v, key=f"base_output_{k}")
 
     with col3:
-        st.subheader("🧾 DataLoad")
-
-        if "output_data" in st.session_state and "input_data" in st.session_state:
-            operation = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="base_op")
-            item_code_input = st.text_input("Codice item", key="base_item_code")
-
-            dataload_string = generate_dataload_string(
-                operation,
-                item_code_input if item_code_input else ".",
-                st.session_state["output_data"]["Description"],
-                st.session_state["output_data"]["Catalog"],
-                st.session_state["output_data"]["Template"],
-                st.session_state["output_data"]["ERP L1"],
-                st.session_state["output_data"]["ERP L2"],
-                st.session_state["output_data"]["Disegno"],
-                st.session_state["output_data"]["Material"],
-                st.session_state["output_data"]["FPD material code"]
-            )
-
-            st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
+        st.subheader("📦 DataLoad & Export")
+        if "dataload_info" in st.session_state:
+            st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="base_op")
+            st.text_input("Codice item", key="base_code")
 
             excel_file = export_all_fields_to_excel(
-                input_data=st.session_state["input_data"],
-                output_data=st.session_state["output_data"],
-                dataload_info={
-                    "Operazione": operation,
-                    "Codice item": item_code_input,
-                    "Stringa DataLoad": dataload_string
+                input_data={
+                    "Pump Type": pump_type,
+                    "Pump Size": pump_size,
+                    "Length": length,
+                    "Width": width,
+                    "Weight": weight,
+                    "Disegno": disegno,
+                    "Note": note
                 },
-                categoria="Machined",
-                parte="Baseplate, Pump"
+                output_data=st.session_state["output_data"],
+                dataload_info=st.session_state["dataload_info"],
+                categoria=st.session_state["categoria_corrente"],
+                parte=st.session_state["parte_corrente"]
             )
 
             st.download_button(
-                label="⬇️ Scarica Excel con tutti i dati",
+                label="📥 Scarica Excel",
                 data=excel_file,
-                file_name=f"{item_code_input if item_code_input else 'senza_codice'}_oracle_item.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                file_name="oracle_item_export.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                key="download_baseplate_excel"
             )
 
 
