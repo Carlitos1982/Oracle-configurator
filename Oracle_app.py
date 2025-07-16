@@ -3051,58 +3051,39 @@ elif selected_part == "Baseplate, Pump":
         item_code_input = st.text_input("Codice item", key="base_item_code")
 
 if "output_data" in st.session_state and item_code_input:
-            dataload_string = generate_dataload_string(
-                operation,
-                item_code_input,
-                st.session_state["output_data"]["Description"],
-                st.session_state["output_data"]["Catalog"],
-                st.session_state["output_data"]["Template"],
-                st.session_state["output_data"]["ERP L1"],
-                st.session_state["output_data"]["ERP L2"],
-                st.session_state["output_data"]["Disegno"],
-                st.session_state["output_data"]["Material"],
-                st.session_state["output_data"]["FPD material code"]
-            )
-            st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
+    dataload_string = generate_dataload_string(
+        operation,
+        item_code_input,
+        st.session_state["output_data"]["Description"],
+        st.session_state["output_data"]["Catalog"],
+        st.session_state["output_data"]["Template"],
+        st.session_state["output_data"]["ERP L1"],
+        st.session_state["output_data"]["ERP L2"],
+        st.session_state["output_data"]["Disegno"],
+        st.session_state["output_data"]["Material"],
+        st.session_state["output_data"]["FPD material code"]
+    )
+    st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
 
-    if "output_data" in st.session_state:
-        input_data = {
-            "Pump Type": model,
-            "Pump Size": size,
-            "Length (mm)": length,
-            "Width (mm)": width,
-            "Weight (kg)": weight,
-            "Sourcing": sourcing,
-            "DWG/Doc": drawing,
-            "Note": note,
-            "Material Type": mat_type,
-            "Material Prefix": mat_prefix,
-            "Material Name": mat_name,
-            "Material Note": mat_note
-        }
+    # 👇 Download Excel
+    excel_file = export_all_fields_to_excel(
+        input_data=input_data,
+        output_data=st.session_state["output_data"],
+        dataload_info={
+            "Operazione": operation,
+            "Codice item": item_code_input,
+            "Stringa DataLoad": dataload_string
+        },
+        categoria="Machined",  # oppure "Casting", "Fastener", ecc.
+        parte="Baseplate, Pump"  # cambia a seconda del blocco
+    )
 
-        dataload_info = {
-            "Item code": item_code_input if item_code_input else "(non specificato)",
-            "Operazione": operation if operation else "(non specificata)",
-            "Stringa DataLoad": dataload_string if 'dataload_string' in locals() else "(non generata)"
-        }
-
-        excel_filexcel_file = export_all_fields_to_excel(
-    input_data,
-    st.session_state["output_data"],
-    dataload_info,
-    categoria="Machined",
-    parte="Baseplate, Pump"
-)
-e = export_all_fields_to_excel(input_data, st.session_state["output_data"], dataload_info)
-
-        st.download_button(
-            label="📥 Scarica tutto in Excel",
-            data=excel_file,
-            file_name=f"oracle_export_{item_code_input or 'item'}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-
+    st.download_button(
+        label="⬇️ Scarica Excel con tutti i dati",
+        data=excel_file,
+        file_name=f"{item_code_input}_oracle_item.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 
 # --- FLANGE, PIPE
