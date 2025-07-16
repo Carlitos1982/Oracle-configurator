@@ -2978,14 +2978,16 @@ elif selected_part == "Baseplate, Pump":
         for key, value in output_data.items():
             st.text_area(key, value, height=40)
 
-    with col3:
-        st.subheader("🧾 DataLoad")
+       with col3:
+        st.subheader("📤 DataLoad")
 
         create_or_update = st.radio("Create or Update?", ["Create", "Update"])
         item_number = st.text_input("Item Number")
 
         if st.button("Genera Stringa DataLoad") and item_number:
-            dataload_string = generate_dataload_string(output_data, item_number, create_
+            dataload_string = generate_dataload_string(output_data, item_number, create_or_update)
+            st.text_area("DataLoad String", dataload_string, height=200)
+
 
 
 # --- FLANGE, PIPE
