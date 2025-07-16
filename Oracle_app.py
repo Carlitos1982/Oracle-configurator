@@ -3044,7 +3044,7 @@ elif selected_part == "Baseplate, Pump":
             st.text_input("To Supplier", value=data["To Supplier"], key="base_out13")
             st.text_area("Quality", value="\n".join(data["Quality"]), height=100, key="base_out14")
 
-       with col3:
+     with col3:
         st.subheader("🧾 DataLoad")
 
         operation = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="base_op")
@@ -3084,6 +3084,7 @@ elif selected_part == "Baseplate, Pump":
                 file_name=f"{item_code_input}_oracle_item.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
