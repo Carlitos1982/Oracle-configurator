@@ -2945,6 +2945,7 @@ if selected_part == "Shaft, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+                
 elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
 
@@ -2998,7 +2999,6 @@ elif selected_part == "Baseplate, Pump":
                 "[SQ53]",
                 "[CORP-ENG-0234]"
             ]
-
             descr = " ".join([d for d in descr_parts if d])
 
             quality = [
@@ -3006,6 +3006,20 @@ elif selected_part == "Baseplate, Pump":
                 "CORP-ENG-0234 - Procedure for Baseplate Inspection J4-11"
             ]
 
+            st.session_state["input_data"] = {
+                "Pump Type": model,
+                "Pump Size": size,
+                "Length (mm)": length,
+                "Width (mm)": width,
+                "Weight (kg)": weight,
+                "Sourcing": sourcing,
+                "DWG/Doc": drawing,
+                "Note": note,
+                "Material Type": mat_type,
+                "Material Prefix": mat_prefix,
+                "Material Name": mat_name,
+                "Material Note": mat_note
+            }
 
             st.session_state["output_data"] = {
                 "Item": item,
@@ -3044,7 +3058,7 @@ elif selected_part == "Baseplate, Pump":
             st.text_input("To Supplier", value=data["To Supplier"], key="base_out13")
             st.text_area("Quality", value="\n".join(data["Quality"]), height=100, key="base_out14")
 
-     with col3:
+    with col3:
         st.subheader("🧾 DataLoad")
 
         operation = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="base_op")
@@ -3065,7 +3079,6 @@ elif selected_part == "Baseplate, Pump":
             )
             st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
 
-            # ⬇️ Download Excel con tutti i dati
             excel_file = export_all_fields_to_excel(
                 input_data=st.session_state["input_data"],
                 output_data=st.session_state["output_data"],
@@ -3084,7 +3097,6 @@ elif selected_part == "Baseplate, Pump":
                 file_name=f"{item_code_input}_oracle_item.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
