@@ -4,6 +4,36 @@ from PIL import Image
 import io
 import csv
 
+import io
+
+def export_all_fields_to_excel(input_data, output_data, dataload_info):
+    export_dict = {}
+
+    # Input
+    for k, v in input_data.items():
+        export_dict[f"Input - {k}"] = v
+
+    # Output
+    for k, v in output_data.items():
+        if isinstance(v, list):
+            export_dict[f"Output - {k}"] = "\n".join(v)
+        else:
+            export_dict[f"Output - {k}"] = v
+
+    # DataLoad
+    for k, v in dataload_info.items():
+        export_dict[f"DataLoad - {k}"] = v
+
+    df = pd.DataFrame(export_dict.items(), columns=["Campo", "Valore"])
+
+    # Scrive su file Excel in memoria
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+        df.to_excel(writer, index=False, sheet_name="Oracle Item")
+    buffer.seek(0)
+    return buffer
+
+
 # Caricamento dati materiali da file Excel
 material_df = pd.read_excel("dati_config4.xlsx", sheet_name="Materials")
 
@@ -3030,6 +3060,38 @@ elif selected_part == "Baseplate, Pump":
                 st.session_state["output_data"]["FPD material code"]
             )
             st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
+
+    if "output_data" in st.session_state:
+        input_data = {
+            "Pump Type": model,
+            "Pump Size": size,
+            "Length (mm)": length,
+            "Width (mm)": width,
+            "Weight (kg)": weight,
+            "Sourcing": sourcing,
+            "DWG/Doc": drawing,
+            "Note": note,
+            "Material Type": mat_type,
+            "Material Prefix": mat_prefix,
+            "Material Name": mat_name,
+            "Material Note": mat_note
+        }
+
+        dataload_info = {
+            "Item code": item_code_input if item_code_input else "(non specificato)",
+            "Operazione": operation if operation else "(non specificata)",
+            "Stringa DataLoad": dataload_string if 'dataload_string' in locals() else "(non generata)"
+        }
+
+        excel_file = export_all_fields_to_excel(input_data, st.session_state["output_data"], dataload_info)
+
+        st.download_button(
+            label="📥 Scarica tutto in Excel",
+            data=excel_file,
+            file_name=f"oracle_export_{item_code_input or 'item'}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
 
 
 # --- FLANGE, PIPE
