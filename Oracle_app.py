@@ -3050,7 +3050,7 @@ elif selected_part == "Baseplate, Pump":
         operation = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="base_op")
         item_code_input = st.text_input("Codice item", key="base_item_code")
 
-        if "output_data" in st.session_state and item_code_input:
+if "output_data" in st.session_state and item_code_input:
             dataload_string = generate_dataload_string(
                 operation,
                 item_code_input,
