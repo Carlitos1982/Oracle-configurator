@@ -6,9 +6,7 @@ import csv
 
 import io
 
-    export_dict = {}
-
-    # Inputdef export_all_fields_to_excel(input_data, output_data, dataload_info, categoria="", parte=""):
+def export_all_fields_to_excel(input_data, output_data, dataload_info, categoria="", parte=""):
     export_dict = {}
 
     # Intestazione con categoria e parte
