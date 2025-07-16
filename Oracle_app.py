@@ -2924,7 +2924,8 @@ elif selected_part == "Baseplate, Pump":
         width = st.number_input("Width (mm)", min_value=0)
         weight = st.number_input("Weight (kg)", min_value=0)
 
-        sourcing = st.selectbox("Sourcing", ["Cast", "Fabricated", "Commercial"])
+        sourcing = st.selectbox("Sourcing", ["EUROPEAN", "INDIAN", "CHINESE"])
+
         drawing = st.text_input("DWG/Doc")
         note = st.text_area("Note")
         mat_type = st.selectbox("Material Type", materials_df["Material Type"].dropna().unique(), key="base_mat_type")
