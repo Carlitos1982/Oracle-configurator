@@ -362,6 +362,7 @@ if selected_part == "Casing, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 # --- CASING COVER, PUMP
 if selected_part == "Casing Cover, Pump":
     col1, col2, col3 = st.columns(3)
@@ -371,21 +372,18 @@ if selected_part == "Casing Cover, Pump":
         model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="ccov_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="ccov_size")
-                feature_1 = ""
+
         f1_list = features_df[
             (features_df["Pump Model"] == model) &
             (features_df["Feature Type"] == "features1")
         ]["Feature"].dropna().tolist()
-        if f1_list:
-            feature_1 = st.selectbox("Additional Feature 1", [""] + f1_list, key="ccov_feat1")
+        feature_1 = st.selectbox("Additional Feature 1", [""] + f1_list, key="ccov_feat1") if f1_list else ""
 
-        feature_2 = ""
         f2_list = features_df[
             (features_df["Pump Model"] == model) &
             (features_df["Feature Type"] == "features2")
         ]["Feature"].dropna().tolist()
-        if f2_list:
-            feature_2 = st.selectbox("Additional Feature 2", [""] + f2_list, key="ccov_feat2")
+        feature_2 = st.selectbox("Additional Feature 2", [""] + f2_list, key="ccov_feat2") if f2_list else ""
 
         note = st.text_area("Note", height=80, key="ccov_note")
         dwg = st.text_input("Dwg/doc number", key="ccov_dwg")
@@ -454,7 +452,6 @@ if selected_part == "Casing Cover, Pump":
             tag_string = " ".join(sq_tags)
             quality = "\n".join(quality_lines)
 
-            # --- DESCRIZIONE
             descr_parts = ["CASING COVER, PUMP"]
             for val in [model, size, feature_1, feature_2, note]:
                 if val:
@@ -463,6 +460,7 @@ if selected_part == "Casing Cover, Pump":
                 descr_parts.append(" ".join([mtype, mprefix, mname]).strip())
             if material_note:
                 descr_parts.append(material_note)
+
             descr = "*" + " - ".join(descr_parts) + " " + tag_string
 
             st.session_state["output_data"] = {
@@ -543,7 +541,6 @@ if selected_part == "Casing Cover, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
 
 # --- IMPELLER, PUMP
 if selected_part == "Impeller, Pump":
