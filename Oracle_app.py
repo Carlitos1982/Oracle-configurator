@@ -2940,24 +2940,26 @@ elif selected_part == "Baseplate, Pump":
         mat_name = st.selectbox("Material Name", filtered_names, key="base_mat_name")
         mat_note = st.text_input("Material Note")
 
-
         if st.button("Genera Output"):
+            # Fixed identifiers and catalog
             item = "477..."
-            ident = "BASEPLATE"
+            ident = "BASE"
             classe = ""
             cat = "FASCIA ITE 5"
-            catalog = "BASE"
+            catalog = "ARTVARI"
+
             drawing_out = drawing
             material = f"{mat_type} {mat_prefix} {mat_name}".strip()
             fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
             template = "FPD_BUY_4"
             erp1 = "21_FABRICATION_OR_BASEPLATES"
             erp2 = "22_BASEPLATE"
-            to_supplier = sourcing
 
+            # Build description with sourcing inserted before dimensions
             descr_parts = [
                 f"*{ident}",
                 f"{model}-{size}",
+                f"({sourcing})",
                 f"{length}x{width} mm",
                 f"{weight} kg",
                 note,
@@ -2966,15 +2968,12 @@ elif selected_part == "Baseplate, Pump":
                 "[SQ53]",
                 "[CORP-ENG-0234]"
             ]
-       
-   
             descr = " ".join([d for d in descr_parts if d])
 
             quality = [
                 "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
                 "CORP-ENG-0234 - Procedure for Baseplate Inspection J4-11"
             ]
-        
 
             st.session_state["output_data"] = {
                 "Item": item,
@@ -2989,7 +2988,8 @@ elif selected_part == "Baseplate, Pump":
                 "Template": template,
                 "ERP L1": erp1,
                 "ERP L2": erp2,
-                "To Supplier": to_supplier,
+                # No To Supplier field; sourcing included in description
+                "To Supplier": "",
                 "Quality": quality
             }
 
@@ -3010,12 +3010,11 @@ elif selected_part == "Baseplate, Pump":
             st.text_input("Template", value=data["Template"], key="base_out10")
             st.text_input("ERP L1", value=data["ERP L1"], key="base_out11")
             st.text_input("ERP L2", value=data["ERP L2"], key="base_out12")
-            st.text_input("To Supplier", value=data["To Supplier"], key="base_out13")
+            st.text_input("To Supplier", value=data.get("To Supplier", ""), key="base_out13")
             st.text_area("Quality", value="\n".join(data["Quality"]), height=100, key="base_out14")
 
     with col3:
         st.subheader("🧾 DataLoad")
-
         operation = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="base_op")
         item_code_input = st.text_input("Codice item", key="base_item_code")
 
