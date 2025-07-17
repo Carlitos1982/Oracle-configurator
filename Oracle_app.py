@@ -451,8 +451,7 @@ if selected_part == "Casing Cover, Pump":
 
             descr_parts = ["CASING COVER, PUMP"]
             for val in [model, size, feature_1, note]:
-
-            if val:
+                if val:
                     descr_parts.append(val)
             if mtype or mprefix or mname:
                 descr_parts.append(" ".join([mtype, mprefix, mname]).strip())
@@ -460,6 +459,7 @@ if selected_part == "Casing Cover, Pump":
                 descr_parts.append(material_note)
 
             descr = "*" + " - ".join(descr_parts) + " " + tag_string
+
 
             st.session_state["output_data"] = {
                 "Item": "40205…",
