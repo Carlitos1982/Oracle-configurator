@@ -180,8 +180,6 @@ if selected_part != st.session_state.prev_part:
 
 st.markdown("---")
 
-
-
 # --- CASING, PUMP
 if selected_part == "Casing, Pump":
     col1, col2, col3 = st.columns(3)
@@ -189,9 +187,9 @@ if selected_part == "Casing, Pump":
     # COLONNA 1 – INPUT
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="casing_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="casing_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
-        size = st.selectbox("Product/Pump Size", [""] + size_list, key="casing_size")
+        size = st.selectbox("Pump Size", [""] + size_list, key="casing_size")
 
         feature_1 = ""
         special = ["HDO", "DMX", "WXB", "WIK"]
@@ -210,7 +208,7 @@ if selected_part == "Casing, Pump":
             ]["Feature"].dropna().tolist()
             feature_2 = st.selectbox("Additional Feature 2", [""] + f2_list, key="casing_f2")
 
-        note = st.text_area("Note (opzionale)", height=80, key="casing_note")
+        note = st.text_area("Note", height=80, key="casing_note")
         dwg = st.text_input("Dwg/doc number", key="casing_dwg")
 
         mtype = st.selectbox("Material Type", [""] + material_types, key="casing_mtype")
@@ -227,6 +225,7 @@ if selected_part == "Casing, Pump":
             ]["Name"].dropna().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="casing_mname")
+        material_note = st.text_area("Material note", height=60, key="casing_matnote")
 
         # ✅ Checkbox qualità extra
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="casing_hf")
@@ -273,11 +272,20 @@ if selected_part == "Casing, Pump":
             tag_string = " ".join(sq_tags)
             quality = "\n".join(quality_lines)
 
-            descr = f"CASING, PUMP - MODEL: {model}, SIZE: {size}, FEATURES: {feature_1}, {feature_2}"
+            descr_parts = ["CASING, PUMP"]
+            if model:
+                descr_parts.append(model)
+            if size:
+                descr_parts.append(size)
+            if feature_1:
+                descr_parts.append(feature_1)
+            if feature_2:
+                descr_parts.append(feature_2)
             if note:
-                descr += f", NOTE: {note}"
-            descr += f" {tag_string}"
-            descr = "*" + descr
+                descr_parts.append(note)
+            if material_note:
+                descr_parts.append(material_note)
+            descr = "*{} {}".format(" - ".join(descr_parts), tag_string)
 
             st.session_state["output_data"] = {
                 "Item": "40201…",
@@ -305,7 +313,6 @@ if selected_part == "Casing, Pump":
                     st.text_area(k, value=v, height=160)
                 else:
                     st.text_input(k, value=v)
-
 
     # COLONNA 3: DataLoad
     with col3:
