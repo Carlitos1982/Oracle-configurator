@@ -2957,15 +2957,14 @@ elif selected_part == "Baseplate, Pump":
             # Fixed identifiers and catalog
             item = "477..."
             ident = "BASE"
+            desc_label = "BASEPLATE, PUMP"
             classe = ""
             cat = "FASCIA ITE 5"
             catalog = "ARTVARI"
 
             drawing_out = drawing
-            # Always build material string without 'None'
             material_parts = [mat_type, mat_prefix, mat_name]
             material = " ".join([m for m in material_parts if m])
-            # FPD code lookup returns 'NOT AVAILABLE' if not found
             fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
             template = "FPD_BUY_4"
             erp1 = "21_FABRICATION_OR_BASEPLATES"
@@ -2973,7 +2972,7 @@ elif selected_part == "Baseplate, Pump":
 
             # Build description
             descr_parts = [
-                f"*{ident}",
+                f"*{desc_label}",
                 f"{model}-{size}",
                 f"({sourcing})",
                 f"{length}x{width} mm",
@@ -3049,6 +3048,7 @@ elif selected_part == "Baseplate, Pump":
                 st.session_state["output_data"]["FPD material code"]
             )
             st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
+
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
