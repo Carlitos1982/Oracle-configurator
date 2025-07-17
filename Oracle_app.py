@@ -2906,6 +2906,7 @@ if selected_part == "Shaft, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
 
@@ -2948,7 +2949,7 @@ elif selected_part == "Baseplate, Pump":
         mat_note = st.text_input("Material Note")
 
         if st.button("Genera Output"):
-            # Fixed identifiers and catalog
+            # Fissi
             item = "477..."
             ident = "BASE"
             desc_label = "BASEPLATE, PUMP"
@@ -2957,17 +2958,26 @@ elif selected_part == "Baseplate, Pump":
             catalog = "ARTVARI"
 
             drawing_out = drawing
-            material_parts = [mat_type, mat_prefix, mat_name]
-            material = " ".join([m for m in material_parts if m])
-            if mat_type and mat_prefix and mat_name:
-                fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
-            else:
-                fpd_code = ""
+            material = " ".join(x for x in [mat_type, mat_prefix, mat_name] if x)
+
+            # Logica FPD Code
+            fpd_code = ""
+            if mat_prefix:
+                if mat_name:
+                    fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
+                else:
+                    codes = materials_df[
+                        (materials_df["Material Type"] == mat_type) &
+                        (materials_df["Prefix"] == mat_prefix)
+                    ]["FPD Code"].dropna().unique()
+                    if len(codes) == 1:
+                        fpd_code = codes[0]
+
             template = "FPD_BUY_4"
             erp1 = "21_FABRICATION_OR_BASEPLATES"
             erp2 = "22_BASEPLATE"
 
-            # Build description
+            # Build descrizione
             descr_parts = [
                 f"*{desc_label}",
                 f"{model}-{size}",
@@ -2981,7 +2991,7 @@ elif selected_part == "Baseplate, Pump":
                 descr_parts.append(material)
             if mat_note:
                 descr_parts.append(mat_note)
-            descr_parts.extend(["[SQ53]", "[CORP-ENG-0234]"])
+            descr_parts += ["[SQ53]", "[CORP-ENG-0234]"]
             descr = " ".join(descr_parts)
 
             quality = [
@@ -3008,7 +3018,6 @@ elif selected_part == "Baseplate, Pump":
 
     with col2:
         st.subheader("📤 Output")
-
         if "output_data" in st.session_state:
             data = st.session_state["output_data"]
             st.text_input("Item", value=data["Item"], key="base_out1")
@@ -3024,8 +3033,7 @@ elif selected_part == "Baseplate, Pump":
             st.text_input("ERP L1", value=data["ERP L1"], key="base_out11")
             st.text_input("ERP L2", value=data["ERP L2"], key="base_out12")
             st.text_input("To Supplier", value=data.get("To Supplier", ""), key="base_out13")
-            st.text_area("Quality", value="\n".join(data["Quality"]), height=160, key="base_out14")
-
+            st.text_area("Quality", value=\"\\n\".join(data[\"Quality\"]), height=160, key=\"base_out14\")\n\n    
     with col3:
         st.subheader("🧾 DataLoad")
         operation = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="base_op")
