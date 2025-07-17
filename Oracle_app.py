@@ -379,11 +379,8 @@ if selected_part == "Casing Cover, Pump":
         ]["Feature"].dropna().tolist()
         feature_1 = st.selectbox("Additional Feature 1", [""] + f1_list, key="ccov_feat1") if f1_list else ""
 
-        f2_list = features_df[
-            (features_df["Pump Model"] == model) &
-            (features_df["Feature Type"] == "features2")
-        ]["Feature"].dropna().tolist()
-        feature_2 = st.selectbox("Additional Feature 2", [""] + f2_list, key="ccov_feat2") if f2_list else ""
+        feature_2 = ""
+
 
         note = st.text_area("Note", height=80, key="ccov_note")
         dwg = st.text_input("Dwg/doc number", key="ccov_dwg")
@@ -453,8 +450,9 @@ if selected_part == "Casing Cover, Pump":
             quality = "\n".join(quality_lines)
 
             descr_parts = ["CASING COVER, PUMP"]
-            for val in [model, size, feature_1, feature_2, note]:
-                if val:
+            for val in [model, size, feature_1, note]:
+
+            if val:
                     descr_parts.append(val)
             if mtype or mprefix or mname:
                 descr_parts.append(" ".join([mtype, mprefix, mname]).strip())
