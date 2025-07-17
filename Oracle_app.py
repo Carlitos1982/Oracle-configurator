@@ -2912,7 +2912,6 @@ if selected_part == "Shaft, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
 elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
 
@@ -2920,7 +2919,9 @@ elif selected_part == "Baseplate, Pump":
         st.subheader("✏️ Input")
 
         model = st.selectbox("Pump Type", size_df["Pump Model"].dropna().unique())
-        size = st.selectbox("Pump Size", size_df[size_df["Pump Model"] == model]["Size"].dropna().unique())
+        size = st.selectbox(
+            "Pump Size", size_df[size_df["Pump Model"] == model]["Size"].dropna().unique()
+        )
 
         length = st.number_input("Length (mm)", min_value=0)
         width = st.number_input("Width (mm)", min_value=0)
@@ -2930,15 +2931,26 @@ elif selected_part == "Baseplate, Pump":
 
         drawing = st.text_input("DWG/Doc")
         note = st.text_area("Note")
-        mat_type = st.selectbox("Material Type", materials_df["Material Type"].dropna().unique(), key="base_mat_type")
+        mat_type = st.selectbox(
+            "Material Type", materials_df["Material Type"].dropna().unique(),
+            key="base_mat_type"
+        )
 
-        filtered_prefix = materials_df[materials_df["Material Type"] == mat_type]["Prefix"].dropna().unique()
-        mat_prefix = st.selectbox("Material Prefix", filtered_prefix, key="base_mat_prefix")
-        filtered_names = materials_df[
+        prefix_options = materials_df[
+            materials_df["Material Type"] == mat_type
+        ]
+        mat_prefix = st.selectbox(
+            "Material Prefix", [""] + sorted(prefix_options["Prefix"].dropna().unique().tolist()),
+            key="base_mat_prefix"
+        )
+        name_options = materials_df[
             (materials_df["Material Type"] == mat_type) &
             (materials_df["Prefix"] == mat_prefix)
-        ]["Name"].dropna().drop_duplicates()
-        mat_name = st.selectbox("Material Name", filtered_names, key="base_mat_name")
+        ]
+        mat_name = st.selectbox(
+            "Material Name", [""] + sorted(name_options["Name"].dropna().unique().tolist()),
+            key="base_mat_name"
+        )
         mat_note = st.text_input("Material Note")
 
         if st.button("Genera Output"):
@@ -2950,13 +2962,16 @@ elif selected_part == "Baseplate, Pump":
             catalog = "ARTVARI"
 
             drawing_out = drawing
-            material = f"{mat_type} {mat_prefix} {mat_name}".strip() if mat_name else ""
+            # Always build material string without 'None'
+            material_parts = [mat_type, mat_prefix, mat_name]
+            material = " ".join([m for m in material_parts if m])
+            # FPD code lookup returns 'NOT AVAILABLE' if not found
             fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
             template = "FPD_BUY_4"
             erp1 = "21_FABRICATION_OR_BASEPLATES"
             erp2 = "22_BASEPLATE"
 
-            # Build description with conditional fields
+            # Build description
             descr_parts = [
                 f"*{ident}",
                 f"{model}-{size}",
@@ -2991,7 +3006,7 @@ elif selected_part == "Baseplate, Pump":
                 "Template": template,
                 "ERP L1": erp1,
                 "ERP L2": erp2,
-                "To Supplier": "",  # sourcing included in description
+                "To Supplier": "",
                 "Quality": quality
             }
 
@@ -3034,7 +3049,6 @@ elif selected_part == "Baseplate, Pump":
                 st.session_state["output_data"]["FPD material code"]
             )
             st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
-
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
