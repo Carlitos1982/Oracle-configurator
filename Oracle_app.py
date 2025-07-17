@@ -235,7 +235,7 @@ if selected_part == "Casing, Pump":
         water = st.checkbox("Water service?", key="casing_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="casing_stamicarbon")
 
-        if st.button("Genera Output", key="casing_gen"):
+                if st.button("Genera Output", key="casing_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
@@ -272,20 +272,16 @@ if selected_part == "Casing, Pump":
             tag_string = " ".join(sq_tags)
             quality = "\n".join(quality_lines)
 
+            # --- DESCRIZIONE
             descr_parts = ["CASING, PUMP"]
-            if model:
-                descr_parts.append(model)
-            if size:
-                descr_parts.append(size)
-            if feature_1:
-                descr_parts.append(feature_1)
-            if feature_2:
-                descr_parts.append(feature_2)
-            if note:
-                descr_parts.append(note)
+            for val in [model, size, feature_1, feature_2, note]:
+                if val:
+                    descr_parts.append(val)
+            if mtype or mprefix or mname:
+                descr_parts.append(" ".join([mtype, mprefix, mname]).strip())
             if material_note:
                 descr_parts.append(material_note)
-            descr = "*{} {}".format(" - ".join(descr_parts), tag_string)
+            descr = "*" + " - ".join(descr_parts) + " " + tag_string
 
             st.session_state["output_data"] = {
                 "Item": "40201…",
@@ -303,6 +299,7 @@ if selected_part == "Casing, Pump":
                 "To supplier": "",
                 "Quality": quality
             }
+
 
     # COLONNA 2 – OUTPUT
     with col2:
