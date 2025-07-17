@@ -188,13 +188,10 @@ if selected_part == "Casing, Pump":
     # COLONNA 1 – INPUT
     with col1:
         st.subheader("✏️ Input")
+        # Rinominati i campi senza cambiare logic
         pump_type = st.selectbox("Pump Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="casing_model")
         pump_size = st.selectbox("Pump Size", [""] + size_df[size_df["Pump Model"] == pump_type]["Size"].dropna().tolist(), key="casing_size")
 
-        length = st.number_input("Length (mm)", min_value=0, key="casing_length")
-        width  = st.number_input("Width (mm)",  min_value=0, key="casing_width")
-
-        # note: rimosso il placeholder “(opzionale)”
         note = st.text_area("Note", height=80, key="casing_note")
         dwg  = st.text_input("Dwg/doc number", key="casing_dwg")
 
@@ -202,6 +199,7 @@ if selected_part == "Casing, Pump":
         pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
         prefixes = sorted(pref_df["Prefix"].unique()) if mtype else []
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="casing_mprefix")
+
         names = (
             materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
             if mtype == "MISCELLANEOUS"
@@ -209,10 +207,10 @@ if selected_part == "Casing, Pump":
         )
         mname = st.selectbox("Material Name", [""] + names, key="casing_mname")
 
-        # textbox aggiuntivo per note sul materiale
+        # Nuovo campo per nota materiale
         mat_note = st.text_input("Material Note", key="casing_mat_note")
 
-        # checkbox qualità extra
+        # Checkbox qualità extra
         hf_service  = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="casing_hf")
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="casing_tmt")
         overlay     = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="casing_overlay")
@@ -221,7 +219,7 @@ if selected_part == "Casing, Pump":
         stamicarbon = st.checkbox("Stamicarbon?", key="casing_stamicarbon")
 
         if st.button("Genera Output", key="casing_gen"):
-            # costruisco il materiale solo se selezionato
+            # Costruzione del materiale solo se selezionato
             materiale = f"{mtype} {mprefix} {mname}".strip() if mname else ""
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
@@ -230,7 +228,7 @@ if selected_part == "Casing, Pump":
             ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else "NOT AVAILABLE"
 
-            # tag e linee di qualità
+            # Tag e quality lines
             sq_tags = ["[SQ58]", "[CORP-ENG-0115]"]
             quality_lines = [
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
@@ -256,19 +254,17 @@ if selected_part == "Casing, Pump":
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             tag_string = " ".join(sq_tags)
-
-            # costruisco la descrizione senza model né note, e con material note in coda
-            descr = (
-                f"*CASING, PUMP - PUMP TYPE: {pump_type}, PUMP SIZE: {pump_size}, "
-                f"LENGHT×WIDTH: {length}×{width} mm"
-            )
-            if materiale:
-                descr += f", MATERIAL: {materiale}"
-            if mat_note:
-                descr += f", {mat_note}"
-            descr += f", {tag_string}"
-            
             quality = "\n".join(quality_lines)
+
+            # Costruzione descrizione senza pump_type e pump_size
+            descr = "*CASING, PUMP"
+            if note:
+                descr += f" - {note}"
+            if materiale:
+                descr += f" - MATERIAL: {materiale}"
+            if mat_note:
+                descr += f" - {mat_note}"
+            descr += f" {tag_string}"
 
             st.session_state["output_data"] = {
                 "Item": "40201…",
@@ -286,7 +282,6 @@ if selected_part == "Casing, Pump":
                 "To supplier": "",
                 "Quality": quality
             }
-    # … resto incolonnato come prima …
 
     # COLONNA 2 – OUTPUT
     with col2:
@@ -298,8 +293,7 @@ if selected_part == "Casing, Pump":
                 else:
                     st.text_input(k, value=v)
 
-
-    # COLONNA 3: DataLoad
+    # COLONNA 3 – DATALOAD
     with col3:
         st.subheader("🧾 DataLoad")
         dataload_mode = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="casing_dl_mode")
@@ -317,6 +311,7 @@ if selected_part == "Casing, Pump":
                 dataload_fields = [
                     "\\%FN", item_code,
                     "\\%TC", get_val("Template"), "TAB",
+     
                     "\\%D", "\\%O", "TAB",
                     get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
                     get_val("Identificativo"), "TAB",
