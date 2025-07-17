@@ -256,7 +256,7 @@ if selected_part == "Casing, Pump":
                 sq_tags.append("[SQ137]")
                 quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
             if overlay:
-                sq_tags.append("<PQ72>")
+                sq_tags.append("[PQ72]")
                 quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
             if hvof:
                 sq_tags.append("[DE2500.002]")
