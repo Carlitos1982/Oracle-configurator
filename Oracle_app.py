@@ -179,7 +179,6 @@ if selected_part != st.session_state.prev_part:
 # —————————————————————————————————————————————————————————
 
 st.markdown("---")
-
 # --- CASING, PUMP
 if selected_part == "Casing, Pump":
     col1, col2, col3 = st.columns(3)
@@ -205,10 +204,8 @@ if selected_part == "Casing, Pump":
         )
         mname = st.selectbox("Material Name", [""] + names, key="casing_mname")
 
-        # Nuovo campo per nota materiale
         mat_note = st.text_input("Material Note", key="casing_mat_note")
 
-        # Checkbox qualità extra
         hf_service  = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="casing_hf")
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="casing_tmt")
         overlay     = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="casing_overlay")
@@ -217,10 +214,8 @@ if selected_part == "Casing, Pump":
         stamicarbon = st.checkbox("Stamicarbon?", key="casing_stamicarbon")
 
         if st.button("Genera Output", key="casing_gen"):
-            # Costruzione stringa materiale (anche se mname vuoto)
-            material_parts = [mtype, mprefix, mname]
-            materiale = " ".join([p for p in material_parts if p])
-            # FPD code
+            materiale_parts = [mtype, mprefix, mname]
+            materiale = " ".join([p for p in materiale_parts if p])
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
                 (materials_df["Prefix"] == mprefix) &
@@ -228,7 +223,6 @@ if selected_part == "Casing, Pump":
             ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else "NOT AVAILABLE"
 
-            # Qualità
             sq_tags = ["[SQ58]", "[CORP-ENG-0115]"]
             quality_lines = [
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
@@ -254,14 +248,15 @@ if selected_part == "Casing, Pump":
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             tag_string = " ".join(sq_tags)
-            quality = "\n".join(quality_lines)
+            quality = "
+".join(quality_lines)
 
-            # Descrizione con pump type, pump size, materiale sempre e senza titolo MATERIAL
-            descr = f"*CASING, PUMP - TYPE: {pump_type}, SIZE: {pump_size}"
-            if materiale:
-                descr += f" - {materiale}"
+            # Aggiornata descrizione: note prima, materiale, poi material note
+            descr = f"*CASING, PUMP - {pump_type}, {pump_size}"
             if note:
                 descr += f" - {note}"
+            if materiale:
+                descr += f" - {materiale}"
             if mat_note:
                 descr += f" - {mat_note}"
             descr += f" {tag_string}"
@@ -309,9 +304,29 @@ if selected_part == "Casing, Pump":
                     val = data.get(key, "").strip()
                     return val if val else "."
                 dataload_fields = [
+                    "\%FN", item_code,
+                    "\%TC", get_val("Template"), "TAB",
+                    # resto invariato...
+                ]
+                # impaginazione DataLoad come prima
+    with col3:
+        st.subheader("🧾 DataLoad")
+        dataload_mode = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="casing_dl_mode")
+        item_code = st.text_input("Codice item", key="casing_item_code")
+        if st.button("Genera stringa DataLoad", key="gen_dl_casing"):
+            if not item_code:
+                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
+            elif "output_data" not in st.session_state:
+                st.error("❌ Genera prima l'output dalla colonna 1.")
+            else:
+                data = st.session_state["output_data"]
+                def get_val(key):
+                    val = data.get(key, "").strip()
+                    return val if val else "."
+                dataload_fields = [
                     "\\%FN", item_code,
                     "\\%TC", get_val("Template"), "TAB",
-                    # ... resto invariato ...
+                    # resto invariato
                 ]
                 # impaginazione DataLoad come prima
 
