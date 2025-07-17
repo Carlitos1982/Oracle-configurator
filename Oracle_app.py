@@ -179,6 +179,7 @@ if selected_part != st.session_state.prev_part:
 # —————————————————————————————————————————————————————————
 
 st.markdown("---")
+
 # --- CASING, PUMP
 if selected_part == "Casing, Pump":
     col1, col2, col3 = st.columns(3)
@@ -248,10 +249,9 @@ if selected_part == "Casing, Pump":
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             tag_string = " ".join(sq_tags)
-            quality = "
-".join(quality_lines)
+            quality = "\n".join(quality_lines)
 
-            # Aggiornata descrizione: note prima, materiale, poi material note
+            # Descrizione: note prima, materiale, material note
             descr = f"*CASING, PUMP - {pump_type}, {pump_size}"
             if note:
                 descr += f" - {note}"
@@ -304,29 +304,9 @@ if selected_part == "Casing, Pump":
                     val = data.get(key, "").strip()
                     return val if val else "."
                 dataload_fields = [
-                    "\%FN", item_code,
-                    "\%TC", get_val("Template"), "TAB",
-                    # resto invariato...
-                ]
-                # impaginazione DataLoad come prima
-    with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="casing_dl_mode")
-        item_code = st.text_input("Codice item", key="casing_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_casing"):
-            if not item_code:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields = [
                     "\\%FN", item_code,
                     "\\%TC", get_val("Template"), "TAB",
-                    # resto invariato
+                    # resto invariato...
                 ]
                 # impaginazione DataLoad come prima
 
