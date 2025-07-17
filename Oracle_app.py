@@ -2913,7 +2913,6 @@ if selected_part == "Shaft, Pump":
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
-
 elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
 
@@ -2951,26 +2950,28 @@ elif selected_part == "Baseplate, Pump":
             catalog = "ARTVARI"
 
             drawing_out = drawing
-            material = f"{mat_type} {mat_prefix} {mat_name}".strip()
+            material = f"{mat_type} {mat_prefix} {mat_name}".strip() if mat_name else ""
             fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
             template = "FPD_BUY_4"
             erp1 = "21_FABRICATION_OR_BASEPLATES"
             erp2 = "22_BASEPLATE"
 
-            # Build description with sourcing inserted before dimensions
+            # Build description with conditional fields
             descr_parts = [
                 f"*{ident}",
                 f"{model}-{size}",
                 f"({sourcing})",
                 f"{length}x{width} mm",
-                f"{weight} kg",
-                note,
-                material,
-                mat_note,
-                "[SQ53]",
-                "[CORP-ENG-0234]"
+                f"{weight} kg"
             ]
-            descr = " ".join([d for d in descr_parts if d])
+            if note:
+                descr_parts.append(note)
+            if material:
+                descr_parts.append(material)
+            if mat_note:
+                descr_parts.append(mat_note)
+            descr_parts.extend(["[SQ53]", "[CORP-ENG-0234]"])
+            descr = " ".join(descr_parts)
 
             quality = [
                 "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
@@ -2990,8 +2991,7 @@ elif selected_part == "Baseplate, Pump":
                 "Template": template,
                 "ERP L1": erp1,
                 "ERP L2": erp2,
-                # No To Supplier field; sourcing included in description
-                "To Supplier": "",
+                "To Supplier": "",  # sourcing included in description
                 "Quality": quality
             }
 
@@ -3034,6 +3034,7 @@ elif selected_part == "Baseplate, Pump":
                 st.session_state["output_data"]["FPD material code"]
             )
             st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
+
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
