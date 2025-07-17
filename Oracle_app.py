@@ -234,8 +234,7 @@ if selected_part == "Casing, Pump":
         hvof = st.checkbox("HVOF coating?", key="casing_hvof")
         water = st.checkbox("Water service?", key="casing_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="casing_stamicarbon")
-
-                if st.button("Genera Output", key="casing_gen"):
+        if st.button("Genera Output", key="casing_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
@@ -299,7 +298,6 @@ if selected_part == "Casing, Pump":
                 "To supplier": "",
                 "Quality": quality
             }
-
 
     # COLONNA 2 – OUTPUT
     with col2:
