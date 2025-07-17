@@ -362,17 +362,15 @@ if selected_part == "Casing, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
-
 # --- CASING COVER, PUMP
 if selected_part == "Casing Cover, Pump":
     col1, col2, col3 = st.columns(3)
 
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="ccov_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="ccov_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
-        size = st.selectbox("Product/Pump Size", [""] + size_list, key="ccov_size")
+        size = st.selectbox("Pump Size", [""] + size_list, key="ccov_size")
         feature_1 = st.text_input("Additional Feature 1", key="ccov_feat1")
         feature_2 = st.text_input("Additional Feature 2", key="ccov_feat2")
         note = st.text_area("Note", height=80, key="ccov_note")
@@ -392,6 +390,10 @@ if selected_part == "Casing Cover, Pump":
             ]["Name"].dropna().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="ccov_mname")
+        material_note = st.text_area("Material note", height=60, key="ccov_matnote")
+
+        make_or_buy = st.radio("Make or Buy?", ["Buy", "Make"], key="ccov_makebuy")
+        template = "FPD_BUY_1" if make_or_buy == "Buy" else "FPD_MAKE"
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="ccov_hf")
@@ -435,26 +437,31 @@ if selected_part == "Casing Cover, Pump":
                 sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
-            quality = "\n".join(quality_lines)
             tag_string = " ".join(sq_tags)
+            quality = "\n".join(quality_lines)
 
-            descr = f"CASING COVER, PUMP - MODEL: {model}, SIZE: {size}, FEATURES: {feature_1} {feature_2}".strip()
-            if note:
-                descr += f", NOTE: {note}"
-            descr += f" {tag_string}"
-            descr = "*" + descr
+            # --- DESCRIZIONE
+            descr_parts = ["CASING COVER, PUMP"]
+            for val in [model, size, feature_1, feature_2, note]:
+                if val:
+                    descr_parts.append(val)
+            if mtype or mprefix or mname:
+                descr_parts.append(" ".join([mtype, mprefix, mname]).strip())
+            if material_note:
+                descr_parts.append(material_note)
+            descr = "*" + " - ".join(descr_parts) + " " + tag_string
 
             st.session_state["output_data"] = {
-                "Item": "1111…",
+                "Item": "40205…",
                 "Description": descr,
                 "Identificativo": "1200-CASING COVER",
                 "Classe ricambi": "1-2-3",
                 "Categories": "FASCIA ITE 4",
-                "Catalog": "ALBERO",
+                "Catalog": "CORPO",
                 "Disegno": dwg,
                 "Material": materiale,
                 "FPD material code": codice_fpd,
-                "Template": "FPD_BUY_1",
+                "Template": template,
                 "ERP_L1": "20_TURNKEY_MACHINING",
                 "ERP_L2": "21_CASING",
                 "To supplier": "",
@@ -470,8 +477,6 @@ if selected_part == "Casing Cover, Pump":
                 else:
                     st.text_input(k, value=v)
 
-
-    # COLONNA 3: DataLoad
     with col3:
         st.subheader("🧾 DataLoad")
         dataload_mode_cc = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="cc_dl_mode")
@@ -487,30 +492,30 @@ if selected_part == "Casing Cover, Pump":
                     val = data.get(key, "").strip()
                     return val if val else "."
                 dataload_fields = [
-                    "\%FN", item_code_cc,
-                    "\%TC", get_val("Template"), "TAB",
-                    "\%D", "\%O", "TAB",
+                    "\\%FN", item_code_cc,
+                    "\\%TC", get_val("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
                     get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
                     get_val("Identificativo"), "TAB",
                     get_val("Classe ricambi"), "TAB",
-                    "\%O", "\^S",
-                    "\%TA", "TAB",
+                    "\\%O", "\\^S",
+                    "\\%TA", "TAB",
                     f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val("Categories").split()[-1], "\^S", "\^{F4}",
-                    "\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
-                    get_val("Disegno"), "TAB", "\^S", "\^{F4}",
-                    "\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
+                    get_val("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
                     get_val("FPD material code"), "TAB",
-                    get_val("Material"), "\^S", "\^{F4}",
-                    "\%VA", "TAB",
+                    get_val("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
                     get_val("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val("Quality") if get_val("Quality") != "." else ".", "\^S",
-                    "\%FN", "TAB",
+                    get_val("Quality") if get_val("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
                     get_val("To supplier"), "TAB", "TAB", "TAB",
                     "Short Text", "TAB",
-                    get_val("To supplier") if get_val("To supplier") != "." else ".", "\^S", "\^S", "\^{F4}", "\^S"
+                    get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
-                dataload_string = "	".join(dataload_fields)
+                dataload_string = "\t".join(dataload_fields)
                 st.text_area("Anteprima (per copia manuale)", dataload_string, height=200)
 
                 csv_buffer = io.StringIO()
@@ -524,6 +529,7 @@ if selected_part == "Casing Cover, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 # --- IMPELLER, PUMP
 if selected_part == "Impeller, Pump":
