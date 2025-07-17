@@ -179,7 +179,6 @@ if selected_part != st.session_state.prev_part:
 # —————————————————————————————————————————————————————————
 
 st.markdown("---")
-
 # --- CASING, PUMP
 if selected_part == "Casing, Pump":
     col1, col2, col3 = st.columns(3)
@@ -187,43 +186,79 @@ if selected_part == "Casing, Pump":
     # COLONNA 1 – INPUT
     with col1:
         st.subheader("✏️ Input")
-        pump_type = st.selectbox("Pump Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="casing_model")
-        pump_size = st.selectbox("Pump Size", [""] + size_df[size_df["Pump Model"] == pump_type]["Size"].dropna().tolist(), key="casing_size")
+        pump_type = st.selectbox(
+            "Pump Type",
+            [""] + sorted(size_df["Pump Model"].dropna().unique()),
+            key="casing_model"
+        )
+        pump_size = st.selectbox(
+            "Pump Size",
+            [""] + size_df[size_df["Pump Model"] == pump_type]["Size"].dropna().tolist(),
+            key="casing_size"
+        )
 
         note = st.text_area("Note", height=80, key="casing_note")
         dwg  = st.text_input("Dwg/doc number", key="casing_dwg")
 
         mtype = st.selectbox("Material Type", [""] + material_types, key="casing_mtype")
-        pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
+        pref_df = materials_df[
+            (materials_df["Material Type"] == mtype) & materials_df["Prefix"].notna()
+        ]
         prefixes = sorted(pref_df["Prefix"].unique()) if mtype else []
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="casing_mprefix")
 
         names = (
             materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
             if mtype == "MISCELLANEOUS"
-            else materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().tolist()
+            else materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix)
+            ]["Name"].dropna().tolist()
         )
         mname = st.selectbox("Material Name", [""] + names, key="casing_mname")
 
         mat_note = st.text_input("Material Note", key="casing_mat_note")
 
-        hf_service  = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="casing_hf")
+        hf_service  = st.checkbox(
+            "Is it an hydrofluoric acid alkylation service (lethal)?", key="casing_hf"
+        )
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="casing_tmt")
-        overlay     = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="casing_overlay")
+        overlay     = st.checkbox(
+            "DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="casing_overlay"
+        )
         hvof        = st.checkbox("HVOF coating?", key="casing_hvof")
         water       = st.checkbox("Water service?", key="casing_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="casing_stamicarbon")
 
         if st.button("Genera Output", key="casing_gen"):
+            # Concatenate material parts
             materiale_parts = [mtype, mprefix, mname]
             materiale = " ".join([p for p in materiale_parts if p])
-            match = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix) &
-                (materials_df["Name"] == mname)
-            ]
-            codice_fpd = match["FPD Code"].values[0] if not match.empty else "NOT AVAILABLE"
 
+            # Lookup FPD Code with fallback
+            if mname:
+                match = materials_df[
+                    (materials_df["Material Type"] == mtype) &
+                    (materials_df["Prefix"] == mprefix) &
+                    (materials_df["Name"] == mname)
+                ]
+            elif mprefix:
+                match = materials_df[
+                    (materials_df["Material Type"] == mtype) &
+                    (materials_df["Prefix"] == mprefix)
+                ]
+            elif mtype:
+                match = materials_df[materials_df["Material Type"] == mtype]
+            else:
+                match = pd.DataFrame()
+
+            codice_fpd = (
+                match["FPD Code"].iloc[0]
+                if not match.empty and "FPD Code" in match.columns
+                else "NOT AVAILABLE"
+            )
+
+            # Build SQ tags and quality lines
             sq_tags = ["[SQ58]", "[CORP-ENG-0115]"]
             quality_lines = [
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
@@ -231,27 +266,37 @@ if selected_part == "Casing, Pump":
             ]
             if hf_service:
                 sq_tags.append("<SQ113>")
-                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
+                quality_lines.append(
+                    "SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)"
+                )
             if tmt_service:
                 sq_tags.append("[SQ137]")
-                quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
+                quality_lines.append(
+                    "SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)"
+                )
             if overlay:
                 sq_tags.append("<PQ72>")
-                quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
+                quality_lines.append(
+                    "PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay"
+                )
             if hvof:
                 sq_tags.append("[DE2500.002]")
-                quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
+                quality_lines.append(
+                    "DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System"
+                )
             if water:
                 sq_tags.append("<PI23>")
                 quality_lines.append("PI 23 - Pompe per Acqua Potabile")
             if stamicarbon:
                 sq_tags.append("<SQ172>")
-                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+                quality_lines.append(
+                    "SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION"
+                )
 
             tag_string = " ".join(sq_tags)
             quality = "\n".join(quality_lines)
 
-            # Descrizione: note prima, materiale, material note
+            # Description: include pump_type & pump_size, note, materiale, mat_note
             descr = f"*CASING, PUMP - {pump_type}, {pump_size}"
             if note:
                 descr += f" - {note}"
@@ -291,7 +336,9 @@ if selected_part == "Casing, Pump":
     # COLONNA 3 – DATALOAD
     with col3:
         st.subheader("🧾 DataLoad")
-        dataload_mode = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="casing_dl_mode")
+        dataload_mode = st.radio(
+            "Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="casing_dl_mode"
+        )
         item_code = st.text_input("Codice item", key="casing_item_code")
         if st.button("Genera stringa DataLoad", key="gen_dl_casing"):
             if not item_code:
