@@ -179,6 +179,7 @@ if selected_part != st.session_state.prev_part:
 # —————————————————————————————————————————————————————————
 
 st.markdown("---")
+
 # --- CASING, PUMP
 if selected_part == "Casing, Pump":
     col1, col2, col3 = st.columns(3)
@@ -235,28 +236,25 @@ if selected_part == "Casing, Pump":
             materiale_parts = [mtype, mprefix, mname]
             materiale = " ".join([p for p in materiale_parts if p])
 
-            # Lookup FPD Code with fallback
+            # Determine FPD Code: only if a specific Name selected, or if prefix has a single unique code
+            codice_fpd = "NOT AVAILABLE"
             if mname:
                 match = materials_df[
                     (materials_df["Material Type"] == mtype) &
                     (materials_df["Prefix"] == mprefix) &
                     (materials_df["Name"] == mname)
                 ]
+                if not match.empty:
+                    codice_fpd = match["FPD Code"].iloc[0]
             elif mprefix:
-                match = materials_df[
+                # check unique codes for this prefix
+                prefix_matches = materials_df[
                     (materials_df["Material Type"] == mtype) &
                     (materials_df["Prefix"] == mprefix)
                 ]
-            elif mtype:
-                match = materials_df[materials_df["Material Type"] == mtype]
-            else:
-                match = pd.DataFrame()
-
-            codice_fpd = (
-                match["FPD Code"].iloc[0]
-                if not match.empty and "FPD Code" in match.columns
-                else "NOT AVAILABLE"
-            )
+                unique_codes = prefix_matches["FPD Code"].dropna().unique()
+                if len(unique_codes) == 1:
+                    codice_fpd = unique_codes[0]
 
             # Build SQ tags and quality lines
             sq_tags = ["[SQ58]", "[CORP-ENG-0115]"]
