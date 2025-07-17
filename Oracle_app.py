@@ -181,7 +181,6 @@ if selected_part != st.session_state.prev_part:
 st.markdown("---")
 
 
-
 # --- CASING, PUMP
 if selected_part == "Casing, Pump":
     col1, col2, col3 = st.columns(3)
@@ -189,68 +188,54 @@ if selected_part == "Casing, Pump":
     # COLONNA 1 – INPUT
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="casing_model")
-        size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
-        size = st.selectbox("Product/Pump Size", [""] + size_list, key="casing_size")
+        pump_type = st.selectbox("Pump Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="casing_model")
+        pump_size = st.selectbox("Pump Size", [""] + size_df[size_df["Pump Model"] == pump_type]["Size"].dropna().tolist(), key="casing_size")
 
-        feature_1 = ""
-        special = ["HDO", "DMX", "WXB", "WIK"]
-        if model not in special:
-            f1_list = features_df[
-                (features_df["Pump Model"] == model) &
-                (features_df["Feature Type"] == "features1")
-            ]["Feature"].dropna().tolist()
-            feature_1 = st.selectbox("Additional Feature 1", [""] + f1_list, key="casing_f1")
+        length = st.number_input("Length (mm)", min_value=0, key="casing_length")
+        width  = st.number_input("Width (mm)",  min_value=0, key="casing_width")
 
-        feature_2 = ""
-        if model in ["HPX", "HED"]:
-            f2_list = features_df[
-                (features_df["Pump Model"] == model) &
-                (features_df["Feature Type"] == "features2")
-            ]["Feature"].dropna().tolist()
-            feature_2 = st.selectbox("Additional Feature 2", [""] + f2_list, key="casing_f2")
-
-        note = st.text_area("Note (opzionale)", height=80, key="casing_note")
-        dwg = st.text_input("Dwg/doc number", key="casing_dwg")
+        # note: rimosso il placeholder “(opzionale)”
+        note = st.text_area("Note", height=80, key="casing_note")
+        dwg  = st.text_input("Dwg/doc number", key="casing_dwg")
 
         mtype = st.selectbox("Material Type", [""] + material_types, key="casing_mtype")
         pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
-        prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
+        prefixes = sorted(pref_df["Prefix"].unique()) if mtype else []
         mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="casing_mprefix")
-
-        if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
-        else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
-            ]["Name"].dropna().tolist()
-
+        names = (
+            materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+            if mtype == "MISCELLANEOUS"
+            else materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().tolist()
+        )
         mname = st.selectbox("Material Name", [""] + names, key="casing_mname")
 
-        # ✅ Checkbox qualità extra
-        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="casing_hf")
+        # textbox aggiuntivo per note sul materiale
+        mat_note = st.text_input("Material Note", key="casing_mat_note")
+
+        # checkbox qualità extra
+        hf_service  = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="casing_hf")
         tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="casing_tmt")
-        overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="casing_overlay")
-        hvof = st.checkbox("HVOF coating?", key="casing_hvof")
-        water = st.checkbox("Water service?", key="casing_water")
+        overlay     = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="casing_overlay")
+        hvof        = st.checkbox("HVOF coating?", key="casing_hvof")
+        water       = st.checkbox("Water service?", key="casing_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="casing_stamicarbon")
 
         if st.button("Genera Output", key="casing_gen"):
-            materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
+            # costruisco il materiale solo se selezionato
+            materiale = f"{mtype} {mprefix} {mname}".strip() if mname else ""
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
                 (materials_df["Prefix"] == mprefix) &
                 (materials_df["Name"] == mname)
             ]
-            codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
+            codice_fpd = match["FPD Code"].values[0] if not match.empty else "NOT AVAILABLE"
 
+            # tag e linee di qualità
             sq_tags = ["[SQ58]", "[CORP-ENG-0115]"]
             quality_lines = [
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
                 "CORP-ENG-0115 - General Surface Quality Requirements G1-1"
             ]
-
             if hf_service:
                 sq_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
@@ -271,13 +256,19 @@ if selected_part == "Casing, Pump":
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             tag_string = " ".join(sq_tags)
-            quality = "\n".join(quality_lines)
 
-            descr = f"CASING, PUMP - MODEL: {model}, SIZE: {size}, FEATURES: {feature_1}, {feature_2}"
-            if note:
-                descr += f", NOTE: {note}"
-            descr += f" {tag_string}"
-            descr = "*" + descr
+            # costruisco la descrizione senza model né note, e con material note in coda
+            descr = (
+                f"*CASING, PUMP - PUMP TYPE: {pump_type}, PUMP SIZE: {pump_size}, "
+                f"LENGHT×WIDTH: {length}×{width} mm"
+            )
+            if materiale:
+                descr += f", MATERIAL: {materiale}"
+            if mat_note:
+                descr += f", {mat_note}"
+            descr += f", {tag_string}"
+            
+            quality = "\n".join(quality_lines)
 
             st.session_state["output_data"] = {
                 "Item": "40201…",
@@ -295,6 +286,7 @@ if selected_part == "Casing, Pump":
                 "To supplier": "",
                 "Quality": quality
             }
+    # … resto incolonnato come prima …
 
     # COLONNA 2 – OUTPUT
     with col2:
