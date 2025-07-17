@@ -371,8 +371,22 @@ if selected_part == "Casing Cover, Pump":
         model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="ccov_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="ccov_size")
-        feature_1 = st.text_input("Additional Feature 1", key="ccov_feat1")
-        feature_2 = st.text_input("Additional Feature 2", key="ccov_feat2")
+                feature_1 = ""
+        f1_list = features_df[
+            (features_df["Pump Model"] == model) &
+            (features_df["Feature Type"] == "features1")
+        ]["Feature"].dropna().tolist()
+        if f1_list:
+            feature_1 = st.selectbox("Additional Feature 1", [""] + f1_list, key="ccov_feat1")
+
+        feature_2 = ""
+        f2_list = features_df[
+            (features_df["Pump Model"] == model) &
+            (features_df["Feature Type"] == "features2")
+        ]["Feature"].dropna().tolist()
+        if f2_list:
+            feature_2 = st.selectbox("Additional Feature 2", [""] + f2_list, key="ccov_feat2")
+
         note = st.text_area("Note", height=80, key="ccov_note")
         dwg = st.text_input("Dwg/doc number", key="ccov_dwg")
 
