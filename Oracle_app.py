@@ -180,7 +180,7 @@ if selected_part != st.session_state.prev_part:
 
 st.markdown("---")
 
-elif selected_part == "Casing, Pump":
+if selected_part == "Casing, Pump":
     col1, col2, col3 = st.columns(3)
 
     with col1:
