@@ -575,7 +575,7 @@ elif selected_part == "Casing cover, Pump":
             st.text_input("Categories", value=data["Categories"], key="cc_out5")
             st.text_input("Catalog", value=data["Catalog"], key="cc_out6")
             st.text_input("Disegno", value=data["Disegno"], key="cc_out7")
-            st.text_input("Material", value=data["Material"], key="cc_out8
+            st.text_input("Material", value=data["Material"], key="cc_out8")
             st.text_input("FPD material code", value=data["FPD material code"], key="cc_out9")
             st.text_input("Template", value=data["Template"], key="cc_out10")
             st.text_input("ERP L1", value=data["ERP L1"], key="cc_out11")
