@@ -2959,7 +2959,10 @@ elif selected_part == "Baseplate, Pump":
             drawing_out = drawing
             material_parts = [mat_type, mat_prefix, mat_name]
             material = " ".join([m for m in material_parts if m])
-            fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
+            if mat_type and mat_prefix and mat_name:
+                fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
+            else:
+                fpd_code = ""
             template = "FPD_BUY_4"
             erp1 = "21_FABRICATION_OR_BASEPLATES"
             erp2 = "22_BASEPLATE"
@@ -3042,7 +3045,6 @@ elif selected_part == "Baseplate, Pump":
                 st.session_state["output_data"]["FPD material code"]
             )
             st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
-
 
 # --- FLANGE, PIPE
 if selected_part == "Flange, Pipe":
