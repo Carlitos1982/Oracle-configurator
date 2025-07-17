@@ -3027,7 +3027,7 @@ elif selected_part == "Baseplate, Pump":
             st.text_input("ERP L1", value=data["ERP L1"], key="base_out11")
             st.text_input("ERP L2", value=data["ERP L2"], key="base_out12")
             st.text_input("To Supplier", value=data.get("To Supplier", ""), key="base_out13")
-            st.text_area("Quality", value="\n".join(data["Quality"]), height=100, key="base_out14")
+            st.text_area("Quality", value="\n".join(data["Quality"]), height=160, key="base_out14")
 
     with col3:
         st.subheader("🧾 DataLoad")
