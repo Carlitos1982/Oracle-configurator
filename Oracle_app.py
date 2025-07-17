@@ -2912,6 +2912,9 @@ if selected_part == "Shaft, Pump":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
+
+
 elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
 
@@ -2930,11 +2933,14 @@ elif selected_part == "Baseplate, Pump":
         st.markdown("### Materiale")
         mcol1, mcol2, mcol3 = st.columns(3)
         with mcol1:
-            mtype = st.selectbox("Material Type", material_df["Type"].unique(), key="bp_mtype")
+            mtype = st.selectbox("Material Type", material_df["Material Type"].dropna().unique(), key="bp_mtype")
         with mcol2:
-            mprefix = st.selectbox("Prefix", material_df[material_df["Type"] == mtype]["Prefix"].unique(), key="bp_mprefix")
+            mprefix = st.selectbox("Prefix", material_df[material_df["Material Type"] == mtype]["Prefix"].dropna().unique(), key="bp_mprefix")
         with mcol3:
-            mname = st.selectbox("Name", material_df[(material_df["Type"] == mtype) & (material_df["Prefix"] == mprefix)]["Name"].unique(), key="bp_mname")
+            mname = st.selectbox("Name", material_df[
+                (material_df["Material Type"] == mtype) &
+                (material_df["Prefix"] == mprefix)
+            ]["Name"].dropna().unique(), key="bp_mname")
         mnote = st.text_area("Material Note", height=60, key="bp_mnote")
 
     with col2:
@@ -2982,7 +2988,6 @@ elif selected_part == "Baseplate, Pump":
                 st.text_area("Dataload String", dataload_string, height=200)
             else:
                 st.warning("Inserire l'Item Number per generare la stringa.")
-
 
 
 # --- FLANGE, PIPE
