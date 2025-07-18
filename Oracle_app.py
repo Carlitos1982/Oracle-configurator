@@ -882,9 +882,17 @@ if selected_part == "Balance Drum, Pump":
 
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="bdrum_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="bdrum_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
-        size = st.selectbox("Product/Pump Size", [""] + size_list, key="bdrum_size")
+        size = st.selectbox("Pump Size", [""] + size_list, key="bdrum_size")
+
+        # Feature 1 come menu a tendina (se presente)
+        f1_list = features_df[
+            (features_df["Pump Model"] == model) &
+            (features_df["Feature Type"] == "features1")
+        ]["Feature"].dropna().tolist()
+        feature_1 = st.selectbox("Additional Feature 1", [""] + f1_list, key="bdrum_feat1") if f1_list else ""
+
         note = st.text_area("Note", height=80, key="bdrum_note")
         dwg = st.text_input("Dwg/doc number", key="bdrum_dwg")
 
@@ -902,6 +910,7 @@ if selected_part == "Balance Drum, Pump":
             ]["Name"].dropna().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="bdrum_mname")
+        material_note = st.text_area("Material note", height=60, key="bdrum_matnote")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="bdrum_hf")
@@ -925,7 +934,6 @@ if selected_part == "Balance Drum, Pump":
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
                 "CORP-ENG-0115 - General Surface Quality Requirements G1-1"
             ]
-
             if hf_service:
                 sq_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
@@ -945,14 +953,15 @@ if selected_part == "Balance Drum, Pump":
                 sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
-            quality = "\n".join(quality_lines)
             tag_string = " ".join(sq_tags)
+            quality = "\n".join(quality_lines)
 
-            descr = f"BALANCE DRUM, PUMP - MODEL: {model}, SIZE: {size}"
-            if note:
-                descr += f", NOTE: {note}"
-            descr += f" {tag_string}"
-            descr = "*" + descr
+            # Descrizione finale
+            descr_parts = ["BALANCE DRUM, PUMP"]
+            for val in [model, size, feature_1, note, materiale, material_note]:
+                if val:
+                    descr_parts.append(val)
+            descr = "*" + " - ".join(descr_parts) + " " + tag_string
 
             st.session_state["output_data"] = {
                 "Item": "6231…",
