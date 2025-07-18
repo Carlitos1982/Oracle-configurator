@@ -2515,21 +2515,19 @@ if selected_part == "Nut, Hex":
                 )
 
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
-
 # --- RING, WEAR
-
 if selected_part == "Ring, Wear":
     col1, col2, col3 = st.columns(3)
 
     with col1:
         st.subheader("✏️ Input")
-        wear_type = st.selectbox("Type", ["Stationary", "Rotary"], key="ring_type")
-        model = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="ring_model")
-        internal_dia = st.text_input("Internal diameter (mm)", key="ring_id")
-        outer_dia = st.text_input("Outer diameter (mm)", key="ring_od")
-        increased_clearance = st.selectbox("Increased clearance", ["No", "Yes"], key="ring_clearance")
+
+        ring_type = st.selectbox("Type", ["Stationary", "Rotary"], key="ring_type")
+        model = st.selectbox("Pump Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="ring_model")
+        int_diam = st.text_input("Internal diameter (mm)", key="ring_id")
+        out_diam = st.text_input("Outer diameter (mm)", key="ring_od")
         note = st.text_area("Note", height=80, key="ring_note")
+        clearance = st.radio("Increased clearance?", ["No", "Yes"], horizontal=True, key="ring_clr")
         dwg = st.text_input("Dwg/doc number", key="ring_dwg")
 
         mtype = st.selectbox("Material Type", [""] + material_types, key="ring_mtype")
@@ -2546,17 +2544,11 @@ if selected_part == "Ring, Wear":
             ]["Name"].dropna().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="ring_mname")
-
-        # Checkbox qualità
-        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="ring_hf")
-        tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="ring_tmt")
-        overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="ring_overlay")
-        hvof = st.checkbox("HVOF coating?", key="ring_hvof")
-        water = st.checkbox("Water service?", key="ring_water")
-        stamicarbon = st.checkbox("Stamicarbon?", key="ring_stamicarbon")
+        material_note = st.text_area("Material note", height=60, key="ring_matnote")
 
         if st.button("Genera Output", key="ring_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
+
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
                 (materials_df["Prefix"] == mprefix) &
@@ -2564,47 +2556,32 @@ if selected_part == "Ring, Wear":
             ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
+            # SQ logiche
             sq_tags = ["[SQ58]", "[CORP-ENG-0115]"]
             quality_lines = [
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
                 "CORP-ENG-0115 - General Surface Quality Requirements G1-1"
             ]
+            if clearance == "Yes":
+                sq_tags.append("<SQ173>")
+                quality_lines.append("SQ 173 - Increased Clearance for Wear Ring")
 
-            if hf_service:
-                sq_tags.append("<SQ113>")
-                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
-            if tmt_service:
-                sq_tags.append("[SQ137]")
-                quality_lines.append("SQ 137 - Pompe di Processo con Rivestimento Protettivo (TMT/HVOF)")
-            if overlay:
-                sq_tags.append("<PQ72>")
-                quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
-            if hvof:
-                sq_tags.append("[DE2500.002]")
-                quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
-            if water:
-                sq_tags.append("<PI23>")
-                quality_lines.append("PI 23 - Pompe per Acqua Potabile")
-            if stamicarbon:
-                sq_tags.append("<SQ172>")
-                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
-
-            quality = "\n".join(quality_lines)
             tag_string = " ".join(sq_tags)
+            quality = "\n".join(quality_lines)
 
-            identificativo = "2300-IMPELLER WEAR RING" if wear_type == "Rotary" else "1500-CASING WEAR RING"
-            item_code = "40224…" if wear_type == "Rotary" else "40223…"
+            # Descrizione
+            descr_parts = [f"{ring_type.upper()} WEAR RING"]
+            for val in [model, int_diam, out_diam, note, materiale, material_note]:
+                if val:
+                    descr_parts.append(val)
+            descr = "*" + " - ".join(descr_parts) + " " + tag_string
 
-            descr = f"{wear_type.upper()} WEAR RING, PUMP - MODEL: {model}, ID: {internal_dia}, OD: {outer_dia}"
-            if increased_clearance == "Yes":
-                descr += ", INCREASED CLEARANCE"
-            if note:
-                descr += f", NOTE: {note}"
-            descr += f" {tag_string}"
-            descr = "*" + descr
+            # Output
+            item = "40224…" if ring_type == "Rotary" else "40223…"
+            identificativo = "2300-IMPELLER WEAR RING" if ring_type == "Rotary" else "1500-CASING WEAR RING"
 
             st.session_state["output_data"] = {
-                "Item": item_code,
+                "Item": item,
                 "Description": descr,
                 "Identificativo": identificativo,
                 "Classe ricambi": "1-2-3",
@@ -2620,6 +2597,7 @@ if selected_part == "Ring, Wear":
                 "Quality": quality
             }
 
+    # COLONNA 2: Output
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
@@ -2632,16 +2610,8 @@ if selected_part == "Ring, Wear":
     # COLONNA 3: DataLoad
     with col3:
         st.subheader("🧾 DataLoad")
-        dataload_mode_ring = st.radio(
-            "Tipo operazione:",
-            ["Crea nuovo item", "Aggiorna item"],
-            key="ring_dl_mode"
-        )
-        item_code_ring = st.text_input(
-            "Codice item",
-            key="ring_item_code"
-        )
-
+        dataload_mode_ring = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="ring_dl_mode")
+        item_code_ring = st.text_input("Codice item", key="ring_item_code")
         if st.button("Genera stringa DataLoad", key="gen_dl_ring"):
             if not item_code_ring:
                 st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
@@ -2649,51 +2619,48 @@ if selected_part == "Ring, Wear":
                 st.error("❌ Genera prima l'output dalla colonna 1.")
             else:
                 data = st.session_state["output_data"]
-                def get_val_ring(key):
+                def get_val_r(key):
                     val = data.get(key, "").strip()
                     return val if val else "."
-
                 dataload_fields_ring = [
                     "\\%FN", item_code_ring,
-                    "\\%TC", get_val_ring("Template"), "TAB",
+                    "\\%TC", get_val_r("Template"), "TAB",
                     "\\%D", "\\%O", "TAB",
-                    get_val_ring("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_ring("Identificativo"), "TAB",
-                    get_val_ring("Classe ricambi"), "TAB",
+                    get_val_r("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_r("Identificativo"), "TAB",
+                    get_val_r("Classe ricambi"), "TAB",
                     "\\%O", "\\^S",
                     "\\%TA", "TAB",
-                    f"{get_val_ring('ERP_L1')}.{get_val_ring('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_ring("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_ring("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_ring("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    f"{get_val_r('ERP_L1')}.{get_val_r('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_r("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_r("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_r("Disegno"), "TAB", "\\^S", "\\^{F4}",
                     "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_ring("FPD material code"), "TAB",
-                    get_val_ring("Material"), "\\^S", "\\^{F4}",
+                    get_val_r("FPD material code"), "TAB",
+                    get_val_r("Material"), "\\^S", "\\^{F4}",
                     "\\%VA", "TAB",
-                    get_val_ring("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_ring("Quality") if get_val_ring("Quality") != "." else ".", "\\^S",
+                    get_val_r("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_r("Quality") if get_val_r("Quality") != "." else ".", "\\^S",
                     "\\%FN", "TAB",
-                    get_val_ring("To supplier"), "TAB", "TAB", "TAB",
+                    get_val_r("To supplier"), "TAB", "TAB", "TAB",
                     "Short Text", "TAB",
-                    get_val_ring("To supplier") if get_val_ring("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                    get_val_r("To supplier") if get_val_r("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
-
                 dataload_string_ring = "\t".join(dataload_fields_ring)
                 st.text_area("Anteprima (per copia manuale)", dataload_string_ring, height=200)
 
                 csv_buffer_ring = io.StringIO()
-                writer_ring     = csv.writer(csv_buffer_ring, quoting=csv.QUOTE_MINIMAL)
+                writer_ring = csv.writer(csv_buffer_ring, quoting=csv.QUOTE_MINIMAL)
                 for riga in dataload_fields_ring:
                     writer_ring.writerow([riga])
-
                 st.download_button(
                     label="💾 Scarica file CSV per Import Data",
                     data=csv_buffer_ring.getvalue(),
                     file_name=f"dataload_{item_code_ring}.csv",
                     mime="text/csv"
                 )
-
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 if selected_part == "Pin, Dowel":
     col1, col2, col3 = st.columns(3)
 
