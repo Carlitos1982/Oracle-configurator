@@ -2829,7 +2829,7 @@ if selected_part == "Shaft, Pump":
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="shaft_size")
 
-        feature_1 = st.selectbox("Additional Feature 1", ["", "keyed", "threaded", "slotted"], key="shaft_f1")
+        # 🔧 RIMOSSO Additional Feature 1
 
         brg_type = st.selectbox("Brg. Type", [""] + brg_types, key="shaft_brg_type")
         brg_size = st.selectbox("Brg. Size", [""] + brg_size_options.get(brg_type, []), key="shaft_brg_size")
@@ -2855,7 +2855,7 @@ if selected_part == "Shaft, Pump":
         mname = st.selectbox("Material Name", [""] + names, key="shaft_mname")
         material_note = st.text_area("Material note", height=60, key="shaft_matnote")
 
-        # Qualità
+        # Checkbox qualità
         overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="shaft_overlay")
         hvof = st.checkbox("HVOF coating?", key="shaft_hvof")
         water = st.checkbox("Water service?", key="shaft_water")
@@ -2895,7 +2895,7 @@ if selected_part == "Shaft, Pump":
             quality = "\n".join(quality_lines)
 
             descr_parts = ["SHAFT, PUMP"]
-            for val in [model, size, feature_1, brg_type, brg_size, max_diam, max_len, note, materiale, material_note]:
+            for val in [model, size, brg_type, max_diam, max_len, note, materiale, material_note]:
                 if val:
                     descr_parts.append(val)
             descr = "*" + " - ".join(descr_parts) + " " + tag_string
@@ -2916,6 +2916,7 @@ if selected_part == "Shaft, Pump":
                 "To supplier": "",
                 "Quality": quality
             }
+
 
     # COLONNA 2: Output
     with col2:
