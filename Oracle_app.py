@@ -546,11 +546,17 @@ if selected_part == "Impeller, Pump":
 
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product/Pump Model", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="imp_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="imp_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
-        size = st.selectbox("Product/Pump Size", [""] + size_list, key="imp_size")
-        feature_1 = st.text_input("Additional Feature 1", key="imp_feat1")
-        feature_2 = st.text_input("Additional Feature 2", key="imp_feat2")
+        size = st.selectbox("Pump Size", [""] + size_list, key="imp_size")
+
+        # Feature 1 come menu a tendina
+        f1_list = features_df[
+            (features_df["Pump Model"] == model) &
+            (features_df["Feature Type"] == "features1")
+        ]["Feature"].dropna().tolist()
+        feature_1 = st.selectbox("Additional Feature 1", [""] + f1_list, key="imp_feat1") if f1_list else ""
+
         note = st.text_area("Note", height=80, key="imp_note")
         dwg = st.text_input("Dwg/doc number", key="imp_dwg")
 
@@ -568,6 +574,7 @@ if selected_part == "Impeller, Pump":
             ]["Name"].dropna().tolist()
 
         mname = st.selectbox("Material Name", [""] + names, key="imp_mname")
+        material_note = st.text_area("Material note", height=60, key="imp_matnote")
 
         # Checkbox qualità
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="imp_hf")
@@ -586,12 +593,12 @@ if selected_part == "Impeller, Pump":
             ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
+            # Qualità
             sq_tags = ["[SQ58]", "[CORP-ENG-0115]"]
             quality_lines = [
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
                 "CORP-ENG-0115 - General Surface Quality Requirements G1-1"
             ]
-
             if hf_service:
                 sq_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
@@ -611,14 +618,15 @@ if selected_part == "Impeller, Pump":
                 sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
-            quality = "\n".join(quality_lines)
             tag_string = " ".join(sq_tags)
+            quality = "\n".join(quality_lines)
 
-            descr = f"IMPELLER, PUMP - MODEL: {model}, SIZE: {size}, FEATURES: {feature_1} {feature_2}".strip()
-            if note:
-                descr += f", NOTE: {note}"
-            descr += f" {tag_string}"
-            descr = "*" + descr
+            # Descrizione finale
+            descr_parts = ["IMPELLER, PUMP"]
+            for val in [model, size, feature_1, note, materiale, material_note]:
+                if val:
+                    descr_parts.append(val)
+            descr = "*" + " - ".join(descr_parts) + " " + tag_string
 
             st.session_state["output_data"] = {
                 "Item": "3110…",
