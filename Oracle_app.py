@@ -1715,6 +1715,9 @@ if selected_part == "Bolt, Eye":
         size = st.selectbox("Size", [""] + bolt_sizes, key="beye_size")
         length = st.selectbox("Length", [""] + bolt_lengths, key="beye_length")
 
+        # Note spostata prima di Material Type
+        note = st.text_area("Note", height=80, key="beye_note")
+
         # selezione materiale
         mtype_beye = st.selectbox("Material Type", [""] + material_types, key="beye_mtype")
         pref_df_beye = materials_df[
@@ -1734,21 +1737,19 @@ if selected_part == "Bolt, Eye":
                 (materials_df["Prefix"] == mprefix_beye)
             ]["Name"].dropna().tolist()
         mname_beye = st.selectbox("Material Name", [""] + names_beye, key="beye_mname")
+
+        # Material note aggiunto
         material_note_beye = st.text_area("Material note", height=60, key="beye_matnote")
 
-        note = st.text_area("Note", height=80, key="beye_note")
-        dwg  = st.text_input("Dwg/doc number", key="beye_dwg")
-
-        # Stamicarbon?
-        stamicarbon = st.checkbox("Stamicarbon?", key="beye_stamicarbon")
+        dwg = st.text_input("Dwg/doc number", key="beye_dwg")
 
         if st.button("Genera Output", key="beye_gen"):
             # costruisco il materiale completo e il codice FPD
-            materiale = (
-                f"{mtype_beye} {mprefix_beye} {mname_beye}".strip()
-                if mtype_beye != "MISCELLANEOUS"
-                else mname_beye
-            )
+            if mtype_beye == "MISCELLANEOUS":
+                materiale = mname_beye
+            else:
+                materiale = f"{mtype_beye} {mprefix_beye} {mname_beye}".strip()
+
             match = materials_df[
                 (materials_df["Material Type"] == mtype_beye) &
                 (materials_df["Prefix"] == mprefix_beye) &
@@ -1756,27 +1757,20 @@ if selected_part == "Bolt, Eye":
             ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-            # tag qualità
+            # nessun checkbox Quality applicabile
             sq_tags = []
             quality_lines = []
-            if stamicarbon:
-                sq_tags.append("<SQ172>")
-                quality_lines.append(
-                    "SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION"
-                )
-            quality = "\n".join(quality_lines)
-            tag_string = " ".join(sq_tags)
+            tag_string = ""
+            quality = ""
 
-            # descrizione
-            descr = f"EYE BOLT - SIZE: {size}, LENGTH: {length}, MATERIAL: {materiale}"
-            if material_note_beye:
-                descr += f" - {material_note_beye}"
-            if note:
-                descr += f", NOTE: {note}"
-            descr += f" {tag_string}"
-            descr = "*" + descr
+            # descrizione senza etichette, solo valori separati da " - "
+            descr_parts = ["EYE BOLT"]
+            for val in [size, length, materiale, material_note_beye, note]:
+                if val:
+                    descr_parts.append(val)
+            descr = "*" + " - ".join(descr_parts)
 
-            # output_data
+            # popolo output_data
             st.session_state["output_data"] = {
                 "Item": "56120…",
                 "Description": descr,
