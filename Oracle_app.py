@@ -1758,14 +1758,12 @@ if selected_part == "Bolt, Eye":
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
             # nessun checkbox Quality applicabile
-            sq_tags = []
-            quality_lines = []
-            tag_string = ""
             quality = ""
+            tag_string = ""
 
-            # descrizione senza etichette, solo valori separati da " - "
+            # descrizione: Note → Size → Length → Materiale → Material note
             descr_parts = ["EYE BOLT"]
-            for val in [size, length, materiale, material_note_beye, note]:
+            for val in [note, size, length, materiale, material_note_beye]:
                 if val:
                     descr_parts.append(val)
             descr = "*" + " - ".join(descr_parts)
@@ -1851,6 +1849,7 @@ if selected_part == "Bolt, Eye":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 # --- BOLT, HEXAGONAL
 elif selected_part == "Bolt, Hexagonal":
