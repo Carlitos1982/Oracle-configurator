@@ -1715,7 +1715,7 @@ if selected_part == "Bolt, Eye":
         size = st.selectbox("Size", [""] + bolt_sizes, key="beye_size")
         length = st.selectbox("Length", [""] + bolt_lengths, key="beye_length")
 
-        # Note spostata prima di Material Type
+        # Note prima di Material
         note = st.text_area("Note", height=80, key="beye_note")
 
         # selezione materiale
@@ -1738,13 +1738,13 @@ if selected_part == "Bolt, Eye":
             ]["Name"].dropna().tolist()
         mname_beye = st.selectbox("Material Name", [""] + names_beye, key="beye_mname")
 
-        # Material note aggiunto
+        # Material note
         material_note_beye = st.text_area("Material note", height=60, key="beye_matnote")
 
         dwg = st.text_input("Dwg/doc number", key="beye_dwg")
 
         if st.button("Genera Output", key="beye_gen"):
-            # costruisco il materiale completo e il codice FPD
+            # costruisco il materiale e il codice FPD
             if mtype_beye == "MISCELLANEOUS":
                 materiale = mname_beye
             else:
@@ -1757,13 +1757,9 @@ if selected_part == "Bolt, Eye":
             ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-            # nessun checkbox Quality applicabile
-            quality = ""
-            tag_string = ""
-
-            # descrizione: Note → Size → Length → Materiale → Material note
+            # descrizione: Size → Length → Note → Materiale → Material note
             descr_parts = ["EYE BOLT"]
-            for val in [note, size, length, materiale, material_note_beye]:
+            for val in [size, length, note, materiale, material_note_beye]:
                 if val:
                     descr_parts.append(val)
             descr = "*" + " - ".join(descr_parts)
@@ -1783,72 +1779,9 @@ if selected_part == "Bolt, Eye":
                 "ERP_L1": "60_FASTENER",
                 "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
                 "To supplier": "",
-                "Quality": quality
+                "Quality": ""
             }
 
-    with col2:
-        st.subheader("📤 Output")
-        if "output_data" in st.session_state:
-            for k, v in st.session_state["output_data"].items():
-                if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
-                else:
-                    st.text_input(k, value=v)
-
-    with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_beye = st.radio(
-            "Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="beye_dl_mode"
-        )
-        item_code_beye = st.text_input("Codice item", key="beye_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_beye"):
-            if not item_code_beye:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields_beye = [
-                    "\\%FN", item_code_beye,
-                    "\\%TC", get_val("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val("Identificativo"), "TAB",
-                    get_val("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
-                    get_val("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val("FPD material code"), "TAB",
-                    get_val("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val("Quality") if get_val("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_beye = "\t".join(dataload_fields_beye)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_beye, height=200)
-
-                csv_buffer_beye = io.StringIO()
-                writer = csv.writer(csv_buffer_beye, quoting=csv.QUOTE_MINIMAL)
-                for r in dataload_fields_beye:
-                    writer.writerow([r])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_beye.getvalue(),
-                    file_name=f"dataload_{item_code_beye}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 
 # --- BOLT, HEXAGONAL
