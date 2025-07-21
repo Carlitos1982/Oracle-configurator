@@ -1711,111 +1711,80 @@ if selected_part == "Bolt, Eye":
 
     with col1:
         st.subheader("✏️ Input")
-        size = st.text_input("Size", key="beye_size")
-        length = st.text_input("Length", key="beye_length")
-        material = st.text_input("Material", key="beye_material")
-        note = st.text_area("Note", height=80, key="beye_note")
-        dwg = st.text_input("Dwg/doc number", key="beye_dwg")
+        # dropdown per Size e Length
+        size = st.selectbox("Size", [""] + bolt_sizes, key="beye_size")
+        length = st.selectbox("Length", [""] + bolt_lengths, key="beye_length")
 
-        # Stamicarbon checkbox
+        # selezione materiale
+        mtype_beye = st.selectbox("Material Type", [""] + material_types, key="beye_mtype")
+        pref_df_beye = materials_df[
+            (materials_df["Material Type"] == mtype_beye) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_beye = sorted(pref_df_beye["Prefix"].unique()) if mtype_beye != "MISCELLANEOUS" else []
+        mprefix_beye = st.selectbox("Material Prefix", [""] + prefixes_beye, key="beye_mprefix")
+
+        if mtype_beye == "MISCELLANEOUS":
+            names_beye = materials_df[
+                materials_df["Material Type"] == mtype_beye
+            ]["Name"].dropna().tolist()
+        else:
+            names_beye = materials_df[
+                (materials_df["Material Type"] == mtype_beye) &
+                (materials_df["Prefix"] == mprefix_beye)
+            ]["Name"].dropna().tolist()
+        mname_beye = st.selectbox("Material Name", [""] + names_beye, key="beye_mname")
+        material_note_beye = st.text_area("Material note", height=60, key="beye_matnote")
+
+        note = st.text_area("Note", height=80, key="beye_note")
+        dwg  = st.text_input("Dwg/doc number", key="beye_dwg")
+
+        # Stamicarbon?
         stamicarbon = st.checkbox("Stamicarbon?", key="beye_stamicarbon")
 
         if st.button("Genera Output", key="beye_gen"):
+            # costruisco il materiale completo e il codice FPD
+            materiale = (
+                f"{mtype_beye} {mprefix_beye} {mname_beye}".strip()
+                if mtype_beye != "MISCELLANEOUS"
+                else mname_beye
+            )
+            match = materials_df[
+                (materials_df["Material Type"] == mtype_beye) &
+                (materials_df["Prefix"] == mprefix_beye) &
+                (materials_df["Name"] == mname_beye)
+            ]
+            codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
+
+            # tag qualità
             sq_tags = []
             quality_lines = []
-
             if stamicarbon:
                 sq_tags.append("<SQ172>")
-                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
-
+                quality_lines.append(
+                    "SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION"
+                )
             quality = "\n".join(quality_lines)
             tag_string = " ".join(sq_tags)
 
-            descr = f"EYE BOLT - SIZE: {size}, LENGTH: {length}, MATERIAL: {material}"
+            # descrizione
+            descr = f"EYE BOLT - SIZE: {size}, LENGTH: {length}, MATERIAL: {materiale}"
+            if material_note_beye:
+                descr += f" - {material_note_beye}"
             if note:
                 descr += f", NOTE: {note}"
             descr += f" {tag_string}"
             descr = "*" + descr
 
+            # output_data
             st.session_state["output_data"] = {
                 "Item": "56120…",
                 "Description": descr,
                 "Identificativo": "6540-EYE BOLT",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
-                "Catalog": "ARTVARI",
-                "Disegno": dwg,
-                "Material": material,
-                "FPD material code": "NA",
-                "Template": "FPD_BUY_2",
-                "ERP_L1": "60_FASTENER",
-                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
-                "To supplier": "",
-                "Quality": quality
-            }
+                "Catalog": "ARTVA
 
-    with col2:
-        st.subheader("📤 Output")
-        if "output_data" in st.session_state:
-            for k, v in st.session_state["output_data"].items():
-                if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
-                else:
-                    st.text_input(k, value=v)
-
-    # COLONNA 3: DataLoad
-    with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_be = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="be_dl_mode")
-        item_code_be = st.text_input("Codice item", key="be_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_be"):
-            if not item_code_be:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val_be(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields_be = [
-                    "\\%FN", item_code_be,
-                    "\\%TC", get_val_be("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_be("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_be("Identificativo"), "TAB",
-                    get_val_be("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_be('ERP_L1')}.{get_val_be('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_be("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_be("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_be("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_be("FPD material code"), "TAB",
-                    get_val_be("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_be("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_be("Quality") if get_val_be("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_be("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_be("To supplier") if get_val_be("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_be = "\t".join(dataload_fields_be)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_be, height=200)
-
-                csv_buffer_be = io.StringIO()
-                writer_be = csv.writer(csv_buffer_be, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_be:
-                    writer_be.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_be.getvalue(),
-                    file_name=f"dataload_{item_code_be}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 # --- BOLT, HEXAGONAL
 elif selected_part == "Bolt, Hexagonal":
     col1, col2, col3 = st.columns(3)
