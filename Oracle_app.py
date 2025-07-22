@@ -2383,19 +2383,24 @@ if selected_part == "Stud, Threaded":
 
 
 # --- NUT, HEX
-# --- NUT, HEX
 if selected_part == "Nut, Hex":
     col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1: INPUT
+    # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
-        nut_type = "Heavy"  # Fisso per ora
-        nut_size = st.selectbox("Size", ["1/4''", "3/8''", "1/2''", "5/8''", "3/4''", "7/8''", "1''", "1 1/8''", "1 1/4''", "1 3/8''", "1 1/2''"], key="nut_size")
-        note_nut = st.text_area("Note (opzionale)", height=80, key="nut_note")
 
+        nut_type = "Heavy"  # fisso
+        size_nut = st.selectbox("Size", [""] + bolt_sizes, key="nut_size")
+
+        note_nut = st.text_area("Note", height=80, key="nut_note")
+
+        # Selezione materiale (Type -> Prefix -> Name)
         mtype_nut = st.selectbox("Material Type", [""] + material_types, key="nut_mtype")
-        pref_df_nut = materials_df[(materials_df["Material Type"] == mtype_nut) & (materials_df["Prefix"].notna())]
+        pref_df_nut = materials_df[
+            (materials_df["Material Type"] == mtype_nut) &
+            (materials_df["Prefix"].notna())
+        ]
         prefixes_nut = sorted(pref_df_nut["Prefix"].unique()) if mtype_nut != "MISCELLANEOUS" else []
         mprefix_nut = st.selectbox("Material Prefix", [""] + prefixes_nut, key="nut_mprefix")
 
@@ -2406,15 +2411,19 @@ if selected_part == "Nut, Hex":
                 (materials_df["Material Type"] == mtype_nut) &
                 (materials_df["Prefix"] == mprefix_nut)
             ]["Name"].dropna().tolist()
-
         mname_nut = st.selectbox("Material Name", [""] + names_nut, key="nut_mname")
-        material_note_nut = st.text_input("Material Note (opzionale)", key="nut_mnote")
 
-        # ✅ Checkbox HF
-        hf_service_nut = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="nut_hf")
+        material_note_nut = st.text_area("Material note", height=60, key="nut_matnote")
+
+        # dwg non usato
+        dwg_nut = ""
 
         if st.button("Genera Output", key="nut_gen"):
-            materiale_nut = f"{mtype_nut} {mprefix_nut} {mname_nut}".strip() if mtype_nut != "MISCELLANEOUS" else mname_nut
+            materiale_nut = (
+                mname_nut if mtype_nut == "MISCELLANEOUS"
+                else f"{mtype_nut} {mprefix_nut} {mname_nut}".strip()
+            )
+
             match_nut = materials_df[
                 (materials_df["Material Type"] == mtype_nut) &
                 (materials_df["Prefix"] == mprefix_nut) &
@@ -2422,18 +2431,9 @@ if selected_part == "Nut, Hex":
             ]
             codice_fpd_nut = match_nut["FPD Code"].values[0] if not match_nut.empty else ""
 
-            descr_nut = f"{nut_type.upper()} NUT, SIZE: {nut_size}"
-            if note_nut:
-                descr_nut += f", NOTE: {note_nut}"
-            if materiale_nut:
-                descr_nut += f", MATERIAL: {materiale_nut}"
-            if material_note_nut:
-                descr_nut += f", MATERIAL NOTE: {material_note_nut}"
-            if hf_service_nut:
-                descr_nut += " <SQ113>"
-            descr_nut = "*" + descr_nut
-
-            quality_nut = "Applicable procedure: SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)" if hf_service_nut else ""
+            # Descrizione: Type -> Size -> Note -> Material -> Material note
+            descr_parts_nut = ["HEX NUT", nut_type, size_nut, note_nut, materiale_nut, material_note_nut]
+            descr_nut = "*" + " - ".join([p for p in descr_parts_nut if p])
 
             st.session_state["output_data"] = {
                 "Item": "56030…",
@@ -2441,29 +2441,28 @@ if selected_part == "Nut, Hex":
                 "Identificativo": "6581-HEXAGON NUT",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
-                "Catalog": "",
-                "Disegno": "",
+                "Catalog": "ARTVARI",
+                "Disegno": dwg_nut,
                 "Material": materiale_nut,
                 "FPD material code": codice_fpd_nut,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
                 "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
                 "To supplier": "",
-                "Quality": quality_nut
+                "Quality": ""
             }
 
-
-    # COLONNA 2: OUTPUT
+    # --------------------- COLONNA 2: OUTPUT ---------------------
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
-                if campo == "Description":
-                    st.text_area(campo, value=valore, height=80, key=f"nut_{campo}")
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=160)
                 else:
-                    st.text_input(campo, value=valore, key=f"nut_{campo}")
+                    st.text_input(k, value=v)
 
-    # COLONNA 3: DataLoad
+    # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         st.subheader("🧾 DataLoad")
         dataload_mode_nut = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="nut_dl_mode")
@@ -2476,51 +2475,49 @@ if selected_part == "Nut, Hex":
                 st.error("❌ Genera prima l'output dalla colonna 1.")
             else:
                 data = st.session_state["output_data"]
-                def get_val_nut(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
+                def get_val_n(k):
+                    v = data.get(k, "").strip()
+                    return v if v else "."
 
                 dataload_fields_nut = [
                     "\\%FN", item_code_nut,
-                    "\\%TC", get_val_nut("Template"), "TAB",
+                    "\\%TC", get_val_n("Template"), "TAB",
                     "\\%D", "\\%O", "TAB",
-                    get_val_nut("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_nut("Identificativo"), "TAB",
-                    get_val_nut("Classe ricambi"), "TAB",
+                    get_val_n("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_n("Identificativo"), "TAB",
+                    get_val_n("Classe ricambi"), "TAB",
                     "\\%O", "\\^S",
                     "\\%TA", "TAB",
-                    f"{get_val_nut('ERP_L1')}.{get_val_nut('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_nut("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_nut("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_nut("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    f"{get_val_n('ERP_L1')}.{get_val_n('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_n("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_n("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_n("Disegno"), "TAB", "\\^S", "\\^{F4}",
                     "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_nut("FPD material code"), "TAB",
-                    get_val_nut("Material"), "\\^S", "\\^{F4}",
+                    get_val_n("FPD material code"), "TAB",
+                    get_val_n("Material"), "\\^S", "\\^{F4}",
                     "\\%VA", "TAB",
-                    get_val_nut("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_nut("Quality") if get_val_nut("Quality") != "." else ".", "\\^S",
+                    get_val_n("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_n("Quality") if get_val_n("Quality") != "." else ".", "\\^S",
                     "\\%FN", "TAB",
-                    get_val_nut("To supplier"), "TAB", "TAB", "TAB",
+                    get_val_n("To supplier"), "TAB", "TAB", "TAB",
                     "Short Text", "TAB",
-                    get_val_nut("To supplier") if get_val_nut("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                    get_val_n("To supplier") if get_val_n("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
-
                 dataload_string_nut = "\t".join(dataload_fields_nut)
                 st.text_area("Anteprima (per copia manuale)", dataload_string_nut, height=200)
 
                 csv_buffer_nut = io.StringIO()
-                writer_nut     = csv.writer(csv_buffer_nut, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_nut:
-                    writer_nut.writerow([riga])
-
+                writer_nut = csv.writer(csv_buffer_nut, quoting=csv.QUOTE_MINIMAL)
+                for r in dataload_fields_nut:
+                    writer_nut.writerow([r])
                 st.download_button(
                     label="💾 Scarica file CSV per Import Data",
                     data=csv_buffer_nut.getvalue(),
                     file_name=f"dataload_{item_code_nut}.csv",
                     mime="text/csv"
                 )
-
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 # --- RING, WEAR
 if selected_part == "Ring, Wear":
     col1, col2, col3 = st.columns(3)
