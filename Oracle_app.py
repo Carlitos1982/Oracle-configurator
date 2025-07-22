@@ -2238,7 +2238,6 @@ elif selected_part == "Gusset, Other":
                 )
 
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
 # --- STUD, THREADED
 if selected_part == "Stud, Threaded":
     col1, col2, col3 = st.columns(3)
@@ -2249,6 +2248,9 @@ if selected_part == "Stud, Threaded":
 
         size_stud   = st.selectbox("Size",   [""] + bolt_sizes,   key="stud_size")
         length_stud = st.selectbox("Length", [""] + bolt_lengths, key="stud_length")
+
+        # Partial / Full threaded
+        thread_type = st.radio("Thread type", ["Partial", "Full"], index=0, key="stud_thread_type")
 
         note_stud = st.text_area("Note", height=80, key="stud_note")
 
@@ -2288,8 +2290,8 @@ if selected_part == "Stud, Threaded":
             ]
             codice_fpd_stud = match_stud["FPD Code"].values[0] if not match_stud.empty else ""
 
-            # Descrizione: Size → Length → Note → Material → Material note
-            descr_parts_stud = ["THREADED STUD", size_stud, length_stud, note_stud, materiale_stud, material_note_stud]
+            # Descrizione: Size → Length → Thread type → Note → Material → Material note
+            descr_parts_stud = ["THREADED STUD", size_stud, length_stud, thread_type.upper()+" THREADED" if thread_type else "", note_stud, materiale_stud, material_note_stud]
             descr_stud = "*" + " - ".join([p for p in descr_parts_stud if p])
 
             st.session_state["output_data"] = {
@@ -2375,6 +2377,7 @@ if selected_part == "Stud, Threaded":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 
 # --- NUT, HEX
