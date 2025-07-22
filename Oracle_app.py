@@ -1841,77 +1841,80 @@ if selected_part == "Bolt, Eye":
 if selected_part == "Bolt, Hexagonal":
     col1, col2, col3 = st.columns(3)
 
-    # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
-        size_hex = st.selectbox("Size", bolt_sizes, key="hex_size")
-        length_hex = st.selectbox("Length", bolt_lengths, key="hex_length")
 
-        # Radio invertiti: default = "No"
-        full_thd = st.radio("Full threaded?", ["No", "Yes"], horizontal=True, key="hex_fullthread")
-        zinc     = st.radio("Zinc Plated?",  ["No", "Yes"], horizontal=True, key="hex_zinc")
+        size_bh   = st.selectbox("Size",   [""] + bolt_sizes,   key="bh_size")
+        length_bh = st.selectbox("Length", [""] + bolt_lengths, key="bh_length")
 
-        note1_hex = st.text_area("Note", height=80, key="hex_note1")
+        full_thread_bh = st.radio("Full threaded?", ["No", "Yes"], index=0, key="bh_full_thread")
 
-        # Selezione materiale
-        mtype_hex = st.selectbox("Material Type", [""] + material_types, key="hex_mtype")
-        pref_df_hex = materials_df[(materials_df["Material Type"] == mtype_hex) & (materials_df["Prefix"].notna())]
-        prefixes_hex = sorted(pref_df_hex["Prefix"].unique()) if mtype_hex != "MISCELLANEOUS" else []
-        mprefix_hex = st.selectbox("Material Prefix", [""] + prefixes_hex, key="hex_mprefix")
+        note_bh = st.text_area("Note", height=80, key="bh_note")
 
-        if mtype_hex == "MISCELLANEOUS":
-            names_hex = materials_df[materials_df["Material Type"] == mtype_hex]["Name"].dropna().tolist()
+        # Materiale
+        mtype_bh = st.selectbox("Material Type", [""] + material_types, key="bh_mtype")
+        pref_df_bh = materials_df[(materials_df["Material Type"] == mtype_bh) & (materials_df["Prefix"].notna())]
+        prefixes_bh = sorted(pref_df_bh["Prefix"].unique()) if mtype_bh != "MISCELLANEOUS" else []
+        mprefix_bh = st.selectbox("Material Prefix", [""] + prefixes_bh, key="bh_mprefix")
+
+        if mtype_bh == "MISCELLANEOUS":
+            names_bh = materials_df[materials_df["Material Type"] == mtype_bh]["Name"].dropna().tolist()
         else:
-            names_hex = materials_df[
-                (materials_df["Material Type"] == mtype_hex) &
-                (materials_df["Prefix"] == mprefix_hex)
+            names_bh = materials_df[
+                (materials_df["Material Type"] == mtype_bh) &
+                (materials_df["Prefix"] == mprefix_bh)
             ]["Name"].dropna().tolist()
-        mname_hex = st.selectbox("Material Name", [""] + names_hex, key="hex_mname")
+        mname_bh = st.selectbox("Material Name", [""] + names_bh, key="bh_mname")
 
-        material_note_hex = st.text_area("Material note", height=60, key="hex_matnote")
+        # 👉 Zinc dopo il materiale
+        zinc_plated_bh = st.radio("Zinc plated?", ["No", "Yes"], index=0, key="bh_zinc")
 
-        # ❌ dwg rimosso
-        # dwg_hex = st.text_input("Dwg/doc number", key="hex_dwg")
-        dwg_hex = ""
+        material_note_bh = st.text_area("Material note", height=60, key="bh_matnote")
 
-        if st.button("Genera Output", key="hex_gen"):
-            materiale_hex = mname_hex if mtype_hex == "MISCELLANEOUS" else f"{mtype_hex} {mprefix_hex} {mname_hex}".strip()
-            match_hex = materials_df[
-                (materials_df["Material Type"] == mtype_hex) &
-                (materials_df["Prefix"] == mprefix_hex) &
-                (materials_df["Name"] == mname_hex)
+        if st.button("Genera Output", key="bh_gen"):
+            materiale_bh = (
+                mname_bh if mtype_bh == "MISCELLANEOUS"
+                else f"{mtype_bh} {mprefix_bh} {mname_bh}".strip()
+            )
+
+            match_bh = materials_df[
+                (materials_df["Material Type"] == mtype_bh) &
+                (materials_df["Prefix"] == mprefix_bh) &
+                (materials_df["Name"] == mname_bh)
             ]
-            codice_fpd_hex = match_hex["FPD Code"].values[0] if not match_hex.empty else ""
+            codice_fpd_bh = match_bh["FPD Code"].values[0] if not match_bh.empty else ""
 
-            descr_parts_hex = ["HEXAGONAL BOLT", size_hex, length_hex]
-            descr_parts_hex.append("FULL THD" if full_thd == "Yes" else "PARTIAL THD")
-            if zinc == "Yes":
-                descr_parts_hex.append("ZINC PLATED")
-            if note1_hex:
-                descr_parts_hex.append(note1_hex)
-            if materiale_hex:
-                descr_parts_hex.append(materiale_hex)
-            if material_note_hex:
-                descr_parts_hex.append(material_note_hex)
-
-            descr_hex = "*" + " - ".join([p for p in descr_parts_hex if p])
+            descr_parts_bh = [
+                "HEXAGONAL BOLT",
+                size_bh,
+                length_bh,
+                "FULL THREADED" if full_thread_bh == "Yes" else "",
+                note_bh,
+                materiale_bh,
+                "ZINC PLATED" if zinc_plated_bh == "Yes" else "",
+                material_note_bh
+            ]
+            descr_bh = "*" + " - ".join([p for p in descr_parts_bh if p])
 
             st.session_state["output_data"] = {
-                "Item": "50155…",
-                "Description": descr_hex,
-                "Identificativo": "6530-HEXAGON BOLT",
+                "Item": "56020…",
+                "Description": descr_bh,
+                "Identificativo": "6520-HEXAGONAL BOLT",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
-                "Disegno": dwg_hex,
-                "Material": materiale_hex,
-                "FPD material code": codice_fpd_hex,
+                "Disegno": "",
+                "Material": materiale_bh,
+                "FPD material code": codice_fpd_bh,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
                 "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
                 "To supplier": "",
                 "Quality": ""
             }
+
+    # (col2 e col3 restano invariati)
+
 
     # --------------------- COLONNA 2: OUTPUT ---------------------
     with col2:
@@ -3305,7 +3308,6 @@ if selected_part == "Gasket, Flat":
 if selected_part == "Screw, Cap":
     col1, col2, col3 = st.columns(3)
 
-    # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
 
@@ -3313,11 +3315,10 @@ if selected_part == "Screw, Cap":
         length_cap = st.selectbox("Length", [""] + bolt_lengths, key="cap_length")
 
         full_thread_cap = st.radio("Full threaded?", ["No", "Yes"], index=0, key="cap_full_thread")
-        zinc_plated_cap = st.radio("Zinc plated?",   ["No", "Yes"], index=0, key="cap_zinc")
 
         note_cap = st.text_area("Note", height=80, key="cap_note")
 
-        # Materiale (Type -> Prefix -> Name)
+        # Materiale
         mtype_cap = st.selectbox("Material Type", [""] + material_types, key="cap_mtype")
         pref_df_cap = materials_df[(materials_df["Material Type"] == mtype_cap) & (materials_df["Prefix"].notna())]
         prefixes_cap = sorted(pref_df_cap["Prefix"].unique()) if mtype_cap != "MISCELLANEOUS" else []
@@ -3331,6 +3332,9 @@ if selected_part == "Screw, Cap":
                 (materials_df["Prefix"] == mprefix_cap)
             ]["Name"].dropna().tolist()
         mname_cap = st.selectbox("Material Name", [""] + names_cap, key="cap_mname")
+
+        # 👉 Zinc dopo il materiale
+        zinc_plated_cap = st.radio("Zinc plated?", ["No", "Yes"], index=0, key="cap_zinc")
 
         material_note_cap = st.text_area("Material note", height=60, key="cap_matnote")
 
@@ -3347,15 +3351,14 @@ if selected_part == "Screw, Cap":
             ]
             codice_fpd_cap = match_cap["FPD Code"].values[0] if not match_cap.empty else ""
 
-            # Descrizione: Size → Length → (FULL THREADED) → (ZINC PLATED) → Note → Material → Material note
             descr_parts_cap = [
                 "CAP SCREW",
                 size_cap,
                 length_cap,
                 "FULL THREADED" if full_thread_cap == "Yes" else "",
-                "ZINC PLATED"   if zinc_plated_cap == "Yes"   else "",
                 note_cap,
                 materiale_cap,
+                "ZINC PLATED" if zinc_plated_cap == "Yes" else "",
                 material_note_cap
             ]
             descr_cap = "*" + " - ".join([p for p in descr_parts_cap if p])
@@ -3367,7 +3370,7 @@ if selected_part == "Screw, Cap":
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
-                "Disegno": "",  # niente dwg
+                "Disegno": "",
                 "Material": materiale_cap,
                 "FPD material code": codice_fpd_cap,
                 "Template": "FPD_BUY_2",
@@ -3376,6 +3379,8 @@ if selected_part == "Screw, Cap":
                 "To supplier": "",
                 "Quality": ""
             }
+
+
 
     # --------------------- COLONNA 2: OUTPUT ---------------------
     with col2:
