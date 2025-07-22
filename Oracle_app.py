@@ -2239,94 +2239,91 @@ elif selected_part == "Gusset, Other":
 
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
-
-# --- STUD, THREADED
 # --- STUD, THREADED
 if selected_part == "Stud, Threaded":
     col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1: INPUT
+    # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
-        threaded_stu = st.selectbox("Threaded", ["Full", "Partial"], key="stu_threaded")
-        size_stu = st.selectbox("Size", ["1/4''", "3/8''", "1/2''", "5/8''", "3/4''", "7/8''", "1''", "1 1/8''", "1 1/4''", "1 3/8''", "1 1/2''"], key="stu_size")
-        length_stu = st.text_input("Length", key="stu_length")
-        note_stu = st.text_area("Note (opzionale)", height=80, key="stu_note")
-        dwg_stu = st.text_input("Dwg/doc number", key="stu_dwg")
 
-        mtype_stu = st.selectbox("Material Type", [""] + material_types, key="stu_mtype")
-        pref_df_stu = materials_df[(materials_df["Material Type"] == mtype_stu) & (materials_df["Prefix"].notna())]
-        prefixes_stu = sorted(pref_df_stu["Prefix"].unique()) if mtype_stu != "MISCELLANEOUS" else []
-        mprefix_stu = st.selectbox("Material Prefix", [""] + prefixes_stu, key="stu_mprefix")
+        size_stud   = st.selectbox("Size",   [""] + bolt_sizes,   key="stud_size")
+        length_stud = st.selectbox("Length", [""] + bolt_lengths, key="stud_length")
 
-        if mtype_stu == "MISCELLANEOUS":
-            names_stu = materials_df[materials_df["Material Type"] == mtype_stu]["Name"].dropna().tolist()
+        note_stud = st.text_area("Note", height=80, key="stud_note")
+
+        # Selezione materiale (Type -> Prefix -> Name)
+        mtype_stud = st.selectbox("Material Type", [""] + material_types, key="stud_mtype")
+        pref_df_stud = materials_df[
+            (materials_df["Material Type"] == mtype_stud) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_stud = sorted(pref_df_stud["Prefix"].unique()) if mtype_stud != "MISCELLANEOUS" else []
+        mprefix_stud = st.selectbox("Material Prefix", [""] + prefixes_stud, key="stud_mprefix")
+
+        if mtype_stud == "MISCELLANEOUS":
+            names_stud = materials_df[materials_df["Material Type"] == mtype_stud]["Name"].dropna().tolist()
         else:
-            names_stu = materials_df[
-                (materials_df["Material Type"] == mtype_stu) &
-                (materials_df["Prefix"] == mprefix_stu)
+            names_stud = materials_df[
+                (materials_df["Material Type"] == mtype_stud) &
+                (materials_df["Prefix"] == mprefix_stud)
             ]["Name"].dropna().tolist()
+        mname_stud = st.selectbox("Material Name", [""] + names_stud, key="stud_mname")
 
-        mname_stu = st.selectbox("Material Name", [""] + names_stu, key="stu_mname")
-        material_note_stu = st.text_input("Material Note (opzionale)", key="stu_mnote")
+        material_note_stud = st.text_area("Material note", height=60, key="stud_matnote")
 
-        # ✅ Checkbox HF
-        hf_service_stu = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="stu_hf")
+        # DWG rimosso
+        dwg_stud = ""
 
-        if st.button("Genera Output", key="stu_gen"):
-            materiale_stu = f"{mtype_stu} {mprefix_stu} {mname_stu}".strip() if mtype_stu != "MISCELLANEOUS" else mname_stu
-            match_stu = materials_df[
-                (materials_df["Material Type"] == mtype_stu) &
-                (materials_df["Prefix"] == mprefix_stu) &
-                (materials_df["Name"] == mname_stu)
+        if st.button("Genera Output", key="stud_gen"):
+            materiale_stud = (
+                mname_stud if mtype_stud == "MISCELLANEOUS"
+                else f"{mtype_stud} {mprefix_stud} {mname_stud}".strip()
+            )
+
+            match_stud = materials_df[
+                (materials_df["Material Type"] == mtype_stud) &
+                (materials_df["Prefix"] == mprefix_stud) &
+                (materials_df["Name"] == mname_stud)
             ]
-            codice_fpd_stu = match_stu["FPD Code"].values[0] if not match_stu.empty else ""
+            codice_fpd_stud = match_stud["FPD Code"].values[0] if not match_stud.empty else ""
 
-            descr_stu = f"STUD THREADED - {threaded_stu.upper()}, SIZE: {size_stu}, LENGTH: {length_stu}"
-            if note_stu:
-                descr_stu += f", NOTE: {note_stu}"
-            if materiale_stu:
-                descr_stu += f", MATERIAL: {materiale_stu}"
-            if material_note_stu:
-                descr_stu += f", MATERIAL NOTE: {material_note_stu}"
-            if hf_service_stu:
-                descr_stu += " <SQ113>"
-            descr_stu = "*" + descr_stu
-
-            quality_stu = "Applicable procedure: SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)" if hf_service_stu else ""
+            # Descrizione: Size → Length → Note → Material → Material note
+            descr_parts_stud = ["THREADED STUD", size_stud, length_stud, note_stud, materiale_stud, material_note_stud]
+            descr_stud = "*" + " - ".join([p for p in descr_parts_stud if p])
 
             st.session_state["output_data"] = {
-                "Item": "56146…",
-                "Description": descr_stu,
-                "Identificativo": "6572-STUD",
+                "Item": "56110…",
+                "Description": descr_stud,
+                "Identificativo": "6535-STUD THREADED",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
-                "Disegno": dwg_stu,
-                "Material": materiale_stu,
-                "FPD material code": codice_fpd_stu,
+                "Disegno": dwg_stud,
+                "Material": materiale_stud,
+                "FPD material code": codice_fpd_stud,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
-                "ERP_L2": "12_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
                 "To supplier": "",
-                "Quality": quality_stu
+                "Quality": ""
             }
 
-    # COLONNA 2: OUTPUT
+    # --------------------- COLONNA 2: OUTPUT ---------------------
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
-                if campo == "Description":
-                    st.text_area(campo, value=valore, height=80, key=f"stud_{campo}")
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=160)
                 else:
-                    st.text_input(campo, value=valore, key=f"stud_{campo}")
+                    st.text_input(k, value=v)
 
-    # COLONNA 3: DataLoad
+    # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         st.subheader("🧾 DataLoad")
         dataload_mode_stud = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="stud_dl_mode")
-        item_code_stud     = st.text_input("Codice item", key="stud_item_code")
+        item_code_stud = st.text_input("Codice item", key="stud_item_code")
 
         if st.button("Genera stringa DataLoad", key="gen_dl_stud"):
             if not item_code_stud:
@@ -2335,52 +2332,48 @@ if selected_part == "Stud, Threaded":
                 st.error("❌ Genera prima l'output dalla colonna 1.")
             else:
                 data = st.session_state["output_data"]
-                def get_val_stud(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
+                def get_val_s(k):
+                    v = data.get(k, "").strip()
+                    return v if v else "."
 
                 dataload_fields_stud = [
                     "\\%FN", item_code_stud,
-                    "\\%TC", get_val_stud("Template"), "TAB",
+                    "\\%TC", get_val_s("Template"), "TAB",
                     "\\%D", "\\%O", "TAB",
-                    get_val_stud("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_stud("Identificativo"), "TAB",
-                    get_val_stud("Classe ricambi"), "TAB",
+                    get_val_s("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_s("Identificativo"), "TAB",
+                    get_val_s("Classe ricambi"), "TAB",
                     "\\%O", "\\^S",
                     "\\%TA", "TAB",
-                    f"{get_val_stud('ERP_L1')}.{get_val_stud('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_stud("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_stud("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_stud("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    f"{get_val_s('ERP_L1')}.{get_val_s('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_s("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_s("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_s("Disegno"), "TAB", "\\^S", "\\^{F4}",
                     "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_stud("FPD material code"), "TAB",
-                    get_val_stud("Material"), "\\^S", "\\^{F4}",
+                    get_val_s("FPD material code"), "TAB",
+                    get_val_s("Material"), "\\^S", "\\^{F4}",
                     "\\%VA", "TAB",
-                    get_val_stud("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_stud("Quality") if get_val_stud("Quality") != "." else ".", "\\^S",
+                    get_val_s("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_s("Quality") if get_val_s("Quality") != "." else ".", "\\^S",
                     "\\%FN", "TAB",
-                    get_val_stud("To supplier"), "TAB", "TAB", "TAB",
+                    get_val_s("To supplier"), "TAB", "TAB", "TAB",
                     "Short Text", "TAB",
-                    get_val_stud("To supplier") if get_val_stud("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                    get_val_s("To supplier") if get_val_s("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
-
                 dataload_string_stud = "\t".join(dataload_fields_stud)
                 st.text_area("Anteprima (per copia manuale)", dataload_string_stud, height=200)
 
                 csv_buffer_stud = io.StringIO()
-                writer_stud     = csv.writer(csv_buffer_stud, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_stud:
-                    writer_stud.writerow([riga])
-
+                writer_stud = csv.writer(csv_buffer_stud, quoting=csv.QUOTE_MINIMAL)
+                for r in dataload_fields_stud:
+                    writer_stud.writerow([r])
                 st.download_button(
                     label="💾 Scarica file CSV per Import Data",
                     data=csv_buffer_stud.getvalue(),
                     file_name=f"dataload_{item_code_stud}.csv",
                     mime="text/csv"
                 )
-
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
 
 # --- NUT, HEX
 if selected_part == "Nut, Hex":
