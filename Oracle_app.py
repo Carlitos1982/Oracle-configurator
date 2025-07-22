@@ -1837,7 +1837,6 @@ if selected_part == "Bolt, Eye":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
 # --- BOLT, HEXAGONAL
 if selected_part == "Bolt, Hexagonal":
     col1, col2, col3 = st.columns(3)
@@ -1845,28 +1844,18 @@ if selected_part == "Bolt, Hexagonal":
     # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
-        size_hex = st.selectbox(
-            "Size",
-            bolt_sizes,
-            key="hex_size"
-        )
-        length_hex = st.selectbox(
-            "Length",
-            bolt_lengths,
-            key="hex_length"
-        )
-        # Invertiti: default = "No"
+        size_hex = st.selectbox("Size", bolt_sizes, key="hex_size")
+        length_hex = st.selectbox("Length", bolt_lengths, key="hex_length")
+
+        # Radio invertiti: default = "No"
         full_thd = st.radio("Full threaded?", ["No", "Yes"], horizontal=True, key="hex_fullthread")
         zinc     = st.radio("Zinc Plated?",  ["No", "Yes"], horizontal=True, key="hex_zinc")
 
         note1_hex = st.text_area("Note", height=80, key="hex_note1")
 
-        # Selezione materiale classica
+        # Selezione materiale
         mtype_hex = st.selectbox("Material Type", [""] + material_types, key="hex_mtype")
-        pref_df_hex = materials_df[
-            (materials_df["Material Type"] == mtype_hex) &
-            (materials_df["Prefix"].notna())
-        ]
+        pref_df_hex = materials_df[(materials_df["Material Type"] == mtype_hex) & (materials_df["Prefix"].notna())]
         prefixes_hex = sorted(pref_df_hex["Prefix"].unique()) if mtype_hex != "MISCELLANEOUS" else []
         mprefix_hex = st.selectbox("Material Prefix", [""] + prefixes_hex, key="hex_mprefix")
 
@@ -1881,10 +1870,11 @@ if selected_part == "Bolt, Hexagonal":
 
         material_note_hex = st.text_area("Material note", height=60, key="hex_matnote")
 
-        dwg_hex = st.text_input("Dwg/doc number", key="hex_dwg")
+        # ❌ dwg rimosso
+        # dwg_hex = st.text_input("Dwg/doc number", key="hex_dwg")
+        dwg_hex = ""
 
         if st.button("Genera Output", key="hex_gen"):
-            # Materiale + FPD
             materiale_hex = mname_hex if mtype_hex == "MISCELLANEOUS" else f"{mtype_hex} {mprefix_hex} {mname_hex}".strip()
             match_hex = materials_df[
                 (materials_df["Material Type"] == mtype_hex) &
@@ -1893,7 +1883,6 @@ if selected_part == "Bolt, Hexagonal":
             ]
             codice_fpd_hex = match_hex["FPD Code"].values[0] if not match_hex.empty else ""
 
-            # Descrizione (mantengo l'ordine già usato; modifica solo se richiesto)
             descr_parts_hex = ["HEXAGONAL BOLT", size_hex, length_hex]
             descr_parts_hex.append("FULL THD" if full_thd == "Yes" else "PARTIAL THD")
             if zinc == "Yes":
@@ -1908,7 +1897,7 @@ if selected_part == "Bolt, Hexagonal":
             descr_hex = "*" + " - ".join([p for p in descr_parts_hex if p])
 
             st.session_state["output_data"] = {
-                "Item": "50155…",  # verifica il tuo range se diverso
+                "Item": "50155…",
                 "Description": descr_hex,
                 "Identificativo": "6530-HEXAGON BOLT",
                 "Classe ricambi": "",
@@ -1989,8 +1978,6 @@ if selected_part == "Bolt, Hexagonal":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
-
 
 # --- GASKET, RING TYPE JOINT
 # --- GASKET, RING TYPE JOINT
