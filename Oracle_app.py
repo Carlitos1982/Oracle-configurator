@@ -2272,8 +2272,8 @@ if selected_part == "Stud, Threaded":
 
         material_note_stud = st.text_area("Material note", height=60, key="stud_matnote")
 
-        # DWG rimosso
-        dwg_stud = ""
+        # Disegno
+        dwg_stud = st.text_input("Dwg/doc number", key="stud_dwg")
 
         if st.button("Genera Output", key="stud_gen"):
             materiale_stud = (
@@ -2332,6 +2332,7 @@ if selected_part == "Stud, Threaded":
                 st.error("❌ Genera prima l'output dalla colonna 1.")
             else:
                 data = st.session_state["output_data"]
+
                 def get_val_s(k):
                     v = data.get(k, "").strip()
                     return v if v else "."
@@ -2374,6 +2375,7 @@ if selected_part == "Stud, Threaded":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 # --- NUT, HEX
 if selected_part == "Nut, Hex":
