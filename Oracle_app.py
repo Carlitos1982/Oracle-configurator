@@ -1838,35 +1838,37 @@ if selected_part == "Bolt, Eye":
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
-
 # --- BOLT, HEXAGONAL
-elif selected_part == "Bolt, Hexagonal":
+if selected_part == "Bolt, Hexagonal":
     col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1: INPUT
+    # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
-        size_hex   = st.selectbox(
+        size_hex = st.selectbox(
             "Size",
-            bolt_sizes,  # utilizza la lista bolt_sizes già definita in alto
+            bolt_sizes,
             key="hex_size"
         )
         length_hex = st.selectbox(
             "Length",
-            bolt_lengths,  # utilizza la lista bolt_lengths già definita in alto
+            bolt_lengths,
             key="hex_length"
         )
-        full_thd   = st.radio("Full threaded?", ["Yes", "No"], horizontal=True, key="hex_fullthread")
-        zinc       = st.radio("Zinc Plated?", ["Yes", "No"], horizontal=True, key="hex_zinc")
-        note1_hex  = st.text_area("Note (opzionale)", height=80, key="hex_note1")
+        # Invertiti: default = "No"
+        full_thd = st.radio("Full threaded?", ["No", "Yes"], horizontal=True, key="hex_fullthread")
+        zinc     = st.radio("Zinc Plated?",  ["No", "Yes"], horizontal=True, key="hex_zinc")
 
-        mtype_hex = st.selectbox("Material Type", [""] + material_types, key="mtype_hex")
+        note1_hex = st.text_area("Note", height=80, key="hex_note1")
+
+        # Selezione materiale classica
+        mtype_hex = st.selectbox("Material Type", [""] + material_types, key="hex_mtype")
         pref_df_hex = materials_df[
             (materials_df["Material Type"] == mtype_hex) &
             (materials_df["Prefix"].notna())
         ]
         prefixes_hex = sorted(pref_df_hex["Prefix"].unique()) if mtype_hex != "MISCELLANEOUS" else []
-        mprefix_hex  = st.selectbox("Material Prefix", [""] + prefixes_hex, key="hex_mprefix")
+        mprefix_hex = st.selectbox("Material Prefix", [""] + prefixes_hex, key="hex_mprefix")
 
         if mtype_hex == "MISCELLANEOUS":
             names_hex = materials_df[materials_df["Material Type"] == mtype_hex]["Name"].dropna().tolist()
@@ -1877,66 +1879,62 @@ elif selected_part == "Bolt, Hexagonal":
             ]["Name"].dropna().tolist()
         mname_hex = st.selectbox("Material Name", [""] + names_hex, key="hex_mname")
 
-        note2_hex = st.text_area("Material Note (opzionale)", height=80, key="hex_note2")
+        material_note_hex = st.text_area("Material note", height=60, key="hex_matnote")
 
-        if st.button("Genera Output", key="gen_hex"):
-            if mtype_hex != "MISCELLANEOUS":
-                materiale_hex = f"{mtype_hex} {mprefix_hex} {mname_hex}".strip()
-                match_hex = materials_df[
-                    (materials_df["Material Type"] == mtype_hex) &
-                    (materials_df["Prefix"] == mprefix_hex) &
-                    (materials_df["Name"] == mname_hex)
-                ]
-            else:
-                materiale_hex = mname_hex
-                match_hex = materials_df[
-                    (materials_df["Material Type"] == mtype_hex) &
-                    (materials_df["Name"] == mname_hex)
-                ]
+        dwg_hex = st.text_input("Dwg/doc number", key="hex_dwg")
+
+        if st.button("Genera Output", key="hex_gen"):
+            # Materiale + FPD
+            materiale_hex = mname_hex if mtype_hex == "MISCELLANEOUS" else f"{mtype_hex} {mprefix_hex} {mname_hex}".strip()
+            match_hex = materials_df[
+                (materials_df["Material Type"] == mtype_hex) &
+                (materials_df["Prefix"] == mprefix_hex) &
+                (materials_df["Name"] == mname_hex)
+            ]
             codice_fpd_hex = match_hex["FPD Code"].values[0] if not match_hex.empty else ""
 
-            # 1) Costruisci prima la descrizione base (senza asterisco)
-            descr_hex = f"BOLT, HEXAGONAL - SIZE: {size_hex}, LENGTH: {length_hex}"
-            if full_thd == "Yes":
-                descr_hex += ", FULL THREADED"
+            # Descrizione (mantengo l'ordine già usato; modifica solo se richiesto)
+            descr_parts_hex = ["HEXAGONAL BOLT", size_hex, length_hex]
+            descr_parts_hex.append("FULL THD" if full_thd == "Yes" else "PARTIAL THD")
             if zinc == "Yes":
-                descr_hex += ", ZINC PLATED AS PER ASTM B633"
+                descr_parts_hex.append("ZINC PLATED")
             if note1_hex:
-                descr_hex += f", {note1_hex}"
-            descr_hex += f", {materiale_hex}"
-            if note2_hex:
-                descr_hex += f", {note2_hex}"
+                descr_parts_hex.append(note1_hex)
+            if materiale_hex:
+                descr_parts_hex.append(materiale_hex)
+            if material_note_hex:
+                descr_parts_hex.append(material_note_hex)
 
-            # 2) Aggiungi sempre l’asterisco all’inizio
-            descr_hex = "*" + descr_hex
+            descr_hex = "*" + " - ".join([p for p in descr_parts_hex if p])
 
             st.session_state["output_data"] = {
-                "Item": "56230…",
+                "Item": "50155…",  # verifica il tuo range se diverso
                 "Description": descr_hex,
-                "Identificativo": "6577-HEXAGON HEAD BOLT",
+                "Identificativo": "6530-HEXAGON BOLT",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
-                "Catalog": "",
+                "Catalog": "ARTVARI",
+                "Disegno": dwg_hex,
                 "Material": materiale_hex,
                 "FPD material code": codice_fpd_hex,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
-                "ERP_L2": "10_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
                 "To supplier": "",
                 "Quality": ""
             }
 
-    # COLONNA 2: OUTPUT
+    # --------------------- COLONNA 2: OUTPUT ---------------------
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
-                if campo == "Description":
-                    st.text_area(campo, value=valore, height=80, key=f"hex_{campo}")
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=160)
                 else:
-                    st.text_input(campo, value=valore, key=f"hex_{campo}")
+                    st.text_input(k, value=v)
 
-    # COLONNA 3: DataLoad
+    # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         st.subheader("🧾 DataLoad")
         dataload_mode_hex = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="hex_dl_mode")
@@ -1949,51 +1947,49 @@ elif selected_part == "Bolt, Hexagonal":
                 st.error("❌ Genera prima l'output dalla colonna 1.")
             else:
                 data = st.session_state["output_data"]
-                def get_val_hex(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
+                def get_val_h(k):
+                    v = data.get(k, "").strip()
+                    return v if v else "."
 
                 dataload_fields_hex = [
                     "\\%FN", item_code_hex,
-                    "\\%TC", get_val_hex("Template"), "TAB",
+                    "\\%TC", get_val_h("Template"), "TAB",
                     "\\%D", "\\%O", "TAB",
-                    get_val_hex("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_hex("Identificativo"), "TAB",
-                    get_val_hex("Classe ricambi"), "TAB",
+                    get_val_h("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_h("Identificativo"), "TAB",
+                    get_val_h("Classe ricambi"), "TAB",
                     "\\%O", "\\^S",
                     "\\%TA", "TAB",
-                    f"{get_val_hex('ERP_L1')}.{get_val_hex('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_hex("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_hex("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_hex("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    f"{get_val_h('ERP_L1')}.{get_val_h('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_h("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_h("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_h("Disegno"), "TAB", "\\^S", "\\^{F4}",
                     "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_hex("FPD material code"), "TAB",
-                    get_val_hex("Material"), "\\^S", "\\^{F4}",
+                    get_val_h("FPD material code"), "TAB",
+                    get_val_h("Material"), "\\^S", "\\^{F4}",
                     "\\%VA", "TAB",
-                    get_val_hex("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_hex("Quality") if get_val_hex("Quality") != "." else ".", "\\^S",
+                    get_val_h("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_h("Quality") if get_val_h("Quality") != "." else ".", "\\^S",
                     "\\%FN", "TAB",
-                    get_val_hex("To supplier"), "TAB", "TAB", "TAB",
+                    get_val_h("To supplier"), "TAB", "TAB", "TAB",
                     "Short Text", "TAB",
-                    get_val_hex("To supplier") if get_val_hex("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                    get_val_h("To supplier") if get_val_h("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
-
                 dataload_string_hex = "\t".join(dataload_fields_hex)
                 st.text_area("Anteprima (per copia manuale)", dataload_string_hex, height=200)
 
                 csv_buffer_hex = io.StringIO()
                 writer_hex = csv.writer(csv_buffer_hex, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_hex:
-                    writer_hex.writerow([riga])
-
+                for r in dataload_fields_hex:
+                    writer_hex.writerow([r])
                 st.download_button(
                     label="💾 Scarica file CSV per Import Data",
                     data=csv_buffer_hex.getvalue(),
                     file_name=f"dataload_{item_code_hex}.csv",
                     mime="text/csv"
                 )
-
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 
 # --- GASKET, RING TYPE JOINT
