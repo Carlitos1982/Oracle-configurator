@@ -3301,54 +3301,83 @@ if selected_part == "Gasket, Flat":
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
+# --- SCREW, CAP
 if selected_part == "Screw, Cap":
     col1, col2, col3 = st.columns(3)
 
+    # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
-        size = st.text_input("Size", key="scap_size")
-        length = st.text_input("Length", key="scap_length")
-        material = st.text_input("Material", key="scap_material")
-        note = st.text_area("Note", height=80, key="scap_note")
-        dwg = st.text_input("Dwg/doc number", key="scap_dwg")
 
-        # Stamicarbon checkbox
-        stamicarbon = st.checkbox("Stamicarbon?", key="scap_stamicarbon")
+        size_cap   = st.selectbox("Size",   [""] + bolt_sizes,   key="cap_size")
+        length_cap = st.selectbox("Length", [""] + bolt_lengths, key="cap_length")
 
-        if st.button("Genera Output", key="scap_gen"):
-            sq_tags = []
-            quality_lines = []
+        full_thread_cap = st.radio("Full threaded?", ["No", "Yes"], index=0, key="cap_full_thread")
+        zinc_plated_cap = st.radio("Zinc plated?",   ["No", "Yes"], index=0, key="cap_zinc")
 
-            if stamicarbon:
-                sq_tags.append("<SQ172>")
-                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+        note_cap = st.text_area("Note", height=80, key="cap_note")
 
-            quality = "\n".join(quality_lines)
-            tag_string = " ".join(sq_tags)
+        # Materiale (Type -> Prefix -> Name)
+        mtype_cap = st.selectbox("Material Type", [""] + material_types, key="cap_mtype")
+        pref_df_cap = materials_df[(materials_df["Material Type"] == mtype_cap) & (materials_df["Prefix"].notna())]
+        prefixes_cap = sorted(pref_df_cap["Prefix"].unique()) if mtype_cap != "MISCELLANEOUS" else []
+        mprefix_cap = st.selectbox("Material Prefix", [""] + prefixes_cap, key="cap_mprefix")
 
-            descr = f"CAP SCREW - SIZE: {size}, LENGTH: {length}, MATERIAL: {material}"
-            if note:
-                descr += f", NOTE: {note}"
-            descr += f" {tag_string}"
-            descr = "*" + descr
+        if mtype_cap == "MISCELLANEOUS":
+            names_cap = materials_df[materials_df["Material Type"] == mtype_cap]["Name"].dropna().tolist()
+        else:
+            names_cap = materials_df[
+                (materials_df["Material Type"] == mtype_cap) &
+                (materials_df["Prefix"] == mprefix_cap)
+            ]["Name"].dropna().tolist()
+        mname_cap = st.selectbox("Material Name", [""] + names_cap, key="cap_mname")
+
+        material_note_cap = st.text_area("Material note", height=60, key="cap_matnote")
+
+        if st.button("Genera Output", key="cap_gen"):
+            materiale_cap = (
+                mname_cap if mtype_cap == "MISCELLANEOUS"
+                else f"{mtype_cap} {mprefix_cap} {mname_cap}".strip()
+            )
+
+            match_cap = materials_df[
+                (materials_df["Material Type"] == mtype_cap) &
+                (materials_df["Prefix"] == mprefix_cap) &
+                (materials_df["Name"] == mname_cap)
+            ]
+            codice_fpd_cap = match_cap["FPD Code"].values[0] if not match_cap.empty else ""
+
+            # Descrizione: Size → Length → (FULL THREADED) → (ZINC PLATED) → Note → Material → Material note
+            descr_parts_cap = [
+                "CAP SCREW",
+                size_cap,
+                length_cap,
+                "FULL THREADED" if full_thread_cap == "Yes" else "",
+                "ZINC PLATED"   if zinc_plated_cap == "Yes"   else "",
+                note_cap,
+                materiale_cap,
+                material_note_cap
+            ]
+            descr_cap = "*" + " - ".join([p for p in descr_parts_cap if p])
 
             st.session_state["output_data"] = {
-                "Item": "56200…",
-                "Description": descr,
-                "Identificativo": "6530-CAP SCREW",
+                "Item": "56090…",
+                "Description": descr_cap,
+                "Identificativo": "6590-CAP SCREW",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
-                "Disegno": dwg,
-                "Material": material,
-                "FPD material code": "NA",
+                "Disegno": "",  # niente dwg
+                "Material": materiale_cap,
+                "FPD material code": codice_fpd_cap,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
                 "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
                 "To supplier": "",
-                "Quality": quality
+                "Quality": ""
             }
 
+    # --------------------- COLONNA 2: OUTPUT ---------------------
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
@@ -3358,60 +3387,64 @@ if selected_part == "Screw, Cap":
                 else:
                     st.text_input(k, value=v)
 
-    # COLONNA 3: DATALOAD
+    # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         st.subheader("🧾 DataLoad")
-        dataload_mode_sc = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="sc_dl_mode")
-        item_code_sc     = st.text_input("Codice item", key="sc_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_sc"):
-            if not item_code_sc:
+        dataload_mode_cap = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="cap_dl_mode")
+        item_code_cap = st.text_input("Codice item", key="cap_item_code")
+
+        if st.button("Genera stringa DataLoad", key="gen_dl_cap"):
+            if not item_code_cap:
                 st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
             elif "output_data" not in st.session_state:
                 st.error("❌ Genera prima l'output dalla colonna 1.")
             else:
                 data = st.session_state["output_data"]
-                def get_val_sc(k):
+
+                def get_val_cap(k):
                     v = data.get(k, "").strip()
                     return v if v else "."
 
-                dataload_fields_sc = [
-                    "\\%FN", item_code_sc,
-                    "\\%TC", get_val_sc("Template"), "TAB",
+                dataload_fields_cap = [
+                    "\\%FN", item_code_cap,
+                    "\\%TC", get_val_cap("Template"), "TAB",
                     "\\%D", "\\%O", "TAB",
-                    get_val_sc("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_sc("Identificativo"), "TAB",
-                    get_val_sc("Classe ricambi"), "TAB",
+                    get_val_cap("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_cap("Identificativo"), "TAB",
+                    get_val_cap("Classe ricambi"), "TAB",
                     "\\%O", "\\^S",
                     "\\%TA", "TAB",
-                    f"{get_val_sc('ERP_L1')}.{get_val_sc('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_sc("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_sc("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_sc("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    f"{get_val_cap('ERP_L1')}.{get_val_cap('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_cap("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_cap("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_cap("Disegno"), "TAB", "\\^S", "\\^{F4}",
                     "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_sc("FPD material code"), "TAB",
-                    get_val_sc("Material"), "\\^S", "\\^{F4}",
+                    get_val_cap("FPD material code"), "TAB",
+                    get_val_cap("Material"), "\\^S", "\\^{F4}",
                     "\\%VA", "TAB",
-                    get_val_sc("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_sc("Quality"), "\\^S",
+                    get_val_cap("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_cap("Quality") if get_val_cap("Quality") != "." else ".", "\\^S",
                     "\\%FN", "TAB",
-                    get_val_sc("To supplier"), "TAB", "TAB", "TAB",
+                    get_val_cap("To supplier"), "TAB", "TAB", "TAB",
                     "Short Text", "TAB",
-                    get_val_sc("To supplier"), "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                    get_val_cap("To supplier") if get_val_cap("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
-                dataload_string_sc = "\t".join(dataload_fields_sc)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_sc, height=200)
+                dataload_string_cap = "\t".join(dataload_fields_cap)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_cap, height=200)
 
-                csv_buffer_sc = io.StringIO()
-                writer_sc = csv.writer(csv_buffer_sc, quoting=csv.QUOTE_MINIMAL)
-                for r in dataload_fields_sc:
-                    writer_sc.writerow([r])
+                csv_buffer_cap = io.StringIO()
+                writer_cap = csv.writer(csv_buffer_cap, quoting=csv.QUOTE_MINIMAL)
+                for r in dataload_fields_cap:
+                    writer_cap.writerow([r])
                 st.download_button(
                     label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_sc.getvalue(),
-                    file_name=f"dataload_{item_code_sc}.csv",
+                    data=csv_buffer_cap.getvalue(),
+                    file_name=f"dataload_{item_code_cap}.csv",
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
+                    
 if selected_part == "Screw, Grub":
     col1, col2, col3 = st.columns(3)
 
