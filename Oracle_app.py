@@ -1458,101 +1458,97 @@ if selected_part == "Gasket, Spiral Wound":
                     st.text_area(campo, value=valore, height=100, key=f"sw_{campo}")
                 else:
                     st.text_input(campo, value=valore, key=f"sw_{campo}")
-
 # --- BEARING, HYDROSTATIC/HYDRODYNAMIC
-elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
+if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
     col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1: INPUT
+    # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
-        ins_dia        = st.number_input("InsDia (mm)", min_value=0.0, step=0.1, format="%.1f", key="insdia_bearing")
-        out_dia        = st.number_input("OutDia (mm)", min_value=0.0, step=0.1, format="%.1f", key="outdia_bearing")
-        width          = st.number_input("Width (mm)", min_value=0.0, step=0.1, format="%.1f", key="width_bearing")
-        add_feat       = st.text_input("Additional Features", key="feat_bearing")
-        dwg_bearing    = st.text_input("Dwg/doc number", key="dwg_bearing")
 
-        mtype_bearing  = st.selectbox("Material Type", [""] + material_types, key="mtype_bearing")
-        pref_df_bearing = materials_df[
-            (materials_df["Material Type"] == mtype_bearing) &
+        # Note al posto di Additional Features
+        note_bear = st.text_area("Note", height=80, key="bear_note")
+
+        # Materiale (Type -> Prefix -> Name)
+        mtype_bear = st.selectbox("Material Type", [""] + material_types, key="bear_mtype")
+
+        pref_df_bear = materials_df[
+            (materials_df["Material Type"] == mtype_bear) &
             (materials_df["Prefix"].notna())
         ]
-        prefixes_bearing = sorted(pref_df_bearing["Prefix"].unique()) if mtype_bearing != "MISCELLANEOUS" else []
-        mprefix_bearing = st.selectbox("Prefix (only if ASTM or EN)", [""] + prefixes_bearing, key="mprefix_bearing")
+        prefixes_bear = sorted(pref_df_bear["Prefix"].unique()) if mtype_bear != "MISCELLANEOUS" else []
+        mprefix_bear = st.selectbox("Material Prefix", [""] + prefixes_bear, key="bear_mprefix")
 
-        if mtype_bearing == "MISCELLANEOUS":
-            names_bearing = materials_df[materials_df["Material Type"] == mtype_bearing]["Name"].dropna().tolist()
+        if mtype_bear == "MISCELLANEOUS":
+            names_bear = materials_df[materials_df["Material Type"] == mtype_bear]["Name"].dropna().tolist()
         else:
-            names_bearing = materials_df[
-                (materials_df["Material Type"] == mtype_bearing) &
-                (materials_df["Prefix"] == mprefix_bearing)
+            names_bear = materials_df[
+                (materials_df["Material Type"] == mtype_bear) &
+                (materials_df["Prefix"] == mprefix_bear)
             ]["Name"].dropna().tolist()
-        mname_bearing    = st.selectbox("Name", [""] + names_bearing, key="mname_bearing")
+        mname_bear = st.selectbox("Material Name", [""] + names_bear, key="bear_mname")
 
-        mat_feat_bearing = st.text_input("Material add. Features", key="matfeat_bearing")
+        # Material note (ex “Material add. features”)
+        material_note_bear = st.text_area("Material note", height=60, key="bear_matnote")
 
-        if st.button("Genera Output", key="gen_bearing"):
-            if mtype_bearing != "MISCELLANEOUS":
-                materiale_b = f"{mtype_bearing} {mprefix_bearing} {mname_bearing}".strip()
-                match_b     = materials_df[
-                    (materials_df["Material Type"] == mtype_bearing) &
-                    (materials_df["Prefix"] == mprefix_bearing) &
-                    (materials_df["Name"] == mname_bearing)
-                ]
-            else:
-                materiale_b = mname_bearing
-                match_b     = materials_df[
-                    (materials_df["Material Type"] == mtype_bearing) &
-                    (materials_df["Name"] == mname_bearing)
-                ]
-            codice_fpd_b = match_b["FPD Code"].values[0] if not match_b.empty else ""
+        # Dwg se ti serve
+        dwg_bear = st.text_input("Dwg/doc number", key="bear_dwg")
 
-            # 1) Costruisci prima la descrizione base (senza asterisco)
-            descr_b = (
-                f"BEARING, HYDROSTATIC/HYDRODYNAMIC - InsDia: {ins_dia}mm, OutDia: {out_dia}mm, "
-                f"Width: {width}mm"
+        if st.button("Genera Output", key="bear_gen"):
+            materiale_bear = (
+                mname_bear if mtype_bear == "MISCELLANEOUS"
+                else f"{mtype_bear} {mprefix_bear} {mname_bear}".strip()
             )
-            if add_feat:
-                descr_b += f", {add_feat}"
-            descr_b += f", Material: {materiale_b}"
-            if mat_feat_bearing:
-                descr_b += f", {mat_feat_bearing}"
 
-            # 2) Aggiungi sempre l’asterisco all’inizio
-            descr_b = "*" + descr_b
+            match_bear = materials_df[
+                (materials_df["Material Type"] == mtype_bear) &
+                (materials_df["Prefix"] == mprefix_bear) &
+                (materials_df["Name"] == mname_bear)
+            ]
+            codice_fpd_bear = match_bear["FPD Code"].values[0] if not match_bear.empty else ""
+
+            # Descrizione senza etichetta “Material:”
+            descr_parts_bear = [
+                "BEARING, HYDROSTATIC/HYDRODYNAMIC",
+                note_bear,
+                materiale_bear,
+                material_note_bear
+            ]
+            descr_bear = "*" + " - ".join([p for p in descr_parts_bear if p])
 
             st.session_state["output_data"] = {
-                "Item":               "50122…",
-                "Description":        descr_b,
-                "Identificativo":     "3010-ANTI-FRICTION BEARING",
-                "Classe ricambi":     "1-2-3",
-                "Categories":         "FASCIA ITE 5",
-                "Catalog":            "ALBERO",
-                "Disegno":            dwg_bearing,
-                "Material":           materiale_b,
-                "FPD material code":  codice_fpd_b,
-                "Template":           "FPD_BUY_1",
-                "ERP_L1":             "31_COMMERCIAL_BEARING",
-                "ERP_L2":             "18_OTHER",
-                "To supplier":        "",
-                "Quality":            ""
+                "Item": "50XXX…",                      # ← metti il tuo
+                "Description": descr_bear,
+                "Identificativo": "XXXX-BEARING",      # ← metti il tuo
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "CUSCINETTO",               # ← se diverso, cambia
+                "Disegno": dwg_bear,
+                "Material": materiale_bear,
+                "FPD material code": codice_fpd_bear,
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "50_BEARING",                # ← se nel tuo file era altro, ripristina
+                "ERP_L2": "10_HYDROSTATIC_HYDRODYNAMIC",
+                "To supplier": "",
+                "Quality": ""
             }
 
-    # COLONNA 2: OUTPUT
+    # --------------------- COLONNA 2: OUTPUT ---------------------
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
-                if campo == "Description":
-                    st.text_area(campo, value=valore, height=80, key=f"bear_{campo}")
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=160)
                 else:
-                    st.text_input(campo, value=valore, key=f"bear_{campo}")
+                    st.text_input(k, value=v)
 
-    # COLONNA 3: DataLoad
+    # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         st.subheader("🧾 DataLoad")
         dataload_mode_bear = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="bear_dl_mode")
         item_code_bear = st.text_input("Codice item", key="bear_item_code")
+
         if st.button("Genera stringa DataLoad", key="gen_dl_bear"):
             if not item_code_bear:
                 st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
@@ -1560,9 +1556,11 @@ elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
                 st.error("❌ Genera prima l'output dalla colonna 1.")
             else:
                 data = st.session_state["output_data"]
-                def get_val_bear(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
+
+                def get_val_bear(k):
+                    v = data.get(k, "").strip()
+                    return v if v else "."
+
                 dataload_fields_bear = [
                     "\\%FN", item_code_bear,
                     "\\%TC", get_val_bear("Template"), "TAB",
@@ -1592,8 +1590,8 @@ elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
 
                 csv_buffer_bear = io.StringIO()
                 writer_bear = csv.writer(csv_buffer_bear, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_bear:
-                    writer_bear.writerow([riga])
+                for r in dataload_fields_bear:
+                    writer_bear.writerow([r])
                 st.download_button(
                     label="💾 Scarica file CSV per Import Data",
                     data=csv_buffer_bear.getvalue(),
@@ -1601,6 +1599,7 @@ elif selected_part == "Bearing, Hydrostatic/Hydrodynamic":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 # --- BEARING, ROLLING
 elif selected_part == "Bearing, Rolling":
