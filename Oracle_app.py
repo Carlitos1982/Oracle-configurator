@@ -75,8 +75,8 @@ bolt_lengths = [
 ]
 
 # --- Liste spine cilindriche
-dowel_diameters_mm = ["Ø1","Ø1.5","Ø2","Ø2.5","Ø3","Ø4","Ø5","Ø6","Ø8","Ø10",
-                      "Ø12","Ø14","Ø16","Ø18","Ø20","Ø22","Ø25","Ø30"]
+dowel_diameters_mm_raw = ["Ø1","Ø1.5","Ø2","Ø2.5","Ø3","Ø4","Ø5","Ø6","Ø8","Ø10",
+                          "Ø12","Ø14","Ø16","Ø18","Ø20","Ø22","Ø25","Ø30"]
 
 dowel_lengths_mm   = ["4mm","5mm","6mm","8mm","10mm","12mm","16mm","20mm","25mm","30mm",
                       "35mm","40mm","45mm","50mm","60mm","70mm","80mm","90mm","100mm"]
@@ -2690,11 +2690,12 @@ if selected_part == "Pin, Dowel":
         st.subheader("✏️ Input")
 
         # Unisco mm + inch nelle tendine
-        diam_list = [""] + dowel_diameters_mm + dowel_diameters_in
-        len_list  = [""] + dowel_lengths_mm   + dowel_lengths_in
+        diam_list = [""] + [f"{d} mm" for d in dowel_diameters_mm_raw] + dowel_diameters_in
+        len_list  = [""] + dowel_lengths_mm + dowel_lengths_in
 
         diameter_pin = st.selectbox("Diameter", diam_list, key="pin_diam")
         length_pin   = st.selectbox("Length",   len_list,  key="pin_len")
+
 
         note_pin = st.text_area("Note", height=80, key="pin_note")
 
