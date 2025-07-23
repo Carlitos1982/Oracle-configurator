@@ -95,13 +95,38 @@ skf_models = [
     "32005","32006","32007","32008","32009","32010","32011","32012",
 ]
 
+# Sigilli / schermature
 skf_seals = ["", "2RS1", "2RSH", "2RSL", "RS1", "RS", "Z", "ZZ", "2Z"]
+
+# Design / angolo di contatto / capacità (per AC, DGBB ecc.)
+skf_design = [
+    "", "BE (40° AC, paired)", "B (40° AC)", "AC (25° AC)", "A (30° AC)",
+    "E (high capacity)", "EC (high capacity)"
+]
+
+# Accoppiamento / precarico / pairing
+skf_pairing = [
+    "", "CB (light preload)", "CC (medium preload)", "CD (heavy preload)",
+    "GA (paired)", "GB (paired)", "GC (paired)"
+]
+
+# Gabbie
 skf_cages = ["", "TN9 (polyamide)", "J (pressed steel)", "M (machined brass)", "MA (brass)",
              "CA (brass)", "CC (polyamide)"]
+
+# Giochi
 skf_clearances = ["", "C2", "CN (normal)", "C3", "C4", "C5"]
+
+# Classi di tolleranza
 skf_tolerances = ["", "P0 (normal)", "P6", "P5", "P4"]
+
+# Trattamento termico / stabilizzazione
 skf_heat = ["", "S0", "S1", "S2", "S3"]
+
+# Lubrificante / grasso
 skf_greases = ["", "VT143", "VT378", "MT33", "GJN"]
+
+# Vibrazione
 skf_vibration = ["", "V1", "V2", "V3", "V4", "VA201", "VA208", "VA228"]
 
 
@@ -1659,18 +1684,20 @@ if selected_part == "Bearing, Rolling":
         if skf_choice == "Altro...":
             custom_model = st.text_input("Inserisci modello SKF", key="br_model_custom")
 
-        # Opzioni add-on
-        seal_opt       = st.selectbox("Seals/Shields", skf_seals, key="br_seal")
-        cage_opt       = st.selectbox("Cage type",     skf_cages, key="br_cage")
-        clearance_opt  = st.selectbox("Clearance",     skf_clearances, key="br_clear")
-        tolerance_opt  = st.selectbox("Tolerance class", skf_tolerances, key="br_tol")
-        heat_opt       = st.selectbox("Heat treatment / Stabilization", skf_heat, key="br_heat")
-        grease_opt     = st.selectbox("Grease / Lubricant code", skf_greases, key="br_grease")
-        vibration_opt  = st.selectbox("Vibration spec", skf_vibration, key="br_vibration")
+        # Design / pairing / sigilli ecc.
+        design_opt     = st.selectbox("Design / Contact angle", skf_design, key="br_design")
+        pairing_opt    = st.selectbox("Pairing / Preload",      skf_pairing, key="br_pairing")
+        seal_opt       = st.selectbox("Seals/Shields",          skf_seals, key="br_seal")
+        cage_opt       = st.selectbox("Cage type",              skf_cages, key="br_cage")
+        clearance_opt  = st.selectbox("Clearance",              skf_clearances, key="br_clear")
+        tolerance_opt  = st.selectbox("Tolerance class",        skf_tolerances, key="br_tol")
+        heat_opt       = st.selectbox("Heat treatment",         skf_heat, key="br_heat")
+        grease_opt     = st.selectbox("Grease / Lubricant",     skf_greases, key="br_grease")
+        vibration_opt  = st.selectbox("Vibration spec",         skf_vibration, key="br_vibration")
 
         extra_suffix = st.text_input("Extra suffix (optional)", key="br_extra")
 
-        # Dimensioni (se vuoi mantenerle)
+        # Dimensioni (se ti servono)
         od_roll    = st.text_input("Outside diameter (OD)", key="br_od")
         id_roll    = st.text_input("Inside diameter (ID)",  key="br_id")
         width_roll = st.text_input("Width",                 key="br_width")
@@ -1700,16 +1727,17 @@ if selected_part == "Bearing, Rolling":
         dwg_roll = st.text_input("Dwg/doc number", key="br_dwg")
 
         if st.button("Genera Output", key="br_gen"):
-            # Base o custom
             model_final = custom_model if skf_choice == "Altro..." else skf_choice
 
-            # Prendo solo “sigla” (prima parola) per cage/clearance/tolerance se hanno descrizione
             def short(sigla):
                 return sigla.split(" ")[0] if sigla else ""
 
+            # Ordine codice: MODEL + SEAL + DESIGN + PAIRING + CAGE + CLEARANCE + TOL + HEAT + GREASE + VIB + EXTRA
             parts_no_space = [
                 model_final,
                 short(seal_opt),
+                short(design_opt),
+                short(pairing_opt),
                 short(cage_opt),
                 short(clearance_opt),
                 short(tolerance_opt),
@@ -1718,7 +1746,6 @@ if selected_part == "Bearing, Rolling":
                 short(vibration_opt),
                 extra_suffix.strip()
             ]
-            # elimino vuoti e concateno senza spazi (classico codice SKF)
             skf_full_code = "".join([p for p in parts_no_space if p])
 
             materiale_roll = (
@@ -1834,6 +1861,7 @@ if selected_part == "Bearing, Rolling":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 # --- BOLT, EYE
 if selected_part == "Bolt, Eye":
