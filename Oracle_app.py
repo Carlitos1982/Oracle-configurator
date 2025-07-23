@@ -74,7 +74,7 @@ bolt_lengths = [
     "190mm", "195mm"
 ]
 
-# --- SKF base models
+# --- SKF MODELS (serie principali – aggiungi/rimuovi a piacere)
 skf_models = [
     "6000","6001","6002","6003","6004","6005","6006","6007","6008","6009","6010",
     "6200","6201","6202","6203","6204","6205","6206","6207","6208","6209","6210","6211","6212",
@@ -94,18 +94,50 @@ skf_models = [
     "30305","30306","30307","30308","30309","30310",
     "32005","32006","32007","32008","32009","32010","32011","32012",
 ]
+
+# --- Seals / Shields
+skf_seals = ["", "2RS1", "2RSH", "2RSL", "RS1", "RS", "Z", "ZZ", "2Z"]
+
+# --- Design / angolo di contatto / capacità
+skf_design = ["", "BE (40° AC, paired)", "B (40° AC)", "AC (25° AC)", "A (30° AC)",
+              "E (high capacity)", "EC (high capacity)"]
+
+# --- Pairing / Preload
+skf_pairing = ["", "CB (light preload)", "CC (medium preload)", "CD (heavy preload)",
+               "GA (paired)", "GB (paired)", "GC (paired)"]
+
+# --- Cage
+skf_cages = ["", "TN9 (polyamide)", "J (pressed steel)", "M (machined brass)",
+             "MA (brass)", "CA (brass)", "CC (polyamide)"]
+
+# --- Clearance
+skf_clearances = ["", "C2", "CN (normal)", "C3", "C4", "C5"]
+
+# --- Tolerance class
+skf_tolerances = ["", "P0 (normal)", "P6", "P5", "P4"]
+
+# --- Heat treatment / Stabilization
+skf_heat = ["", "S0", "S1", "S2", "S3"]
+
+# --- Grease / Lubricant
+skf_greases = ["", "VT143", "VT378", "MT33", "GJN"]
+
+# --- Vibration
+skf_vibration = ["", "V1", "V2", "V3", "V4", "VA201", "VA208", "VA228"]
+
+# ------------------ DIZIONARI DESCRITTIVI ------------------
 base_series_desc = {
-    "60": "Deep groove ball bearing – light series",
-    "62": "Deep groove ball bearing – medium series",
-    "63": "Deep groove ball bearing – heavy series",
-    "72": "Angular contact ball bearing – 15°",
-    "73": "Angular contact ball bearing – 40°",
-    "32": "Double-row angular contact ball bearing",
-    "12": "Self-aligning ball bearing – light series",
-    "22": "Self-aligning ball bearing – medium series",
-    "NU": "Cylindrical roller bearing (NU)",
+    "60":  "Deep groove ball bearing – light series",
+    "62":  "Deep groove ball bearing – medium series",
+    "63":  "Deep groove ball bearing – heavy series",
+    "72":  "Angular contact ball bearing – 15°",
+    "73":  "Angular contact ball bearing – 40°",
+    "32":  "Double-row angular contact ball bearing",
+    "12":  "Self-aligning ball bearing – light series",
+    "22":  "Self-aligning ball bearing – medium series",
+    "NU":  "Cylindrical roller bearing (NU)",
     "NUP": "Cylindrical roller bearing (NUP)",
-    "NJ": "Cylindrical roller bearing (NJ)",
+    "NJ":  "Cylindrical roller bearing (NJ)",
     "222": "Spherical roller bearing – 222 series",
     "223": "Spherical roller bearing – 223 series",
     "230": "Spherical roller bearing – 230 series",
@@ -114,48 +146,43 @@ base_series_desc = {
     "303": "Tapered roller bearing – 303 series",
     "320": "Tapered roller bearing – 320 series",
 }
-def bearing_type_from_code(code: str) -> str:
-    # prova prefissi 3, 2, 1 caratteri/lettere
-    for p in (code[:3], code[:2], code[:1]):
-        if p in base_series_desc:
-            return base_series_desc[p]
-    return ""
 
-
-# Sigilli / schermature
-skf_seals = ["", "2RS1", "2RSH", "2RSL", "RS1", "RS", "Z", "ZZ", "2Z"]
-
-# Design / angolo di contatto / capacità (per AC, DGBB ecc.)
-skf_design = [
-    "", "BE (40° AC, paired)", "B (40° AC)", "AC (25° AC)", "A (30° AC)",
-    "E (high capacity)", "EC (high capacity)"
-]
-
-# Accoppiamento / precarico / pairing
-skf_pairing = [
-    "", "CB (light preload)", "CC (medium preload)", "CD (heavy preload)",
-    "GA (paired)", "GB (paired)", "GC (paired)"
-]
-
-# Gabbie
-skf_cages = ["", "TN9 (polyamide)", "J (pressed steel)", "M (machined brass)", "MA (brass)",
-             "CA (brass)", "CC (polyamide)"]
-
-# Giochi
-skf_clearances = ["", "C2", "CN (normal)", "C3", "C4", "C5"]
-
-# Classi di tolleranza
-skf_tolerances = ["", "P0 (normal)", "P6", "P5", "P4"]
-
-# Trattamento termico / stabilizzazione
-skf_heat = ["", "S0", "S1", "S2", "S3"]
-
-# Lubrificante / grasso
-skf_greases = ["", "VT143", "VT378", "MT33", "GJN"]
-
-# Vibrazione
-skf_vibration = ["", "V1", "V2", "V3", "V4", "VA201", "VA208", "VA228"]
-
+design_desc = {
+    "BE": "40° AC, paired",
+    "B" : "40° AC",
+    "AC": "25° AC",
+    "A" : "30° AC",
+    "E" : "high capacity",
+    "EC": "high capacity"
+}
+pairing_desc = {
+    "CB": "light preload",
+    "CC": "medium preload",
+    "CD": "heavy preload",
+    "GA": "paired",
+    "GB": "paired",
+    "GC": "paired"
+}
+cage_desc = {
+    "TN9": "polyamide cage",
+    "J"  : "pressed steel cage",
+    "M"  : "machined brass cage",
+    "MA" : "brass cage",
+    "CA" : "brass cage",
+    "CC" : "polyamide cage"
+}
+clearance_desc = {
+    "C2": "reduced clearance",
+    "CN": "normal clearance",
+    "C3": "increased clearance",
+    "C4": "large clearance",
+    "C5": "very large clearance"
+}
+tolerance_desc = {"P0": "normal tol.", "P6": "P6 tol.", "P5": "P5 tol.", "P4": "P4 tol."}
+heat_desc      = {"S0": "stabilized S0", "S1": "S1", "S2": "S2", "S3": "S3"}
+grease_desc    = {"VT143": "grease VT143", "VT378": "grease VT378", "MT33": "grease MT33", "GJN": "grease GJN"}
+vibration_desc = {"V1": "V1 vib.", "V2": "V2 vib.", "V3": "V3 vib.", "V4": "V4 vib.",
+                  "VA201": "VA201 vib.", "VA208": "VA208 vib.", "VA228": "VA228 vib."}
 
 # --- Liste spine cilindriche
 dowel_diameters_mm_raw = ["Ø1","Ø1.5","Ø2","Ø2.5","Ø3","Ø4","Ø5","Ø6","Ø8","Ø10",
@@ -1696,8 +1723,6 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
-
-# --- BEARING, ROLLING
 # --- BEARING, ROLLING
 if selected_part == "Bearing, Rolling":
     col1, col2, col3 = st.columns(3)
@@ -1725,7 +1750,7 @@ if selected_part == "Bearing, Rolling":
 
         extra_suffix = st.text_input("Extra suffix (optional)", key="br_extra")
 
-        # Dimensioni (se vuoi mantenerle)
+        # Dimensioni
         od_roll    = st.text_input("Outside diameter (OD)", key="br_od")
         id_roll    = st.text_input("Inside diameter (ID)",  key="br_id")
         width_roll = st.text_input("Width",                 key="br_width")
@@ -1754,59 +1779,69 @@ if selected_part == "Bearing, Rolling":
 
         dwg_roll = st.text_input("Dwg/doc number", key="br_dwg")
 
-        # --- Dizionario tipo cuscinetto + funzione helper (solo tipo, niente preload ecc.)
-        base_series_desc = {
-            "60":  "Deep groove ball bearing – light series",
-            "62":  "Deep groove ball bearing – medium series",
-            "63":  "Deep groove ball bearing – heavy series",
-            "72":  "Angular contact ball bearing – 15°",
-            "73":  "Angular contact ball bearing – 40°",
-            "32":  "Double-row angular contact ball bearing",
-            "12":  "Self-aligning ball bearing – light series",
-            "22":  "Self-aligning ball bearing – medium series",
-            "NU":  "Cylindrical roller bearing (NU)",
-            "NUP": "Cylindrical roller bearing (NUP)",
-            "NJ":  "Cylindrical roller bearing (NJ)",
-            "222": "Spherical roller bearing – 222 series",
-            "223": "Spherical roller bearing – 223 series",
-            "230": "Spherical roller bearing – 230 series",
-            "231": "Spherical roller bearing – 231 series",
-            "302": "Tapered roller bearing – 302 series",
-            "303": "Tapered roller bearing – 303 series",
-            "320": "Tapered roller bearing – 320 series",
-        }
+        # --- Funzioni helper ---
         def bearing_type_from_code(code: str) -> str:
             for p in (code[:3], code[:2], code[:1]):
                 if p in base_series_desc:
                     return base_series_desc[p]
             return ""
 
+        def short(sigla: str) -> str:
+            return sigla.split(" ")[0] if sigla else ""
+
         if st.button("Genera Output", key="br_gen"):
             model_final = custom_model if skf_choice == "Altro..." else skf_choice
 
-            def short(sigla):
-                return sigla.split(" ")[0] if sigla else ""
+            # Codici singoli
+            code_design    = short(design_opt)
+            code_pairing   = short(pairing_opt)
+            code_seal      = short(seal_opt)
+            code_cage      = short(cage_opt)
+            code_clear     = short(clearance_opt)
+            code_tol       = short(tolerance_opt)
+            code_heat      = short(heat_opt)
+            code_grease    = short(grease_opt)
+            code_vib       = short(vibration_opt)
 
-            # Ordine sigle nel codice
+            # Costruzione sigla finale
             parts_no_space = [
                 model_final,
-                short(seal_opt),
-                short(design_opt),
-                short(pairing_opt),
-                short(cage_opt),
-                short(clearance_opt),
-                short(tolerance_opt),
-                short(heat_opt),
-                short(grease_opt),
-                short(vibration_opt),
+                code_seal,
+                code_design,
+                code_pairing,
+                code_cage,
+                code_clear,
+                code_tol,
+                code_heat,
+                code_grease,
+                code_vib,
                 extra_suffix.strip()
             ]
             skf_full_code = "".join([p for p in parts_no_space if p]).upper()
 
-            # Solo tipo di cuscinetto
+            # Tipo + descrizioni suffissi
             bearing_type_txt = bearing_type_from_code(model_final)
-            human_suffix = f" ({bearing_type_txt})" if bearing_type_txt else ""
 
+            desc_bits = [
+                design_desc.get(code_design, ""),
+                pairing_desc.get(code_pairing, ""),
+                cage_desc.get(code_cage, ""),
+                clearance_desc.get(code_clear, ""),
+                tolerance_desc.get(code_tol, ""),
+                heat_desc.get(code_heat, ""),
+                grease_desc.get(code_grease, ""),
+                vibration_desc.get(code_vib, "")
+            ]
+            desc_bits = [d for d in desc_bits if d]
+
+            full_desc_list = []
+            if bearing_type_txt:
+                full_desc_list.append(bearing_type_txt)
+            full_desc_list += desc_bits
+
+            human_suffix = f" ({'; '.join(full_desc_list)})" if full_desc_list else ""
+
+            # Materiale + FPD
             materiale_roll = (
                 mname_roll if mtype_roll == "MISCELLANEOUS"
                 else f"{mtype_roll} {mprefix_roll} {mname_roll}".strip()
@@ -1819,12 +1854,14 @@ if selected_part == "Bearing, Rolling":
             ]
             codice_fpd_roll = match_roll["FPD Code"].values[0] if not match_roll.empty else ""
 
+            # Dimensioni in stringa
             dim_roll = " - ".join([
                 f"OD {od_roll}" if od_roll else "",
                 f"ID {id_roll}" if id_roll else "",
                 f"W {width_roll}" if width_roll else ""
             ]).strip(" -")
 
+            # DESCRIZIONE
             descr_parts_roll = [
                 "BEARING, ROLLING",
                 skf_full_code + human_suffix,
@@ -1920,7 +1957,6 @@ if selected_part == "Bearing, Rolling":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
 
 # --- BOLT, EYE
 if selected_part == "Bolt, Eye":
