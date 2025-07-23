@@ -2672,8 +2672,17 @@ if selected_part == "Pin, Dowel":
     with col1:
         st.subheader("✏️ Input")
 
-        size_pin   = st.selectbox("Size",   [""] + bolt_sizes,   key="pin_size")
-        length_pin = st.selectbox("Length", [""] + bolt_lengths, key="pin_length")
+        unit_pin = st.radio("Unità misura", ["mm", "inch"], index=0, key="pin_unit")
+
+        if unit_pin == "mm":
+            diam_list = [""] + dowel_diameters_mm
+            len_list  = [""] + dowel_lengths_mm
+        else:
+            diam_list = [""] + dowel_diameters_in
+            len_list  = [""] + dowel_lengths_in
+
+        diameter_pin = st.selectbox("Diameter", diam_list, key="pin_diam")
+        length_pin   = st.selectbox("Length",   len_list,  key="pin_len")
 
         note_pin = st.text_area("Note", height=80, key="pin_note")
 
@@ -2712,7 +2721,7 @@ if selected_part == "Pin, Dowel":
 
             descr_parts_pin = [
                 "DOWEL PIN",
-                size_pin,
+                diameter_pin,
                 length_pin,
                 note_pin,
                 materiale_pin,
@@ -2803,6 +2812,7 @@ if selected_part == "Pin, Dowel":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 # --- SHAFT, PUMP
 if selected_part == "Shaft, Pump":
