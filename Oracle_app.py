@@ -2664,56 +2664,80 @@ if selected_part == "Ring, Wear":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
+# --- PIN, DOWEL
 if selected_part == "Pin, Dowel":
     col1, col2, col3 = st.columns(3)
 
+    # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
-        size = st.text_input("Size", key="pdowel_size")
-        length = st.text_input("Length", key="pdowel_length")
-        material = st.text_input("Material", key="pdowel_material")
-        note = st.text_area("Note", height=80, key="pdowel_note")
-        dwg = st.text_input("Dwg/doc number", key="pdowel_dwg")
 
-        # Stamicarbon checkbox
-        stamicarbon = st.checkbox("Stamicarbon?", key="pdowel_stamicarbon")
+        size_pin   = st.selectbox("Size",   [""] + bolt_sizes,   key="pin_size")
+        length_pin = st.selectbox("Length", [""] + bolt_lengths, key="pin_length")
 
-        if st.button("Genera Output", key="pdowel_gen"):
-            sq_tags = []
-            quality_lines = []
+        note_pin = st.text_area("Note", height=80, key="pin_note")
 
-            if stamicarbon:
-                sq_tags.append("<SQ172>")
-                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+        # Materiale (Type -> Prefix -> Name)
+        mtype_pin = st.selectbox("Material Type", [""] + material_types, key="pin_mtype")
+        pref_df_pin = materials_df[
+            (materials_df["Material Type"] == mtype_pin) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_pin = sorted(pref_df_pin["Prefix"].unique()) if mtype_pin != "MISCELLANEOUS" else []
+        mprefix_pin = st.selectbox("Material Prefix", [""] + prefixes_pin, key="pin_mprefix")
 
-            quality = "\n".join(quality_lines)
-            tag_string = " ".join(sq_tags)
+        if mtype_pin == "MISCELLANEOUS":
+            names_pin = materials_df[materials_df["Material Type"] == mtype_pin]["Name"].dropna().tolist()
+        else:
+            names_pin = materials_df[
+                (materials_df["Material Type"] == mtype_pin) &
+                (materials_df["Prefix"] == mprefix_pin)
+            ]["Name"].dropna().tolist()
+        mname_pin = st.selectbox("Material Name", [""] + names_pin, key="pin_mname")
 
-            descr = f"DOWEL PIN - SIZE: {size}, LENGTH: {length}, MATERIAL: {material}"
-            if note:
-                descr += f", NOTE: {note}"
-            descr += f" {tag_string}"
-            descr = "*" + descr
-            
+        material_note_pin = st.text_area("Material note", height=60, key="pin_matnote")
+
+        if st.button("Genera Output", key="pin_gen"):
+            materiale_pin = (
+                mname_pin if mtype_pin == "MISCELLANEOUS"
+                else f"{mtype_pin} {mprefix_pin} {mname_pin}".strip()
+            )
+
+            match_pin = materials_df[
+                (materials_df["Material Type"] == mtype_pin) &
+                (materials_df["Prefix"] == mprefix_pin) &
+                (materials_df["Name"] == mname_pin)
+            ]
+            codice_fpd_pin = match_pin["FPD Code"].values[0] if not match_pin.empty else ""
+
+            descr_parts_pin = [
+                "DOWEL PIN",
+                size_pin,
+                length_pin,
+                note_pin,
+                materiale_pin,
+                material_note_pin
+            ]
+            descr_pin = "*" + " - ".join([p for p in descr_parts_pin if p])
 
             st.session_state["output_data"] = {
-                "Item": "56300…",
-                "Description": descr,
-                "Identificativo": "6560-DOWEL PIN",
+                "Item": "56200…",
+                "Description": descr_pin,
+                "Identificativo": "6550-DOWEL PIN",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
-                "Disegno": dwg,
-                "Material": material,
-                "FPD material code": "NA",
+                "Disegno": "",
+                "Material": materiale_pin,
+                "FPD material code": codice_fpd_pin,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
-                "ERP_L2": "13_STANDARD_PIN",
+                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
                 "To supplier": "",
-                "Quality": quality
+                "Quality": ""
             }
 
+    # --------------------- COLONNA 2: OUTPUT ---------------------
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
@@ -2723,11 +2747,12 @@ if selected_part == "Pin, Dowel":
                 else:
                     st.text_input(k, value=v)
 
-    # COLONNA 3: DataLoad
+    # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         st.subheader("🧾 DataLoad")
         dataload_mode_pin = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="pin_dl_mode")
-        item_code_pin    = st.text_input("Codice item", key="pin_item_code")
+        item_code_pin = st.text_input("Codice item", key="pin_item_code")
+
         if st.button("Genera stringa DataLoad", key="gen_dl_pin"):
             if not item_code_pin:
                 st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
@@ -2735,9 +2760,10 @@ if selected_part == "Pin, Dowel":
                 st.error("❌ Genera prima l'output dalla colonna 1.")
             else:
                 data = st.session_state["output_data"]
-                def get_val_pin(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
+
+                def get_val_pin(k):
+                    v = data.get(k, "").strip()
+                    return v if v else "."
 
                 dataload_fields_pin = [
                     "\\%FN", item_code_pin,
@@ -2767,9 +2793,9 @@ if selected_part == "Pin, Dowel":
                 st.text_area("Anteprima (per copia manuale)", dataload_string_pin, height=200)
 
                 csv_buffer_pin = io.StringIO()
-                writer_pin    = csv.writer(csv_buffer_pin, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_pin:
-                    writer_pin.writerow([riga])
+                writer_pin = csv.writer(csv_buffer_pin, quoting=csv.QUOTE_MINIMAL)
+                for r in dataload_fields_pin:
+                    writer_pin.writerow([r])
                 st.download_button(
                     label="💾 Scarica file CSV per Import Data",
                     data=csv_buffer_pin.getvalue(),
@@ -2777,6 +2803,7 @@ if selected_part == "Pin, Dowel":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 # --- SHAFT, PUMP
 if selected_part == "Shaft, Pump":
     col1, col2, col3 = st.columns(3)
