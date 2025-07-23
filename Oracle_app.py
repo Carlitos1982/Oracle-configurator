@@ -1614,122 +1614,196 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 
-
 # --- BEARING, ROLLING
-elif selected_part == "Bearing, Rolling":
+if selected_part == "Bearing, Rolling":
     col1, col2, col3 = st.columns(3)
 
-    # COLONNA 1: INPUT
+    # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
-        type_options  = [
-            "ANGULAR_CONTACT_BEARING",
-            "BALL_BEARING",
-            "ROLLER_BEARING",
-            "TAPERED_BEARING",
-            "ANTIFRICTION_THRUST_BEARING",
-            "OTHER"
+
+        # Modello SKF base
+        skf_choice = st.selectbox("SKF Model", [""] + skf_models + ["Altro..."], key="br_model")
+        custom_model = ""
+        if skf_choice == "Altro...":
+            custom_model = st.text_input("Inserisci modello SKF", key="br_model_custom")
+
+        # Opzioni add-on
+        seal_opt       = st.selectbox("Seals/Shields", skf_seals, key="br_seal")
+        cage_opt       = st.selectbox("Cage type",     skf_cages, key="br_cage")
+        clearance_opt  = st.selectbox("Clearance",     skf_clearances, key="br_clear")
+        tolerance_opt  = st.selectbox("Tolerance class", skf_tolerances, key="br_tol")
+        heat_opt       = st.selectbox("Heat treatment / Stabilization", skf_heat, key="br_heat")
+        grease_opt     = st.selectbox("Grease / Lubricant code", skf_greases, key="br_grease")
+        vibration_opt  = st.selectbox("Vibration spec", skf_vibration, key="br_vibration")
+
+        extra_suffix = st.text_input("Extra suffix (optional)", key="br_extra")
+
+        # Dimensioni (se vuoi mantenerle)
+        od_roll    = st.text_input("Outside diameter (OD)", key="br_od")
+        id_roll    = st.text_input("Inside diameter (ID)",  key="br_id")
+        width_roll = st.text_input("Width",                 key="br_width")
+
+        note_roll = st.text_area("Note", height=80, key="br_note")
+
+        # Materiale
+        mtype_roll = st.selectbox("Material Type", [""] + material_types, key="br_mtype")
+        pref_df_roll = materials_df[
+            (materials_df["Material Type"] == mtype_roll) &
+            (materials_df["Prefix"].notna())
         ]
-        bearing_type  = st.selectbox("Type", type_options, key="rolling_type")
-        designation   = st.text_input("Designation", key="rolling_designation")
-        ins_dia_r     = st.number_input("InsDia (mm)", min_value=0.0, step=0.1, format="%.1f", key="insdia_rolling")
-        out_dia_r     = st.number_input("OutDia (mm)", min_value=0.0, step=0.1, format="%.1f", key="outdia_rolling")
-        width_r       = st.number_input("Width (mm)", min_value=0.0, step=0.1, format="%.1f", key="width_rolling")
-        add_feat_r    = st.text_input("Additional Features", key="feat_rolling")
-        dwg_rolling   = st.text_input("Dwg/doc number", key="dwg_rolling")
+        prefixes_roll = sorted(pref_df_roll["Prefix"].unique()) if mtype_roll != "MISCELLANEOUS" else []
+        mprefix_roll = st.selectbox("Material Prefix", [""] + prefixes_roll, key="br_mprefix")
 
-        if st.button("Genera Output", key="gen_rolling"):
-            # 1) Costruisci prima la descrizione base (senza asterisco)
-            descr_rolling = (
-                f"BEARING, ROLLING - TYPE: {bearing_type}, DESIGNATION: {designation}, "
-                f"InsDia: {ins_dia_r}mm, OutDia: {out_dia_r}mm, Width: {width_r}mm"
+        if mtype_roll == "MISCELLANEOUS":
+            names_roll = materials_df[materials_df["Material Type"] == mtype_roll]["Name"].dropna().tolist()
+        else:
+            names_roll = materials_df[
+                (materials_df["Material Type"] == mtype_roll) &
+                (materials_df["Prefix"] == mprefix_roll)
+            ]["Name"].dropna().tolist()
+        mname_roll = st.selectbox("Material Name", [""] + names_roll, key="br_mname")
+
+        material_note_roll = st.text_area("Material note", height=60, key="br_matnote")
+
+        dwg_roll = st.text_input("Dwg/doc number", key="br_dwg")
+
+        if st.button("Genera Output", key="br_gen"):
+            # Base o custom
+            model_final = custom_model if skf_choice == "Altro..." else skf_choice
+
+            # Prendo solo “sigla” (prima parola) per cage/clearance/tolerance se hanno descrizione
+            def short(sigla):
+                return sigla.split(" ")[0] if sigla else ""
+
+            parts_no_space = [
+                model_final,
+                short(seal_opt),
+                short(cage_opt),
+                short(clearance_opt),
+                short(tolerance_opt),
+                short(heat_opt),
+                short(grease_opt),
+                short(vibration_opt),
+                extra_suffix.strip()
+            ]
+            # elimino vuoti e concateno senza spazi (classico codice SKF)
+            skf_full_code = "".join([p for p in parts_no_space if p])
+
+            materiale_roll = (
+                mname_roll if mtype_roll == "MISCELLANEOUS"
+                else f"{mtype_roll} {mprefix_roll} {mname_roll}".strip()
             )
-            if add_feat_r:
-                descr_rolling += f", {add_feat_r}"
 
-            # 2) Aggiungi sempre l’asterisco all’inizio
-            descr_rolling = "*" + descr_rolling
+            match_roll = materials_df[
+                (materials_df["Material Type"] == mtype_roll) &
+                (materials_df["Prefix"] == mprefix_roll) &
+                (materials_df["Name"] == mname_roll)
+            ]
+            codice_fpd_roll = match_roll["FPD Code"].values[0] if not match_roll.empty else ""
+
+            dim_roll = " - ".join([
+                f"OD {od_roll}" if od_roll else "",
+                f"ID {id_roll}" if id_roll else "",
+                f"W {width_roll}" if width_roll else ""
+            ]).strip(" -")
+
+            descr_parts_roll = [
+                "BEARING, ROLLING",
+                skf_full_code,
+                dim_roll,
+                note_roll,
+                materiale_roll,
+                material_note_roll
+            ]
+            descr_roll = "*" + " - ".join([p for p in descr_parts_roll if p])
 
             st.session_state["output_data"] = {
-                "Item": "50122…",
-                "Description": descr_rolling,
-                "Identificativo": "3010-ANTI-FRICTION BEARING",
-                "Classe ricambi": "1-2-3",
+                "Item": "50YYY…",
+                "Description": descr_roll,
+                "Identificativo": "XXXX-ROLLING BEARING",
+                "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
-                "Catalog": "ALBERO",
-                "Disegno": dwg_rolling,
-                "Material": "BUY OUT NOT AVAILABLE",
-                "FPD material code": "BO-NA",
+                "Catalog": "CUSCINETTO",
+                "Disegno": dwg_roll,
+                "Material": materiale_roll,
+                "FPD material code": codice_fpd_roll,
                 "Template": "FPD_BUY_2",
-                "ERP_L1": "31_COMMERCIAL_BEARING",
-                "ERP_L2": "11_BALL_BEARING",
+                "ERP_L1": "50_BEARING",
+                "ERP_L2": "20_ROLLING",
                 "To supplier": "",
                 "Quality": ""
             }
 
-    # COLONNA 2: OUTPUT
+    # --------------------- COLONNA 2: OUTPUT ---------------------
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
-                if campo == "Description":
-                    st.text_area(campo, value=valore, height=80, key=f"rolling_{campo}")
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=160)
                 else:
-                    st.text_input(campo, value=valore, key=f"rolling_{campo}")
+                    st.text_input(k, value=v)
 
-    # COLONNA 3: DataLoad
+    # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         st.subheader("🧾 DataLoad")
-        dataload_mode_rolling = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="rolling_dl_mode")
-        item_code_rolling    = st.text_input("Codice item", key="rolling_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_rolling"):
-            if not item_code_rolling:
+        dataload_mode_roll = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="br_dl_mode")
+        item_code_roll = st.text_input("Codice item", key="br_item_code")
+
+        if st.button("Genera stringa DataLoad", key="gen_dl_roll"):
+            if not item_code_roll:
                 st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
             elif "output_data" not in st.session_state:
                 st.error("❌ Genera prima l'output dalla colonna 1.")
             else:
                 data = st.session_state["output_data"]
-                def get_val_rolling(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields_rolling = [
-                    "\\%FN", item_code_rolling,
-                    "\\%TC", get_val_rolling("Template"), "TAB",
+
+                def get_val_roll(k):
+                    v = data.get(k, "").strip()
+                    return v if v else "."
+
+                dataload_fields_roll = [
+                    "\\%FN", item_code_roll,
+                    "\\%TC", get_val_roll("Template"), "TAB",
                     "\\%D", "\\%O", "TAB",
-                    get_val_rolling("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_rolling("Identificativo"), "TAB",
-                    get_val_rolling("Classe ricambi"), "TAB",
+                    get_val_roll("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_roll("Identificativo"), "TAB",
+                    get_val_roll("Classe ricambi"), "TAB",
                     "\\%O", "\\^S",
                     "\\%TA", "TAB",
-                    f"{get_val_rolling('ERP_L1')}.{get_val_rolling('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_rolling("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_rolling("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_rolling("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    f"{get_val_roll('ERP_L1')}.{get_val_roll('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_roll("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_roll("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_roll("Disegno"), "TAB", "\\^S", "\\^{F4}",
                     "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_rolling("FPD material code"), "TAB",
-                    get_val_rolling("Material"), "\\^S", "\\^{F4}",
+                    get_val_roll("FPD material code"), "TAB",
+                    get_val_roll("Material"), "\\^S", "\\^{F4}",
                     "\\%VA", "TAB",
-                    get_val_rolling("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_rolling("Quality") if get_val_rolling("Quality") != "." else ".", "\\^S",
+                    get_val_roll("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_roll("Quality") if get_val_roll("Quality") != "." else ".", "\\^S",
                     "\\%FN", "TAB",
-                    get_val_rolling("To supplier"), "TAB", "TAB", "TAB",
+                    get_val_roll("To supplier"), "TAB", "TAB", "TAB",
                     "Short Text", "TAB",
-                    get_val_rolling("To supplier") if get_val_rolling("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                    get_val_roll("To supplier") if get_val_roll("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
-                dataload_string_rolling = "\t".join(dataload_fields_rolling)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_rolling, height=200)
 
-                csv_buffer_rolling = io.StringIO()
-                writer_rolling = csv.writer(csv_buffer_rolling, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_rolling:
-                    writer_rolling.writerow([riga])
+                dataload_string_roll = "\t".join(dataload_fields_roll)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_roll, height=200)
+
+                csv_buffer_roll = io.StringIO()
+                writer_roll = csv.writer(csv_buffer_roll, quoting=csv.QUOTE_MINIMAL)
+                for r in dataload_fields_roll:
+                    writer_roll.writerow([r])
+
                 st.download_button(
                     label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_rolling.getvalue(),
-                    file_name=f"dataload_{item_code_rolling}.csv",
+                    data=csv_buffer_roll.getvalue(),
+                    file_name=f"dataload_{item_code_roll}.csv",
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 # --- BOLT, EYE
 if selected_part == "Bolt, Eye":
     col1, col2, col3 = st.columns(3)
