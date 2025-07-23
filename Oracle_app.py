@@ -2681,18 +2681,17 @@ if selected_part == "Ring, Wear":
 if selected_part == "Pin, Dowel":
     col1, col2, col3 = st.columns(3)
 
+    # --------------------- COL# --- PIN, DOWEL
+if selected_part == "Pin, Dowel":
+    col1, col2, col3 = st.columns(3)
+
     # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
 
-        unit_pin = st.radio("Unità misura", ["mm", "inch"], index=0, key="pin_unit")
-
-        if unit_pin == "mm":
-            diam_list = [""] + dowel_diameters_mm
-            len_list  = [""] + dowel_lengths_mm
-        else:
-            diam_list = [""] + dowel_diameters_in
-            len_list  = [""] + dowel_lengths_in
+        # Unisco mm + inch nelle tendine
+        diam_list = [""] + dowel_diameters_mm + dowel_diameters_in
+        len_list  = [""] + dowel_lengths_mm   + dowel_lengths_in
 
         diameter_pin = st.selectbox("Diameter", diam_list, key="pin_diam")
         length_pin   = st.selectbox("Length",   len_list,  key="pin_len")
@@ -2825,6 +2824,7 @@ if selected_part == "Pin, Dowel":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 
 # --- SHAFT, PUMP
