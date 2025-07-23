@@ -94,6 +94,33 @@ skf_models = [
     "30305","30306","30307","30308","30309","30310",
     "32005","32006","32007","32008","32009","32010","32011","32012",
 ]
+base_series_desc = {
+    "60": "Deep groove ball bearing – light series",
+    "62": "Deep groove ball bearing – medium series",
+    "63": "Deep groove ball bearing – heavy series",
+    "72": "Angular contact ball bearing – 15°",
+    "73": "Angular contact ball bearing – 40°",
+    "32": "Double-row angular contact ball bearing",
+    "12": "Self-aligning ball bearing – light series",
+    "22": "Self-aligning ball bearing – medium series",
+    "NU": "Cylindrical roller bearing (NU)",
+    "NUP": "Cylindrical roller bearing (NUP)",
+    "NJ": "Cylindrical roller bearing (NJ)",
+    "222": "Spherical roller bearing – 222 series",
+    "223": "Spherical roller bearing – 223 series",
+    "230": "Spherical roller bearing – 230 series",
+    "231": "Spherical roller bearing – 231 series",
+    "302": "Tapered roller bearing – 302 series",
+    "303": "Tapered roller bearing – 303 series",
+    "320": "Tapered roller bearing – 320 series",
+}
+def bearing_type_from_code(code: str) -> str:
+    # prova prefissi 3, 2, 1 caratteri/lettere
+    for p in (code[:3], code[:2], code[:1]):
+        if p in base_series_desc:
+            return base_series_desc[p]
+    return ""
+
 
 # Sigilli / schermature
 skf_seals = ["", "2RS1", "2RSH", "2RSL", "RS1", "RS", "Z", "ZZ", "2Z"]
@@ -1671,6 +1698,7 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
 
 
 # --- BEARING, ROLLING
+# --- BEARING, ROLLING
 if selected_part == "Bearing, Rolling":
     col1, col2, col3 = st.columns(3)
 
@@ -1697,7 +1725,7 @@ if selected_part == "Bearing, Rolling":
 
         extra_suffix = st.text_input("Extra suffix (optional)", key="br_extra")
 
-        # Dimensioni (se ti servono)
+        # Dimensioni (se vuoi mantenerle)
         od_roll    = st.text_input("Outside diameter (OD)", key="br_od")
         id_roll    = st.text_input("Inside diameter (ID)",  key="br_id")
         width_roll = st.text_input("Width",                 key="br_width")
@@ -1726,13 +1754,40 @@ if selected_part == "Bearing, Rolling":
 
         dwg_roll = st.text_input("Dwg/doc number", key="br_dwg")
 
+        # --- Dizionario tipo cuscinetto + funzione helper (solo tipo, niente preload ecc.)
+        base_series_desc = {
+            "60":  "Deep groove ball bearing – light series",
+            "62":  "Deep groove ball bearing – medium series",
+            "63":  "Deep groove ball bearing – heavy series",
+            "72":  "Angular contact ball bearing – 15°",
+            "73":  "Angular contact ball bearing – 40°",
+            "32":  "Double-row angular contact ball bearing",
+            "12":  "Self-aligning ball bearing – light series",
+            "22":  "Self-aligning ball bearing – medium series",
+            "NU":  "Cylindrical roller bearing (NU)",
+            "NUP": "Cylindrical roller bearing (NUP)",
+            "NJ":  "Cylindrical roller bearing (NJ)",
+            "222": "Spherical roller bearing – 222 series",
+            "223": "Spherical roller bearing – 223 series",
+            "230": "Spherical roller bearing – 230 series",
+            "231": "Spherical roller bearing – 231 series",
+            "302": "Tapered roller bearing – 302 series",
+            "303": "Tapered roller bearing – 303 series",
+            "320": "Tapered roller bearing – 320 series",
+        }
+        def bearing_type_from_code(code: str) -> str:
+            for p in (code[:3], code[:2], code[:1]):
+                if p in base_series_desc:
+                    return base_series_desc[p]
+            return ""
+
         if st.button("Genera Output", key="br_gen"):
             model_final = custom_model if skf_choice == "Altro..." else skf_choice
 
             def short(sigla):
                 return sigla.split(" ")[0] if sigla else ""
 
-            # Ordine codice: MODEL + SEAL + DESIGN + PAIRING + CAGE + CLEARANCE + TOL + HEAT + GREASE + VIB + EXTRA
+            # Ordine sigle nel codice
             parts_no_space = [
                 model_final,
                 short(seal_opt),
@@ -1746,7 +1801,11 @@ if selected_part == "Bearing, Rolling":
                 short(vibration_opt),
                 extra_suffix.strip()
             ]
-            skf_full_code = "".join([p for p in parts_no_space if p])
+            skf_full_code = "".join([p for p in parts_no_space if p]).upper()
+
+            # Solo tipo di cuscinetto
+            bearing_type_txt = bearing_type_from_code(model_final)
+            human_suffix = f" ({bearing_type_txt})" if bearing_type_txt else ""
 
             materiale_roll = (
                 mname_roll if mtype_roll == "MISCELLANEOUS"
@@ -1768,7 +1827,7 @@ if selected_part == "Bearing, Rolling":
 
             descr_parts_roll = [
                 "BEARING, ROLLING",
-                skf_full_code,
+                skf_full_code + human_suffix,
                 dim_roll,
                 note_roll,
                 materiale_roll,
@@ -2140,7 +2199,6 @@ if selected_part == "Bolt, Hexagonal":
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
-# --- GASKET, RING TYPE JOINT
 # --- GASKET, RING TYPE JOINT
 if selected_part == "Gasket, Ring Type Joint":
     col1, col2, col3 = st.columns(3)
