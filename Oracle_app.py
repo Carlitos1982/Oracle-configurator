@@ -1466,7 +1466,7 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
     with col1:
         st.subheader("✏️ Input")
 
-        # Dimensioni (riaggiunte)
+        # Dimensioni
         od_bear    = st.text_input("Outside diameter (OD)", key="bear_od")
         id_bear    = st.text_input("Inside diameter (ID)",  key="bear_id")
         width_bear = st.text_input("Width",                 key="bear_width")
@@ -1474,7 +1474,7 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
         # ex Additional Features -> Note
         note_bear = st.text_area("Note", height=80, key="bear_note")
 
-        # Materiale
+        # Materiale (Type -> Prefix -> Name)
         mtype_bear = st.selectbox("Material Type", [""] + material_types, key="bear_mtype")
         pref_df_bear = materials_df[
             (materials_df["Material Type"] == mtype_bear) &
@@ -1517,7 +1517,7 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
                 f"W {width_bear}" if width_bear else ""
             ]).strip(" -")
 
-            # Descrizione SENZA etichetta "Material:"
+            # Descrizione SENZA etichetta “Material:”
             descr_parts_bear = [
                 "BEARING, HYDROSTATIC/HYDRODYNAMIC",
                 dim_bear,
@@ -1528,7 +1528,7 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
             descr_bear = "*" + " - ".join([p for p in descr_parts_bear if p])
 
             st.session_state["output_data"] = {
-                "Item": "50XXX…",                 # mantieni/aggiorna con il tuo valore originale
+                "Item": "50XXX…",                 # mantieni il tuo valore originale
                 "Description": descr_bear,
                 "Identificativo": "XXXX-BEARING", # idem
                 "Classe ricambi": "",
@@ -1586,6 +1586,33 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
                     "\\%TG", get_val_bear("Catalog"), "TAB", "TAB", "TAB",
                     get_val_bear("Disegno"), "TAB", "\\^S", "\\^{F4}",
                     "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
+                    get_val_bear("FPD material code"), "TAB",
+                    get_val_bear("Material"), "\\^S", "\\^{F4}",
+                    "\\%VA", "TAB",
+                    get_val_bear("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_bear("Quality") if get_val_bear("Quality") != "." else ".", "\\^S",
+                    "\\%FN", "TAB",
+                    get_val_bear("To supplier"), "TAB", "TAB", "TAB",
+                    "Short Text", "TAB",
+                    get_val_bear("To supplier") if get_val_bear("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                ]
+
+                dataload_string_bear = "\t".join(dataload_fields_bear)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_bear, height=200)
+
+                csv_buffer_bear = io.StringIO()
+                writer_bear = csv.writer(csv_buffer_bear, quoting=csv.QUOTE_MINIMAL)
+                for r in dataload_fields_bear:
+                    writer_bear.writerow([r])
+
+                st.download_button(
+                    label="💾 Scarica file CSV per Import Data",
+                    data=csv_buffer_bear.getvalue(),
+                    file_name=f"dataload_{item_code_bear}.csv",
+                    mime="text/csv"
+                )
+                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 
 # --- BEARING, ROLLING
