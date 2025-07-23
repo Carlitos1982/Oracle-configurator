@@ -1750,36 +1750,19 @@ if selected_part == "Bearing, Rolling":
 
         extra_suffix = st.text_input("Extra suffix (optional)", key="br_extra")
 
-        # Dimensioni
+        # Dimensioni (se vuoi tenerle)
         od_roll    = st.text_input("Outside diameter (OD)", key="br_od")
         id_roll    = st.text_input("Inside diameter (ID)",  key="br_id")
         width_roll = st.text_input("Width",                 key="br_width")
 
         note_roll = st.text_area("Note", height=80, key="br_note")
 
-        # Materiale
-        mtype_roll = st.selectbox("Material Type", [""] + material_types, key="br_mtype")
-        pref_df_roll = materials_df[
-            (materials_df["Material Type"] == mtype_roll) &
-            (materials_df["Prefix"].notna())
-        ]
-        prefixes_roll = sorted(pref_df_roll["Prefix"].unique()) if mtype_roll != "MISCELLANEOUS" else []
-        mprefix_roll = st.selectbox("Material Prefix", [""] + prefixes_roll, key="br_mprefix")
-
-        if mtype_roll == "MISCELLANEOUS":
-            names_roll = materials_df[materials_df["Material Type"] == mtype_roll]["Name"].dropna().tolist()
-        else:
-            names_roll = materials_df[
-                (materials_df["Material Type"] == mtype_roll) &
-                (materials_df["Prefix"] == mprefix_roll)
-            ]["Name"].dropna().tolist()
-        mname_roll = st.selectbox("Material Name", [""] + names_roll, key="br_mname")
-
-        material_note_roll = st.text_area("Material note", height=60, key="br_matnote")
-
         dwg_roll = st.text_input("Dwg/doc number", key="br_dwg")
 
-        # --- Funzioni helper ---
+        # --- Dizionari/func già definiti in alto ---
+        # base_series_desc, design_desc, pairing_desc, cage_desc, clearance_desc,
+        # tolerance_desc, heat_desc, grease_desc, vibration_desc
+
         def bearing_type_from_code(code: str) -> str:
             for p in (code[:3], code[:2], code[:1]):
                 if p in base_series_desc:
@@ -1792,7 +1775,7 @@ if selected_part == "Bearing, Rolling":
         if st.button("Genera Output", key="br_gen"):
             model_final = custom_model if skf_choice == "Altro..." else skf_choice
 
-            # Codici singoli
+            # Codici
             code_design    = short(design_opt)
             code_pairing   = short(pairing_opt)
             code_seal      = short(seal_opt)
@@ -1803,7 +1786,7 @@ if selected_part == "Bearing, Rolling":
             code_grease    = short(grease_opt)
             code_vib       = short(vibration_opt)
 
-            # Costruzione sigla finale
+            # Sigla finale
             parts_no_space = [
                 model_final,
                 code_seal,
@@ -1819,7 +1802,7 @@ if selected_part == "Bearing, Rolling":
             ]
             skf_full_code = "".join([p for p in parts_no_space if p]).upper()
 
-            # Tipo + descrizioni suffissi
+            # Descrizione tipo + suffissi
             bearing_type_txt = bearing_type_from_code(model_final)
 
             desc_bits = [
@@ -1841,36 +1824,25 @@ if selected_part == "Bearing, Rolling":
 
             human_suffix = f" ({'; '.join(full_desc_list)})" if full_desc_list else ""
 
-            # Materiale + FPD
-            materiale_roll = (
-                mname_roll if mtype_roll == "MISCELLANEOUS"
-                else f"{mtype_roll} {mprefix_roll} {mname_roll}".strip()
-            )
-
-            match_roll = materials_df[
-                (materials_df["Material Type"] == mtype_roll) &
-                (materials_df["Prefix"] == mprefix_roll) &
-                (materials_df["Name"] == mname_roll)
-            ]
-            codice_fpd_roll = match_roll["FPD Code"].values[0] if not match_roll.empty else ""
-
-            # Dimensioni in stringa
+            # Dimensioni stringa
             dim_roll = " - ".join([
                 f"OD {od_roll}" if od_roll else "",
                 f"ID {id_roll}" if id_roll else "",
                 f"W {width_roll}" if width_roll else ""
             ]).strip(" -")
 
-            # DESCRIZIONE
+            # DESCRIZIONE (niente materiale)
             descr_parts_roll = [
                 "BEARING, ROLLING",
                 skf_full_code + human_suffix,
                 dim_roll,
-                note_roll,
-                materiale_roll,
-                material_note_roll
+                note_roll
             ]
             descr_roll = "*" + " - ".join([p for p in descr_parts_roll if p])
+
+            # Campi fissi per Material
+            default_material = "COMMERCIAL BEARING"
+            default_fpd      = "NA"
 
             st.session_state["output_data"] = {
                 "Item": "50YYY…",
@@ -1880,8 +1852,8 @@ if selected_part == "Bearing, Rolling":
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "CUSCINETTO",
                 "Disegno": dwg_roll,
-                "Material": materiale_roll,
-                "FPD material code": codice_fpd_roll,
+                "Material": default_material,
+                "FPD material code": default_fpd,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "50_BEARING",
                 "ERP_L2": "20_ROLLING",
@@ -1957,6 +1929,7 @@ if selected_part == "Bearing, Rolling":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 # --- BOLT, EYE
 if selected_part == "Bolt, Eye":
