@@ -3448,56 +3448,80 @@ if selected_part == "Screw, Cap":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
-                    
+# --- SCREW, GRUB
 if selected_part == "Screw, Grub":
     col1, col2, col3 = st.columns(3)
 
+    # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
-        size = st.text_input("Size", key="sgrub_size")
-        length = st.text_input("Length", key="sgrub_length")
-        material = st.text_input("Material", key="sgrub_material")
-        note = st.text_area("Note", height=80, key="sgrub_note")
-        dwg = st.text_input("Dwg/doc number", key="sgrub_dwg")
 
-        # Stamicarbon checkbox
-        stamicarbon = st.checkbox("Stamicarbon?", key="sgrub_stamicarbon")
+        size_grub   = st.selectbox("Size",   [""] + bolt_sizes,   key="grub_size")
+        length_grub = st.selectbox("Length", [""] + bolt_lengths, key="grub_length")
 
-        if st.button("Genera Output", key="sgrub_gen"):
-            sq_tags = []
-            quality_lines = []
+        note_grub = st.text_area("Note", height=80, key="grub_note")
 
-            if stamicarbon:
-                sq_tags.append("<SQ172>")
-                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+        # Materiale (Type -> Prefix -> Name)
+        mtype_grub = st.selectbox("Material Type", [""] + material_types, key="grub_mtype")
+        pref_df_grub = materials_df[
+            (materials_df["Material Type"] == mtype_grub) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_grub = sorted(pref_df_grub["Prefix"].unique()) if mtype_grub != "MISCELLANEOUS" else []
+        mprefix_grub = st.selectbox("Material Prefix", [""] + prefixes_grub, key="grub_mprefix")
 
-            quality = "\n".join(quality_lines)
-            tag_string = " ".join(sq_tags)
+        if mtype_grub == "MISCELLANEOUS":
+            names_grub = materials_df[materials_df["Material Type"] == mtype_grub]["Name"].dropna().tolist()
+        else:
+            names_grub = materials_df[
+                (materials_df["Material Type"] == mtype_grub) &
+                (materials_df["Prefix"] == mprefix_grub)
+            ]["Name"].dropna().tolist()
+        mname_grub = st.selectbox("Material Name", [""] + names_grub, key="grub_mname")
 
-            descr = f"GRUB SCREW - SIZE: {size}, LENGTH: {length}, MATERIAL: {material}"
-            if note:
-                descr += f", NOTE: {note}"
-            descr += f" {tag_string}"
-            descr = "*" + descr
+        material_note_grub = st.text_area("Material note", height=60, key="grub_matnote")
+
+        if st.button("Genera Output", key="grub_gen"):
+            materiale_grub = (
+                mname_grub if mtype_grub == "MISCELLANEOUS"
+                else f"{mtype_grub} {mprefix_grub} {mname_grub}".strip()
+            )
+
+            match_grub = materials_df[
+                (materials_df["Material Type"] == mtype_grub) &
+                (materials_df["Prefix"] == mprefix_grub) &
+                (materials_df["Name"] == mname_grub)
+            ]
+            codice_fpd_grub = match_grub["FPD Code"].values[0] if not match_grub.empty else ""
+
+            descr_parts_grub = [
+                "GRUB SCREW",
+                size_grub,
+                length_grub,
+                note_grub,
+                materiale_grub,
+                material_note_grub
+            ]
+            descr_grub = "*" + " - ".join([p for p in descr_parts_grub if p])
 
             st.session_state["output_data"] = {
-                "Item": "56210…",
-                "Description": descr,
-                "Identificativo": "6520-GRUB SCREW",
+                "Item": "56095…",
+                "Description": descr_grub,
+                "Identificativo": "6595-GRUB SCREW",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
-                "Disegno": dwg,
-                "Material": material,
-                "FPD material code": "NA",
+                "Disegno": "",
+                "Material": materiale_grub,
+                "FPD material code": codice_fpd_grub,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
                 "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
                 "To supplier": "",
-                "Quality": quality
+                "Quality": ""
             }
 
+    # --------------------- COLONNA 2: OUTPUT ---------------------
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
@@ -3507,62 +3531,62 @@ if selected_part == "Screw, Grub":
                 else:
                     st.text_input(k, value=v)
 
-
-    # COLONNA 3: DATALOAD
+    # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         st.subheader("🧾 DataLoad")
-        dataload_mode_sg = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="sg_dl_mode")
-        item_code_sg     = st.text_input("Codice item", key="sg_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_sg"):
-            if not item_code_sg:
+        dataload_mode_grub = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="grub_dl_mode")
+        item_code_grub = st.text_input("Codice item", key="grub_item_code")
+
+        if st.button("Genera stringa DataLoad", key="gen_dl_grub"):
+            if not item_code_grub:
                 st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
             elif "output_data" not in st.session_state:
                 st.error("❌ Genera prima l'output dalla colonna 1.")
             else:
                 data = st.session_state["output_data"]
-                def get_val_sg(k):
+
+                def get_val_grub(k):
                     v = data.get(k, "").strip()
                     return v if v else "."
 
-                dataload_fields_sg = [
-                    "\\%FN", item_code_sg,
-                    "\\%TC", get_val_sg("Template"), "TAB",
+                dataload_fields_grub = [
+                    "\\%FN", item_code_grub,
+                    "\\%TC", get_val_grub("Template"), "TAB",
                     "\\%D", "\\%O", "TAB",
-                    get_val_sg("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_sg("Identificativo"), "TAB",
-                    get_val_sg("Classe ricambi"), "TAB",
+                    get_val_grub("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
+                    get_val_grub("Identificativo"), "TAB",
+                    get_val_grub("Classe ricambi"), "TAB",
                     "\\%O", "\\^S",
                     "\\%TA", "TAB",
-                    f"{get_val_sg('ERP_L1')}.{get_val_sg('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_sg("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_sg("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_sg("Disegno"), "TAB", "\\^S", "\\^{F4}",
+                    f"{get_val_grub('ERP_L1')}.{get_val_grub('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
+                    get_val_grub("Categories").split()[-1], "\\^S", "\\^{F4}",
+                    "\\%TG", get_val_grub("Catalog"), "TAB", "TAB", "TAB",
+                    get_val_grub("Disegno"), "TAB", "\\^S", "\\^{F4}",
                     "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_sg("FPD material code"), "TAB",
-                    get_val_sg("Material"), "\\^S", "\\^{F4}",
+                    get_val_grub("FPD material code"), "TAB",
+                    get_val_grub("Material"), "\\^S", "\\^{F4}",
                     "\\%VA", "TAB",
-                    get_val_sg("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_sg("Quality"), "\\^S",
+                    get_val_grub("Quality"), "TAB", "TAB", "TAB", "TAB",
+                    get_val_grub("Quality") if get_val_grub("Quality") != "." else ".", "\\^S",
                     "\\%FN", "TAB",
-                    get_val_sg("To supplier"), "TAB", "TAB", "TAB",
+                    get_val_grub("To supplier"), "TAB", "TAB", "TAB",
                     "Short Text", "TAB",
-                    get_val_sg("To supplier"), "\\^S", "\\^S", "\\^{F4}", "\\^S"
+                    get_val_grub("To supplier") if get_val_grub("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
-                dataload_string_sg = "\t".join(dataload_fields_sg)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_sg, height=200)
+                dataload_string_grub = "\t".join(dataload_fields_grub)
+                st.text_area("Anteprima (per copia manuale)", dataload_string_grub, height=200)
 
-                csv_buffer_sg = io.StringIO()
-                writer_sg = csv.writer(csv_buffer_sg, quoting=csv.QUOTE_MINIMAL)
-                for r in dataload_fields_sg:
-                    writer_sg.writerow([r])
+                csv_buffer_grub = io.StringIO()
+                writer_grub = csv.writer(csv_buffer_grub, quoting=csv.QUOTE_MINIMAL)
+                for r in dataload_fields_grub:
+                    writer_grub.writerow([r])
                 st.download_button(
                     label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_sg.getvalue(),
-                    file_name=f"dataload_{item_code_sg}.csv",
+                    data=csv_buffer_grub.getvalue(),
+                    file_name=f"dataload_{item_code_grub}.csv",
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
 
 
 if selected_part in [
