@@ -1722,7 +1722,6 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
 # --- BEARING, ROLLING
 if selected_part == "Bearing, Rolling":
     col1, col2, col3 = st.columns(3)
@@ -1750,19 +1749,14 @@ if selected_part == "Bearing, Rolling":
 
         extra_suffix = st.text_input("Extra suffix (optional)", key="br_extra")
 
-        # Dimensioni (se vuoi tenerle)
+        # Dimensioni (opzionali)
         od_roll    = st.text_input("Outside diameter (OD)", key="br_od")
         id_roll    = st.text_input("Inside diameter (ID)",  key="br_id")
         width_roll = st.text_input("Width",                 key="br_width")
 
         note_roll = st.text_area("Note", height=80, key="br_note")
 
-        dwg_roll = st.text_input("Dwg/doc number", key="br_dwg")
-
-        # --- Dizionari/func già definiti in alto ---
-        # base_series_desc, design_desc, pairing_desc, cage_desc, clearance_desc,
-        # tolerance_desc, heat_desc, grease_desc, vibration_desc
-
+        # --- Funzioni/dizionari già definiti in alto ---
         def bearing_type_from_code(code: str) -> str:
             for p in (code[:3], code[:2], code[:1]):
                 if p in base_series_desc:
@@ -1802,7 +1796,7 @@ if selected_part == "Bearing, Rolling":
             ]
             skf_full_code = "".join([p for p in parts_no_space if p]).upper()
 
-            # Descrizione tipo + suffissi
+            # Descrizioni
             bearing_type_txt = bearing_type_from_code(model_final)
 
             desc_bits = [
@@ -1824,14 +1818,14 @@ if selected_part == "Bearing, Rolling":
 
             human_suffix = f" ({'; '.join(full_desc_list)})" if full_desc_list else ""
 
-            # Dimensioni stringa
+            # Dimensioni
             dim_roll = " - ".join([
                 f"OD {od_roll}" if od_roll else "",
                 f"ID {id_roll}" if id_roll else "",
                 f"W {width_roll}" if width_roll else ""
             ]).strip(" -")
 
-            # DESCRIZIONE (niente materiale)
+            # Descrizione finale
             descr_parts_roll = [
                 "BEARING, ROLLING",
                 skf_full_code + human_suffix,
@@ -1840,10 +1834,6 @@ if selected_part == "Bearing, Rolling":
             ]
             descr_roll = "*" + " - ".join([p for p in descr_parts_roll if p])
 
-            # Campi fissi per Material
-            default_material = "COMMERCIAL BEARING"
-            default_fpd      = "NA"
-
             st.session_state["output_data"] = {
                 "Item": "50YYY…",
                 "Description": descr_roll,
@@ -1851,9 +1841,9 @@ if selected_part == "Bearing, Rolling":
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "CUSCINETTO",
-                "Disegno": dwg_roll,
-                "Material": default_material,
-                "FPD material code": default_fpd,
+                "Disegno": ".",                      # <-- nessun input, lo mettiamo a punto
+                "Material": "COMMERCIAL BEARING",
+                "FPD material code": "NA",
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "50_BEARING",
                 "ERP_L2": "20_ROLLING",
@@ -1929,7 +1919,6 @@ if selected_part == "Bearing, Rolling":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
 
 # --- BOLT, EYE
 if selected_part == "Bolt, Eye":
