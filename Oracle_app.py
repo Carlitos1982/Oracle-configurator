@@ -1519,7 +1519,7 @@ if selected_part == "Gasket, Spiral Wound":
         thickness_gsw = st.text_input("Thickness (MM)", key="gsw_thick")
         rating_gsw = st.selectbox("Rating", list(rating_mapping.keys()), key="gsw_rating")
         dwg_gsw = st.text_input("Dwg/doc number", key="gsw_dwg")
-        note_gsw = st.text_area("Note (opzionale)", height=80, key="gsw_note")
+        note_gsw = st.text_area("Note", height=80, key="gsw_note")
         hf_service_gsw = st.checkbox("Is it a hydrofluoric acid (HF) alkylation service?", key="gsw_hf")
 
         if st.button("Genera Output", key="gsw_gen"):
@@ -1565,7 +1565,7 @@ if selected_part == "Gasket, Spiral Wound":
             output_data = st.session_state["output_data"]
             for campo, valore in output_data.items():
                 if campo == "Description":
-                    st.text_area(campo, value=valore, height=100, key=f"sw_{campo}")
+                    st.text_area(campo, value=valore, height=180, key=f"sw_{campo}")
                 else:
                     st.text_input(campo, value=valore, key=f"sw_{campo}")
 # --- BEARING, HYDROSTATIC/HYDRODYNAMIC
