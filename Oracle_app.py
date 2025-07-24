@@ -1476,81 +1476,109 @@ if selected_part == "Gasket, Spiral Wound":
     with col1:
         st.subheader("✏️ Input")
 
-        # Materiali del winding e del filler
-        winding_choice = st.selectbox("Winding material", winding_materials, key="gw_winding")
-        filler_choice  = st.selectbox("Filler material",  filler_materials, key="gw_filler")
+        winding_options = {
+            "304 stainless steel": ("Yellow", "RAL1021"),
+            "316L stainless steel": ("Green", "RAL6005"),
+            "317L stainless steel": ("Maroon", "RAL3003"),
+            "321 stainless steel": ("Turquoise", "RAL5018"),
+            "347 stainless steel": ("Blue", "RAL5017"),
+            "MONEL": ("Orange", "RAL2003"),
+            "Nickel": ("Red", "RAL3024"),
+            "Titanium": ("Purple", "RAL4003"),
+            "Alloy 20": ("Black", "RAL9005"),
+            "INCONEL 600": ("Gold", "RAL1004"),
+            "HASTELLOY B": ("Brown", "RAL8003"),
+            "HASTELLOY C": ("Beige", "RAL1011"),
+            "INCOLOY 800": ("White", "RAL9010"),
+            "DUPLEX": ("Yellow+Blue", "RAL1021+5017"),
+            "SUPERDUPLEX": ("Red+Black", "RAL3020+9005"),
+            "ALLOY 825": ("Orange+Green", "RAL2003+6005"),
+            "UNS S31254": ("Orange+Blue", "RAL2003+5017"),
+            "ZYRCONIUM 702": ("Gold+Green", "RAL1004+6005"),
+            "INCONEL X750HT": ("Gold+Black", "RAL1004+9005")
+        }
 
-        # Codici colore (in sola lettura)
-        st.text_input("Winding color code", color_codes.get(winding_choice, ""), disabled=True)
-        st.text_input("Filler color code",  color_codes.get(filler_choice, ""),  disabled=True)
+        filler_options = {
+            "Graphite": ("Gray", "RAL7011"),
+            "PTFE": ("White", "RAL9010"),
+            "Ceramic": ("Light Green", "RAL6021"),
+            "Verdicarb (Mica Graphite)": ("Pink", "RAL3015")
+        }
 
-        # Solo checkbox HF lethal
-        hf_service = st.checkbox(
-            "Is it an hydrofluoric acid alkylation service (lethal)?",
-            key="gw_hf"
-        )
+        rating_mapping = {
+            "STANDARD PRESSURE - m=3; y=10000psi (1 stripe)": ("STANDARD PRESSURE", "m=3; y=10000psi", "1 stripe"),
+            "HIGH PRESSURE - m=3; y=17500psi (2 stripes)":    ("HIGH PRESSURE",   "m=3; y=17500psi",   "2 stripes"),
+            "ULTRA HIGH PRESSURE - m=3; y=23500psi (3 stripes)":("ULTRA HIGH PRESSURE", "m=3; y=23500psi", "3 stripes")
+        }
 
-        if st.button("Genera Output", key="gw_gen"):
-            # Costruzione materiale e FPD code
-            materiale = f"{winding_choice} / {filler_choice}"
-            match = materials_df[
-                (materials_df["Material Type"] == "Gasket, Spiral Wound") &
-                (materials_df["Name"] == winding_choice)
-            ]
-            codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
+        winding_gsw    = st.selectbox("Winding Material", list(winding_options.keys()), key="gsw_winding")
+        filler_gsw     = st.selectbox("Filler",            list(filler_options.keys()),  key="gsw_filler")
+        out_dia_gsw    = st.text_input("Outer Diameter (MM)",     key="gsw_out_dia")
+        in_dia_gsw     = st.text_input("Inner Diameter (MM)",     key="gsw_in_dia")
+        thickness_gsw  = st.text_input("Thickness (MM)",          key="gsw_thick")
+        rating_gsw     = st.selectbox("Rating",            list(rating_mapping.keys()), key="gsw_rating")
+        dwg_gsw        = st.text_input("Dwg/doc number",          key="gsw_dwg")
+        note_gsw       = st.text_area("Note", height=80,            key="gsw_note")
+        hf_service_gsw = st.checkbox("Is it a hydrofluoric acid (HF) alkylation service?", key="gsw_hf")
 
-            # Descrizione base
-            descr = (
-                f"GASKET, SPIRAL WOUND - {winding_choice}/{filler_choice}"
-                f" - color {color_codes[winding_choice]}/{color_codes[filler_choice]}"
+        if st.button("Genera Output", key="gsw_gen"):
+            color1, ral1      = winding_options[winding_gsw]
+            color2, ral2      = filler_options[filler_gsw]
+            pressure_label, rating_descr, stripe = rating_mapping[rating_gsw]
+
+            # descrizione base + tag SQ174
+            descr_gsw = (
+                f"*GASKET, SPIRAL WOUND - WINDING: {winding_gsw}, FILLER: {filler_gsw}, "
+                f"OD: {out_dia_gsw} (MM), ID: {in_dia_gsw} (MM), THK: {thickness_gsw} (MM), "
+                f"RATING: {pressure_label} - {rating_descr}, "
+                f"COLOR CODE: {color1} {ral1} / {color2} {ral2} ({stripe}) [SQ174]"
             )
 
-            # Se HF letale, aggiungo tag in descrizione e riga in quality
-            sq_tags = []
-            quality_lines = []
-            if hf_service:
-                sq_tags.append("<SQ113>")
-                quality_lines.append(
-                    "SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)"
-                )
-            tag_string = " ".join(sq_tags)
-            descr = "*" + descr + (f" {tag_string}" if tag_string else "")
+            # se HF, aggiungo tag e linea in quality
+            quality = "SQ 174 - Casing/Cover pump spiral wound gaskets: Specification for Mechanical properties, applicable materials and dimensions"
+            if hf_service_gsw:
+                descr_gsw += " <SQ113>"
+                quality   += "\nSQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)"
 
-            # Popolo output_data
+            # eventuale nota
+            if note_gsw:
+                descr_gsw += f", NOTE: {note_gsw}"
+
             st.session_state["output_data"] = {
-                "Item": "56XXX…",
-                "Description": descr,
-                "Identificativo": "GASKET_SW",
-                "Classe ricambi": "",
+                "Item": "50415…",
+                "Description": descr_gsw,
+                "Identificativo": "4510-JOINT",
+                "Classe ricambi": "1-2-3",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
-                "Disegno": ".",
-                "Material": materiale,
-                "FPD material code": codice_fpd,
+                "Disegno": dwg_gsw,
+                "Material": "NA",
+                "FPD material code": "NOT AVAILABLE",
                 "Template": "FPD_BUY_1",
-                "ERP_L1": "60_COMMERCIAL_PARTS",
-                "ERP_L2": "29_OTHER",
+                "ERP_L1": "55_GASKETS_OR_SEAL",
+                "ERP_L2": "16_SPIRAL_WOUND",
                 "To supplier": "",
-                "Quality": "\n".join(quality_lines)
+                "Quality": quality
             }
 
     # --------------------- COLONNA 2: OUTPUT ---------------------
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            for campo, valore in st.session_state["output_data"].items():
+            output_data = st.session_state["output_data"]
+            for campo, valore in output_data.items():
                 if campo in ["Description", "Quality"]:
-                    st.text_area(campo, value=valore, height=100, key=f"gw_{campo}")
+                    st.text_area(campo, value=valore, height=100, key=f"sw_{campo}")
                 else:
-                    st.text_input(campo, value=valore, key=f"gw_{campo}")
+                    st.text_input(campo, value=valore, key=f"sw_{campo}")
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         st.subheader("🧾 DataLoad")
         dataload_mode_gw = st.radio(
-            "Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="gw_dl_mode"
+            "Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="gsw_dl_mode"
         )
-        item_code_gw = st.text_input("Codice item", key="gw_item_code")
+        item_code_gw = st.text_input("Codice item", key="gsw_item_code")
 
         if st.button("Genera stringa DataLoad", key="gen_dl_gw"):
             if not item_code_gw:
@@ -1587,7 +1615,6 @@ if selected_part == "Gasket, Spiral Wound":
                     "Short Text", "TAB",
                     get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
-
                 dl_string = "\t".join(fields)
                 st.text_area("Anteprima (per copia manuale)", dl_string, height=200)
 
@@ -1596,7 +1623,7 @@ if selected_part == "Gasket, Spiral Wound":
                 for r in fields:
                     writer.writerow([r])
                 st.download_button(
-                    "💾 Scarica CSV per Import Data",
+                    label="💾 Scarica CSV per Import Data",
                     data=buf.getvalue(),
                     file_name=f"dataload_{item_code_gw}.csv",
                     mime="text/csv"
