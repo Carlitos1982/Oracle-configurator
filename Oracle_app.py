@@ -1472,32 +1472,40 @@ if selected_part == "Gate, Valve":
 if selected_part == "Gasket, Spiral Wound":
     col1, col2, col3 = st.columns(3)
 
-    # ——— COLONNA 1: INPUT ———
+    # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
-        # (qui vanno tutti gli altri select/input che avevi già: winding_material, filler_material, color_codes, ecc.)
-        # …
-        # checkbox HF lethal service
+
+        # Materiali del winding e del filler
+        winding_choice = st.selectbox("Winding material", winding_materials, key="gw_winding")
+        filler_choice  = st.selectbox("Filler material",  filler_materials, key="gw_filler")
+
+        # Codici colore (in sola lettura)
+        st.text_input("Winding color code", color_codes.get(winding_choice, ""), disabled=True)
+        st.text_input("Filler color code",  color_codes.get(filler_choice, ""),  disabled=True)
+
+        # Solo checkbox HF lethal
         hf_service = st.checkbox(
             "Is it an hydrofluoric acid alkylation service (lethal)?",
             key="gw_hf"
         )
 
         if st.button("Genera Output", key="gw_gen"):
-            # --- calcolo FPD code come prima ---
+            # Costruzione materiale e FPD code
             materiale = f"{winding_choice} / {filler_choice}"
             match = materials_df[
                 (materials_df["Material Type"] == "Gasket, Spiral Wound") &
-                (materials_df["Name"] == winding_choice)  # o il tuo filtro corretto
+                (materials_df["Name"] == winding_choice)
             ]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-            # --- descrizione base (senza asterisco) ---
+            # Descrizione base
             descr = (
                 f"GASKET, SPIRAL WOUND - {winding_choice}/{filler_choice}"
                 f" - color {color_codes[winding_choice]}/{color_codes[filler_choice]}"
             )
-            # aggiungo tag se HF
+
+            # Se HF letale, aggiungo tag in descrizione e riga in quality
             sq_tags = []
             quality_lines = []
             if hf_service:
@@ -1508,7 +1516,7 @@ if selected_part == "Gasket, Spiral Wound":
             tag_string = " ".join(sq_tags)
             descr = "*" + descr + (f" {tag_string}" if tag_string else "")
 
-            # ——— POPOLA output_data ———
+            # Popolo output_data
             st.session_state["output_data"] = {
                 "Item": "56XXX…",
                 "Description": descr,
@@ -1523,10 +1531,10 @@ if selected_part == "Gasket, Spiral Wound":
                 "ERP_L1": "60_COMMERCIAL_PARTS",
                 "ERP_L2": "29_OTHER",
                 "To supplier": "",
-                "Quality": "\n".join(quality_lines)  # campo Quality con la sola SQ 113
+                "Quality": "\n".join(quality_lines)
             }
 
-    # ——— COLONNA 2: OUTPUT ———
+    # --------------------- COLONNA 2: OUTPUT ---------------------
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
@@ -1536,7 +1544,7 @@ if selected_part == "Gasket, Spiral Wound":
                 else:
                     st.text_input(campo, value=valore, key=f"gw_{campo}")
 
-    # ——— COLONNA 3: DATALOAD ———
+    # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         st.subheader("🧾 DataLoad")
         dataload_mode_gw = st.radio(
@@ -1554,6 +1562,7 @@ if selected_part == "Gasket, Spiral Wound":
                 def get_val(key):
                     v = data.get(key, "").strip()
                     return v if v else "."
+
                 fields = [
                     "\\%FN", item_code_gw,
                     "\\%TC", get_val("Template"), "TAB",
@@ -1578,6 +1587,7 @@ if selected_part == "Gasket, Spiral Wound":
                     "Short Text", "TAB",
                     get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
                 ]
+
                 dl_string = "\t".join(fields)
                 st.text_area("Anteprima (per copia manuale)", dl_string, height=200)
 
@@ -1592,7 +1602,6 @@ if selected_part == "Gasket, Spiral Wound":
                     mime="text/csv"
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
 
 
 
