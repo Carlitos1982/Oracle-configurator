@@ -2308,7 +2308,6 @@ if selected_part == "Gasket, Ring Type Joint":
                 )
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
-
 # --- GUSSET, OTHER
 elif selected_part == "Gusset, Other":
     col1, col2, col3 = st.columns(3)
@@ -2319,7 +2318,7 @@ elif selected_part == "Gusset, Other":
         width_gusset     = st.number_input("Width", min_value=0, step=1, format="%d", key="gusset_width")
         thickness_gusset = st.number_input("Thickness", min_value=0, step=1, format="%d", key="gusset_thickness")
         uom_gusset       = st.selectbox("Unità di misura", ["mm", "inches"], key="gusset_uom")
-        note1_gusset     = st.text_area("Note (opzionale)", height=80, key="gusset_note1")
+        note1_gusset     = st.text_area("Note", height=80, key="gusset_note1")
 
         mtype_gusset = st.selectbox("Material Type", [""] + material_types, key="mtype_gusset")
         pref_df_gusset = materials_df[
@@ -2338,7 +2337,7 @@ elif selected_part == "Gusset, Other":
             ]["Name"].dropna().tolist()
         mname_gusset = st.selectbox("Material Name", [""] + names_gusset, key="mname_gusset")
 
-        note2_gusset = st.text_area("Material Note (opzionale)", height=80, key="gusset_note2")
+        note2_gusset = st.text_area("Material Note", height=80, key="gusset_note2")
 
         if st.button("Genera Output", key="gen_gusset"):
             if mtype_gusset != "MISCELLANEOUS":
@@ -2455,6 +2454,7 @@ elif selected_part == "Gusset, Other":
                 )
 
                 st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 # --- STUD, THREADED
 if selected_part == "Stud, Threaded":
     col1, col2, col3 = st.columns(3)
