@@ -1568,7 +1568,7 @@ if selected_part == "Gasket, Spiral Wound":
             output_data = st.session_state["output_data"]
             for campo, valore in output_data.items():
                 if campo in ["Description", "Quality"]:
-                    st.text_area(campo, value=valore, height=100, key=f"sw_{campo}")
+                    st.text_area(campo, value=valore, height=180, key=f"sw_{campo}")
                 else:
                     st.text_input(campo, value=valore, key=f"sw_{campo}")
 
