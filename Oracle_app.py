@@ -506,7 +506,7 @@ if selected_part == "Casing, Pump":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 # --- CASING COVER, PUMP
@@ -637,7 +637,7 @@ if selected_part == "Casing Cover, Pump":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 
@@ -759,7 +759,7 @@ if selected_part == "Impeller, Pump":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 
@@ -884,7 +884,7 @@ if selected_part == "Balance Bushing, Pump":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 
@@ -1005,7 +1005,7 @@ if selected_part == "Balance Drum, Pump":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 # --- BALANCE DISC, PUMP
@@ -1125,7 +1125,7 @@ if selected_part == "Balance Disc, Pump":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 # --- GATE, VALVE
@@ -1219,7 +1219,7 @@ if selected_part == "Gate, Valve":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 # --- GASKET, SPIRAL WOUND
@@ -1331,7 +1331,7 @@ if selected_part == "Gasket, Spiral Wound":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+ )
 
 
 # --- BEARING, HYDROSTATIC/HYDRODYNAMIC
@@ -1435,8 +1435,8 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
-
+        )
+    
 # --- BEARING, ROLLING
 if selected_part == "Bearing, Rolling":
     col1, col2, col3 = st.columns(3)
@@ -1581,7 +1581,7 @@ if selected_part == "Bearing, Rolling":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 # --- BOLT, EYE
@@ -1664,7 +1664,7 @@ if selected_part == "Bolt, Eye":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 # --- BOLT, HEXAGONAL
 if selected_part == "Bolt, Hexagonal":
@@ -1760,7 +1760,7 @@ if selected_part == "Bolt, Hexagonal":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 # --- GASKET, RING TYPE JOINT
 if selected_part == "Gasket, Ring Type Joint":
@@ -1822,7 +1822,7 @@ if selected_part == "Gasket, Ring Type Joint":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 # --- GUSSET, OTHER
@@ -1918,7 +1918,7 @@ elif selected_part == "Gusset, Other":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 # --- STUD, THREADED
@@ -2009,7 +2009,7 @@ if selected_part == "Stud, Threaded":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 # --- NUT, HEX
 if selected_part == "Nut, Hex":
@@ -2097,7 +2097,7 @@ if selected_part == "Nut, Hex":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 # --- RING, WEAR
 if selected_part == "Ring, Wear":
@@ -2196,7 +2196,7 @@ if selected_part == "Ring, Wear":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 # --- PIN, DOWEL
 if selected_part == "Pin, Dowel":
@@ -2292,7 +2292,7 @@ if selected_part == "Pin, Dowel":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 # --- SHAFT, PUMP
@@ -2423,7 +2423,7 @@ if selected_part == "Shaft, Pump":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
@@ -2530,7 +2530,7 @@ elif selected_part == "Baseplate, Pump":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 
@@ -2599,7 +2599,7 @@ if selected_part == "Flange, Pipe":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 # --- GASKET, FLAT
 if selected_part == "Gasket, Flat":
@@ -2661,7 +2661,7 @@ if selected_part == "Gasket, Flat":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 # --- SCREW, CAP
@@ -2757,7 +2757,7 @@ if selected_part == "Screw, Cap":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 # --- SCREW, GRUB
@@ -2848,7 +2848,7 @@ if selected_part == "Screw, Grub":
     render_dataload(
         item_code_key="beye_item_code",
         dl_button_key="gen_dl_beye"
-    )
+        )
 
 
 
