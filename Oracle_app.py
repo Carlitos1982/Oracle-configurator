@@ -4,6 +4,76 @@ from PIL import Image
 import io
 import csv
 
+def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "output_data"):
+    st.subheader("🧾 DataLoad")
+    mode = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"],
+                    key=item_code_key + "_mode")
+    # uscita se non 'Crea'
+    if mode != "Crea nuovo item":
+        return
+
+    item_code = st.text_input("Codice item", key=item_code_key)
+    if st.button("Genera stringa DataLoad", key=dl_button_key):
+        data = st.session_state.get(state_key, {})
+        if not item_code:
+            st.error("❌ Inserisci prima il codice item.")
+            return
+
+        # fallback su Quality
+        quality_val = data.get("Quality", "").strip() or "NA"
+
+        def get_val(k):
+            v = data.get(k, "").strip()
+            return v if v else "."
+
+        fields = [
+            "\\%FN",            item_code,
+            "\\%TC",            get_val("Template"), "TAB",
+            "\\%D",             "\\%O",               "TAB",
+            get_val("Description"), *["TAB"]*6,
+            get_val("Identificativo"), "TAB",
+            get_val("Classe ricambi"), "TAB",
+            "\\%O",             "\\^S",
+            "\\%TA",            "TAB",
+            "FASCIA ITE",       "TAB",
+            item_code[:1],      "TAB",
+            "TIPO ART.",        "TAB",
+            f"{get_val('ERP_L1')}.{get_val('ERP_L2')}",
+            "\\^S",             "\\^{F4}",
+            "\\%TG",            "CATALOG", *["TAB"]*4,
+            get_val("Disegno"), "TAB",
+            "\\^S",             "\\^{F4}",
+            "\\%TR",            "MATER+DESCR_FPD", *["TAB"]*2,
+            get_val("FPD material code"), "TAB",
+            get_val("Material"), "\\^S", "\\^S", "\\^{F4}",
+            "\\%VA",            "TAB",
+            quality_val,        *["TAB"]*4,
+            quality_val,        "\\^S",
+            "\\%FN",            "TAB",
+            ".",                *["TAB"]*3,
+            "Short Text",       "TAB",
+            ".",                "\\^S", "\\^S", "\\^{F4}", "\\^S"
+        ]
+
+        # preview
+        dl_string = "\t".join(fields)
+        st.text_area("Anteprima (per copia)", dl_string, height=200)
+
+        # CSV
+        buf = io.StringIO()
+        writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
+        for token in fields:
+            writer.writerow([token])
+        st.download_button(
+            "💾 Scarica CSV per Import Data",
+            data=buf.getvalue(),
+            file_name=f"dataload_{item_code}.csv",
+            mime="text/csv"
+        )
+
+
+
+
 # Caricamento dati materiali da file Excel
 material_df = pd.read_excel("dati_config4.xlsx", sheet_name="Materials")
 
@@ -433,57 +503,11 @@ if selected_part == "Casing, Pump":
 
     # COLONNA 3: DataLoad
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="casing_dl_mode")
-        item_code = st.text_input("Codice item", key="casing_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_casing"):
-            if not item_code:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields = [
-                    "\\%FN", item_code,
-                    "\\%TC", get_val("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val("Identificativo"), "TAB",
-                    get_val("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
-                    get_val("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val("FPD material code"), "TAB",
-                    get_val("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val("Quality") if get_val("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string = "\t".join(dataload_fields)
-                st.text_area("Anteprima (per copia manuale)", dataload_string, height=200)
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-                csv_buffer = io.StringIO()
-                writer = csv.writer(csv_buffer, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields:
-                    writer.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer.getvalue(),
-                    file_name=f"dataload_{item_code}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # --- CASING COVER, PUMP
 if selected_part == "Casing Cover, Pump":
@@ -610,57 +634,12 @@ if selected_part == "Casing Cover, Pump":
                     st.text_input(k, value=v)
 
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_cc = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="cc_dl_mode")
-        item_code_cc = st.text_input("Codice item", key="cc_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_cc"):
-            if not item_code_cc:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields = [
-                    "\\%FN", item_code_cc,
-                    "\\%TC", get_val("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val("Identificativo"), "TAB",
-                    get_val("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
-                    get_val("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val("FPD material code"), "TAB",
-                    get_val("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val("Quality") if get_val("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string = "\t".join(dataload_fields)
-                st.text_area("Anteprima (per copia manuale)", dataload_string, height=200)
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-                csv_buffer = io.StringIO()
-                writer = csv.writer(csv_buffer, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields:
-                    writer.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer.getvalue(),
-                    file_name=f"dataload_{item_code_cc}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 
 # --- IMPELLER, PUMP
 if selected_part == "Impeller, Pump":
@@ -776,60 +755,14 @@ if selected_part == "Impeller, Pump":
                 else:
                     st.text_input(k, value=v)
 
-    # COLONNA 3: DataLoad
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_imp = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="imp_dl_mode")
-        item_code_imp = st.text_input("Codice item", key="imp_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_imp"):
-            if not item_code_imp:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields = [
-                    "\\%FN", item_code_imp,
-                    "\\%TC", get_val("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val("Identificativo"), "TAB",
-                    get_val("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
-                    get_val("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val("FPD material code"), "TAB",
-                    get_val("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val("Quality") if get_val("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string = "\t".join(dataload_fields)
-                st.text_area("Anteprima (per copia manuale)", dataload_string, height=200)
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-                csv_buffer = io.StringIO()
-                writer = csv.writer(csv_buffer, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields:
-                    writer.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer.getvalue(),
-                    file_name=f"dataload_{item_code_imp}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-# --- BALANCE BUSHING, PUMP
+
+
 # --- BALANCE BUSHING, PUMP
 if selected_part == "Balance Bushing, Pump":
     col1, col2, col3 = st.columns(3)
@@ -946,58 +879,15 @@ if selected_part == "Balance Bushing, Pump":
 
 
     # COLONNA 3: DataLoad
-    with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_bb = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="bb_dl_mode")
-        item_code_bb = st.text_input("Codice item", key="bb_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_bb"):
-            if not item_code_bb:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val_bb(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields_bb = [
-                    "\\%FN", item_code_bb,
-                    "\\%TC", get_val_bb("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_bb("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_bb("Identificativo"), "TAB",
-                    get_val_bb("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_bb('ERP_L1')}.{get_val_bb('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_bb("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_bb("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_bb("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB", 
-                    get_val_bb("FPD material code"), "TAB",
-                    get_val_bb("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_bb("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_bb("Quality") if get_val_bb("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_bb("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_bb("To supplier") if get_val_bb("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_bb = "\t".join(dataload_fields_bb)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_bb, height=200)
 
-                csv_buffer_bb = io.StringIO()
-                writer_bb = csv.writer(csv_buffer_bb, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_bb:
-                    writer_bb.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_bb.getvalue(),
-                    file_name=f"dataload_{item_code_bb}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+    with col3:
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
+
+
+
 # --- BALANCE DRUM, PUMP
 if selected_part == "Balance Drum, Pump":
     col1, col2, col3 = st.columns(3)
@@ -1111,59 +1001,13 @@ if selected_part == "Balance Drum, Pump":
                 else:
                     st.text_input(k, value=v)
 
-    # COLONNA 3: DataLoad
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_bd = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="bd_dl_mode")
-        item_code_bd = st.text_input("Codice item", key="bd_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_bd"):
-            if not item_code_bd:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val_bd(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields_bd = [
-                    "\\%FN", item_code_bd,
-                    "\\%TC", get_val_bd("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_bd("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_bd("Identificativo"), "TAB",
-                    get_val_bd("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_bd('ERP_L1')}.{get_val_bd('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_bd("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_bd("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_bd("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_bd("FPD material code"), "TAB",
-                    get_val_bd("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_bd("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_bd("Quality") if get_val_bd("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_bd("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_bd("To supplier") if get_val_bd("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_bd = "\t".join(dataload_fields_bd)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_bd, height=200)
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-                csv_buffer_bd = io.StringIO()
-                writer_bd = csv.writer(csv_buffer_bd, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_bd:
-                    writer_bd.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_bd.getvalue(),
-                    file_name=f"dataload_{item_code_bd}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+
 # --- BALANCE DISC, PUMP
 if selected_part == "Balance Disc, Pump":
     col1, col2, col3 = st.columns(3)
@@ -1276,58 +1120,13 @@ if selected_part == "Balance Disc, Pump":
                     st.text_input(k, value=v)
 
     # COLONNA 3: DataLoad
-    with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_bdsc = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="bdsc_dl_mode")
-        item_code_bdsc = st.text_input("Codice item", key="bdsc_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_bdsc"):
-            if not item_code_bdsc:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val_bdsc(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields_bdsc = [
-                    "\\%FN", item_code_bdsc,
-                    "\\%TC", get_val_bdsc("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_bdsc("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_bdsc("Identificativo"), "TAB",
-                    get_val_bdsc("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_bdsc('ERP_L1')}.{get_val_bdsc('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_bdsc("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_bdsc("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_bdsc("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_bdsc("FPD material code"), "TAB",
-                    get_val_bdsc("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_bdsc("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_bdsc("Quality") if get_val_bdsc("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_bdsc("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_bdsc("To supplier") if get_val_bdsc("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_bdsc = "\t".join(dataload_fields_bdsc)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_bdsc, height=200)
 
-                csv_buffer_bdsc = io.StringIO()
-                writer_bdsc = csv.writer(csv_buffer_bdsc, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_bdsc:
-                    writer_bdsc.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_bdsc.getvalue(),
-                    file_name=f"dataload_{item_code_bdsc}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+    with col3:
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
+
 
 # --- GATE, VALVE
 if selected_part == "Gate, Valve":
@@ -1415,58 +1214,13 @@ if selected_part == "Gate, Valve":
                     st.text_input(k, value=v)
 
     # COLONNA 3: DataLoad
-    with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_gate = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="gate_dl_mode")
-        item_code_gate = st.text_input("Codice item", key="gate_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_gate"):
-            if not item_code_gate:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val_gate(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields_gate = [
-                    "\\%FN", item_code_gate,
-                    "\\%TC", get_val_gate("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_gate("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_gate("Identificativo"), "TAB",
-                    get_val_gate("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_gate('ERP_L1')}.{get_val_gate('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_gate("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_gate("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_gate("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_gate("FPD material code"), "TAB",
-                    get_val_gate("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_gate("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_gate("Quality") if get_val_gate("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_gate("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_gate("To supplier") if get_val_gate("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_gate = "\t".join(dataload_fields_gate)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_gate, height=200)
 
-                csv_buffer_gate = io.StringIO()
-                writer_gate = csv.writer(csv_buffer_gate, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_gate:
-                    writer_gate.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_gate.getvalue(),
-                    file_name=f"dataload_{item_code_gate}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+    with col3:
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
+
 
 # --- GASKET, SPIRAL WOUND
 if selected_part == "Gasket, Spiral Wound":
@@ -1574,62 +1328,10 @@ if selected_part == "Gasket, Spiral Wound":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_gw = st.radio(
-            "Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="gsw_dl_mode"
-        )
-        item_code_gw = st.text_input("Codice item", key="gsw_item_code")
-
-        if st.button("Genera stringa DataLoad", key="gen_dl_gw"):
-            if not item_code_gw:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val(key):
-                    v = data.get(key, "").strip()
-                    return v if v else "."
-
-                fields = [
-                    "\\%FN", item_code_gw,
-                    "\\%TC", get_val("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val("Identificativo"), "TAB",
-                    get_val("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
-                    get_val("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val("FPD material code"), "TAB",
-                    get_val("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val("Quality") if get_val("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dl_string = "\t".join(fields)
-                st.text_area("Anteprima (per copia manuale)", dl_string, height=200)
-
-                buf = io.StringIO()
-                writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
-                for r in fields:
-                    writer.writerow([r])
-                st.download_button(
-                    label="💾 Scarica CSV per Import Data",
-                    data=buf.getvalue(),
-                    file_name=f"dataload_{item_code_gw}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
 
 # --- BEARING, HYDROSTATIC/HYDRODYNAMIC
@@ -1730,62 +1432,11 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_bear = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="bear_dl_mode")
-        item_code_bear = st.text_input("Codice item", key="bear_item_code")
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-        if st.button("Genera stringa DataLoad", key="gen_dl_bear"):
-            if not item_code_bear:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-
-                def get_val_bear(k):
-                    v = data.get(k, "").strip()
-                    return v if v else "."
-
-                dataload_fields_bear = [
-                    "\\%FN", item_code_bear,
-                    "\\%TC", get_val_bear("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_bear("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_bear("Identificativo"), "TAB",
-                    get_val_bear("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_bear('ERP_L1')}.{get_val_bear('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_bear("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_bear("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_bear("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_bear("FPD material code"), "TAB",
-                    get_val_bear("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_bear("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_bear("Quality") if get_val_bear("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_bear("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_bear("To supplier") if get_val_bear("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-
-                dataload_string_bear = "\t".join(dataload_fields_bear)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_bear, height=200)
-
-                csv_buffer_bear = io.StringIO()
-                writer_bear = csv.writer(csv_buffer_bear, quoting=csv.QUOTE_MINIMAL)
-                for r in dataload_fields_bear:
-                    writer_bear.writerow([r])
-
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_bear.getvalue(),
-                    file_name=f"dataload_{item_code_bear}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 # --- BEARING, ROLLING
 if selected_part == "Bearing, Rolling":
     col1, col2, col3 = st.columns(3)
@@ -1927,62 +1578,11 @@ if selected_part == "Bearing, Rolling":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_roll = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="br_dl_mode")
-        item_code_roll = st.text_input("Codice item", key="br_item_code")
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-        if st.button("Genera stringa DataLoad", key="gen_dl_roll"):
-            if not item_code_roll:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-
-                def get_val_roll(k):
-                    v = data.get(k, "").strip()
-                    return v if v else "."
-
-                dataload_fields_roll = [
-                    "\\%FN", item_code_roll,
-                    "\\%TC", get_val_roll("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_roll("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_roll("Identificativo"), "TAB",
-                    get_val_roll("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_roll('ERP_L1')}.{get_val_roll('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_roll("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_roll("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_roll("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_roll("FPD material code"), "TAB",
-                    get_val_roll("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_roll("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_roll("Quality") if get_val_roll("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_roll("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_roll("To supplier") if get_val_roll("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-
-                dataload_string_roll = "\t".join(dataload_fields_roll)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_roll, height=200)
-
-                csv_buffer_roll = io.StringIO()
-                writer_roll = csv.writer(csv_buffer_roll, quoting=csv.QUOTE_MINIMAL)
-                for r in dataload_fields_roll:
-                    writer_roll.writerow([r])
-
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_roll.getvalue(),
-                    file_name=f"dataload_{item_code_roll}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # --- BOLT, EYE
 if selected_part == "Bolt, Eye":
@@ -2061,61 +1661,11 @@ if selected_part == "Bolt, Eye":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_beye = st.radio(
-            "Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="beye_dl_mode"
-        )
-        item_code_beye = st.text_input("Codice item", key="beye_item_code")
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-        if st.button("Genera stringa DataLoad", key="gen_dl_beye"):
-            if not item_code_beye:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-
-                dataload_fields_beye = [
-                    "\\%FN", item_code_beye,
-                    "\\%TC", get_val("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val("Identificativo"), "TAB",
-                    get_val("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
-                    get_val("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val("FPD material code"), "TAB",
-                    get_val("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val("Quality") if get_val("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_beye = "\t".join(dataload_fields_beye)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_beye, height=200)
-
-                csv_buffer_beye = io.StringIO()
-                writer = csv.writer(csv_buffer_beye, quoting=csv.QUOTE_MINIMAL)
-                for r in dataload_fields_beye:
-                    writer.writerow([r])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_beye.getvalue(),
-                    file_name=f"dataload_{item_code_beye}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 # --- BOLT, HEXAGONAL
 if selected_part == "Bolt, Hexagonal":
     col1, col2, col3 = st.columns(3)
@@ -2207,59 +1757,10 @@ if selected_part == "Bolt, Hexagonal":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_hex = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="hex_dl_mode")
-        item_code_hex = st.text_input("Codice item", key="hex_item_code")
-
-        if st.button("Genera stringa DataLoad", key="gen_dl_hex"):
-            if not item_code_hex:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val_h(k):
-                    v = data.get(k, "").strip()
-                    return v if v else "."
-
-                dataload_fields_hex = [
-                    "\\%FN", item_code_hex,
-                    "\\%TC", get_val_h("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_h("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_h("Identificativo"), "TAB",
-                    get_val_h("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_h('ERP_L1')}.{get_val_h('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_h("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_h("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_h("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_h("FPD material code"), "TAB",
-                    get_val_h("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_h("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_h("Quality") if get_val_h("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_h("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_h("To supplier") if get_val_h("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_hex = "\t".join(dataload_fields_hex)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_hex, height=200)
-
-                csv_buffer_hex = io.StringIO()
-                writer_hex = csv.writer(csv_buffer_hex, quoting=csv.QUOTE_MINIMAL)
-                for r in dataload_fields_hex:
-                    writer_hex.writerow([r])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_hex.getvalue(),
-                    file_name=f"dataload_{item_code_hex}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
 # --- GASKET, RING TYPE JOINT
 if selected_part == "Gasket, Ring Type Joint":
@@ -2318,59 +1819,11 @@ if selected_part == "Gasket, Ring Type Joint":
 
     # COLONNA 3 – DATALOAD
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_rtj = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="rtj_dl_mode")
-        item_code_rtj = st.text_input("Codice item", key="rtj_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_rtj"):
-            if not item_code_rtj:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-                def get_val_rtj(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-
-                dataload_fields_rtj = [
-                    "\\%FN", item_code_rtj,
-                    "\\%TC", get_val_rtj("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_rtj("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_rtj("Identificativo"), "TAB",
-                    get_val_rtj("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_rtj('ERP_L1')}.{get_val_rtj('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_rtj("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_rtj("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_rtj("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_rtj("FPD material code"), "TAB",
-                    get_val_rtj("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_rtj("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_rtj("Quality") if get_val_rtj("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_rtj("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_rtj("To supplier") if get_val_rtj("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_rtj = "\t".join(dataload_fields_rtj)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_rtj, height=200)
-
-                csv_buffer_rtj = io.StringIO()
-                writer_rtj = csv.writer(csv_buffer_rtj, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_rtj:
-                    writer_rtj.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_rtj.getvalue(),
-                    file_name=f"dataload_{item_code_rtj}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # --- GUSSET, OTHER
 elif selected_part == "Gusset, Other":
@@ -2462,62 +1915,11 @@ elif selected_part == "Gusset, Other":
 
     # COLONNA 3: DataLoad
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_gusset = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="gusset_dl_mode")
-        item_code_gusset     = st.text_input("Codice item", key="gusset_item_code")
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-        if st.button("Genera stringa DataLoad", key="gen_dl_gusset"):
-            if not item_code_gusset:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val_gusset(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-
-                dataload_fields_gusset = [
-                    "\\%FN", item_code_gusset,
-                    "\\%TC", get_val_gusset("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_gusset("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_gusset("Identificativo"), "TAB",
-                    get_val_gusset("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_gusset('ERP_L1')}.{get_val_gusset('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_gusset("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_gusset("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_gusset("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_gusset("FPD material code"), "TAB",
-                    get_val_gusset("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_gusset("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_gusset("Quality") if get_val_gusset("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_gusset("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_gusset("To supplier") if get_val_gusset("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-
-                dataload_string_gusset = "\t".join(dataload_fields_gusset)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_gusset, height=200)
-
-                csv_buffer_gusset = io.StringIO()
-                writer_gusset     = csv.writer(csv_buffer_gusset, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_gusset:
-                    writer_gusset.writerow([riga])
-
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_gusset.getvalue(),
-                    file_name=f"dataload_{item_code_gusset}.csv",
-                    mime="text/csv"
-                )
-
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # --- STUD, THREADED
 if selected_part == "Stud, Threaded":
@@ -2604,62 +2006,10 @@ if selected_part == "Stud, Threaded":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_stud = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="stud_dl_mode")
-        item_code_stud = st.text_input("Codice item", key="stud_item_code")
-
-        if st.button("Genera stringa DataLoad", key="gen_dl_stud"):
-            if not item_code_stud:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-
-                def get_val_s(k):
-                    v = data.get(k, "").strip()
-                    return v if v else "."
-
-                dataload_fields_stud = [
-                    "\\%FN", item_code_stud,
-                    "\\%TC", get_val_s("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_s("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_s("Identificativo"), "TAB",
-                    get_val_s("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_s('ERP_L1')}.{get_val_s('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_s("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_s("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_s("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_s("FPD material code"), "TAB",
-                    get_val_s("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_s("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_s("Quality") if get_val_s("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_s("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_s("To supplier") if get_val_s("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_stud = "\t".join(dataload_fields_stud)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_stud, height=200)
-
-                csv_buffer_stud = io.StringIO()
-                writer_stud = csv.writer(csv_buffer_stud, quoting=csv.QUOTE_MINIMAL)
-                for r in dataload_fields_stud:
-                    writer_stud.writerow([r])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_stud.getvalue(),
-                    file_name=f"dataload_{item_code_stud}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
-
-
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
 # --- NUT, HEX
 if selected_part == "Nut, Hex":
@@ -2743,59 +2093,11 @@ if selected_part == "Nut, Hex":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_nut = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="nut_dl_mode")
-        item_code_nut = st.text_input("Codice item", key="nut_item_code")
-
-        if st.button("Genera stringa DataLoad", key="gen_dl_nut"):
-            if not item_code_nut:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val_n(k):
-                    v = data.get(k, "").strip()
-                    return v if v else "."
-
-                dataload_fields_nut = [
-                    "\\%FN", item_code_nut,
-                    "\\%TC", get_val_n("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_n("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_n("Identificativo"), "TAB",
-                    get_val_n("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_n('ERP_L1')}.{get_val_n('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_n("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_n("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_n("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_n("FPD material code"), "TAB",
-                    get_val_n("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_n("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_n("Quality") if get_val_n("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_n("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_n("To supplier") if get_val_n("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_nut = "\t".join(dataload_fields_nut)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_nut, height=200)
-
-                csv_buffer_nut = io.StringIO()
-                writer_nut = csv.writer(csv_buffer_nut, quoting=csv.QUOTE_MINIMAL)
-                for r in dataload_fields_nut:
-                    writer_nut.writerow([r])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_nut.getvalue(),
-                    file_name=f"dataload_{item_code_nut}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+        with col3:
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
 # --- RING, WEAR
 if selected_part == "Ring, Wear":
@@ -2891,57 +2193,11 @@ if selected_part == "Ring, Wear":
 
     # COLONNA 3: DataLoad
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_ring = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="ring_dl_mode")
-        item_code_ring = st.text_input("Codice item", key="ring_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_ring"):
-            if not item_code_ring:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val_r(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields_ring = [
-                    "\\%FN", item_code_ring,
-                    "\\%TC", get_val_r("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_r("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_r("Identificativo"), "TAB",
-                    get_val_r("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_r('ERP_L1')}.{get_val_r('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_r("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_r("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_r("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_r("FPD material code"), "TAB",
-                    get_val_r("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_r("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_r("Quality") if get_val_r("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_r("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_r("To supplier") if get_val_r("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_ring = "\t".join(dataload_fields_ring)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_ring, height=200)
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-                csv_buffer_ring = io.StringIO()
-                writer_ring = csv.writer(csv_buffer_ring, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_ring:
-                    writer_ring.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_ring.getvalue(),
-                    file_name=f"dataload_{item_code_ring}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 # --- PIN, DOWEL
 if selected_part == "Pin, Dowel":
     col1, col2, col3 = st.columns(3)
@@ -3033,60 +2289,11 @@ if selected_part == "Pin, Dowel":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_pin = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="pin_dl_mode")
-        item_code_pin = st.text_input("Codice item", key="pin_item_code")
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-        if st.button("Genera stringa DataLoad", key="gen_dl_pin"):
-            if not item_code_pin:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-
-                def get_val_pin(k):
-                    v = data.get(k, "").strip()
-                    return v if v else "."
-
-                dataload_fields_pin = [
-                    "\\%FN", item_code_pin,
-                    "\\%TC", get_val_pin("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_pin("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_pin("Identificativo"), "TAB",
-                    get_val_pin("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_pin('ERP_L1')}.{get_val_pin('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_pin("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_pin("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_pin("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_pin("FPD material code"), "TAB",
-                    get_val_pin("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_pin("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_pin("Quality") if get_val_pin("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_pin("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_pin("To supplier") if get_val_pin("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_pin = "\t".join(dataload_fields_pin)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_pin, height=200)
-
-                csv_buffer_pin = io.StringIO()
-                writer_pin = csv.writer(csv_buffer_pin, quoting=csv.QUOTE_MINIMAL)
-                for r in dataload_fields_pin:
-                    writer_pin.writerow([r])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_pin.getvalue(),
-                    file_name=f"dataload_{item_code_pin}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # --- SHAFT, PUMP
 if selected_part == "Shaft, Pump":
@@ -3213,57 +2420,10 @@ if selected_part == "Shaft, Pump":
 
     # COLONNA 3: DataLoad
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_shaft = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="shaft_dl_mode")
-        item_code_shaft = st.text_input("Codice item", key="shaft_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_shaft"):
-            if not item_code_shaft:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-                def get_val(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-                dataload_fields_shaft = [
-                    "\\%FN", item_code_shaft,
-                    "\\%TC", get_val("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val("Identificativo"), "TAB",
-                    get_val("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val("Catalog"), "TAB", "TAB", "TAB",
-                    get_val("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val("FPD material code"), "TAB",
-                    get_val("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val("Quality") if get_val("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val("To supplier") if get_val("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_shaft = "\t".join(dataload_fields_shaft)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_shaft, height=200)
-
-                csv_buffer_shaft = io.StringIO()
-                writer = csv.writer(csv_buffer_shaft, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_shaft:
-                    writer.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_shaft.getvalue(),
-                    file_name=f"dataload_{item_code_shaft}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
 elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
@@ -3367,25 +2527,11 @@ elif selected_part == "Baseplate, Pump":
             st.text_area("Quality", value="\n".join(data["Quality"]), height=100, key="base_out14")
 
     with col3:
-        st.subheader("🧾 DataLoad")
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-        operation = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="base_op")
-        item_code_input = st.text_input("Codice item", key="base_item_code")
-
-        if "output_data" in st.session_state and item_code_input:
-            dataload_string = generate_dataload_string(
-                operation,
-                item_code_input,
-                st.session_state["output_data"]["Description"],
-                st.session_state["output_data"]["Catalog"],
-                st.session_state["output_data"]["Template"],
-                st.session_state["output_data"]["ERP L1"],
-                st.session_state["output_data"]["ERP L2"],
-                st.session_state["output_data"]["Disegno"],
-                st.session_state["output_data"]["Material"],
-                st.session_state["output_data"]["FPD material code"]
-            )
-            st.text_area("📋 Copia stringa per DataLoad", dataload_string, height=200)
 
 
 # --- FLANGE, PIPE
@@ -3450,59 +2596,10 @@ if selected_part == "Flange, Pipe":
 
     # COLONNA 3 – DATALOAD
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_fl = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="fl_dl_mode")
-        item_code_fl = st.text_input("Codice item", key="fl_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_fl"):
-            if not item_code_fl:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-
-                def get_val_fl(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-
-                dataload_fields_fl = [
-                    "\\%FN", item_code_fl,
-                    "\\%TC", get_val_fl("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_fl("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_fl("Identificativo"), "TAB",
-                    get_val_fl("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_fl('ERP_L1')}.{get_val_fl('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_fl("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_fl("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_fl("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_fl("FPD material code"), "TAB",
-                    get_val_fl("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_fl("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_fl("Quality") if get_val_fl("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_fl("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_fl("To supplier") if get_val_fl("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_fl = "\t".join(dataload_fields_fl)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_fl, height=200)
-
-                csv_buffer_fl = io.StringIO()
-                writer_fl = csv.writer(csv_buffer_fl, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_fl:
-                    writer_fl.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_fl.getvalue(),
-                    file_name=f"dataload_{item_code_fl}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
 # --- GASKET, FLAT
 if selected_part == "Gasket, Flat":
@@ -3561,59 +2658,11 @@ if selected_part == "Gasket, Flat":
 
     # COLONNA 3 – DATALOAD
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_gf = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="gf_dl_mode")
-        item_code_gf = st.text_input("Codice item", key="gf_item_code")
-        if st.button("Genera stringa DataLoad", key="gen_dl_gf"):
-            if not item_code_gf:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-                def get_val_gf(key):
-                    val = data.get(key, "").strip()
-                    return val if val else "."
-
-                dataload_fields_gf = [
-                    "\\%FN", item_code_gf,
-                    "\\%TC", get_val_gf("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_gf("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_gf("Identificativo"), "TAB",
-                    get_val_gf("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_gf('ERP_L1')}.{get_val_gf('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_gf("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_gf("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_gf("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_gf("FPD material code"), "TAB",
-                    get_val_gf("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_gf("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_gf("Quality") if get_val_gf("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_gf("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_gf("To supplier") if get_val_gf("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_gf = "\t".join(dataload_fields_gf)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_gf, height=200)
-
-                csv_buffer_gf = io.StringIO()
-                writer_gf = csv.writer(csv_buffer_gf, quoting=csv.QUOTE_MINIMAL)
-                for riga in dataload_fields_gf:
-                    writer_gf.writerow([riga])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_gf.getvalue(),
-                    file_name=f"dataload_{item_code_gf}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 # --- SCREW, CAP
 if selected_part == "Screw, Cap":
@@ -3705,60 +2754,12 @@ if selected_part == "Screw, Cap":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_cap = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="cap_dl_mode")
-        item_code_cap = st.text_input("Codice item", key="cap_item_code")
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-        if st.button("Genera stringa DataLoad", key="gen_dl_cap"):
-            if not item_code_cap:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
 
-                def get_val_cap(k):
-                    v = data.get(k, "").strip()
-                    return v if v else "."
-
-                dataload_fields_cap = [
-                    "\\%FN", item_code_cap,
-                    "\\%TC", get_val_cap("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_cap("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_cap("Identificativo"), "TAB",
-                    get_val_cap("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_cap('ERP_L1')}.{get_val_cap('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_cap("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_cap("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_cap("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_cap("FPD material code"), "TAB",
-                    get_val_cap("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_cap("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_cap("Quality") if get_val_cap("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_cap("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_cap("To supplier") if get_val_cap("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_cap = "\t".join(dataload_fields_cap)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_cap, height=200)
-
-                csv_buffer_cap = io.StringIO()
-                writer_cap = csv.writer(csv_buffer_cap, quoting=csv.QUOTE_MINIMAL)
-                for r in dataload_fields_cap:
-                    writer_cap.writerow([r])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_cap.getvalue(),
-                    file_name=f"dataload_{item_code_cap}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 # --- SCREW, GRUB
 if selected_part == "Screw, Grub":
     col1, col2, col3 = st.columns(3)
@@ -3844,60 +2845,11 @@ if selected_part == "Screw, Grub":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-        st.subheader("🧾 DataLoad")
-        dataload_mode_grub = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"], key="grub_dl_mode")
-        item_code_grub = st.text_input("Codice item", key="grub_item_code")
+    render_dataload(
+        item_code_key="beye_item_code",
+        dl_button_key="gen_dl_beye"
+    )
 
-        if st.button("Genera stringa DataLoad", key="gen_dl_grub"):
-            if not item_code_grub:
-                st.error("❌ Inserisci prima il codice item per generare la stringa DataLoad.")
-            elif "output_data" not in st.session_state:
-                st.error("❌ Genera prima l'output dalla colonna 1.")
-            else:
-                data = st.session_state["output_data"]
-
-                def get_val_grub(k):
-                    v = data.get(k, "").strip()
-                    return v if v else "."
-
-                dataload_fields_grub = [
-                    "\\%FN", item_code_grub,
-                    "\\%TC", get_val_grub("Template"), "TAB",
-                    "\\%D", "\\%O", "TAB",
-                    get_val_grub("Description"), "TAB", "TAB", "TAB", "TAB", "TAB", "TAB",
-                    get_val_grub("Identificativo"), "TAB",
-                    get_val_grub("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S",
-                    "\\%TA", "TAB",
-                    f"{get_val_grub('ERP_L1')}.{get_val_grub('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
-                    get_val_grub("Categories").split()[-1], "\\^S", "\\^{F4}",
-                    "\\%TG", get_val_grub("Catalog"), "TAB", "TAB", "TAB",
-                    get_val_grub("Disegno"), "TAB", "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", "TAB", "TAB",
-                    get_val_grub("FPD material code"), "TAB",
-                    get_val_grub("Material"), "\\^S", "\\^{F4}",
-                    "\\%VA", "TAB",
-                    get_val_grub("Quality"), "TAB", "TAB", "TAB", "TAB",
-                    get_val_grub("Quality") if get_val_grub("Quality") != "." else ".", "\\^S",
-                    "\\%FN", "TAB",
-                    get_val_grub("To supplier"), "TAB", "TAB", "TAB",
-                    "Short Text", "TAB",
-                    get_val_grub("To supplier") if get_val_grub("To supplier") != "." else ".", "\\^S", "\\^S", "\\^{F4}", "\\^S"
-                ]
-                dataload_string_grub = "\t".join(dataload_fields_grub)
-                st.text_area("Anteprima (per copia manuale)", dataload_string_grub, height=200)
-
-                csv_buffer_grub = io.StringIO()
-                writer_grub = csv.writer(csv_buffer_grub, quoting=csv.QUOTE_MINIMAL)
-                for r in dataload_fields_grub:
-                    writer_grub.writerow([r])
-                st.download_button(
-                    label="💾 Scarica file CSV per Import Data",
-                    data=csv_buffer_grub.getvalue(),
-                    file_name=f"dataload_{item_code_grub}.csv",
-                    mime="text/csv"
-                )
-                st.caption("📂 Usa questo file in **DataLoad Classic → File → Import Data...**")
 
 
 if selected_part in [
