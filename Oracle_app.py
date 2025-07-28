@@ -503,9 +503,9 @@ if selected_part == "Casing, Pump":
 
     # COLONNA 3: DataLoad
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
 
 
@@ -634,10 +634,11 @@ if selected_part == "Casing Cover, Pump":
                     st.text_input(k, value=v)
 
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 
 
@@ -756,10 +757,11 @@ if selected_part == "Impeller, Pump":
                     st.text_input(k, value=v)
 
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 
 
@@ -881,10 +883,11 @@ if selected_part == "Balance Bushing, Pump":
     # COLONNA 3: DataLoad
 
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 
 
@@ -1002,10 +1005,11 @@ if selected_part == "Balance Drum, Pump":
                     st.text_input(k, value=v)
 
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 
 # --- BALANCE DISC, PUMP
@@ -1122,10 +1126,11 @@ if selected_part == "Balance Disc, Pump":
     # COLONNA 3: DataLoad
 
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 
 # --- GATE, VALVE
@@ -1216,10 +1221,11 @@ if selected_part == "Gate, Valve":
     # COLONNA 3: DataLoad
 
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 
 # --- GASKET, SPIRAL WOUND
@@ -1328,10 +1334,10 @@ if selected_part == "Gasket, Spiral Wound":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
- )
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
+        )
 
 
 # --- BEARING, HYDROSTATIC/HYDRODYNAMIC
@@ -1432,10 +1438,11 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
     
 # --- BEARING, ROLLING
 if selected_part == "Bearing, Rolling":
@@ -1578,10 +1585,11 @@ if selected_part == "Bearing, Rolling":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 
 # --- BOLT, EYE
@@ -1661,9 +1669,9 @@ if selected_part == "Bolt, Eye":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
 
 # --- BOLT, HEXAGONAL
@@ -1757,10 +1765,11 @@ if selected_part == "Bolt, Hexagonal":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 # --- GASKET, RING TYPE JOINT
 if selected_part == "Gasket, Ring Type Joint":
@@ -1819,10 +1828,11 @@ if selected_part == "Gasket, Ring Type Joint":
 
     # COLONNA 3 – DATALOAD
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 
 # --- GUSSET, OTHER
@@ -1915,9 +1925,9 @@ elif selected_part == "Gusset, Other":
 
     # COLONNA 3: DataLoad
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
 
 
@@ -2006,10 +2016,11 @@ if selected_part == "Stud, Threaded":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 # --- NUT, HEX
 if selected_part == "Nut, Hex":
@@ -2093,11 +2104,11 @@ if selected_part == "Nut, Hex":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-        with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 # --- RING, WEAR
 if selected_part == "Ring, Wear":
@@ -2193,10 +2204,11 @@ if selected_part == "Ring, Wear":
 
     # COLONNA 3: DataLoad
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 # --- PIN, DOWEL
 if selected_part == "Pin, Dowel":
@@ -2289,10 +2301,11 @@ if selected_part == "Pin, Dowel":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 
 # --- SHAFT, PUMP
@@ -2420,10 +2433,11 @@ if selected_part == "Shaft, Pump":
 
     # COLONNA 3: DataLoad
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
@@ -2527,10 +2541,11 @@ elif selected_part == "Baseplate, Pump":
             st.text_area("Quality", value="\n".join(data["Quality"]), height=100, key="base_out14")
 
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 
 
@@ -2596,10 +2611,11 @@ if selected_part == "Flange, Pipe":
 
     # COLONNA 3 – DATALOAD
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 # --- GASKET, FLAT
 if selected_part == "Gasket, Flat":
@@ -2658,10 +2674,11 @@ if selected_part == "Gasket, Flat":
 
     # COLONNA 3 – DATALOAD
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 
 # --- SCREW, CAP
@@ -2754,10 +2771,11 @@ if selected_part == "Screw, Cap":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 
 # --- SCREW, GRUB
@@ -2845,10 +2863,11 @@ if selected_part == "Screw, Grub":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
-    render_dataload(
-        item_code_key="beye_item_code",
-        dl_button_key="gen_dl_beye"
+        render_dataload(
+            item_code_key="beye_item_code",
+            dl_button_key="gen_dl_beye"
         )
+
 
 
 
