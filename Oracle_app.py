@@ -100,6 +100,100 @@ def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "ou
             mime="text/csv"
         )
 
+def render_update(item_code_key: str, upd_button_key: str, state_key: str = "output_data"):
+    st.subheader("🛠 Aggiorna Item")
+    mode = st.radio(
+        "Tipo operazione:",
+        ["Crea nuovo item", "Aggiorna item"],
+        key=item_code_key + "_mode_upd"
+    )
+    if mode != "Aggiorna item":
+        return
+
+    item_code = st.text_input("Codice item da aggiornare", key=item_code_key + "_upd")
+    if st.button("Genera stringa Update", key=upd_button_key):
+        data = st.session_state.get(state_key, {})
+        if not item_code:
+            st.error("❌ Inserisci prima il codice item.")
+            return
+
+        # Prepara le righe di Quality + placeholder \{NUMPAD ENTER}
+        raw_q = data.get("Quality", "").strip()
+        if not raw_q:
+            quality_tokens = ["NA"]
+        else:
+            quality_tokens = []
+            for line in raw_q.splitlines():
+                quality_tokens.append(line)
+                quality_tokens.append("\\{NUMPAD ENTER}")
+            if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
+                quality_tokens.pop()
+
+        def get_val(k):
+            v = data.get(k, "").strip()
+            return v if v else "."
+
+        # Costruzione sequenza fissa fino a dove inizia Quality
+        fields = [
+            "\\%VF",
+            item_code,
+            "\\{NUMPAD ENTER}",
+            "TAB",
+            get_val("Description"),
+            *["TAB"]*6,
+            get_val("Identificativo"),
+            "TAB",
+            get_val("Classe ricambi"),
+            "TAB",
+            "\\%O", "\\^S", "\\%TA",
+            "\\%VF",
+            "FASCIA ITE",
+            "\\{NUMPAD ENTER}",
+            "TAB",
+            item_code[:1],
+            "\\^S",
+            "\\%VF",
+            "TIPO ARTICOLO",
+            "\\{NUMPAD ENTER}",
+            "TAB",
+            f"{get_val('ERP_L1')}.{get_val('ERP_L2')}",
+            "\\^S",
+            "\\^{F4}",
+            "\\%TG",
+            get_val("Catalog"),
+            *["TAB"]*3,
+            get_val("Disegno"),
+            "TAB",
+            "\\^S",
+            "\\^{F4}",
+            "\\^S",
+            "\\%VA",
+            "TAB",
+            "Quality",
+            *["TAB"]*4,
+        ]
+
+        # Inietto qui tutte le quality_tokens (1 riga + ENTER placeholder ciascuna)
+        fields += quality_tokens
+
+        # Infine i token fissi di chiusura
+        fields += ["\\^S", "\\^{F4}", "\\^S"]
+
+        # Anteprima orizzontale
+        upd_string = "\t".join(fields)
+        st.text_area("Anteprima Update (per copia)", upd_string, height=200)
+
+        # Export CSV (ogni token su riga)
+        buf = io.StringIO()
+        writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
+        for tok in fields:
+            writer.writerow([tok])
+        st.download_button(
+            "💾 Scarica CSV Update",
+            data=buf.getvalue(),
+            file_name=f"update_{item_code}.csv",
+            mime="text/csv"
+        )
 
 # Caricamento dati materiali da file Excel
 material_df = pd.read_excel("dati_config4.xlsx", sheet_name="Materials")
@@ -530,11 +624,17 @@ if selected_part == "Casing, Pump":
 
     # COLONNA 3: DataLoad
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
         )
 
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
+        )
 
 # --- CASING COVER, PUMP
 if selected_part == "Casing Cover, Pump":
@@ -661,10 +761,18 @@ if selected_part == "Casing Cover, Pump":
                     st.text_input(k, value=v)
 
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
         )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
+        )
+
 
 
 
@@ -784,9 +892,16 @@ if selected_part == "Impeller, Pump":
                     st.text_input(k, value=v)
 
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
 
@@ -910,9 +1025,16 @@ if selected_part == "Balance Bushing, Pump":
     # COLONNA 3: DataLoad
 
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
 
@@ -1032,9 +1154,16 @@ if selected_part == "Balance Drum, Pump":
                     st.text_input(k, value=v)
 
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
 
@@ -1151,13 +1280,18 @@ if selected_part == "Balance Disc, Pump":
                     st.text_input(k, value=v)
 
     # COLONNA 3: DataLoad
-
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
         )
 
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
+        )
 
 
 # --- GATE, VALVE
@@ -1248,9 +1382,16 @@ if selected_part == "Gate, Valve":
     # COLONNA 3: DataLoad
 
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
 
@@ -1361,9 +1502,16 @@ if selected_part == "Gasket, Spiral Wound":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
 
@@ -1465,9 +1613,16 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
     
@@ -1612,9 +1767,16 @@ if selected_part == "Bearing, Rolling":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
 
@@ -1696,10 +1858,18 @@ if selected_part == "Bolt, Eye":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
         )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
+        )
+
 
 # --- BOLT, HEXAGONAL
 if selected_part == "Bolt, Hexagonal":
@@ -1792,10 +1962,18 @@ if selected_part == "Bolt, Hexagonal":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
         )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
+        )
+
 
 
 # --- GASKET, RING TYPE JOINT
@@ -1855,9 +2033,16 @@ if selected_part == "Gasket, Ring Type Joint":
 
     # COLONNA 3 – DATALOAD
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
 
@@ -1952,9 +2137,16 @@ elif selected_part == "Gusset, Other":
 
     # COLONNA 3: DataLoad
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
 
@@ -2043,9 +2235,16 @@ if selected_part == "Stud, Threaded":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
 
@@ -2131,10 +2330,18 @@ if selected_part == "Nut, Hex":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
         )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
+        )
+
 
 
 # --- RING, WEAR
@@ -2231,10 +2438,18 @@ if selected_part == "Ring, Wear":
 
     # COLONNA 3: DataLoad
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
         )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
+        )
+
 
 
 # --- PIN, DOWEL
@@ -2328,9 +2543,16 @@ if selected_part == "Pin, Dowel":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
 
@@ -2460,10 +2682,18 @@ if selected_part == "Shaft, Pump":
 
     # COLONNA 3: DataLoad
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
         )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
+        )
+
 
 
 elif selected_part == "Baseplate, Pump":
@@ -2568,9 +2798,16 @@ elif selected_part == "Baseplate, Pump":
             st.text_area("Quality", value="\n".join(data["Quality"]), height=100, key="base_out14")
 
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
 
@@ -2638,9 +2875,16 @@ if selected_part == "Flange, Pipe":
 
     # COLONNA 3 – DATALOAD
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
 
@@ -2701,11 +2945,17 @@ if selected_part == "Gasket, Flat":
 
     # COLONNA 3 – DATALOAD
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
         )
 
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
+        )
 
 
 # --- SCREW, CAP
@@ -2798,10 +3048,18 @@ if selected_part == "Screw, Cap":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
         )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
+        )
+
 
 
 
@@ -2890,9 +3148,16 @@ if selected_part == "Screw, Grub":
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
+    # Generazione “Crea nuovo item”
         render_dataload(
             item_code_key="beye_item_code",
             dl_button_key="gen_dl_beye"
+        )
+
+    # Generazione “Aggiorna item”
+        render_update(
+            item_code_key="beye_item_code",
+            upd_button_key="gen_upd_beye"
         )
 
 
