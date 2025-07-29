@@ -2939,8 +2939,7 @@ if selected_part == "Screw, Grub":
             update_btn_key="gen_upd_beye"
         )
 
-
-# --- CASTING PARTS (unico blocco per TUTTE le voci di casting) ---
+# --- CASTING PARTS (unico blocco per tutte le voci di casting) ---
 if selected_part in [
     "Casing cover casting",
     "Casing casting",
@@ -2964,38 +2963,37 @@ if selected_part in [
     # ─── COLONNA 1: INPUT ───
     with col_input:
         st.markdown("### 📥 Input")
-        base_pattern     = st.text_input("Base pattern")
-        mod1             = st.text_input("Pattern modification 1")
-        mod2             = st.text_input("Pattern modification 2")
-        mod3             = st.text_input("Pattern modification 3")
-        mod4             = st.text_input("Pattern modification 4")
-        mod5             = st.text_input("Pattern modification 5")
-        note             = st.text_input("Note")
-        casting_drawing  = st.text_input("Casting drawing")
-        pattern_item     = st.text_input("Pattern item")
+        base_pattern     = st.text_input("Base pattern",                  key="cast_base_pattern")
+        mod1             = st.text_input("Pattern modification 1",        key="cast_mod1")
+        mod2             = st.text_input("Pattern modification 2",        key="cast_mod2")
+        mod3             = st.text_input("Pattern modification 3",        key="cast_mod3")
+        mod4             = st.text_input("Pattern modification 4",        key="cast_mod4")
+        mod5             = st.text_input("Pattern modification 5",        key="cast_mod5")
+        note             = st.text_input("Note",                          key="cast_note")
+        casting_drawing  = st.text_input("Casting drawing",              key="cast_input_drawing")
+        pattern_item     = st.text_input("Pattern item",                 key="cast_input_pattern")
 
         st.markdown("**Material selection**")
-        material_type = st.selectbox(
-            "Material Type", [""] + material_types
-        )
+        material_type = st.selectbox("Material Type", [""] + material_types, key="cast_mat_type")
         prefix_options = materials_df[
             materials_df["Material Type"] == material_type
         ]["Prefix"].dropna().unique().tolist()
-        prefix = st.selectbox("Prefix", [""] + prefix_options)
+        prefix = st.selectbox("Prefix", [""] + prefix_options, key="cast_prefix")
         name_options = materials_df[
             (materials_df["Material Type"] == material_type)
             & (materials_df["Prefix"] == prefix)
         ]["Name"].dropna().unique().tolist()
-        name = st.selectbox("Name", [""] + name_options)
-        material_note = st.text_input("Material Note")
+        name = st.selectbox("Name", [""] + name_options, key="cast_name")
+        material_note = st.text_input("Material Note", key="cast_mat_note")
 
         hf_service_casting = False
         if selected_part != "Bearing housing casting":
             hf_service_casting = st.checkbox(
-                "Is it an hydrofluoric acid alkylation service (lethal)?"
+                "Is it an hydrofluoric acid alkylation service (lethal)?",
+                key="cast_hf"
             )
 
-        generate_output = st.button("Genera Output")
+        generate_output = st.button("Genera Output", key="cast_gen")
 
     # ─── COLONNA 2: OUTPUT ───
     if generate_output:
@@ -3003,8 +3001,8 @@ if selected_part in [
             st.markdown("### 📤 Output")
 
             # --- LOOKUP MATERIALI ---
-            casting_code       = "XX"
-            fpd_material_code  = "NA"
+            casting_code      = "XX"
+            fpd_material_code = "NA"
             if material_type and prefix and name:
                 dfm = materials_df[
                     (materials_df["Material Type"] == material_type)
@@ -3018,9 +3016,7 @@ if selected_part in [
 
             # --- ITEM NUMBER & PATTERN ---
             item_number   = "7" + casting_code
-            pattern_parts = [
-                m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()
-            ]
+            pattern_parts = [m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()]
             pattern_full  = "/".join(pattern_parts)
 
             # --- DESCRIPTION ---
@@ -3055,26 +3051,28 @@ if selected_part in [
             quality_field = "\n".join(quality_lines)
 
             # ─── Output UI ───
-            st.text_input("Item",               value=item_number)
-            st.text_area ("Description",        value=description,      height=100)
-            st.text_input("Identificativo",     value=identificativo)
-            st.text_input("Classe ricambi",     value="")
-            st.text_input("Categories",         value="FASCIA ITE 7")
-            st.text_input("Catalog",            value="FUSIONI")
-            st.text_input("Casting drawing",    value=casting_drawing)
-            st.text_input("Pattern item",       value=pattern_item)
-            st.text_input("Material",           value=f"{prefix} {name}")
-            st.text_input("FPD Material Code",  value=fpd_material_code)
-            st.text_input("Template",           value="FPD_BUY_CASTING")
-            st.text_input("ERP L1",             value="10_CASTING")
-            st.text_input("ERP L2",             value="")
-            st.text_input("To Supplier",        value="")
-            st.text_area ("Quality",            value=quality_field,    height=100)
+            st.text_input("Item",               value=item_number,                 key="cast_out_item")
+            st.text_area ("Description",        value=description,      height=100, key="cast_out_desc")
+            st.text_input("Identificativo",     value=identificativo,               key="cast_out_id")
+            st.text_input("Classe ricambi",     value="",                           key="cast_out_class")
+            st.text_input("Categories",         value="FASCIA ITE 7",               key="cast_out_cat")
+            st.text_input("Catalog",            value="FUSIONI",                    key="cast_out_catalog")
+            st.text_input("Casting drawing",    value=casting_drawing,              key="cast_out_drawing")
+            st.text_input("Pattern item",       value=pattern_item,                 key="cast_out_pattern")
+            st.text_input("Material",           value=f"{prefix} {name}",           key="cast_out_mat")
+            st.text_input("FPD Material Code",  value=fpd_material_code,            key="cast_out_fpd")
+            st.text_input("Template",           value="FPD_BUY_CASTING",            key="cast_out_tmpl")
+            st.text_input("ERP L1",             value="10_CASTING",                 key="cast_out_erp1")
+            st.text_input("ERP L2",             value="",                           key="cast_out_erp2")
+            st.text_input("To Supplier",        value="",                           key="cast_out_to")
+            st.text_area ("Quality",            value=quality_field,    height=100, key="cast_out_quality")
 
     # ─── COLONNA 3: DATALOAD ───
     with col_dataload:
         st.markdown("### ⚙️ DataLoad")
         st.write("Coming soon…")
+
+
 
 
 # --- Footer (non fisso, subito dopo i contenuti)
