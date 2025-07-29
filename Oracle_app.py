@@ -2941,17 +2941,28 @@ if selected_part == "Screw, Grub":
 
 
 
-# --- CASTING PARTS
-# --- CASTING PARTS
+# --- CASTING PARTS (unico blocco) ---
 if selected_part in [
     "Casing cover casting",
     "Casing casting",
-    # … ecc. …
+    "Bearing housing casting",
+    "Impeller casting",
+    "Impeller nut casting",
+    "Shaft casting",
+    "Throttling bush casting",
+    "Pump bowl casting",
+    "Bearing bracket casting",
+    "Discharge elbow casting",
+    "Bearing cover casting",
+    "Diffuser casting",
+    "Inducer casting",
+    "Wear plate casting",
+    "Shaft wear sleeve casting"
 ]:
     identificativo = selected_part
     col_input, col_output, col_dataload = st.columns(3, gap="small")
 
-    # COLONNA 1: INPUT
+    # ─── COLONNA 1: INPUT ───
     with col_input:
         st.markdown("### 📥 Input")
         base_pattern     = st.text_input("Base pattern")
@@ -2962,45 +2973,107 @@ if selected_part in [
         mod5             = st.text_input("Pattern modification 5")
         note             = st.text_input("Note")
         casting_drawing  = st.text_input("Casting drawing")
-        pattern_item     = st.text_input("Pattern item")   # nuovo campo
+        pattern_item     = st.text_input("Pattern item")
 
-        # … material selection …
+        st.markdown("**Material selection**")
+        material_type = st.selectbox(
+            "Material Type", [""] + material_types
+        )
+        prefix_options = materials_df[
+            materials_df["Material Type"] == material_type
+        ]["Prefix"].dropna().unique().tolist()
+        prefix = st.selectbox("Prefix", [""] + prefix_options)
+        name_options = materials_df[
+            (materials_df["Material Type"] == material_type)
+            & (materials_df["Prefix"] == prefix)
+        ]["Name"].dropna().unique().tolist()
+        name = st.selectbox("Name", [""] + name_options)
+        material_note = st.text_input("Material Note")
+
+        hf_service_casting = False
+        if selected_part != "Bearing housing casting":
+            hf_service_casting = st.checkbox(
+                "Is it an hydrofluoric acid alkylation service (lethal)?"
+            )
+
         generate_output = st.button("Genera Output")
 
-    # COLONNA 2: OUTPUT (solo se ho premuto il bottone)
+    # ─── COLONNA 2: OUTPUT ───
     if generate_output:
         with col_output:
             st.markdown("### 📤 Output")
 
-            # --- Calcolo delle variabili di output ---
+            # --- LOOKUP MATERIALI ---
             casting_code       = "XX"
             fpd_material_code  = "NA"
-            # … lookup su materials_df …
-            item_number = "7" + casting_code
-            # … costruzione di description, quality_field …
+            if material_type and prefix and name:
+                dfm = materials_df[
+                    (materials_df["Material Type"] == material_type)
+                    & (materials_df["Prefix"] == prefix)
+                    & (materials_df["Name"] == name)
+                ]
+                if not dfm.empty:
+                    raw = str(dfm["Casting code"].values[0])
+                    casting_code = raw[-2:] if len(raw) >= 2 else raw
+                    fpd_material_code = dfm["FPD Code"].values[0]
 
-            # Infine: tutti gli st.text_input e st.text_area degli output
-            st.text_input("Item",                value=item_number)
-            st.text_area ("Description",         value=description, height=100)
-            st.text_input("Identificativo",      value=identificativo)
-            st.text_input("Classe ricambi",      value="")
-            st.text_input("Categories",          value="FASCIA ITE 7")
-            st.text_input("Catalog",             value="FUSIONI")
-            st.text_input("Casting drawing",     value=casting_drawing)
-            st.text_input("Pattern item",        value=pattern_item)  # qui mostro il pattern
-            st.text_input("Material",            value=f"{prefix} {name}")
-            st.text_input("FPD Material Code",   value=fpd_material_code)
-            st.text_input("Template",            value="FPD_BUY_CASTING")
-            st.text_input("ERP L1",              value="10_CASTING")
-            st.text_input("ERP L2",              value="")
-            st.text_input("To Supplier",         value="")
-            st.text_area ("Quality",             value=quality_field, height=100)
+            # --- ITEM NUMBER & PATTERN ---
+            item_number  = "7" + casting_code
+            pattern_parts = [
+                m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()
+            ]
+            pattern_full = "/".join(pattern_parts)
 
-    # COLONNA 3: DATALOAD (sempre visibile)
+            # --- DESCRIPTION ---
+            description_parts = [f"*{identificativo.upper()}", "[SQ58]"]
+            if base_pattern:
+                description_parts.append(f"BASE PATTERN: {base_pattern}")
+            if pattern_full:
+                description_parts.append(f"MODS: {pattern_full}")
+            if note:
+                description_parts.append(note)
+            description_parts.append(f"{prefix} {name}".strip())
+            if material_note:
+                description_parts.append(material_note)
+            description_parts.append("[DE2390.002]")
+            # eventuali trigger SQ95, HF, Impeller
+            # … (lascia qui le tue logiche come prima) …
+            description = ", ".join(description_parts)
+
+            # --- QUALITY FIELD ---
+            quality_lines = [
+                "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings",
+                "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche"
+            ]
+            if hf_service_casting:
+                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
+            if selected_part == "Impeller casting":
+                quality_lines.append(
+                    "DE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E."
+                )
+            quality_field = "\n".join(quality_lines)
+
+            # ─── Output UI ───
+            st.text_input("Item",               value=item_number)
+            st.text_area ("Description",        value=description, height=100)
+            st.text_input("Identificativo",     value=identificativo)
+            st.text_input("Classe ricambi",     value="")
+            st.text_input("Categories",         value="FASCIA ITE 7")
+            st.text_input("Catalog",            value="FUSIONI")
+            st.text_input("Casting drawing",    value=casting_drawing)
+            st.text_input("Pattern item",       value=pattern_item)
+            st.text_input("Material",           value=f"{prefix} {name}")
+            st.text_input("FPD Material Code",  value=fpd_material_code)
+            st.text_input("Template",           value="FPD_BUY_CASTING")
+            st.text_input("ERP L1",             value="10_CASTING")
+            st.text_input("ERP L2",             value="")
+            st.text_input("To Supplier",        value="")
+            st.text_area ("Quality",            value=quality_field, height=100)
+
+    # ─── COLONNA 3: DATALOAD ───
     with col_dataload:
         st.markdown("### ⚙️ DataLoad")
         st.write("Coming soon…")
-
 
 
 # --- Footer (non fisso, subito dopo i contenuti)
