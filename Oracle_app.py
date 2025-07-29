@@ -2940,8 +2940,7 @@ if selected_part == "Screw, Grub":
         )
 
 
-
-# --- CASTING PARTS (unico blocco) ---
+# --- CASTING PARTS (unico blocco per TUTTE le voci di casting) ---
 if selected_part in [
     "Casing cover casting",
     "Casing casting",
@@ -3018,11 +3017,11 @@ if selected_part in [
                     fpd_material_code = dfm["FPD Code"].values[0]
 
             # --- ITEM NUMBER & PATTERN ---
-            item_number  = "7" + casting_code
+            item_number   = "7" + casting_code
             pattern_parts = [
                 m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()
             ]
-            pattern_full = "/".join(pattern_parts)
+            pattern_full  = "/".join(pattern_parts)
 
             # --- DESCRIPTION ---
             description_parts = [f"*{identificativo.upper()}", "[SQ58]"]
@@ -3036,8 +3035,10 @@ if selected_part in [
             if material_note:
                 description_parts.append(material_note)
             description_parts.append("[DE2390.002]")
-            # eventuali trigger SQ95, HF, Impeller
-            # … (lascia qui le tue logiche come prima) …
+            if hf_service_casting:
+                description_parts.append("<SQ113>")
+            if selected_part == "Impeller casting":
+                description_parts.append("[DE2920.025]")
             description = ", ".join(description_parts)
 
             # --- QUALITY FIELD ---
@@ -3055,7 +3056,7 @@ if selected_part in [
 
             # ─── Output UI ───
             st.text_input("Item",               value=item_number)
-            st.text_area ("Description",        value=description, height=100)
+            st.text_area ("Description",        value=description,      height=100)
             st.text_input("Identificativo",     value=identificativo)
             st.text_input("Classe ricambi",     value="")
             st.text_input("Categories",         value="FASCIA ITE 7")
@@ -3068,7 +3069,7 @@ if selected_part in [
             st.text_input("ERP L1",             value="10_CASTING")
             st.text_input("ERP L2",             value="")
             st.text_input("To Supplier",        value="")
-            st.text_area ("Quality",            value=quality_field, height=100)
+            st.text_area ("Quality",            value=quality_field,    height=100)
 
     # ─── COLONNA 3: DATALOAD ───
     with col_dataload:
