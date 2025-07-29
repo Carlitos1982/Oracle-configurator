@@ -10,7 +10,7 @@ def render_dataload_panel(item_code_key: str,
                           create_btn_key: str,
                           update_btn_key: str,
                           state_key: str = "output_data"):
-    st.subheader("🗃 DataLoad")
+    st.subheader("🧾 DataLoad")
     mode = st.radio(
         "Tipo operazione:",
         ["Crea nuovo item", "Aggiorna item"],
