@@ -4,6 +4,8 @@ from PIL import Image
 import io
 import csv
 
+import io, csv, streamlit as st
+
 def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "output_data"):
     st.subheader("🧾 DataLoad")
     mode = st.radio(
@@ -21,13 +23,18 @@ def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "ou
             st.error("❌ Inserisci prima il codice item.")
             return
 
-        # Preparazione del campo Quality con blank line fra le righe
+        # ---- prepara i token di Quality, uno per riga + blank-line
         raw_q = data.get("Quality", "").strip()
         if not raw_q:
-            quality_val = "NA"
+            quality_tokens = ["NA"]
         else:
             lines = raw_q.splitlines()
-            quality_val = "\n\n".join(lines)
+            quality_tokens = []
+            for line in lines:
+                quality_tokens.append(line)
+                quality_tokens.append("")      # token vuoto -> ENTER
+            if quality_tokens and quality_tokens[-1] == "":
+                quality_tokens.pop()           # rimuove l’ultimo blank
 
         def get_val(k):
             v = data.get(k, "").strip()
@@ -67,15 +74,16 @@ def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "ou
             "TAB",
             "Quality",
             *["TAB"] * 4,
-            quality_val,
+            # qui inserisco i singoli token di qualità (riga + blank)
+            *quality_tokens,
             "\\^S", "\\^{F4}", "\\^S"
         ]
 
-        # Anteprima per copia
+        # Preview (orizzontale, tab-separated) con text_area
         dl_string = "\t".join(fields)
         st.text_area("Anteprima (per copia)", dl_string, height=200)
 
-        # CSV di export (un token per riga)
+        # Export CSV (verticale: un token per riga)
         buf = io.StringIO()
         writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
         for token in fields:
