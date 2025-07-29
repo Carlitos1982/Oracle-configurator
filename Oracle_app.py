@@ -8,7 +8,6 @@ def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "ou
     st.subheader("🧾 DataLoad")
     mode = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"],
                     key=item_code_key + "_mode")
-    # uscita se non 'Crea'
     if mode != "Crea nuovo item":
         return
 
@@ -27,39 +26,47 @@ def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "ou
             return v if v else "."
 
         fields = [
-            "\\%FN",            item_code,
-            "\\%TC",            get_val("Template"), "TAB",
-            "\\%D",             "\\%O",               "TAB",
-            get_val("Description"), *["TAB"]*6,
-            get_val("Identificativo"), "TAB",
-            get_val("Classe ricambi"), "TAB",
-            "\\%O",             "\\^S",
-            "\\%TA",            "TAB",
-            "FASCIA ITE",       "TAB",
-            item_code[:1],      "TAB",
-            "TIPO ART.",        "TAB",
+            "\\%FN", item_code,
+            "\\%TC", get_val("Template"),
+            "TAB",
+            "\\%D", "\\%O",
+            "TAB",
+            get_val("Description"),
+            *["TAB"] * 6,
+            get_val("Identificativo"),
+            "TAB",
+            get_val("Classe ricambi"),
+            "TAB",
+            "\\%O", "\\^S", "\\%TA",
+            "TAB",  # 23
             f"{get_val('ERP_L1')}.{get_val('ERP_L2')}",
-            "\\^S",             "\\^{F4}",
-            "\\%TG",            "CATALOG", *["TAB"]*4,
-            get_val("Disegno"), "TAB",
-            "\\^S",             "\\^{F4}",
-            "\\%TR",            "MATER+DESCR_FPD", *["TAB"]*2,
-            get_val("FPD material code"), "TAB",
-            get_val("Material"), "\\^S", "\\^S", "\\^{F4}",
-            "\\%VA",            "TAB",
-            quality_val,        *["TAB"]*4,
-            quality_val,        "\\^S",
-            "\\%FN",            "TAB",
-            ".",                *["TAB"]*3,
-            "Short Text",       "TAB",
-            ".",                "\\^S", "\\^S", "\\^{F4}", "\\^S"
+            "TAB", "FASCIA ITE", "TAB",
+            item_code[:1],
+            "TAB",
+            "\\^S", "\\^{F4}", "\\%TG",
+            get_val("Catalog"),
+            *["TAB"] * 4,
+            get_val("Disegno"),
+            "TAB",
+            "\\^S", "\\^{F4}",
+            "\\%TR",
+            "MATER+DESCR_FPD",
+            *["TAB"] * 2,
+            get_val("FPD material code"),
+            "TAB",
+            get_val("Material"),
+            "\\^S", "\\^S", "\\^{F4}", "\\%VA",
+            "TAB",
+            "Quality",
+            *["TAB"] * 4,
+            quality_val,
+            "\\^S", "\\^{F4}", "\\^S"
         ]
 
-        # preview
         dl_string = "\t".join(fields)
         st.text_area("Anteprima (per copia)", dl_string, height=200)
 
-        # CSV
+        # CSV di export (un token per riga)
         buf = io.StringIO()
         writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
         for token in fields:
@@ -70,7 +77,6 @@ def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "ou
             file_name=f"dataload_{item_code}.csv",
             mime="text/csv"
         )
-
 
 
 
