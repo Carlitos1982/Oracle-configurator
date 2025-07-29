@@ -7,13 +7,16 @@ import csv
 import io, csv, streamlit as st
 
 import io, csv, streamlit as st
+import io
+import csv
+import streamlit as st
 
 def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "output_data"):
     st.subheader("🧾 DataLoad")
     mode = st.radio(
         "Tipo operazione:",
         ["Crea nuovo item", "Aggiorna item"],
-        key=item_code_key + "_mode"
+        key=f"{item_code_key}_mode"
     )
     if mode != "Crea nuovo item":
         return
@@ -25,7 +28,7 @@ def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "ou
             st.error("❌ Inserisci prima il codice item.")
             return
 
-        # ---- prepara i token di Quality, uno per riga + token "ENTER"
+        # Prepara i token di Quality: ogni riga + il placeholder \{NUMPAD ENTER}
         raw_q = data.get("Quality", "").strip()
         if not raw_q:
             quality_tokens = ["NA"]
@@ -34,9 +37,9 @@ def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "ou
             quality_tokens = []
             for line in lines:
                 quality_tokens.append(line)
-                quality_tokens.append("ENTER")
-            # rimuove l'ultimo "ENTER" se è in coda
-            if quality_tokens and quality_tokens[-1] == "ENTER":
+                quality_tokens.append("\\{NUMPAD ENTER}")
+            # Rimuove l'ultimo placeholder se è in coda
+            if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
                 quality_tokens.pop()
 
         def get_val(k):
@@ -77,16 +80,15 @@ def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "ou
             "TAB",
             "Quality",
             *["TAB"] * 4,
-            # inserisce il token "ENTER" tra le linee di Quality
             *quality_tokens,
             "\\^S", "\\^{F4}", "\\^S"
         ]
 
-        # Anteprima (orizzontale)
+        # Anteprima per copia (orizzontale)
         dl_string = "\t".join(fields)
         st.text_area("Anteprima (per copia)", dl_string, height=200)
 
-        # CSV di export (un token per riga, con "ENTER" dove serve)
+        # Export CSV (ogni token su una riga)
         buf = io.StringIO()
         writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
         for token in fields:
