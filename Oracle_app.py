@@ -5,79 +5,33 @@ import io
 import csv
 
 def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "output_data"):
-    st.subheader("🧾 DataLoad")
-    mode = st.radio("Tipo operazione:", ["Crea nuovo item", "Aggiorna item"],
-                    key=item_code_key + "_mode")
-    if mode != "Crea nuovo item":
-        return
+    # … header e controlli come prima …
 
-    item_code = st.text_input("Codice item", key=item_code_key)
     if st.button("Genera stringa DataLoad", key=dl_button_key):
         data = st.session_state.get(state_key, {})
-        if not item_code:
-            st.error("❌ Inserisci prima il codice item.")
-            return
+        # …
+        # invece di:
+        # quality_val = data.get("Quality", "").strip() or "NA"
 
-        # fallback su Quality
-        quality_val = data.get("Quality", "").strip() or "NA"
+        # prendi il testo originale
+        raw_q = data.get("Quality", "").strip()
+        if not raw_q:
+            quality_val = "NA"
+        else:
+            # inserisci un blank line fra ogni riga
+            lines = raw_q.splitlines()
+            quality_val = "\n\n".join(lines)
 
-        def get_val(k):
-            v = data.get(k, "").strip()
-            return v if v else "."
-
+        # … poi il resto di get_val e costruzione di fields …
         fields = [
-            "\\%FN", item_code,
-            "\\%TC", get_val("Template"),
+            # … tutti i token precedenti …
             "TAB",
-            "\\%D", "\\%O",
-            "TAB",
-            get_val("Description"),
-            *["TAB"] * 6,
-            get_val("Identificativo"),
-            "TAB",
-            get_val("Classe ricambi"),
-            "TAB",
-            "\\%O", "\\^S", "\\%TA",
-            "TAB",  # 23
-            f"{get_val('ERP_L1')}.{get_val('ERP_L2')}",
-            "TAB", "FASCIA ITE", "TAB",
-            item_code[:1],
-            "TAB",
-            "\\^S", "\\^{F4}", "\\%TG",
-            get_val("Catalog"),
+            "Quality",             # campo letterale col nome
             *["TAB"] * 4,
-            get_val("Disegno"),
-            "TAB",
-            "\\^S", "\\^{F4}",
-            "\\%TR",
-            "MATER+DESCR_FPD",
-            *["TAB"] * 2,
-            get_val("FPD material code"),
-            "TAB",
-            get_val("Material"),
-            "\\^S", "\\^S", "\\^{F4}", "\\%VA",
-            "TAB",
-            "Quality",
-            *["TAB"] * 4,
-            quality_val,
+            quality_val,           # qui inserisci il blocco multilinea
             "\\^S", "\\^{F4}", "\\^S"
         ]
-
-        dl_string = "\t".join(fields)
-        st.text_area("Anteprima (per copia)", dl_string, height=200)
-
-        # CSV di export (un token per riga)
-        buf = io.StringIO()
-        writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
-        for token in fields:
-            writer.writerow([token])
-        st.download_button(
-            "💾 Scarica CSV per Import Data",
-            data=buf.getvalue(),
-            file_name=f"dataload_{item_code}.csv",
-            mime="text/csv"
-        )
-
+        # … preview e CSV come prima …
 
 
 # Caricamento dati materiali da file Excel
