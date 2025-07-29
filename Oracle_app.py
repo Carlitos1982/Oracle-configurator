@@ -6,6 +6,8 @@ import csv
 
 import io, csv, streamlit as st
 
+import io, csv, streamlit as st
+
 def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "output_data"):
     st.subheader("🧾 DataLoad")
     mode = st.radio(
@@ -23,7 +25,7 @@ def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "ou
             st.error("❌ Inserisci prima il codice item.")
             return
 
-        # ---- prepara i token di Quality, uno per riga + blank-line
+        # ---- prepara i token di Quality, uno per riga + token "ENTER"
         raw_q = data.get("Quality", "").strip()
         if not raw_q:
             quality_tokens = ["NA"]
@@ -32,9 +34,10 @@ def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "ou
             quality_tokens = []
             for line in lines:
                 quality_tokens.append(line)
-                quality_tokens.append("")      # token vuoto -> ENTER
-            if quality_tokens and quality_tokens[-1] == "":
-                quality_tokens.pop()           # rimuove l’ultimo blank
+                quality_tokens.append("ENTER")
+            # rimuove l'ultimo "ENTER" se è in coda
+            if quality_tokens and quality_tokens[-1] == "ENTER":
+                quality_tokens.pop()
 
         def get_val(k):
             v = data.get(k, "").strip()
@@ -74,16 +77,16 @@ def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "ou
             "TAB",
             "Quality",
             *["TAB"] * 4,
-            # qui inserisco i singoli token di qualità (riga + blank)
+            # inserisce il token "ENTER" tra le linee di Quality
             *quality_tokens,
             "\\^S", "\\^{F4}", "\\^S"
         ]
 
-        # Preview (orizzontale, tab-separated) con text_area
+        # Anteprima (orizzontale)
         dl_string = "\t".join(fields)
         st.text_area("Anteprima (per copia)", dl_string, height=200)
 
-        # Export CSV (verticale: un token per riga)
+        # CSV di export (un token per riga, con "ENTER" dove serve)
         buf = io.StringIO()
         writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
         for token in fields:
@@ -94,6 +97,7 @@ def render_dataload(item_code_key: str, dl_button_key: str, state_key: str = "ou
             file_name=f"dataload_{item_code}.csv",
             mime="text/csv"
         )
+
 
 # Caricamento dati materiali da file Excel
 material_df = pd.read_excel("dati_config4.xlsx", sheet_name="Materials")
