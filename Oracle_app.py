@@ -2939,7 +2939,6 @@ if selected_part == "Screw, Grub":
             update_btn_key="gen_upd_beye"
         )
 
-
 # --- CASTING PARTS (unico blocco per tutte le voci di casting) ---
 if selected_part in [
     "Casing cover casting",
@@ -2961,6 +2960,10 @@ if selected_part in [
     identificativo = selected_part
     col_input, col_output, col_dataload = st.columns(3, gap="small")
 
+    # Inizializza il flag di generazione
+    if "cast_generated" not in st.session_state:
+        st.session_state.cast_generated = False
+
     # ─── COLONNA 1: INPUT ───
     with col_input:
         st.markdown("### 📥 Input")
@@ -2975,10 +2978,7 @@ if selected_part in [
         pattern_item     = st.text_input("Pattern item",                key="cast_input_pattern")
 
         st.markdown("**Material selection**")
-        material_type = st.selectbox(
-            "Material Type", [""] + material_types,
-            key="cast_mat_type"
-        )
+        material_type = st.selectbox("Material Type", [""] + material_types, key="cast_mat_type")
         prefix_options = materials_df[
             materials_df["Material Type"] == material_type
         ]["Prefix"].dropna().unique().tolist()
@@ -2998,14 +2998,15 @@ if selected_part in [
             )
 
         # Bottone di generazione dell’output
-        generate_output = st.button("Genera Output", key="cast_gen")
+        if st.button("Genera Output", key="cast_gen"):
+            st.session_state.cast_generated = True
 
     # ─── COLONNA 2: OUTPUT ───
-    if generate_output:
+    if st.session_state.cast_generated:
         with col_output:
             st.markdown("### 📤 Output")
 
-            # --- LOOKUP MATERIALI ---
+            # Lookup dei codici dal dataframe
             casting_code      = "XX"
             fpd_material_code = "NA"
             if material_type and prefix and name:
@@ -3019,12 +3020,12 @@ if selected_part in [
                     casting_code = raw[-2:] if len(raw) >= 2 else raw
                     fpd_material_code = dfm["FPD Code"].values[0]
 
-            # --- ITEM NUMBER & PATTERN ---
+            # Calcolo item_number e pattern completo
             item_number   = "7" + casting_code
             pattern_parts = [m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()]
             pattern_full  = "/".join(pattern_parts)
 
-            # --- DESCRIPTION ---
+            # Costruzione della descrizione
             description_parts = [f"*{identificativo.upper()}", "[SQ58]"]
             if base_pattern:
                 description_parts.append(f"BASE PATTERN: {base_pattern}")
@@ -3042,7 +3043,7 @@ if selected_part in [
                 description_parts.append("[DE2920.025]")
             description = ", ".join(description_parts)
 
-            # --- QUALITY FIELD ---
+            # Costruzione del campo Quality
             quality_lines = [
                 "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings",
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche"
@@ -3057,117 +3058,114 @@ if selected_part in [
                 )
             quality_field = "\n".join(quality_lines)
 
-            # ─── Output UI ───
-            st.text_input("Item",               value=item_number,           key="cast_out_item")
-            st.text_area ("Description",        value=description, height=100, key="cast_out_desc")
-            st.text_input("Identificativo",     value=identificativo,         key="cast_out_id")
-            st.text_input("Classe ricambi",     value="",                     key="cast_out_class")
-            st.text_input("Categories",         value="FASCIA ITE 7",         key="cast_out_cat")
-            st.text_input("Catalog",            value="FUSIONI",              key="cast_out_catalog")
-            st.text_input("Casting drawing",    value=casting_drawing,        key="cast_out_drawing")
-            st.text_input("Pattern item",       value=pattern_full,           key="cast_out_pattern")
-            st.text_input("Material",           value=f"{prefix} {name}",     key="cast_out_mat")
-            st.text_input("FPD Material Code",  value=fpd_material_code,      key="cast_out_fpd")
-            st.text_input("Template",           value="FPD_BUY_CASTING",      key="cast_out_tmpl")
-            st.text_input("ERP L1",             value="10_CASTING",           key="cast_out_erp1")
-            st.text_input("ERP L2",             value="",                     key="cast_out_erp2")
-            st.text_input("To Supplier",        value="",                     key="cast_out_to")
-            st.text_area ("Quality",            value=quality_field, height=100, key="cast_out_quality")
+            # Visualizzazione dei widget di output
+            st.text_input("Item",              value=item_number,           key="cast_out_item")
+            st.text_area ("Description",       value=description, height=100, key="cast_out_desc")
+            st.text_input("Identificativo",    value=identificativo,         key="cast_out_id")
+            st.text_input("Classe ricambi",    value="",                     key="cast_out_class")
+            st.text_input("Categories",        value="FASCIA ITE 7",         key="cast_out_cat")
+            st.text_input("Catalog",           value="FUSIONI",              key="cast_out_catalog")
+            st.text_input("Casting drawing",   value=casting_drawing,        key="cast_out_drawing")
+            st.text_input("Pattern item",      value=pattern_full,           key="cast_out_pattern")
+            st.text_input("Material",          value=f"{prefix} {name}",     key="cast_out_mat")
+            st.text_input("FPD Material Code", value=fpd_material_code,      key="cast_out_fpd")
+            st.text_input("Template",          value="FPD_BUY_CASTING",      key="cast_out_tmpl")
+            st.text_input("ERP L1",            value="10_CASTING",           key="cast_out_erp1")
+            st.text_input("ERP L2",            value="",                     key="cast_out_erp2")
+            st.text_input("To Supplier",       value="",                     key="cast_out_to")
+            st.text_area ("Quality",           value=quality_field, height=100, key="cast_out_quality")
 
-        # ─── COLONNA 3: DATALOAD ───
-        with col_dataload:
-            st.markdown("### ⚙️ DataLoad")
-            mode = st.radio(
-                "Tipo operazione:",
-                ["Crea nuovo item", "Aggiorna item"],
-                key="cast_mode"
-            )
-            item_code_dl = st.text_input(
-                "Codice item", key="cast_dl_code"
-            )
+    # ─── COLONNA 3: DATALOAD ───
+    with col_dataload:
+        st.markdown("### ⚙️ DataLoad")
+        mode = st.radio(
+            "Tipo operazione:",
+            ["Crea nuovo item", "Aggiorna item"],
+            key="cast_mode"
+        )
+        item_code_dl = st.text_input("Codice item", key="cast_dl_code")
 
-            # CREAZIONE
-            if mode == "Crea nuovo item":
-                if st.button("Genera stringa DataLoad", key="cast_dl_create"):
-                    if not item_code_dl:
-                        st.error("❌ Inserisci prima il codice item.")
-                    else:
-                        # ricompongo i dati in dict per comodità
-                        data = {
-                            "Template": "FPD_BUY_CASTING",
-                            "Description": description,
-                            "Identificativo": identificativo,
-                            "Classe ricambi": "",
-                            "ERP_L1": "10_CASTING",
-                            "ERP_L2": "",
-                            "Catalog": "FUSIONI",
-                            "Pattern item": pattern_full,
-                            "Casting drawing": casting_drawing,
-                            "FPD material code": fpd_material_code,
-                            "Material": f"{prefix} {name}",
-                            "Quality": quality_field
-                        }
+        # CREAZIONE
+        if mode == "Crea nuovo item":
+            if st.button("Genera stringa DataLoad", key="cast_dl_create"):
+                if not item_code_dl:
+                    st.error("❌ Inserisci prima il codice item.")
+                else:
+                    # Raccoglie i dati in un dict
+                    data = {
+                        "Template": "FPD_BUY_CASTING",
+                        "Description": description,
+                        "Identificativo": identificativo,
+                        "Classe ricambi": "",
+                        "ERP_L1": "10_CASTING",
+                        "ERP_L2": "",
+                        "Catalog": "FUSIONI",
+                        "Pattern item": pattern_full,
+                        "Casting drawing": casting_drawing,
+                        "FPD material code": fpd_material_code,
+                        "Material": f"{prefix} {name}",
+                        "Quality": quality_field
+                    }
+                    # Prepara i token di Quality con placeholder
+                    lines = data["Quality"].splitlines()
+                    quality_tokens = []
+                    for ln in lines:
+                        quality_tokens.append(ln)
+                        quality_tokens.append("\\{NUMPAD ENTER}")
+                    if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
+                        quality_tokens.pop()
 
-                        # preparo quality_tokens
-                        lines = data["Quality"].splitlines()
-                        quality_tokens = []
-                        for ln in lines:
-                            quality_tokens.append(ln)
-                            quality_tokens.append("\\{NUMPAD ENTER}")
-                        if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
-                            quality_tokens.pop()
+                    # Costruzione dei 63 token
+                    fields = [
+                        "\\%FN", item_code_dl,
+                        "\\%TC", data["Template"],
+                        "TAB",
+                        "\\%D", "\\%O",
+                        "TAB",
+                        data["Description"],
+                        *["TAB"] * 6,
+                        data["Identificativo"],
+                        "TAB",
+                        data["Classe ricambi"],
+                        "TAB",
+                        "\\%O", "\\^S", "\\%TA",
+                        "TAB",
+                        f"{data['ERP_L1']}.{data['ERP_L2']}",
+                        "TAB", "FASCIA ITE", "TAB",
+                        item_code_dl[:1], "TAB",
+                        "\\^S", "\\^{F4}", "\\%TG",
+                        data["Catalog"],
+                        *["TAB"] * 3,
+                        data["Pattern item"], "TAB",
+                        data["Casting drawing"], "TAB",
+                        "\\^S", "\\^{F4}",
+                        "\\%TR", "MATER+DESCR_FPD", *["TAB"] * 2,
+                        data["FPD material code"], "TAB",
+                        data["Material"], "\\^S", "\\^S", "\\^{F4}", "\\%VA",
+                        "TAB", "Quality", *["TAB"] * 4,
+                        *quality_tokens,
+                        "\\^S", "\\^{F4}", "\\^S"
+                    ]
 
-                        # costruisco fields (1–63)
-                        fields = [
-                            "\\%FN", item_code_dl,
-                            "\\%TC", data["Template"],
-                            "TAB",
-                            "\\%D", "\\%O",
-                            "TAB",
-                            data["Description"],
-                            *["TAB"] * 6,
-                            data["Identificativo"],
-                            "TAB",
-                            data["Classe ricambi"],
-                            "TAB",
-                            "\\%O", "\\^S", "\\%TA",
-                            "TAB",
-                            f"{data['ERP_L1']}.{data['ERP_L2']}",
-                            "TAB", "FASCIA ITE", "TAB",
-                            item_code_dl[:1], "TAB",
-                            "\\^S", "\\^{F4}", "\\%TG",
-                            data["Catalog"],
-                            *["TAB"] * 3,
-                            data["Pattern item"], "TAB",
-                            data["Casting drawing"], "TAB",
-                            "\\^S", "\\^{F4}",
-                            "\\%TR", "MATER+DESCR_FPD", *["TAB"] * 2,
-                            data["FPD material code"], "TAB",
-                            data["Material"], "\\^S", "\\^S", "\\^{F4}", "\\%VA",
-                            "TAB", "Quality", *["TAB"] * 4,
-                            *quality_tokens,
-                            "\\^S", "\\^{F4}", "\\^S"
-                        ]
+                    # Anteprima orizzontale
+                    preview = "\t".join(fields)
+                    st.text_area("Anteprima (per copia)", preview, height=200)
 
-                        # preview e CSV
-                        preview = "\t".join(fields)
-                        st.text_area("Anteprima (per copia)", preview, height=200)
-                        buf = io.StringIO()
-                        writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
-                        for tok in fields:
-                            writer.writerow([tok])
-                        st.download_button(
-                            "💾 Scarica CSV per Import Data",
-                            data=buf.getvalue(),
-                            file_name=f"dataload_{item_code_dl}.csv",
-                            mime="text/csv"
-                        )
+                    # Scarica CSV (un token per riga)
+                    buf = io.StringIO()
+                    writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
+                    for tok in fields:
+                        writer.writerow([tok])
+                    st.download_button(
+                        "💾 Scarica CSV per Import Data",
+                        data=buf.getvalue(),
+                        file_name=f"dataload_{item_code_dl}.csv",
+                        mime="text/csv"
+                    )
 
-            # AGGIORNAMENTO (puoi implementare la tua logica qui)
-            else:
-                st.info("Funzionalità “Aggiorna item” non ancora implementata.")
-
-
+        # AGGIORNAMENTO (placeholder)
+        else:
+            st.info("Funzionalità “Aggiorna item” non ancora implementata.")
 
 
 # --- Footer (non fisso, subito dopo i contenuti)
