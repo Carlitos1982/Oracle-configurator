@@ -3025,8 +3025,12 @@ if selected_part in [
             pattern_parts = [m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()]
             pattern_full  = "/".join(pattern_parts)
 
-            # Costruzione della descrizione
-            description_parts = [f"*{identificativo.upper()}", "[SQ58]"]
+            # Costruzione della descrizione (con entrambi i tag di qualità)
+            description_parts = [
+                f"*{identificativo.upper()}",
+                "[SQ58]",
+                "[CORP-ENG-0115]"
+            ]
             if base_pattern:
                 description_parts.append(f"BASE PATTERN: {base_pattern}")
             if pattern_full:
@@ -3059,21 +3063,22 @@ if selected_part in [
             quality_field = "\n".join(quality_lines)
 
             # Visualizzazione dei widget di output
-            st.text_input("Item",              value=item_number,           key="cast_out_item")
-            st.text_area ("Description",       value=description, height=100, key="cast_out_desc")
-            st.text_input("Identificativo",    value=identificativo,         key="cast_out_id")
-            st.text_input("Classe ricambi",    value="",                     key="cast_out_class")
-            st.text_input("Categories",        value="FASCIA ITE 7",         key="cast_out_cat")
-            st.text_input("Catalog",           value="FUSIONI",              key="cast_out_catalog")
-            st.text_input("Casting drawing",   value=casting_drawing,        key="cast_out_drawing")
-            st.text_input("Pattern item",      value=pattern_full,           key="cast_out_pattern")
-            st.text_input("Material",          value=f"{prefix} {name}",     key="cast_out_mat")
-            st.text_input("FPD Material Code", value=fpd_material_code,      key="cast_out_fpd")
-            st.text_input("Template",          value="FPD_BUY_CASTING",      key="cast_out_tmpl")
-            st.text_input("ERP L1",            value="10_CASTING",           key="cast_out_erp1")
-            st.text_input("ERP L2",            value="",                     key="cast_out_erp2")
-            st.text_input("To Supplier",       value="",                     key="cast_out_to")
-            st.text_area ("Quality",           value=quality_field, height=100, key="cast_out_quality")
+            st.text_input("Item",               value=item_number,       key="cast_out_item")
+            st.text_area ("Description",        value=description, height=100, key="cast_out_desc")
+            st.text_input("Identificativo",     value=identificativo,     key="cast_out_id")
+            st.text_input("Classe ricambi",     value="",                 key="cast_out_class")
+            st.text_input("Categories",         value="FASCIA ITE 7",     key="cast_out_cat")
+            st.text_input("Catalog",            value="FUSIONI",          key="cast_out_catalog")
+            st.text_input("Casting drawing",    value=casting_drawing,    key="cast_out_drawing")
+            st.text_input("Pattern item",       value=pattern_full,       key="cast_out_pattern")
+            st.text_input("Material",           value=f"{prefix} {name}", key="cast_out_mat")
+            st.text_input("FPD Material Code",  value=fpd_material_code,  key="cast_out_fpd")
+            st.text_input("Template",           value="FPD_BUY_CASTING",  key="cast_out_tmpl")
+            st.text_input("ERP L1",             value="10_CASTING",       key="cast_out_erp1")
+            st.text_input("ERP L2",             value="",                 key="cast_out_erp2")
+            st.text_input("To Supplier",        value="",                 key="cast_out_to")
+            st.text_area ("Quality",            value=quality_field, height=100, key="cast_out_quality")
+
     # ─── COLONNA 3: DATALOAD ───
     with col_dataload:
         st.markdown("### ⚙️ DataLoad")
@@ -3090,7 +3095,6 @@ if selected_part in [
                 if not item_code_dl:
                     st.error("❌ Inserisci prima il codice item.")
                 else:
-                    # Raccogliamo tutti i dati
                     data = {
                         "Template":          "FPD_BUY_CASTING",
                         "Description":       description,
@@ -3106,7 +3110,6 @@ if selected_part in [
                         "Quality":           quality_field
                     }
 
-                    # Preparo i token di Quality con ENTER
                     lines = data["Quality"].splitlines()
                     quality_tokens = []
                     for ln in lines:
@@ -3115,7 +3118,6 @@ if selected_part in [
                     if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
                         quality_tokens.pop()
 
-                    # Costruzione esatta dei token (posizioni aggiornate)
                     fields = [
                         "\\%FN",           item_code_dl,
                         "\\%TC",           data["Template"],
@@ -3123,36 +3125,31 @@ if selected_part in [
                         "\\%D", "\\%O",
                         "TAB",
                         data["Description"],
-                        *["TAB"] * 6,                     # pos 10–15
-                        data["Identificativo"], "TAB",   # pos 16–17
-                        data["Classe ricambi"], "TAB",   # pos 18–19
-                        "\\%O", "\\^S", "\\%TA", "TAB",   # pos 20–23
-                        f"{data['ERP_L1']}.{data['ERP_L2']}", "TAB",  # pos 24–25
-                        "FASCIA ITE", "TAB",             # pos 26–27
-                        item_code_dl[:1], "TAB",         # pos 28–29
-                        "\\^S", "\\^{F4}",               # pos 30–31
-                        "\\%TG", data["Catalog"],        # pos 32–33
-                        *["TAB"] * 3,                    # pos 34–36
-                        data["Pattern item"], "TAB",     # pos 37–38
-                        data["Casting drawing"], "TAB",  # pos 39–40
-                        "\\^S", "\\^{F4}",               # pos 41–42
-                        "\\%TR", "MATER+DESCR_FPD",       # pos 43–44
-                        *["TAB"] * 2,                    # pos 45–46
-                        data["FPD material code"], "TAB",# pos 47–48
-                        data["Material"],                # pos 49
-                        "\\^S", "\\^S", "\\^{F4}", "\\%VA",  # pos 50–53
-                        "TAB",                           # pos 54
-                        "Quality",                       # pos 55
-                        *["TAB"] * 4,                    # pos 56–59
-                        *quality_tokens,                # pos 60…n
-                        "\\^S", "\\^{F4}", "\\^S"        # ultimi tre token
+                        *["TAB"]*6,
+                        data["Identificativo"], "TAB",
+                        data["Classe ricambi"], "TAB",
+                        "\\%O", "\\^S", "\\%TA", "TAB",
+                        f"{data['ERP_L1']}.{data['ERP_L2']}", "TAB",
+                        "FASCIA ITE", "TAB",
+                        item_code_dl[:1], "TAB",
+                        "\\^S", "\\^{F4}",
+                        "\\%TG", data["Catalog"],
+                        *["TAB"]*3,
+                        data["Pattern item"], "TAB",
+                        data["Casting drawing"], "TAB",
+                        "\\^S", "\\^{F4}",
+                        "\\%TR", "MATER+DESCR_FPD",
+                        *["TAB"]*2,
+                        data["FPD material code"], "TAB",
+                        data["Material"], "\\^S", "\\^S", "\\^{F4}", "\\%VA",
+                        "TAB", "Quality", *["TAB"]*4,
+                        *quality_tokens,
+                        "\\^S", "\\^{F4}", "\\^S"
                     ]
 
-                    # Anteprima orizzontale
                     preview = "\t".join(fields)
                     st.text_area("Anteprima (per copia)", preview, height=200)
 
-                    # Esportazione CSV (un token per riga)
                     buf    = io.StringIO()
                     writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
                     for tok in fields:
@@ -3164,7 +3161,7 @@ if selected_part in [
                         mime="text/csv"
                     )
 
-        # AGGIORNAMENTO ITEM (selezionato l'altro radio)
+        # AGGIORNAMENTO ITEM
         else:
             st.info("Funzionalità “Aggiorna item” non ancora implementata.")
 
