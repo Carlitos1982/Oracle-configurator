@@ -3067,10 +3067,108 @@ if selected_part in [
             st.text_input("To Supplier",        value="",                           key="cast_out_to")
             st.text_area ("Quality",            value=quality_field,    height=100, key="cast_out_quality")
 
+
     # ─── COLONNA 3: DATALOAD ───
     with col_dataload:
         st.markdown("### ⚙️ DataLoad")
-        st.write("Coming soon…")
+
+        # Bottone per creare la stringa
+        if st.button("Genera stringa DataLoad", key="cast_dl"):
+            # Recupera i dati di output già calcolati
+            data = {
+                "Template": "FPD_BUY_CASTING",
+                "Description": description,
+                "Identificativo": identificativo,
+                "Classe ricambi": "",
+                "ERP_L1": "10_CASTING",
+                "ERP_L2": "",
+                "Catalog": "FUSIONI",
+                "Pattern item": pattern_item,
+                "Casting drawing": casting_drawing,
+                "FPD material code": fpd_material_code,
+                "Material": f"{prefix} {name}",
+                "Quality": quality_field
+            }
+            item_code = item_number  # es. "7XX" o "7DZ1"
+
+            # Preparazione delle righe di Quality + placeholder
+            raw_q = data["Quality"].splitlines()
+            quality_tokens = []
+            if raw_q:
+                for line in raw_q:
+                    quality_tokens.append(line)
+                    quality_tokens.append("\\{NUMPAD ENTER}")
+                # rimuovi l'ultimo placeholder
+                if quality_tokens[-1] == "\\{NUMPAD ENTER}":
+                    quality_tokens.pop()
+            else:
+                quality_tokens = ["NA"]
+
+            # Costruzione lista di tutti i token, 1–63
+            fields = [
+                "\\%FN", item_code,
+                "\\%TC", data["Template"],
+                "TAB",
+                "\\%D", "\\%O",
+                "TAB",
+                data["Description"],
+                *["TAB"]*5,  # pos 9–15: cinque TAB
+                "TAB",      # sesto TAB (pos 15)
+                data["Identificativo"],  # pos 16
+                "TAB",     # 17
+                data["Classe ricambi"],  # 18
+                "TAB",     # 19
+                "\\%O",    # 20
+                "\\^S",    # 21
+                "\\%TA",   # 22
+                "\\%VF",   # 23
+                data["ERP_L1"] + "." + data["ERP_L2"],  # 24
+                "TAB",     # 25
+                "FASCIA ITE",  # 26
+                "TAB",     # 27
+                item_code[:1], # 28
+                "\\^S",    # 29
+                "\\^{F4}", # 30
+                "\\%TG",   # 31
+                data["Catalog"], # 32
+                *["TAB"]*3,    # 33–35
+                data["Pattern item"],   # 36
+                "TAB",         # 37
+                data["Casting drawing"], # 38
+                "TAB",         # 39
+                "\\^S",        # 40
+                "\\^{F4}",     # 41
+                "\\%TR",       # 42
+                "MATER+DESCR_FPD", # 43
+                *["TAB"]*2,    # 44–45
+                data["FPD material code"], # 46
+                "TAB",         # 47
+                data["Material"], # 48
+                "\\^S", "\\^S", "\\^{F4}", "\\%VA",  # 49–52
+                "TAB",         # 53
+                "Quality",     # 54
+                *["TAB"]*4,    # 55–58
+                *quality_tokens, # 59…n
+                "\\^S",        # last-2
+                "\\^{F4}",     # last-1
+                "\\^S"         # last
+            ]
+
+            # Anteprima orizzontale per copia
+            dl_string = "\t".join(fields)
+            st.text_area("Anteprima (per copia)", dl_string, height=200)
+
+            # Scarica CSV (un token per riga)
+            buf = io.StringIO()
+            writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
+            for tok in fields:
+                writer.writerow([tok])
+            st.download_button(
+                "💾 Scarica CSV per Import Data",
+                data=buf.getvalue(),
+                file_name=f"dataload_{item_code}.csv",
+                mime="text/csv"
+            )
 
 
 
