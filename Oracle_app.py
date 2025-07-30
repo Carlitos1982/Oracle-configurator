@@ -1288,7 +1288,6 @@ if selected_part == "Gate, Valve":
             update_btn_key="gen_upd_beye"
         )
 
-# --- GASKET, SPIRAL WOUND
 if selected_part == "Gasket, Spiral Wound":
     col1, col2, col3 = st.columns(3)
 
@@ -1341,56 +1340,54 @@ if selected_part == "Gasket, Spiral Wound":
             key="gsw_hf"
         )
 
-    # --------------------- COLONNA 2: OUTPUT ---------------------
-    with col2:
-        st.subheader("📤 Output")
         if st.button("Genera Output", key="gsw_gen"):
             color1, ral1      = winding_options[winding_gsw]
             color2, ral2      = filler_options[filler_gsw]
             pressure_label, rating_descr, stripe = rating_mapping[rating_gsw]
 
-            # Descrizione base
+            # costruisco la descrizione
             descr_gsw = (
                 f"*GASKET, SPIRAL WOUND - WINDING: {winding_gsw}, "
                 f"FILLER: {filler_gsw}, "
-                f"OD: {out_dia_gsw} MM, ID: {in_dia_gsw} MM, THK: {thickness_gsw} MM, "
-                f"RATING: {pressure_label} – {rating_descr}, "
-                f"COLOR CODE: {color1} {ral1} / {color2} {ral2} ({stripe})"
+                f"OD: {out_dia_gsw} MM, ID: {in_dia_gsw} MM, THK: {thickness_gsw} MM, "
+                f"RATING: {pressure_label} – {rating_descr}, "
+                f"COLOR CODE: {color1} {ral1} / {color2} {ral2} ({stripe})"
             )
-
-            # Nota (senza etichetta)
             if note_gsw:
                 descr_gsw += f", {note_gsw}"
 
-            # Tag di qualità in coda (selezionati)
+            # tag di qualità in coda
             qual_tags = ["[SQ174]"]
             quality_lines = [
-                "SQ 174 - Casing/Cover pump spiral wound gaskets: Specification for Mechanical properties, applicable materials and dimensions"
+                "SQ 174 - Casing/Cover pump spiral wound gaskets: Specification for Mechanical properties, applicable materials and dimensions"
             ]
             if hf_service_gsw:
                 qual_tags.append("<SQ113>")
-                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
+                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
 
             descr_gsw += " " + " ".join(qual_tags)
             quality_field = "\n".join(quality_lines)
 
             st.session_state["output_data"] = {
-                "Item":                "50415…",
-                "Description":         descr_gsw,
-                "Identificativo":      "4510-JOINT",
-                "Classe ricambi":      "1-2-3",
-                "Categories":          "FASCIA ITE 5",
-                "Catalog":             "ARTVARI",
-                "Disegno":             dwg_gsw,
-                "Material":            "BUY OUT NOT AVAILABLE",
-                "FPD material code":   "BO-NA",
-                "Template":            "FPD_BUY_1",
-                "ERP_L1":              "55_GASKETS_OR_SEAL",
-                "ERP_L2":              "16_SPIRAL_WOUND",
-                "To supplier":         "",
-                "Quality":             quality_field
+                "Item":               "50415…",
+                "Description":        descr_gsw,
+                "Identificativo":     "4510-JOINT",
+                "Classe ricambi":     "1-2-3",
+                "Categories":         "FASCIA ITE 5",
+                "Catalog":            "ARTVARI",
+                "Disegno":            dwg_gsw,
+                "Material":           "BUY OUT NOT AVAILABLE",
+                "FPD material code":  "BO-NA",
+                "Template":           "FPD_BUY_1",
+                "ERP_L1":             "55_GASKETS_OR_SEAL",
+                "ERP_L2":             "16_SPIRAL_WOUND",
+                "To supplier":        "",
+                "Quality":            quality_field
             }
 
+    # --------------------- COLONNA 2: OUTPUT ---------------------
+    with col2:
+        st.subheader("📤 Output")
         if "output_data" in st.session_state:
             out = st.session_state["output_data"]
             for campo, valore in out.items():
@@ -1406,6 +1403,7 @@ if selected_part == "Gasket, Spiral Wound":
             create_btn_key="gen_dl_beye",
             update_btn_key="gen_upd_beye"
         )
+
 
 
 # --- BEARING, HYDROSTATIC/HYDRODYNAMIC
