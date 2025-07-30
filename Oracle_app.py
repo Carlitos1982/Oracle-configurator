@@ -1295,7 +1295,6 @@ if selected_part == "Gasket, Spiral Wound":
     # --------------------- COLONNA 1: INPUT ---------------------
     with col1:
         st.subheader("✏️ Input")
-
         winding_options = {
             "304 stainless steel": ("Yellow", "RAL1021"),
             "316L stainless steel": ("Green", "RAL6005"),
@@ -1317,88 +1316,97 @@ if selected_part == "Gasket, Spiral Wound":
             "ZYRCONIUM 702": ("Gold+Green", "RAL1004+6005"),
             "INCONEL X750HT": ("Gold+Black", "RAL1004+9005")
         }
-
         filler_options = {
             "Graphite": ("Gray", "RAL7011"),
             "PTFE": ("White", "RAL9010"),
             "Ceramic": ("Light Green", "RAL6021"),
             "Verdicarb (Mica Graphite)": ("Pink", "RAL3015")
         }
-
         rating_mapping = {
-            "STANDARD PRESSURE - m=3; y=10000psi (1 stripe)": ("STANDARD PRESSURE", "m=3; y=10000psi", "1 stripe"),
-            "HIGH PRESSURE - m=3; y=17500psi (2 stripes)":    ("HIGH PRESSURE",   "m=3; y=17500psi",   "2 stripes"),
-            "ULTRA HIGH PRESSURE - m=3; y=23500psi (3 stripes)":("ULTRA HIGH PRESSURE", "m=3; y=23500psi", "3 stripes")
+            "STANDARD PRESSURE - m=3; y=10000psi (1 stripe)":    ("STANDARD PRESSURE", "m=3; y=10000psi", "1 stripe"),
+            "HIGH PRESSURE - m=3; y=17500psi (2 stripes)":       ("HIGH PRESSURE",   "m=3; y=17500psi",   "2 stripes"),
+            "ULTRA HIGH PRESSURE - m=3; y=23500psi (3 stripes)": ("ULTRA HIGH PRESSURE", "m=3; y=23500psi", "3 stripes")
         }
 
-        winding_gsw    = st.selectbox("Winding Material", list(winding_options.keys()), key="gsw_winding")
-        filler_gsw     = st.selectbox("Filler",            list(filler_options.keys()),  key="gsw_filler")
-        out_dia_gsw    = st.text_input("Outer Diameter (MM)",     key="gsw_out_dia")
-        in_dia_gsw     = st.text_input("Inner Diameter (MM)",     key="gsw_in_dia")
-        thickness_gsw  = st.text_input("Thickness (MM)",          key="gsw_thick")
-        rating_gsw     = st.selectbox("Rating",            list(rating_mapping.keys()), key="gsw_rating")
-        dwg_gsw        = st.text_input("Dwg/doc number",          key="gsw_dwg")
-        note_gsw       = st.text_area("Note", height=80,            key="gsw_note")
-        hf_service_gsw = st.checkbox("Is it a hydrofluoric acid (HF) alkylation service?", key="gsw_hf")
+        winding_gsw    = st.selectbox("Winding Material", list(winding_options), key="gsw_winding")
+        filler_gsw     = st.selectbox("Filler",            list(filler_options),  key="gsw_filler")
+        out_dia_gsw    = st.text_input("Outer Diameter (MM)", key="gsw_out_dia")
+        in_dia_gsw     = st.text_input("Inner Diameter (MM)", key="gsw_in_dia")
+        thickness_gsw  = st.text_input("Thickness (MM)",      key="gsw_thick")
+        rating_gsw     = st.selectbox("Rating", list(rating_mapping), key="gsw_rating")
+        dwg_gsw        = st.text_input("Dwg/doc number",       key="gsw_dwg")
+        note_gsw       = st.text_area("Note", height=80,       key="gsw_note")
+        hf_service_gsw = st.checkbox(
+            "Is it a hydrofluoric acid (HF) alkylation service?",
+            key="gsw_hf"
+        )
 
+    # --------------------- COLONNA 2: OUTPUT ---------------------
+    with col2:
+        st.subheader("📤 Output")
         if st.button("Genera Output", key="gsw_gen"):
             color1, ral1      = winding_options[winding_gsw]
             color2, ral2      = filler_options[filler_gsw]
             pressure_label, rating_descr, stripe = rating_mapping[rating_gsw]
 
-            # descrizione base + tag SQ174
+            # Descrizione base
             descr_gsw = (
-                f"*GASKET, SPIRAL WOUND - WINDING: {winding_gsw}, FILLER: {filler_gsw}, "
-                f"OD: {out_dia_gsw} (MM), ID: {in_dia_gsw} (MM), THK: {thickness_gsw} (MM), "
-                f"RATING: {pressure_label} - {rating_descr}, "
-                f"COLOR CODE: {color1} {ral1} / {color2} {ral2} ({stripe}) [SQ174]"
+                f"*GASKET, SPIRAL WOUND - WINDING: {winding_gsw}, "
+                f"FILLER: {filler_gsw}, "
+                f"OD: {out_dia_gsw} MM, ID: {in_dia_gsw} MM, THK: {thickness_gsw} MM, "
+                f"RATING: {pressure_label} – {rating_descr}, "
+                f"COLOR CODE: {color1} {ral1} / {color2} {ral2} ({stripe})"
             )
 
-            # se HF, aggiungo tag e linea in quality
-            quality = "SQ 174 - Casing/Cover pump spiral wound gaskets: Specification for Mechanical properties, applicable materials and dimensions"
-            if hf_service_gsw:
-                descr_gsw += " <SQ113>"
-                quality   += "\nSQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)"
-
-            # eventuale nota
+            # Nota (senza etichetta)
             if note_gsw:
-                descr_gsw += f", NOTE: {note_gsw}"
+                descr_gsw += f", {note_gsw}"
+
+            # Tag di qualità in coda (selezionati)
+            qual_tags = ["[SQ174]"]
+            quality_lines = [
+                "SQ 174 - Casing/Cover pump spiral wound gaskets: Specification for Mechanical properties, applicable materials and dimensions"
+            ]
+            if hf_service_gsw:
+                qual_tags.append("<SQ113>")
+                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
+
+            descr_gsw += " " + " ".join(qual_tags)
+            quality_field = "\n".join(quality_lines)
 
             st.session_state["output_data"] = {
-                "Item": "50415…",
-                "Description": descr_gsw,
-                "Identificativo": "4510-JOINT",
-                "Classe ricambi": "1-2-3",
-                "Categories": "FASCIA ITE 5",
-                "Catalog": "ARTVARI",
-                "Disegno": dwg_gsw,
-                "Material": "BUY OUT NOT AVAILABLE",
-                "FPD material code": "BO-NA",
-                "Template": "FPD_BUY_1",
-                "ERP_L1": "55_GASKETS_OR_SEAL",
-                "ERP_L2": "16_SPIRAL_WOUND",
-                "To supplier": "",
-                "Quality": quality
+                "Item":                "50415…",
+                "Description":         descr_gsw,
+                "Identificativo":      "4510-JOINT",
+                "Classe ricambi":      "1-2-3",
+                "Categories":          "FASCIA ITE 5",
+                "Catalog":             "ARTVARI",
+                "Disegno":             dwg_gsw,
+                "Material":            "BUY OUT NOT AVAILABLE",
+                "FPD material code":   "BO-NA",
+                "Template":            "FPD_BUY_1",
+                "ERP_L1":              "55_GASKETS_OR_SEAL",
+                "ERP_L2":              "16_SPIRAL_WOUND",
+                "To supplier":         "",
+                "Quality":             quality_field
             }
 
-    # --------------------- COLONNA 2: OUTPUT ---------------------
-    with col2:
-        st.subheader("📤 Output")
         if "output_data" in st.session_state:
-            output_data = st.session_state["output_data"]
-            for campo, valore in output_data.items():
+            out = st.session_state["output_data"]
+            for campo, valore in out.items():
                 if campo in ["Description", "Quality"]:
-                    st.text_area(campo, value=valore, height=180, key=f"sw_{campo}")
+                    st.text_area(campo, value=valore, height=120, key=f"sw_{campo}")
                 else:
                     st.text_input(campo, value=valore, key=f"sw_{campo}")
 
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
+            item_code_key="beye_item_code",
             create_btn_key="gen_dl_beye",
             update_btn_key="gen_upd_beye"
         )
+
 
 # --- BEARING, HYDROSTATIC/HYDRODYNAMIC
 if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
