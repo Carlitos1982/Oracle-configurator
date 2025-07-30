@@ -2938,9 +2938,7 @@ if selected_part == "Screw, Grub":
             create_btn_key="gen_dl_beye",
             update_btn_key="gen_upd_beye"
         )
-import io, csv
 
-import io, csv
 
 # --- CASTING PARTS (unico blocco per tutte le voci di casting) ---
 if selected_part in [
@@ -3176,60 +3174,65 @@ if selected_part in [
                         file_name=f"dataload_{item_code_dl}.csv",
                         mime="text/csv"
                     )
-
         # AGGIORNAMENTO ITEM
         else:
             if st.button("Genera stringa Update", key="cast_dl_update"):
                 if not item_code_dl:
                     st.error("❌ Inserisci prima il codice item.")
                 else:
-                    # Dati per l'update
-                    update_quality_lines = quality_field.splitlines()[1:]  # esclude la prima riga se serve
+                    # Valori costanti per il casting
+                    erp1    = "10_CASTING"
+                    erp2    = ""
+                    catalog = "FUSIONI"
+
+                    # Preparo i token di Quality per l'update (escludo la prima riga se necessario)
+                    qlines = quality_field.splitlines()[1:]  # esempio: esclude DE2390.002
                     update_tokens = ["\\%ERF"]
-                    for ln in update_quality_lines:
+                    for ln in qlines:
                         update_tokens.append(ln)
                         update_tokens.append("\\{NUMPAD ENTER}")
                     if update_tokens and update_tokens[-1] == "\\{NUMPAD ENTER}":
                         update_tokens.pop()
 
+                    # Costruisco i token per l'Update
                     update_fields = [
                         "\\%VF", item_code_dl,
                         "\\{NUMPAD ENTER}",
                         "TAB",
-                        description,                     # Description
+                        description,                    # Description
                         *["TAB"]*6,
-                        identificativo, "TAB",
-                        "", "TAB",                       # Classe ricambi (vuoto o variabile)
+                        identificativo, "TAB",         # Identificativo
+                        "", "TAB",                     # Classe ricambi (qui lasci vuoto o metti variabile)
                         "\\%O", "\\^S", "\\%TA",
                         "\\%VF",
-                        "FASCIA ITE",
+                        "FASCIA ITE",                  # letterale
                         "\\{NUMPAD ENTER}",
                         "TAB",
-                        item_code_dl[:1],               # primo carattere
+                        item_code_dl[:1],              # primo carattere del codice
                         "\\^S",
                         "\\%VF",
-                        "TIPO ARTICOLO",
+                        "TIPO ARTICOLO",               # letterale
                         "\\{NUMPAD ENTER}",
                         "TAB",
-                        f"{output_data['ERP_L1']}.{output_data['ERP_L2']}",
+                        f"{erp1}.{erp2}",              # ERP_L1.ERP_L2 senza output_data
                         "\\^S", "\\^{F4}", "\\%TG",
-                        output_data["Catalog"],
+                        catalog,                       # Catalog
                         *["TAB"]*3,
-                        pattern_item, "TAB", "TAB",
+                        pattern_item, "TAB", "TAB",    # Pattern item + 2 TAB
                         casting_drawing,
                         "\\^S", "\\^{F4}", "\\^S",
                         "\\%VA",
                         "TAB", "Quality", *["TAB"]*4,
-                        *update_tokens,
+                        *update_tokens,                # i token di quality con NUMPAD ENTER
                         "\\^S", "\\^{F4}", "\\^S"
                     ]
 
-                    # Anteprima update (un token per riga)
+                    # Mostro l'anteprima (un token per riga)
                     preview_upd = "\n".join(update_fields)
                     st.text_area("Anteprima Update (per riga)", preview_upd, height=300)
 
-                    # Scarica CSV update
-                    buf_upd = io.StringIO()
+                    # Esporto il CSV
+                    buf_upd    = io.StringIO()
                     writer_upd = csv.writer(buf_upd, quoting=csv.QUOTE_MINIMAL)
                     for tok in update_fields:
                         writer_upd.writerow([tok])
