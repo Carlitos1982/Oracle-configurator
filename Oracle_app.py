@@ -3074,39 +3074,39 @@ if selected_part in [
             st.text_input("ERP L2",            value="",                     key="cast_out_erp2")
             st.text_input("To Supplier",       value="",                     key="cast_out_to")
             st.text_area ("Quality",           value=quality_field, height=100, key="cast_out_quality")
-
     # ─── COLONNA 3: DATALOAD ───
     with col_dataload:
         st.markdown("### ⚙️ DataLoad")
-        mode = st.radio(
+        mode         = st.radio(
             "Tipo operazione:",
             ["Crea nuovo item", "Aggiorna item"],
             key="cast_mode"
         )
         item_code_dl = st.text_input("Codice item", key="cast_dl_code")
 
-        # CREAZIONE
+        # CREAZIONE NUOVO ITEM
         if mode == "Crea nuovo item":
             if st.button("Genera stringa DataLoad", key="cast_dl_create"):
                 if not item_code_dl:
                     st.error("❌ Inserisci prima il codice item.")
                 else:
-                    # Raccoglie i dati in un dict
+                    # Raccogliamo tutti i dati
                     data = {
-                        "Template": "FPD_BUY_CASTING",
-                        "Description": description,
-                        "Identificativo": identificativo,
-                        "Classe ricambi": "",
-                        "ERP_L1": "10_CASTING",
-                        "ERP_L2": "",
-                        "Catalog": "FUSIONI",
-                        "Pattern item": pattern_full,
-                        "Casting drawing": casting_drawing,
+                        "Template":          "FPD_BUY_CASTING",
+                        "Description":       description,
+                        "Identificativo":    identificativo,
+                        "Classe ricambi":    "",
+                        "ERP_L1":            "10_CASTING",
+                        "ERP_L2":            "",
+                        "Catalog":           "FUSIONI",
+                        "Pattern item":      pattern_full,
+                        "Casting drawing":   casting_drawing,
                         "FPD material code": fpd_material_code,
-                        "Material": f"{prefix} {name}",
-                        "Quality": quality_field
+                        "Material":          f"{prefix} {name}",
+                        "Quality":           quality_field
                     }
-                    # Prepara i token di Quality con placeholder
+
+                    # Preparo i token di Quality con ENTER
                     lines = data["Quality"].splitlines()
                     quality_tokens = []
                     for ln in lines:
@@ -3115,44 +3115,45 @@ if selected_part in [
                     if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
                         quality_tokens.pop()
 
-                    # Costruzione dei 63 token
+                    # Costruzione esatta dei token (posizioni aggiornate)
                     fields = [
-                        "\\%FN", item_code_dl,
-                        "\\%TC", data["Template"],
+                        "\\%FN",           item_code_dl,
+                        "\\%TC",           data["Template"],
                         "TAB",
                         "\\%D", "\\%O",
                         "TAB",
                         data["Description"],
-                        *["TAB"] * 6,
-                        data["Identificativo"],
-                        "TAB",
-                        data["Classe ricambi"],
-                        "TAB",
-                        "\\%O", "\\^S", "\\%TA",
-                        "TAB",
-                        f"{data['ERP_L1']}.{data['ERP_L2']}",
-                        "TAB", "FASCIA ITE", "TAB",
-                        item_code_dl[:1], "TAB",
-                        "\\^S", "\\^{F4}", "\\%TG",
-                        data["Catalog"],
-                        *["TAB"] * 3,
-                        data["Pattern item"], "TAB",
-                        data["Casting drawing"], "TAB",
-                        "\\^S", "\\^{F4}",
-                        "\\%TR", "MATER+DESCR_FPD", *["TAB"] * 2,
-                        data["FPD material code"], "TAB",
-                        data["Material"], "\\^S", "\\^S", "\\^{F4}", "\\%VA",
-                        "TAB", "Quality", *["TAB"] * 4,
-                        *quality_tokens,
-                        "\\^S", "\\^{F4}", "\\^S"
+                        *["TAB"] * 6,                     # pos 10–15
+                        data["Identificativo"], "TAB",   # pos 16–17
+                        data["Classe ricambi"], "TAB",   # pos 18–19
+                        "\\%O", "\\^S", "\\%TA", "TAB",   # pos 20–23
+                        f"{data['ERP_L1']}.{data['ERP_L2']}", "TAB",  # pos 24–25
+                        "FASCIA ITE", "TAB",             # pos 26–27
+                        item_code_dl[:1], "TAB",         # pos 28–29
+                        "\\^S", "\\^{F4}",               # pos 30–31
+                        "\\%TG", data["Catalog"],        # pos 32–33
+                        *["TAB"] * 3,                    # pos 34–36
+                        data["Pattern item"], "TAB",     # pos 37–38
+                        data["Casting drawing"], "TAB",  # pos 39–40
+                        "\\^S", "\\^{F4}",               # pos 41–42
+                        "\\%TR", "MATER+DESCR_FPD",       # pos 43–44
+                        *["TAB"] * 2,                    # pos 45–46
+                        data["FPD material code"], "TAB",# pos 47–48
+                        data["Material"],                # pos 49
+                        "\\^S", "\\^S", "\\^{F4}", "\\%VA",  # pos 50–53
+                        "TAB",                           # pos 54
+                        "Quality",                       # pos 55
+                        *["TAB"] * 4,                    # pos 56–59
+                        *quality_tokens,                # pos 60…n
+                        "\\^S", "\\^{F4}", "\\^S"        # ultimi tre token
                     ]
 
                     # Anteprima orizzontale
                     preview = "\t".join(fields)
                     st.text_area("Anteprima (per copia)", preview, height=200)
 
-                    # Scarica CSV (un token per riga)
-                    buf = io.StringIO()
+                    # Esportazione CSV (un token per riga)
+                    buf    = io.StringIO()
                     writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
                     for tok in fields:
                         writer.writerow([tok])
@@ -3163,7 +3164,7 @@ if selected_part in [
                         mime="text/csv"
                     )
 
-        # AGGIORNAMENTO (placeholder)
+        # AGGIORNAMENTO ITEM (selezionato l'altro radio)
         else:
             st.info("Funzionalità “Aggiorna item” non ancora implementata.")
 
