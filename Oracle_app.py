@@ -2940,6 +2940,8 @@ if selected_part == "Screw, Grub":
         )
 import io, csv
 
+import io, csv
+
 # --- CASTING PARTS (unico blocco per tutte le voci di casting) ---
 if selected_part in [
     "Casing cover casting",
@@ -2968,25 +2970,25 @@ if selected_part in [
     # ─── COLONNA 1: INPUT ───
     with col_input:
         st.markdown("### 📥 Input")
-        base_pattern     = st.text_input("Base pattern",               key="cast_base_pattern")
-        mod1             = st.text_input("Pattern modification 1",     key="cast_mod1")
-        mod2             = st.text_input("Pattern modification 2",     key="cast_mod2")
-        mod3             = st.text_input("Pattern modification 3",     key="cast_mod3")
-        mod4             = st.text_input("Pattern modification 4",     key="cast_mod4")
-        mod5             = st.text_input("Pattern modification 5",     key="cast_mod5")
-        note             = st.text_input("Note",                        key="cast_note")
-        casting_drawing  = st.text_input("Casting drawing",            key="cast_input_drawing")
-        pattern_item     = st.text_input("Pattern item",               key="cast_input_pattern")
+        base_pattern     = st.text_input("Base pattern", key="cast_base_pattern")
+        mod1             = st.text_input("Pattern modification 1", key="cast_mod1")
+        mod2             = st.text_input("Pattern modification 2", key="cast_mod2")
+        mod3             = st.text_input("Pattern modification 3", key="cast_mod3")
+        mod4             = st.text_input("Pattern modification 4", key="cast_mod4")
+        mod5             = st.text_input("Pattern modification 5", key="cast_mod5")
+        note             = st.text_input("Note", key="cast_note")
+        casting_drawing  = st.text_input("Casting drawing", key="cast_input_drawing")
+        pattern_item     = st.text_input("Pattern item", key="cast_input_pattern")
 
         st.markdown("**Material selection**")
         material_type = st.selectbox("Material Type", [""] + material_types, key="cast_mat_type")
-        prefixes = materials_df[materials_df["Material Type"] == material_type]["Prefix"].dropna().unique().tolist()
-        prefix = st.selectbox("Prefix", [""] + prefixes, key="cast_prefix")
-        names = materials_df[
+        prefixes      = materials_df[materials_df["Material Type"] == material_type]["Prefix"].dropna().tolist()
+        prefix        = st.selectbox("Prefix", [""] + prefixes, key="cast_prefix")
+        names         = materials_df[
             (materials_df["Material Type"] == material_type) &
             (materials_df["Prefix"] == prefix)
-        ]["Name"].dropna().unique().tolist()
-        name = st.selectbox("Name", [""] + names, key="cast_name")
+        ]["Name"].dropna().tolist()
+        name          = st.selectbox("Name", [""] + names, key="cast_name")
         material_note = st.text_input("Material Note", key="cast_mat_note")
 
         hf_service_casting = False
@@ -3014,18 +3016,16 @@ if selected_part in [
                     & (materials_df["Name"] == name)
                 ]
                 if not dfm.empty:
-                    raw = str(dfm["Casting code"].values[0])
+                    raw               = str(dfm["Casting code"].values[0])
                     casting_code      = raw[-2:] if len(raw) >= 2 else raw
                     fpd_material_code = dfm["FPD Code"].values[0]
 
-            # Item number
-            item_number = "7" + casting_code
-
-            # Pattern full (per descrizione)
+            # Item number e pattern completo
+            item_number   = "7" + casting_code
             pattern_parts = [m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()]
             pattern_full  = "/".join(pattern_parts)
 
-            # Descrizione
+            # Descrizione (quality tags in fondo)
             description_parts = [f"*{identificativo.upper()}"]
             if base_pattern:
                 description_parts.append(f"BASE PATTERN: {base_pattern}")
@@ -3036,7 +3036,7 @@ if selected_part in [
             description_parts.append(f"{prefix} {name}".strip())
             if material_note:
                 description_parts.append(material_note)
-            # tag di qualità in fondo
+            # tag di qualità in coda
             description_parts.extend([
                 "[SQ58]",
                 "[CORP-ENG-0115]",
@@ -3048,10 +3048,11 @@ if selected_part in [
                 description_parts.append("[DE2920.025]")
             description = ", ".join(description_parts)
 
-            # Quality field
+            # Costruzione del campo Quality (inclusi SQ58 e CORP-ENG-0115)
             quality_lines = [
                 "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings",
-                "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche"
+                "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
+                "CORP-ENG-0115 - General Surface Quality Requirements G1-1"
             ]
             if hf_service_casting:
                 quality_lines.append(
@@ -3110,7 +3111,8 @@ if selected_part in [
                         "Material":          f"{prefix} {name}",
                         "Quality":           quality_field
                     }
-                    # Quality tokens con ENTER
+
+                    # Prepara quality_tokens
                     lines = data["Quality"].splitlines()
                     quality_tokens = []
                     for ln in lines:
@@ -3119,7 +3121,7 @@ if selected_part in [
                     if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
                         quality_tokens.pop()
 
-                    # Costruzione token
+                    # Costruzione token DataLoad
                     fields = [
                         "\\%FN",           item_code_dl,
                         "\\%TC",           data["Template"],
@@ -3127,33 +3129,31 @@ if selected_part in [
                         "\\%D", "\\%O",
                         "TAB",
                         data["Description"],
-                        *["TAB"]*6,                     # pos 9–15
-                        data["Identificativo"], "TAB", # 16–17
-                        data["Classe ricambi"], "TAB", # 18–19
-                        "\\%O", "\\^S", "\\%TA", "TAB",# 20–23
-                        f"{data['ERP_L1']}.{data['ERP_L2']}", "TAB",  # 24–25
-                        "FASCIA ITE", "TAB",           # 26–27
-                        item_code_dl[:1], "TAB",       # 28–29
-                        "\\^S", "\\^{F4}",             # 30–31
-                        "\\%TG", data["Catalog"],      # 32–33
-                        *["TAB"]*3,                    # 34–36
-                        data["Pattern item"], "TAB",   # 37–38
-                        data["Casting drawing"], "TAB",# 39–40
-                        "\\^S", "\\^{F4}",             # 41–42
-                        "\\%TR", "MATER+DESCR_FPD",     # 43–44
-                        *["TAB"]*2,                    # 45–46
-                        data["FPD material code"], "TAB",# 47–48
-                        data["Material"], "\\^S", "\\^S", "\\^{F4}", "\\%VA",#49–53
-                        "TAB", "Quality", *["TAB"]*4,  # 54–58
-                        *quality_tokens,               # 59…n
-                        "\\^S", "\\^{F4}", "\\^S"      # last 3
+                        *["TAB"]*6,
+                        data["Identificativo"], "TAB",
+                        data["Classe ricambi"], "TAB",
+                        "\\%O", "\\^S", "\\%TA", "TAB",
+                        f"{data['ERP_L1']}.{data['ERP_L2']}", "TAB",
+                        "FASCIA ITE", "TAB",
+                        item_code_dl[:1], "TAB",
+                        "\\^S", "\\^{F4}",
+                        "\\%TG", data["Catalog"],
+                        *["TAB"]*3,
+                        data["Pattern item"], "TAB",
+                        data["Casting drawing"], "TAB",
+                        "\\^S", "\\^{F4}",
+                        "\\%TR", "MATER+DESCR_FPD",
+                        *["TAB"]*2,
+                        data["FPD material code"], "TAB",
+                        data["Material"], "\\^S", "\\^S", "\\^{F4}", "\\%VA",
+                        "TAB", "Quality", *["TAB"]*4,
+                        *quality_tokens,
+                        "\\^S", "\\^{F4}", "\\^S"
                     ]
 
-                    # Anteprima orizzontale
+                    # Anteprima e CSV
                     preview = "\t".join(fields)
                     st.text_area("Anteprima (per copia)", preview, height=200)
-
-                    # Esportazione CSV
                     buf = io.StringIO()
                     writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
                     for tok in fields:
@@ -3164,7 +3164,6 @@ if selected_part in [
                         file_name=f"dataload_{item_code_dl}.csv",
                         mime="text/csv"
                     )
-
         else:
             st.info("Funzionalità “Aggiorna item” non ancora implementata.")
 
