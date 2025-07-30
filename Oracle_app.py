@@ -3092,8 +3092,7 @@ if selected_part in [
             st.text_input("To Supplier",        value="",                 key="cast_out_to")
             st.text_area ("Quality",            value=quality_field, height=100, key="cast_out_quality")
 
-    # ─── COLONNA 3: DATALOAD ───
-    # ─── COLONNA 3: DATALOAD ───
+     # ─── COLONNA 3: DATALOAD ───
     with col_dataload:
         st.markdown("### ⚙️ DataLoad")
         mode         = st.radio(
@@ -3103,83 +3102,86 @@ if selected_part in [
         )
         item_code_dl = st.text_input("Codice item", key="cast_dl_code")
 
+        # CREA NUOVO ITEM (unchanged)
         if mode == "Crea nuovo item":
-            if st.button("Genera stringa DataLoad", key="cast_dl_create"):
+            # … il tuo codice di render_dataload per il create …
+
+        # AGGIORNA ITEM
+        else:
+            if st.button("Genera stringa Update", key="cast_dl_update"):
                 if not item_code_dl:
                     st.error("❌ Inserisci prima il codice item.")
                 else:
-                    # Raccogliamo i dati
+                    # Ricavo i dati già calcolati nel blocco OUTPUT
                     data = {
-                        "Template":          "FPD_BUY_CASTING",
                         "Description":       description,
                         "Identificativo":    identificativo,
-                        "Classe ricambi":    "",
-                        "ERP_L1":            "10_CASTING",
-                        "ERP_L2":            "",
-                        "Catalog":           "FUSIONI",
-                        "Pattern item":      pattern_item,
+                        "Classe ricambi":    output_data.get("Classe ricambi", ""),
+                        "ERP_L1":            output_data.get("ERP_L1", ""),
+                        "ERP_L2":            output_data.get("ERP_L2", ""),
+                        "Catalog":           output_data.get("Catalog", ""),
+                        "Pattern full":      pattern_full,
                         "Casting drawing":   casting_drawing,
-                        "FPD material code": fpd_material_code,
-                        "Material":          f"{prefix} {name}",
-                        "Quality":           quality_field
                     }
+                    # Per l’update uso solo le righe di quality *dopo* la prima
+                    qlines = quality_field.splitlines()[1:]  # esclude DE2390.002
+                    update_quality = ["\\%ERF"]
+                    for ln in qlines:
+                        update_quality.append(ln)
+                        update_quality.append("\\{NUMPAD ENTER}")
+                    if update_quality[-1] == "\\{NUMPAD ENTER}":
+                        update_quality.pop()
 
-                    # Preparo i token di Quality con ENTER
-                    lines = data["Quality"].splitlines()
-                    quality_tokens = []
-                    for ln in lines:
-                        quality_tokens.append(ln)
-                        quality_tokens.append("\\{NUMPAD ENTER}")
-                    if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
-                        quality_tokens.pop()
-
-                    # Costruzione dei token con i TAB aggiuntivi
-                    fields = [
-                        "\\%FN",           item_code_dl,
-                        "\\%TC",           data["Template"],
-                        "TAB",
-                        "\\%D", "\\%O",
+                    # Costruisco la lista di token per l’update
+                    update_fields = [
+                        "\\%VF", item_code_dl,
+                        "\\{NUMPAD ENTER}",
                         "TAB",
                         data["Description"],
-                        *["TAB"]*6,
+                        *["TAB"] * 6,
                         data["Identificativo"], "TAB",
-                        data["Classe ricambi"], "TAB",
-                        "\\%O", "\\^S", "\\%TA", "TAB",
-                        f"{data['ERP_L1']}.{data['ERP_L2']}", "TAB",
-                        "FASCIA ITE", "TAB",
-                        item_code_dl[:1], "TAB",
-                        "\\^S", "\\^{F4}",
-                        "\\%TG", data["Catalog"],
-                        *["TAB"]*4,                    # ← 4 TAB dopo Catalog
-                        data["Pattern item"], "TAB", "TAB",  # ← 2 TAB dopo Pattern item
-                        data["Casting drawing"], "TAB",
-                        "\\^S", "\\^{F4}",
-                        "\\%TR", "MATER+DESCR_FPD",
-                        *["TAB"]*2,
-                        data["FPD material code"], "TAB",
-                        data["Material"], "\\^S", "\\^S", "\\^{F4}", "\\%VA",
-                        "TAB", "Quality", *["TAB"]*4,
-                        *quality_tokens,
+                        data["Classe ricambi"],     "TAB",
+                        "\\%O", "\\^S", "\\%TA",
+                        "\\%VF",
+                        "FASCIA ITE",                # letterale
+                        "\\{NUMPAD ENTER}",
+                        "TAB",
+                        item_code_dl[:1],            # primo carattere
+                        "\\^S",
+                        "\\%VF",
+                        "TIPO ARTICOLO",             # letterale
+                        "\\{NUMPAD ENTER}",
+                        "TAB",
+                        f"{data['ERP_L1']}.{data['ERP_L2']}",
+                        "\\^S", "\\^{F4}", "\\%TG",
+                        data["Catalog"],
+                        *["TAB"] * 3,
+                        data["Pattern full"], "TAB",
+                        data["Casting drawing"],
+                        "\\^S", "\\^{F4}", "\\^S",
+                        "\\%VA",
+                        "TAB",
+                        "Quality",
+                        *["TAB"] * 4,
+                        *update_quality,
                         "\\^S", "\\^{F4}", "\\^S"
                     ]
 
-                    # Anteprima orizzontale
-                    preview = "\t".join(fields)
-                    st.text_area("Anteprima (per copia)", preview, height=200)
+                    # Anteprima update (un token per riga)
+                    preview_update = "\n".join(update_fields)
+                    st.text_area("Anteprima Update (per riga)", preview_update, height=300)
 
-                    # Esportazione CSV
+                    # Scarica CSV update
                     buf = io.StringIO()
                     writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
-                    for tok in fields:
+                    for tok in update_fields:
                         writer.writerow([tok])
                     st.download_button(
-                        "💾 Scarica CSV per Import Data",
+                        "💾 Scarica CSV per Update Item",
                         data=buf.getvalue(),
-                        file_name=f"dataload_{item_code_dl}.csv",
+                        file_name=f"update_{item_code_dl}.csv",
                         mime="text/csv"
                     )
-        else:
-            st.info("Funzionalità “Aggiorna item” non ancora implementata.")
 
 
 # --- Footer (non fisso, subito dopo i contenuti)
