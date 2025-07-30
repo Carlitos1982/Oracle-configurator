@@ -3034,30 +3034,30 @@ if selected_part in [
             pattern_parts = [m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()]
             pattern_full  = "/".join(pattern_parts)
 
-            # Descrizione (quality tags in fondo)
-            description_parts = [f"*{identificativo.upper()}"]
+            # Costruzione della descrizione (senza virgole tra i quality tag)
+            parts = [f"*{identificativo.upper()}"]
             if base_pattern:
-                description_parts.append(f"BASE PATTERN: {base_pattern}")
+                parts.append(f"BASE PATTERN: {base_pattern}")
             if pattern_full:
-                description_parts.append(f"MODS: {pattern_full}")
+                parts.append(f"MODS: {pattern_full}")
             if note:
-                description_parts.append(note)
-            description_parts.append(f"{prefix} {name}".strip())
+                parts.append(note)
+            parts.append(f"{prefix} {name}".strip())
             if material_note:
-                description_parts.append(material_note)
-            # tag di qualità in coda
-            description_parts.extend([
-                "[SQ58]",
-                "[CORP-ENG-0115]",
-                "[DE2390.002]"
-            ])
-            if hf_service_casting:
-                description_parts.append("<SQ113>")
-            if selected_part == "Impeller casting":
-                description_parts.append("[DE2920.025]")
-            description = ", ".join(description_parts)
+                parts.append(material_note)
 
-            # Costruzione del campo Quality (inclusi SQ58 e CORP-ENG-0115)
+            # Preparo i soli tag di qualità in coda, senza virgole tra loro
+            qual_tags = ["[SQ58]", "[CORP-ENG-0115]", "[DE2390.002]"]
+            if hf_service_casting:
+                qual_tags.append("<SQ113>")
+            if selected_part == "Impeller casting":
+                qual_tags.append("[DE2920.025]")
+
+            # Unisco prima le parti normali con virgole, poi aggiungo i quality tag separati da spazi
+            base_description = ", ".join(parts)
+            description      = base_description + " " + " ".join(qual_tags)
+
+            # Costruzione del campo Quality (stesso di prima)
             quality_lines = [
                 "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings",
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
@@ -3074,21 +3074,22 @@ if selected_part in [
             quality_field = "\n".join(quality_lines)
 
             # Widget di output
-            st.text_input("Item",               value=item_number,       key="cast_out_item")
+            st.text_input("Item",               value=item_number,    key="cast_out_item")
             st.text_area ("Description",        value=description, height=100, key="cast_out_desc")
-            st.text_input("Identificativo",     value=identificativo,     key="cast_out_id")
-            st.text_input("Classe ricambi",     value="",                 key="cast_out_class")
-            st.text_input("Categories",         value="FASCIA ITE 7",     key="cast_out_cat")
-            st.text_input("Catalog",            value="FUSIONI",          key="cast_out_catalog")
-            st.text_input("Casting drawing",    value=casting_drawing,    key="cast_out_drawing")
-            st.text_input("Pattern item",       value=pattern_full,       key="cast_out_pattern")
+            st.text_input("Identificativo",     value=identificativo, key="cast_out_id")
+            st.text_input("Classe ricambi",     value="",            key="cast_out_class")
+            st.text_input("Categories",         value="FASCIA ITE 7",key="cast_out_cat")
+            st.text_input("Catalog",            value="FUSIONI",     key="cast_out_catalog")
+            st.text_input("Casting drawing",    value=casting_drawing,key="cast_out_drawing")
+            st.text_input("Pattern item",       value=pattern_full,  key="cast_out_pattern")
             st.text_input("Material",           value=f"{prefix} {name}", key="cast_out_mat")
-            st.text_input("FPD Material Code",  value=fpd_material_code,  key="cast_out_fpd")
+            st.text_input("FPD Material Code",  value=fpd_material_code, key="cast_out_fpd")
             st.text_input("Template",           value="FPD_BUY_CASTING",  key="cast_out_tmpl")
             st.text_input("ERP L1",             value="10_CASTING",       key="cast_out_erp1")
             st.text_input("ERP L2",             value="",                 key="cast_out_erp2")
             st.text_input("To Supplier",        value="",                 key="cast_out_to")
             st.text_area ("Quality",            value=quality_field, height=100, key="cast_out_quality")
+
     # ─── COLONNA 3: DATALOAD ───
     with col_dataload:
         st.markdown("### ⚙️ DataLoad")
