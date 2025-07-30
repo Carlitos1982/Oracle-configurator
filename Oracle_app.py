@@ -3105,7 +3105,7 @@ if selected_part in [
                 if not item_code_dl:
                     st.error("❌ Inserisci prima il codice item.")
                 else:
-                    # Dati per il create (come già implementato)
+                    # Preparo il dict dei dati
                     data = {
                         "Template":          "FPD_BUY_CASTING",
                         "Description":       description,
@@ -3120,7 +3120,8 @@ if selected_part in [
                         "Material":          f"{prefix} {name}",
                         "Quality":           quality_field
                     }
-                    # Prepara i token di Quality con ENTER
+
+                    # Creo i token di Quality con invio
                     lines = data["Quality"].splitlines()
                     quality_tokens = []
                     for ln in lines:
@@ -3129,7 +3130,7 @@ if selected_part in [
                     if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
                         quality_tokens.pop()
 
-                    # Costruzione dei token create
+                    # Costruzione esatta dei token con TAB aggiuntivi
                     fields = [
                         "\\%FN",           item_code_dl,
                         "\\%TC",           data["Template"],
@@ -3137,34 +3138,34 @@ if selected_part in [
                         "\\%D", "\\%O",
                         "TAB",
                         data["Description"],
-                        *["TAB"]*6,
-                        data["Identificativo"], "TAB",
-                        data["Classe ricambi"], "TAB",
-                        "\\%O", "\\^S", "\\%TA", "TAB",
-                        f"{data['ERP_L1']}.{data['ERP_L2']}", "TAB",
-                        "FASCIA ITE", "TAB",
-                        item_code_dl[:1], "TAB",
-                        "\\^S", "\\^{F4}",
-                        "\\%TG", data["Catalog"],
+                        *["TAB"]*6,                       # pos 9–15
+                        data["Identificativo"], "TAB",   # pos 16–17
+                        data["Classe ricambi"], "TAB",   # pos 18–19
+                        "\\%O", "\\^S", "\\%TA", "TAB",  # pos 20–23
+                        f"{data['ERP_L1']}.{data['ERP_L2']}", "TAB",  # pos 24–25
+                        "FASCIA ITE", "TAB",             # pos 26–27
+                        item_code_dl[:1], "TAB",         # pos 28–29
+                        "\\^S", "\\^{F4}",               # pos 30–31
+                        "\\%TG", data["Catalog"],        # pos 32–33
                         *["TAB"]*4,                      # 4 TAB dopo Catalog
                         data["Pattern item"], "TAB", "TAB",  # 2 TAB dopo Pattern item
-                        data["Casting drawing"], "TAB",
-                        "\\^S", "\\^{F4}",
-                        "\\%TR", "MATER+DESCR_FPD",
-                        *["TAB"]*2,
-                        data["FPD material code"], "TAB",
-                        data["Material"], "\\^S", "\\^S", "\\^{F4}", "\\%VA",
-                        "TAB", "Quality", *["TAB"]*4,
-                        *quality_tokens,
-                        "\\^S", "\\^{F4}", "\\^S"
+                        data["Casting drawing"], "TAB",  # pos 39–40
+                        "\\^S", "\\^{F4}",               # pos 41–42
+                        "\\%TR", "MATER+DESCR_FPD",       # pos 43–44
+                        *["TAB"]*2,                      # pos 45–46
+                        data["FPD material code"], "TAB",# pos 47–48
+                        data["Material"], "\\^S", "\\^S", "\\^{F4}", "\\%VA",  # pos 49–53
+                        "TAB", "Quality", *["TAB"]*4,    # pos 54–58
+                        *quality_tokens,                 # pos 59…n
+                        "\\^S", "\\^{F4}", "\\^S"        # ultimi tre
                     ]
 
-                    # Anteprima create (orizzontale)
+                    # Anteprima orizzontale per copia
                     preview = "\t".join(fields)
                     st.text_area("Anteprima (per copia)", preview, height=200)
 
-                    # Scarica CSV create
-                    buf = io.StringIO()
+                    # Esportazione CSV (un token per riga)
+                    buf    = io.StringIO()
                     writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
                     for tok in fields:
                         writer.writerow([tok])
@@ -3174,19 +3175,18 @@ if selected_part in [
                         file_name=f"dataload_{item_code_dl}.csv",
                         mime="text/csv"
                     )
+
         # AGGIORNAMENTO ITEM
         else:
             if st.button("Genera stringa Update", key="cast_dl_update"):
                 if not item_code_dl:
                     st.error("❌ Inserisci prima il codice item.")
                 else:
-                    # Valori costanti per il casting
-                    erp1    = "10_CASTING"
-                    erp2    = ""
-                    catalog = "FUSIONI"
+                    # Valori fissi per l'update
+                    erp1, erp2, catalog = "10_CASTING", "", "FUSIONI"
 
-                    # Preparo i token di Quality per l'update (escludo la prima riga se necessario)
-                    qlines = quality_field.splitlines()[1:]  # esempio: esclude DE2390.002
+                    # Creo i token di Quality con invio (tutte le righe)
+                    qlines = quality_field.splitlines()
                     update_tokens = ["\\%ERF"]
                     for ln in qlines:
                         update_tokens.append(ln)
@@ -3194,7 +3194,7 @@ if selected_part in [
                     if update_tokens and update_tokens[-1] == "\\{NUMPAD ENTER}":
                         update_tokens.pop()
 
-                    # Costruisco i token per l'Update
+                    # Costruzione esatta dei token per l'update
                     update_fields = [
                         "\\%VF", item_code_dl,
                         "\\{NUMPAD ENTER}",
@@ -3202,36 +3202,36 @@ if selected_part in [
                         description,                    # Description
                         *["TAB"]*6,
                         identificativo, "TAB",         # Identificativo
-                        "", "TAB",                     # Classe ricambi (qui lasci vuoto o metti variabile)
+                        "", "TAB",                      # Classe ricambi (vuoto o variabile)
                         "\\%O", "\\^S", "\\%TA",
                         "\\%VF",
-                        "FASCIA ITE",                  # letterale
+                        "FASCIA ITE",
                         "\\{NUMPAD ENTER}",
                         "TAB",
-                        item_code_dl[:1],              # primo carattere del codice
+                        item_code_dl[:1],               # primo carattere del codice
                         "\\^S",
                         "\\%VF",
-                        "TIPO ARTICOLO",               # letterale
+                        "TIPO ARTICOLO",
                         "\\{NUMPAD ENTER}",
                         "TAB",
-                        f"{erp1}.{erp2}",              # ERP_L1.ERP_L2 senza output_data
+                        f"{erp1}.{erp2}",               # ERP_L1.ERP_L2
                         "\\^S", "\\^{F4}", "\\%TG",
-                        catalog,                       # Catalog
+                        catalog,                        # Catalog
                         *["TAB"]*3,
-                        pattern_item, "TAB", "TAB",    # Pattern item + 2 TAB
+                        pattern_item, "TAB", "TAB",     # Pattern item con 2 TAB
                         casting_drawing,
                         "\\^S", "\\^{F4}", "\\^S",
                         "\\%VA",
                         "TAB", "Quality", *["TAB"]*4,
-                        *update_tokens,                # i token di quality con NUMPAD ENTER
+                        *update_tokens,                 # token di quality con NUMPAD ENTER
                         "\\^S", "\\^{F4}", "\\^S"
                     ]
 
-                    # Mostro l'anteprima (un token per riga)
+                    # Anteprima update (un token per riga)
                     preview_upd = "\n".join(update_fields)
                     st.text_area("Anteprima Update (per riga)", preview_upd, height=300)
 
-                    # Esporto il CSV
+                    # Scarica CSV update
                     buf_upd    = io.StringIO()
                     writer_upd = csv.writer(buf_upd, quoting=csv.QUOTE_MINIMAL)
                     for tok in update_fields:
