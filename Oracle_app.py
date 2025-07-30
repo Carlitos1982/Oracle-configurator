@@ -3093,6 +3093,7 @@ if selected_part in [
             st.text_area ("Quality",            value=quality_field, height=100, key="cast_out_quality")
 
     # ─── COLONNA 3: DATALOAD ───
+    # ─── COLONNA 3: DATALOAD ───
     with col_dataload:
         st.markdown("### ⚙️ DataLoad")
         mode         = st.radio(
@@ -3107,7 +3108,7 @@ if selected_part in [
                 if not item_code_dl:
                     st.error("❌ Inserisci prima il codice item.")
                 else:
-                    # Dati per DataLoad
+                    # Raccogliamo i dati
                     data = {
                         "Template":          "FPD_BUY_CASTING",
                         "Description":       description,
@@ -3123,7 +3124,7 @@ if selected_part in [
                         "Quality":           quality_field
                     }
 
-                    # Prepara quality_tokens
+                    # Preparo i token di Quality con ENTER
                     lines = data["Quality"].splitlines()
                     quality_tokens = []
                     for ln in lines:
@@ -3132,7 +3133,7 @@ if selected_part in [
                     if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
                         quality_tokens.pop()
 
-                    # Costruzione token DataLoad
+                    # Costruzione dei token con i TAB aggiuntivi
                     fields = [
                         "\\%FN",           item_code_dl,
                         "\\%TC",           data["Template"],
@@ -3149,8 +3150,8 @@ if selected_part in [
                         item_code_dl[:1], "TAB",
                         "\\^S", "\\^{F4}",
                         "\\%TG", data["Catalog"],
-                        *["TAB"]*3,
-                        data["Pattern item"], "TAB",
+                        *["TAB"]*4,                    # ← 4 TAB dopo Catalog
+                        data["Pattern item"], "TAB", "TAB",  # ← 2 TAB dopo Pattern item
                         data["Casting drawing"], "TAB",
                         "\\^S", "\\^{F4}",
                         "\\%TR", "MATER+DESCR_FPD",
@@ -3162,9 +3163,11 @@ if selected_part in [
                         "\\^S", "\\^{F4}", "\\^S"
                     ]
 
-                    # Anteprima e CSV
+                    # Anteprima orizzontale
                     preview = "\t".join(fields)
                     st.text_area("Anteprima (per copia)", preview, height=200)
+
+                    # Esportazione CSV
                     buf = io.StringIO()
                     writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
                     for tok in fields:
