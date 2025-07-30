@@ -2966,29 +2966,40 @@ if selected_part in [
     # Inizializza il flag di generazione
     if "cast_generated" not in st.session_state:
         st.session_state.cast_generated = False
-
     # ─── COLONNA 1: INPUT ───
     with col_input:
         st.markdown("### 📥 Input")
-        base_pattern     = st.text_input("Base pattern", key="cast_base_pattern")
-        mod1             = st.text_input("Pattern modification 1", key="cast_mod1")
-        mod2             = st.text_input("Pattern modification 2", key="cast_mod2")
-        mod3             = st.text_input("Pattern modification 3", key="cast_mod3")
-        mod4             = st.text_input("Pattern modification 4", key="cast_mod4")
-        mod5             = st.text_input("Pattern modification 5", key="cast_mod5")
-        note             = st.text_input("Note", key="cast_note")
-        casting_drawing  = st.text_input("Casting drawing", key="cast_input_drawing")
-        pattern_item     = st.text_input("Pattern item", key="cast_input_pattern")
+        base_pattern     = st.text_input("Base pattern",               key="cast_base_pattern")
+        mod1             = st.text_input("Pattern modification 1",     key="cast_mod1")
+        mod2             = st.text_input("Pattern modification 2",     key="cast_mod2")
+        mod3             = st.text_input("Pattern modification 3",     key="cast_mod3")
+        mod4             = st.text_input("Pattern modification 4",     key="cast_mod4")
+        mod5             = st.text_input("Pattern modification 5",     key="cast_mod5")
+        note             = st.text_input("Note",                        key="cast_note")
+        casting_drawing  = st.text_input("Casting drawing",            key="cast_input_drawing")
+        pattern_item     = st.text_input("Pattern item",               key="cast_input_pattern")
 
         st.markdown("**Material selection**")
         material_type = st.selectbox("Material Type", [""] + material_types, key="cast_mat_type")
-        prefixes      = materials_df[materials_df["Material Type"] == material_type]["Prefix"].dropna().tolist()
-        prefix        = st.selectbox("Prefix", [""] + prefixes, key="cast_prefix")
-        names         = materials_df[
+
+        # prendo solo valori di Prefix unici e ordinati
+        prefixes = sorted(
+            materials_df[
+                materials_df["Material Type"] == material_type
+            ]["Prefix"]
+            .dropna()
+            .unique()
+            .tolist()
+        )
+        prefix = st.selectbox("Prefix", [""] + prefixes, key="cast_prefix")
+
+        # raccolgo i Name corrispondenti
+        names = materials_df[
             (materials_df["Material Type"] == material_type) &
             (materials_df["Prefix"] == prefix)
-        ]["Name"].dropna().tolist()
-        name          = st.selectbox("Name", [""] + names, key="cast_name")
+        ]["Name"].dropna().unique().tolist()
+        name = st.selectbox("Name", [""] + names, key="cast_name")
+
         material_note = st.text_input("Material Note", key="cast_mat_note")
 
         hf_service_casting = False
