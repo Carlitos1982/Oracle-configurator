@@ -5901,188 +5901,152 @@ if selected_part in [
     "Shaft wear sleeve casting"
 ]:
     identificativo = selected_part
-    col_input, col_output, col_dataload = st.columns(3, gap="small")
+    col_input, col_output, col_dataload = st.columns(3, gap='small')
 
-    if "cast_generated" not in st.session_state:
+    if 'cast_generated' not in st.session_state:
         st.session_state.cast_generated = False
 
-    # ─── COLONNA 1: INPUT ───
-        # ─── COLONNA 1: INPUT ───
+    # --- COLONNA 1: INPUT ---
     with col_input:
-        st.markdown("### 📥 Input")
+        st.markdown('### 📥 Input')
         # Pump type selection for specific castings
-        if selected_part == "Impeller casting":
-            imp_pump_type = st.selectbox(
-                "Impeller Pump Type", ["Other", "DMX"], key="cast_imp_pump_type"
-            )
-        if selected_part == "Bearing housing casting":
-            pump_type = st.selectbox(
-                "Pump Type", ["Other", "HPX"], key="cast_pump_type"
-            )
-        base_pattern     = st.text_input("Base pattern", key="cast_base_pattern")
-        mod1             = st.text_input("Pattern modification 1", key="cast_mod1")
-        mod2             = st.text_input("Pattern modification 2", key="cast_mod2")
-        mod3             = st.text_input("Pattern modification 3", key="cast_mod3")
-        mod4             = st.text_input("Pattern modification 4", key="cast_mod4")
-        mod5             = st.text_input("Pattern modification 5", key="cast_mod5")
-        note             = st.text_input("Note", key="cast_note")
-        casting_drawing  = st.text_input("Casting drawing", key="cast_input_drawing")
-        pattern_item     = st.text_input("Pattern item", key="cast_input_pattern")
+        if selected_part == 'Impeller casting':
+            imp_pump_type = st.selectbox('Impeller Pump Type', ['Other', 'DMX'], key='cast_imp_pump_type')
+        if selected_part == 'Bearing housing casting':
+            pump_type = st.selectbox('Pump Type', ['Other', 'HPX'], key='cast_pump_type')
 
-        st.markdown("**Material selection**")
-        material_type = st.selectbox("Material Type", [""] + material_types, key="cast_mat_type")
+        base_pattern    = st.text_input('Base pattern', key='cast_base_pattern')
+        mod1            = st.text_input('Pattern modification 1', key='cast_mod1')
+        mod2            = st.text_input('Pattern modification 2', key='cast_mod2')
+        mod3            = st.text_input('Pattern modification 3', key='cast_mod3')
+        mod4            = st.text_input('Pattern modification 4', key='cast_mod4')
+        mod5            = st.text_input('Pattern modification 5', key='cast_mod5')
+        note            = st.text_input('Note', key='cast_note')
+        casting_drawing = st.text_input('Casting drawing', key='cast_input_drawing')
+        pattern_item    = st.text_input('Pattern item', key='cast_input_pattern')
+
+        st.markdown('**Material selection**')
+        material_type = st.selectbox('Material Type', [''] + material_types, key='cast_mat_type')
+        prefixes      = sorted(materials_df[materials_df['Material Type']==material_type]['Prefix'].dropna().unique().tolist())
+        prefix        = st.selectbox('Prefix', [''] + prefixes, key='cast_prefix')
+        names         = sorted(materials_df[(materials_df['Material Type']==material_type)&(materials_df['Prefix']==prefix)]['Name'].dropna().unique().tolist())
+        name          = st.selectbox('Name', [''] + names, key='cast_name')
+        material_note = st.text_input('Material Note', key='cast_mat_note')
+
         hf_service_casting = False
-        if selected_part != "Bearing housing casting":
-            hf_service_casting = st.checkbox(
-                "Is it an hydrofluoric acid alkylation service (lethal)?",
-                key="cast_hf"
-            )
-        if st.button("Generate Output", key="cast_gen"):
+        if selected_part != 'Bearing housing casting':
+            hf_service_casting = st.checkbox('Is it an hydrofluoric acid alkylation service (lethal)?', key='cast_hf')
+
+        if st.button('Generate Output', key='cast_gen'):
             st.session_state.cast_generated = True
 
-    # ─── COLONNA 2: OUTPUT ───
+    # --- COLONNA 2: OUTPUT ---
     if st.session_state.cast_generated:
         with col_output:
-            st.markdown("### 📤 Output")
-
-            # --- Lookup codici ---
-            casting_code      = "XX"
-            fpd_material_code = "NA"
+            st.markdown('### 📤 Output')
             dfm = materials_df[
-                (materials_df["Material Type"] == material_type) &
-                (materials_df["Prefix"] == prefix) &
-                (materials_df["Name"] == name)
+                (materials_df['Material Type']==material_type)&
+                (materials_df['Prefix']==prefix)&
+                (materials_df['Name']==name)
             ]
-            if not dfm.empty:
-                raw               = str(dfm["Casting code"].values[0])
-                casting_code      = raw[-2:] if len(raw) >= 2 else raw
-                fpd_material_code = dfm["FPD Code"].values[0]
+            casting_code      = dfm['Casting code'].iloc[0][-2:] if not dfm.empty else 'XX'
+            fpd_material_code = dfm['FPD Code'].iloc[0]       if not dfm.empty else 'NA'
+            item_number       = '7' + casting_code
+            pattern_parts     = [m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()]
+            pattern_full      = '/'.join(pattern_parts)
 
-            item_number   = "7" + casting_code
-            pattern_parts = [m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()]
-            pattern_full  = "/".join(pattern_parts)
+            parts = [f'*{identificativo.upper()}']
+            if base_pattern: parts.append(f'BASE PATTERN: {base_pattern}')
+            if pattern_full: parts.append(f'MODS: {pattern_full}')
+            if note: parts.append(note)
+            parts.append(f'{prefix} {name}'.strip())
+            if material_note: parts.append(material_note)
 
-            parts = [f"*{identificativo.upper()}"]
-            if base_pattern:
-                parts.append(f"BASE PATTERN: {base_pattern}")
-            if pattern_full:
-                parts.append(f"MODS: {pattern_full}")
-            if note:
-                parts.append(note)
-            parts.append(f"{prefix} {name}".strip())
-            if material_note:
-                parts.append(material_note)
-
-            # --- Tag di qualità di base ---
-            qual_tags = ["[SQ58]", "[CORP-ENG-0115]", "[DE2390.002]"]
+            # Base quality tags
+            qual_tags     = ['[SQ58]', '[CORP-ENG-0115]', '[DE2390.002]']
             quality_lines = [
-                "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings",
-                "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
-                "CORP-ENG-0115 - General Surface Quality Requirements G1-1"
+                'DE 2390.002 - Procurement and Quality Specification for Ferrous Castings',
+                'SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche',
+                'CORP-ENG-0115 - General Surface Quality Requirements G1-1'
             ]
-
-            # HF service
             if hf_service_casting:
-                qual_tags.append("<SQ113>")
-                quality_lines.append(
-                    "SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)"
-                )
+                qual_tags.append('<SQ113>')
+                quality_lines.append('SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)')
 
-            # Impeller casting DMX logic
-            if selected_part == "Impeller casting":
-                if imp_pump_type == "DMX":
-                    qual_tags.insert(
-                        0, "[CORP-ENG-0229]"
-                    )
-                    quality_lines.insert(
-                        0, "CORP-ENG-0229 - Inspection Procedures and Requirements for DMX Impeller Castings J4-6"
-                    )
-                qual_tags.append("[DE2920.025]")
-                quality_lines.append(
-                    "DE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E."
-                )
+            # DMX logic for Impeller
+            if selected_part == 'Impeller casting':
+                if st.session_state.get('cast_imp_pump_type') == 'DMX':
+                    qual_tags.insert(0, '[CORP-ENG-0229]')
+                    quality_lines.insert(0, 'CORP-ENG-0229 - Inspection Procedures and Requirements for DMX Impeller Castings J4-6')
+                qual_tags.append('[DE2920.025]')
+                quality_lines.append(\"DE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E.\")
 
-            # Bearing housing HPX logic
-            if selected_part == "Bearing housing casting":
-                if pump_type == "HPX":
-                    qual_tags.insert(
-                        0, "[SQ36]"
-                    )
-                    quality_lines.insert(
-                        0, "SQ 36 - HPX Bearing Housing: Requisiti di Qualità"
-                    )
+            # HPX logic for Bearing housing
+            if selected_part == 'Bearing housing casting' and st.session_state.get('cast_pump_type') == 'HPX':
+                qual_tags.insert(0, '[SQ36]')
+                quality_lines.insert(0, 'SQ 36 - HPX Bearing Housing: Requisiti di Qualità')
 
-            # Special hydraulic castings logic
-            special_casts = [
-                "Casing cover casting", "Casing casting", "Impeller casting",
-                "Pump bowl casting", "Diffuser casting", "Inducer casting", "Wear plate casting"
+            # Hydraulic casting specs
+            hydraulic = [
+                'Casing cover casting','Casing casting','Impeller casting',
+                'Pump bowl casting','Diffuser casting','Inducer casting','Wear plate casting'
             ]
-            if selected_part in special_casts:
-                extra = ["[DE2390.001]", "[CORP-ENG-0523]", "[CORP-ENG-0090]"]
-                qual_tags.extend(extra)
+            if selected_part in hydraulic:
+                qual_tags.extend(['[DE2390.001]','[CORP-ENG-0523]','[CORP-ENG-0090]'])
                 quality_lines.extend([
-                    "DE 2390.001 - Procurement and Cleaning Requirements for Hydraulic Castings-API, Vertical, Submersible and Specially Pumps",
-                    "CORP-ENG-0523 - As-Cast Surface Finish and Cleaning Requirements for Hydraulic Castings",
-                    "CORP-ENG-0090 - Procurement and Cleaning Requirement for Hydraulic Castings - API, Vertical, Submersible, and Specialty Pumps P-5"
+                    'DE 2390.001 - Procurement and Cleaning Requirements for Hydraulic Castings-API, Vertical, Submersible and Specially Pumps',
+                    'CORP-ENG-0523 - As-Cast Surface Finish and Cleaning Requirements for Hydraulic Castings',
+                    'CORP-ENG-0090 - Procurement and Cleaning Requirement for Hydraulic Castings - API, Vertical, Submersible, and Specialty Pumps P-5'
                 ])
 
-            # SQ95 logic
-            cg_materials = {
-                ("A351_","CG3M"),("A351_","CG8M"),
-                ("A351_","CG8M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY"),
-                ("A351_","CG3M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY + PTA STELLITE 6 OVERLAY"),
-                ("A743_","CG3M"),("A743_","CG8M"),("A743_","CG8M + PTA STELLITE 12 OVERLAY"),
-                ("A743_","CG3M + PTA STELLITE 6 OVERLAY"),("A743_","CG3M + DLD WC-Ni 60-40"),
-                ("A744_","CG3M")
-            }
+            # SQ95 for specific alloys
+            cg_materials = [
+                ('A351_','CG3M'),('A351_','CG8M'),('A743_','CG3M'),('A743_','CG8M'),
+                ('A351_','CG8M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY'),
+                ('A351_','CG3M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY + PTA STELLITE 6 OVERLAY'),
+                ('A743_','CG8M + PTA STELLITE 12 OVERLAY'),('A743_','CG3M + PTA STELLITE 6 OVERLAY'),
+                ('A743_','CG3M + DLD WC-Ni 60-40'),('A744_','CG3M')
+            ]
             if (prefix, name) in cg_materials:
-                qual_tags.append("[SQ95]")
-                quality_lines.append(
-                    "SQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
-                )
+                qual_tags.append('[SQ95]')
+                quality_lines.append('SQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)')
 
-            # Build outputs
-            description   = ", ".join(parts) + " " + " ".join(qual_tags)
-            quality_field = "\n".join(quality_lines)
+            description   = ', '.join(parts) + ' ' + ' '.join(qual_tags)
+            quality_field = '\\n'.join(quality_lines)
 
-            st.text_input("Item",              value=item_number,          key="cast_out_item")
-            st.text_area ("Description",       value=description, height=120, key="cast_out_desc")
-            st.text_input("Identificativo",    value=identificativo,       key="cast_out_id")
-            st.text_input("Classe ricambi",    value="",                   key="cast_out_class")
-            st.text_input("Categories",        value="FASCIA ITE 7",        key="cast_out_cat")
-            st.text_input("Catalog",           value="FUSIONI",             key="cast_out_catalog")
-            st.text_input("Casting drawing",   value=casting_drawing,      key="cast_out_drawing")
-            st.text_input("Pattern item",      value=pattern_full,         key="cast_out_pattern")
-            st.text_input("Material",          value=f"{prefix} {name}",    key="cast_out_material")
-            st.text_input("FPD Material Code", value=fpd_material_code,     key="cast_out_fpd")
-            st.text_input("Template",          value="FPD_BUY_CASTING",     key="cast_out_template")
-            st.text_input("ERP L1",            value="10_CASTING",          key="cast_out_erp1")
-            st.text_input("ERP L2",            value="",                    key="cast_out_erp2")
-            st.text_input("To Supplier",       value="",                    key="cast_out_supplier")
-            st.text_area ("Quality",           value=quality_field, height=120, key="cast_out_quality")
+            st.text_input('Item',              value=item_number,       key='cast_out_item')
+            st.text_area('Description',        value=description,      height=120, key='cast_out_desc')
+            st.text_input('Identificativo',    value=identificativo,    key='cast_out_id')
+            st.text_input('Classe ricambi',    value='',                key='cast_out_class')
+            st.text_input('Categories',        value='FASCIA ITE 7',    key='cast_out_cat')
+            st.text_input('Catalog',           value='FUSIONI',         key='cast_out_catalog')
+            st.text_input('Casting drawing',   value=casting_drawing,   key='cast_out_drawing')
+            st.text_input('Pattern item',      value=pattern_full,      key='cast_out_pattern')
+            st.text_input('Material',          value=f'{prefix} {name}', key='cast_out_material')
+            st.text_input('FPD Material Code', value=fpd_material_code, key='cast_out_fpd')
+            st.text_input('Template',          value='FPD_BUY_CASTING', key='cast_out_template')
+            st.text_input('ERP L1',            value='10_CASTING',      key='cast_out_erp1')
+            st.text_input('ERP L2',            value='',                key='cast_out_erp2')
+            st.text_input('To Supplier',       value='',                key='cast_out_supplier')
+            st.text_area('Quality',            value=quality_field,     height=120, key='cast_out_quality')
 
-    # ─── COLONNA 3: DATALOAD ───
+    # --- COLONNA 3: DATALOAD ---
     with col_dataload:
-        st.markdown("### 🧾 DataLoad")
-        mode         = st.radio(
-            "Operation type:",
-            ["Create new item", "Update item"],
-            key="cast_mode"
-        )
-        item_code_dl = st.text_input("Item code", key="cast_dl_code")
-
-        if mode == "Create new item":
-            if st.button("Generate DataLoad string", key="cast_dl_create"):
+        st.markdown('### 🧾 DataLoad')
+        mode         = st.radio('Operation type:', ['Create new item', 'Update item'], key='cast_dl_mode')
+        item_code_dl = st.text_input('Item code', key='cast_dl_code')
+        if mode == 'Create new item':
+            if st.button('Generate DataLoad string', key='cast_dl_create'):
                 if not item_code_dl:
-                    st.error("❌ Please enter the item code first.")
+                    st.error('❌ Please enter the item code first.')
                 else:
-                    st.success("✅ DataLoad string successfully generated. Download the CSV below.")
+                    st.success('✅ DataLoad string successfully generated. Download the CSV below.')
         else:
-            if st.button("Generate Update string", key="cast_dl_update"):
+            if st.button('Generate Update string', key='cast_dl_update'):
                 if not item_code_dl:
-                    st.error("❌ Please enter the item code first.")
+                    st.error('❌ Please enter the item code first.')
                 else:
-                    st.success("✅ Update string successfully generated. Download the CSV below.")
+                    st.success('✅ Update string successfully generated. Download the CSV below.')
 
 
 # --- Footer (non fisso, subito dopo i contenuti)
