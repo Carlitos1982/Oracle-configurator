@@ -2993,7 +2993,7 @@ if selected_part in [
                 "Is it an hydrofluoric acid alkylation service (lethal)?",
                 key="cast_hf"
             )        # DMX and HPX selectboxes are above, no duplicates here
-        if st.button("Generate Output", key="cast_gen"):"Generate Output", key="cast_gen"):
+                if st.button("Generate Output", key="cast_gen"):
             st.session_state.cast_generated = True
 
     # ─── COLONNA 2: OUTPUT ───
@@ -3139,7 +3139,6 @@ if selected_part in [
                     st.error("❌ Please enter the item code first.")
                 else:
                     st.success("✅ Update string successfully generated. Download the CSV below.")
-
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
