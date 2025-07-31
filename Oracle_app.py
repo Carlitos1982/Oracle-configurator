@@ -393,7 +393,7 @@ categories = {
 col1, col2 = st.columns([1, 1], gap="small")
 with col1:
     selected_category = st.selectbox(
-        "Categoria:",
+        "Category:",
         [""] + list(categories.keys()),
         index=0
     )
@@ -403,7 +403,7 @@ with col2:
     else:
         part_list = []
     selected_part = st.selectbox(
-        "Parte:",
+        "Part:",
         [""] + part_list,
         key="selected_part"
     )
@@ -472,7 +472,7 @@ if selected_part == "Casing, Pump":
         hvof = st.checkbox("HVOF coating?", key="casing_hvof")
         water = st.checkbox("Water service?", key="casing_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="casing_stamicarbon")
-        if st.button("Genera Output", key="casing_gen"):
+        if st.button("Generate Output", key="casing_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
@@ -604,7 +604,7 @@ if selected_part == "Casing Cover, Pump":
         water = st.checkbox("Water service?", key="ccov_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="ccov_stamicarbon")
 
-        if st.button("Genera Output", key="ccov_gen"):
+        if st.button("Generate Output", key="ccov_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
@@ -733,7 +733,7 @@ if selected_part == "Impeller, Pump":
         water = st.checkbox("Water service?", key="imp_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="imp_stamicarbon")
 
-        if st.button("Genera Output", key="imp_gen"):
+        if st.button("Generate Output", key="imp_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
@@ -856,7 +856,7 @@ if selected_part == "Balance Bushing, Pump":
         water = st.checkbox("Water service?", key="bbush_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="bbush_stamicarbon")
 
-        if st.button("Genera Output", key="bbush_gen"):
+        if st.button("Generate Output", key="bbush_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
@@ -983,7 +983,7 @@ if selected_part == "Balance Drum, Pump":
         water = st.checkbox("Water service?", key="bdrum_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="bdrum_stamicarbon")
 
-        if st.button("Genera Output", key="bdrum_gen"):
+        if st.button("Generate Output", key="bdrum_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
@@ -1104,7 +1104,7 @@ if selected_part == "Balance Disc, Pump":
         water = st.checkbox("Water service?", key="bdisc_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="bdisc_stamicarbon")
 
-        if st.button("Genera Output", key="bdisc_gen"):
+        if st.button("Generate Output", key="bdisc_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
@@ -1212,7 +1212,7 @@ if selected_part == "Gate, Valve":
         hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="gate_hf")
         stamicarbon = st.checkbox("Stamicarbon?", key="gate_stamicarbon")
 
-        if st.button("Genera Output", key="gate_gen"):
+        if st.button("Generate Output", key="gate_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
@@ -1326,7 +1326,7 @@ if selected_part == "Gasket, Spiral Wound":
             key="gsw_hf"
         )
 
-        if st.button("Genera Output", key="gsw_gen"):
+        if st.button("Generate Output", key="gsw_gen"):
             color1, ral1      = winding_options[winding_gsw]
             color2, ral2      = filler_options[filler_gsw]
             pressure_label, rating_descr, stripe = rating_mapping[rating_gsw]
@@ -1431,7 +1431,7 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
 
         dwg_bear = st.text_input("Dwg/doc number", key="bear_dwg")
 
-        if st.button("Genera Output", key="bear_gen"):
+        if st.button("Generate Output", key="bear_gen"):
             materiale_bear = (
                 mname_bear if mtype_bear == "MISCELLANEOUS"
                 else f"{mtype_bear} {mprefix_bear} {mname_bear}".strip()
@@ -1540,7 +1540,7 @@ if selected_part == "Bearing, Rolling":
         def short(sigla: str) -> str:
             return sigla.split(" ")[0] if sigla else ""
 
-        if st.button("Genera Output", key="br_gen"):
+        if st.button("Generate Output", key="br_gen"):
             model_final = custom_model if skf_choice == "Altro..." else skf_choice
 
             # Codici
@@ -1672,7 +1672,7 @@ if selected_part == "Bolt, Eye":
         material_note_beye   = st.text_area("Material note", height=60, key="beye_matnote")
         dwg                  = st.text_input("Dwg/doc number", key="beye_dwg")
 
-        if st.button("Genera Output", key="beye_gen"):
+        if st.button("Generate Output", key="beye_gen"):
             # costruisco il materiale e il codice FPD
             if mtype_beye == "MISCELLANEOUS":
                 materiale = mname_beye
@@ -1762,7 +1762,7 @@ if selected_part == "Bolt, Hexagonal":
 
         material_note_bh = st.text_area("Material note", height=60, key="bh_matnote")
 
-        if st.button("Genera Output", key="bh_gen"):
+        if st.button("Generate Output", key="bh_gen"):
             materiale_bh = (
                 mname_bh if mtype_bh == "MISCELLANEOUS"
                 else f"{mtype_bh} {mprefix_bh} {mname_bh}".strip()
@@ -1839,7 +1839,7 @@ if selected_part == "Gasket, Ring Type Joint":
         dwg_rtj = st.text_input("Dwg/doc number", key="rtj_dwg")
         hf_service_rtj = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="rtj_hf")
 
-        if st.button("Genera Output", key="rtj_gen"):
+        if st.button("Generate Output", key="rtj_gen"):
             descr_rtj = (
                 f"GASKET, RTJ - STYLE: {style_rtj}, SIZE: {size_rtj}, MATERIAL: {material_rtj}"
             )
@@ -1921,7 +1921,7 @@ elif selected_part == "Gusset, Other":
 
         note2_gusset = st.text_area("Material Note", height=80, key="gusset_note2")
 
-        if st.button("Genera Output", key="gen_gusset"):
+        if st.button("Generate Output", key="gen_gusset"):
             if mtype_gusset != "MISCELLANEOUS":
                 materiale_gusset = f"{mtype_gusset} {mprefix_gusset} {mname_gusset}".strip()
                 match_gusset = materials_df[
@@ -2025,7 +2025,7 @@ if selected_part == "Stud, Threaded":
         # Disegno
         dwg_stud = st.text_input("Dwg/doc number", key="stud_dwg")
 
-        if st.button("Genera Output", key="stud_gen"):
+        if st.button("Generate Output", key="stud_gen"):
             materiale_stud = (
                 mname_stud if mtype_stud == "MISCELLANEOUS"
                 else f"{mtype_stud} {mprefix_stud} {mname_stud}".strip()
@@ -2112,7 +2112,7 @@ if selected_part == "Nut, Hex":
         # dwg non usato
         dwg_nut = ""
 
-        if st.button("Genera Output", key="nut_gen"):
+        if st.button("Generate Output", key="nut_gen"):
             materiale_nut = (
                 mname_nut if mtype_nut == "MISCELLANEOUS"
                 else f"{mtype_nut} {mprefix_nut} {mname_nut}".strip()
@@ -2197,7 +2197,7 @@ if selected_part == "Ring, Wear":
         mname = st.selectbox("Material Name", [""] + names, key="ring_mname")
         material_note = st.text_area("Material note", height=60, key="ring_matnote")
 
-        if st.button("Genera Output", key="ring_gen"):
+        if st.button("Generate Output", key="ring_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
 
             match = materials_df[
@@ -2305,7 +2305,7 @@ if selected_part == "Pin, Dowel":
 
         material_note_pin = st.text_area("Material note", height=60, key="pin_matnote")
 
-        if st.button("Genera Output", key="pin_gen"):
+        if st.button("Generate Output", key="pin_gen"):
             materiale_pin = (
                 mname_pin if mtype_pin == "MISCELLANEOUS"
                 else f"{mtype_pin} {mprefix_pin} {mname_pin}".strip()
@@ -2423,7 +2423,7 @@ if selected_part == "Shaft, Pump":
         water = st.checkbox("Water service?", key="shaft_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="shaft_stamicarbon")
 
-        if st.button("Genera Output", key="shaft_gen"):
+        if st.button("Generate Output", key="shaft_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
             match = materials_df[
                 (materials_df["Material Type"] == mtype) &
@@ -2528,7 +2528,7 @@ elif selected_part == "Baseplate, Pump":
         mat_note = st.text_input("Material Note")
 
 
-        if st.button("Genera Output"):
+        if st.button("Generate Output"):
             item = "477..."
             ident = "BASEPLATE"
             classe = ""
@@ -2627,7 +2627,7 @@ if selected_part == "Flange, Pipe":
         note_flange = st.text_input("Additional Features (optional)", key="flange_note")
         hf_service_flange = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="flange_hf")
 
-        if st.button("Genera Output", key="flange_gen"):
+        if st.button("Generate Output", key="flange_gen"):
             descr = (
                 f"FLANGE, PIPE - TYPE: {pipe_type}, SIZE: {pipe_size}, FACE: {face_type}, "
                 f"CLASS: {pressure_class}, MATERIAL: {material_flange}"
@@ -2691,7 +2691,7 @@ if selected_part == "Gasket, Flat":
         note_gf = st.text_area("Note (opzionale)", height=80, key="gf_note")
         hf_service_gf = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="gf_hf")
 
-        if st.button("Genera Output", key="gf_gen"):
+        if st.button("Generate Output", key="gf_gen"):
             descr_gf = (
                 f"GASKET, FLAT - THICKNESS: {thickness_gf}{unit_gf.upper()}, MATERIAL: {material_gf}"
             )
@@ -2775,7 +2775,7 @@ if selected_part == "Screw, Cap":
 
         material_note_cap = st.text_area("Material note", height=60, key="cap_matnote")
 
-        if st.button("Genera Output", key="cap_gen"):
+        if st.button("Generate Output", key="cap_gen"):
             materiale_cap = (
                 mname_cap if mtype_cap == "MISCELLANEOUS"
                 else f"{mtype_cap} {mprefix_cap} {mname_cap}".strip()
@@ -2873,7 +2873,7 @@ if selected_part == "Screw, Grub":
 
         material_note_grub = st.text_area("Material note", height=60, key="grub_matnote")
 
-        if st.button("Genera Output", key="grub_gen"):
+        if st.button("Generate Output", key="grub_gen"):
             materiale_grub = (
                 mname_grub if mtype_grub == "MISCELLANEOUS"
                 else f"{mtype_grub} {mprefix_grub} {mname_grub}".strip()
@@ -2993,7 +2993,7 @@ if selected_part in [
                 key="cast_hf"
             )
 
-        if st.button("Genera Output", key="cast_gen"):
+        if st.button("Generate Output", key="cast_gen"):
             st.session_state.cast_generated = True
 
     # ─── COLONNA 2: OUTPUT ───
