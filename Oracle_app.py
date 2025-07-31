@@ -5931,17 +5931,24 @@ if selected_part in [
 
         st.markdown("**Material selection**")
         material_type = st.selectbox("Material Type", [""] + material_types, key="cast_mat_type")
-        prefixes = materials_df[materials_df["Material Type"] == material_type]["Prefix"].dropna().unique().tolist()
-        prefix   = st.selectbox("Prefix", [""] + sorted(prefixes), key="cast_prefix")
-        names    = materials_df[(materials_df["Material Type"] == material_type) & (materials_df["Prefix"] == prefix)]["Name"].dropna().unique().tolist()
-        name     = st.selectbox("Name", [""] + sorted(names), key="cast_name")
+        prefixes      = sorted(materials_df[
+            materials_df["Material Type"] == material_type
+        ]["Prefix"].dropna().unique().tolist())
+        prefix        = st.selectbox("Prefix", [""] + prefixes, key="cast_prefix")
+        names         = sorted(materials_df[
+            (materials_df["Material Type"] == material_type) &
+            (materials_df["Prefix"] == prefix)
+        ]["Name"].dropna().unique().tolist())
+        name          = st.selectbox("Name", [""] + names, key="cast_name")
         material_note = st.text_input("Material Note", key="cast_mat_note")
+
         hf_service_casting = False
         if selected_part != "Bearing housing casting":
             hf_service_casting = st.checkbox(
                 "Is it an hydrofluoric acid alkylation service (lethal)?",
                 key="cast_hf"
             )
+
         if st.button("Generate Output", key="cast_gen"):
             st.session_state.cast_generated = True
 
@@ -5949,15 +5956,17 @@ if selected_part in [
     if st.session_state.cast_generated:
         with col_output:
             st.markdown("### 📤 Output")
-            # Lookup codes
-            dfm = materials_df[(materials_df["Material Type"] == material_type) & (materials_df["Prefix"] == prefix) & (materials_df["Name"] == name)]
-            casting_code      = dfm["Casting code"].values[0][-2:] if not dfm.empty else "XX"
-            fpd_material_code = dfm["FPD Code"].values[0] if not dfm.empty else "NA"
-            item_number = "7" + casting_code
-            pattern_parts = [m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()]
-            pattern_full  = "/".join(pattern_parts)
+            dfm = materials_df[
+                (materials_df["Material Type"] == material_type) &
+                (materials_df["Prefix"] == prefix) &
+                (materials_df["Name"] == name)
+            ]
+            casting_code      = dfm["Casting code"].iloc[0][-2:] if not dfm.empty else "XX"
+            fpd_material_code = dfm["FPD Code"].iloc[0]       if not dfm.empty else "NA"
+            item_number       = "7" + casting_code
+            pattern_parts     = [m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()]
+            pattern_full      = "/".join(pattern_parts)
 
-            # Build description parts
             parts = [f"*{identificativo.upper()}"]
             if base_pattern: parts.append(f"BASE PATTERN: {base_pattern}")
             if pattern_full: parts.append(f"MODS: {pattern_full}")
@@ -5965,8 +5974,7 @@ if selected_part in [
             parts.append(f"{prefix} {name}".strip())
             if material_note: parts.append(material_note)
 
-            # Base quality
-            qual_tags = ["[SQ58]", "[CORP-ENG-0115]", "[DE2390.002]"]
+            qual_tags     = ["[SQ58]", "[CORP-ENG-0115]", "[DE2390.002]"]
             quality_lines = [
                 "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings",
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
@@ -5976,7 +5984,6 @@ if selected_part in [
                 qual_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
 
-            # Impeller DMX logic
             if selected_part == "Impeller casting" and st.session_state.get("cast_imp_pump_type") == "DMX":
                 qual_tags.insert(0, "[CORP-ENG-0229]")
                 quality_lines.insert(0, "CORP-ENG-0229 - Inspection Procedures and Requirements for DMX Impeller Castings J4-6")
@@ -5984,12 +5991,10 @@ if selected_part in [
                 qual_tags.append("[DE2920.025]")
                 quality_lines.append("DE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E.")
 
-            # Bearing housing HPX logic
             if selected_part == "Bearing housing casting" and st.session_state.get("cast_pump_type") == "HPX":
                 qual_tags.insert(0, "[SQ36]")
                 quality_lines.insert(0, "SQ 36 - HPX Bearing Housing: Requisiti di Qualità")
 
-            # Hydraulic castings specs
             hydraulic = [
                 "Casing cover casting", "Casing casting", "Impeller casting",
                 "Pump bowl casting", "Diffuser casting", "Inducer casting", "Wear plate casting"
@@ -6003,22 +6008,18 @@ if selected_part in [
                     "CORP-ENG-0090 - Procurement and Cleaning Requirement for Hydraulic Castings - API, Vertical, Submersible, and Specialty Pumps P-5"
                 ])
 
-            # SQ95 logic
-            cg = {
+            cg_materials = {
                 ("A351_","CG3M"),("A351_","CG8M"),("A743_","CG3M"),("A743_","CG8M"),
                 ("A351_","CG8M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY"),
                 ("A351_","CG3M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY + PTA STELLITE 6 OVERLAY"),
                 ("A743_","CG8M + PTA STELLITE 12 OVERLAY"),("A743_","CG3M + PTA STELLITE 6 OVERLAY"),
                 ("A743_","CG3M + DLD WC-Ni 60-40"),("A744_","CG3M")
             }
-            if (prefix, name) in cg:
+            if (prefix, name) in cg_materials:
                 qual_tags.append("[SQ95]")
                 quality_lines.append("SQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)")
 
-            # Corrected join for quality_lines
             quality_field = "\n".join(quality_lines)
-
-            # Render output
             description   = ", ".join(parts) + " " + " ".join(qual_tags)
 
             st.text_input("Item", value=item_number, key="cast_out_item")
@@ -6034,7 +6035,22 @@ if selected_part in [
             st.text_input("Template", value="FPD_BUY_CASTING", key="cast_out_template")
             st.text_input("ERP L1", value="10_CASTING", key="cast_out_erp1")
             st.text_input("ERP L2", value="", key="cast_out_erp2")
+            st.text_input("To Supplier", value="", key="cast_out_supplier")
+            st.text_area ("Quality", value=quality_field, height=120, key="cast_out_quality")
 
+    # --- COLONNA 3: DATALOAD ---
+    with col_dataload:
+        st.markdown("### 🧾 DataLoad")
+        mode         = st.radio("Operation type:", ["Create new item", "Update item"], key="cast_mode")
+        item_code_dl = st.text_input("Item code", key="cast_dl_code")
+        if mode == "Create new item":
+            if st.button("Generate DataLoad string", key="cast_dl_create"):
+                if not item_code_dl:
+                    st.error("❌ Please enter the item code first.")
+                else:
+                    st.success("✅ DataLoad string successfully generated. Download the CSV below.")
+        else:
+            if st.button("Generate Update string", key="cast
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
