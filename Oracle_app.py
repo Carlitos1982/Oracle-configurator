@@ -532,7 +532,7 @@ if selected_part == "Casing, Pump":
                 "FPD material code": codice_fpd,
                 "Template": "FPD_MAKE",
                 "ERP_L1": "20_TURNKEY_MACHINING",
-                "ERP_L2": "15_CASING",
+                "ERP_L2": "17_CASING",
                 "To supplier": "",
                 "Quality": quality
             }
@@ -543,7 +543,7 @@ if selected_part == "Casing, Pump":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -656,8 +656,8 @@ if selected_part == "Casing Cover, Pump":
             st.session_state["output_data"] = {
                 "Item": "40205…",
                 "Description": descr,
-                "Identificativo": "1200-CASING COVER",
-                "Classe ricambi": "1-2-3",
+                "Identificativo": "1221-CASING COVER",
+                "Classe ricambi": "3",
                 "Categories": "FASCIA ITE 4",
                 "Catalog": "CORPO",
                 "Disegno": dwg,
@@ -665,7 +665,7 @@ if selected_part == "Casing Cover, Pump":
                 "FPD material code": codice_fpd,
                 "Template": template,
                 "ERP_L1": "20_TURNKEY_MACHINING",
-                "ERP_L2": "21_CASING",
+                "ERP_L2": "17_CASING",
                 "To supplier": "",
                 "Quality": quality
             }
@@ -675,7 +675,7 @@ if selected_part == "Casing Cover, Pump":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -778,18 +778,18 @@ if selected_part == "Impeller, Pump":
             descr = "*" + " - ".join(descr_parts) + " " + tag_string
 
             st.session_state["output_data"] = {
-                "Item": "3110…",
+                "Item": "40229…",
                 "Description": descr,
-                "Identificativo": "3110-IMPELLER",
-                "Classe ricambi": "1-2-3",
+                "Identificativo": "2200-IMPELLER",
+                "Classe ricambi": "2-3",
                 "Categories": "FASCIA ITE 4",
-                "Catalog": "ALBERO",
+                "Catalog": "ARTVARI",
                 "Disegno": dwg,
                 "Material": materiale,
                 "FPD material code": codice_fpd,
-                "Template": "FPD_BUY_1",
+                "Template": "FPD_MAKE",
                 "ERP_L1": "20_TURNKEY_MACHINING",
-                "ERP_L2": "22_IMPELLERS",
+                "ERP_L2": "20_IMPELLER_DIFFUSER",
                 "To supplier": "",
                 "Quality": quality
             }
@@ -799,7 +799,7 @@ if selected_part == "Impeller, Pump":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -900,7 +900,7 @@ if selected_part == "Balance Bushing, Pump":
             descr = "*" + " - ".join(descr_parts) + " " + tag_string
 
             st.session_state["output_data"] = {
-                "Item": "6231…",
+                "Item": "40226…",
                 "Description": descr,
                 "Identificativo": "6231-BALANCE DRUM BUSH",
                 "Classe ricambi": "1-2-3",
@@ -922,7 +922,7 @@ if selected_part == "Balance Bushing, Pump":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -1027,12 +1027,12 @@ if selected_part == "Balance Drum, Pump":
             descr = "*" + " - ".join(descr_parts) + " " + tag_string
 
             st.session_state["output_data"] = {
-                "Item": "6231…",
+                "Item": "40226…",
                 "Description": descr,
-                "Identificativo": "6231-BALANCE DRUM BUSH",
+                "Identificativo": "6230-BALANCE DRUM",
                 "Classe ricambi": "1-2-3",
                 "Categories": "FASCIA ITE 4",
-                "Catalog": "ALBERO",
+                "Catalog": "ARTVARI",
                 "Disegno": dwg,
                 "Material": materiale,
                 "FPD material code": codice_fpd,
@@ -1048,7 +1048,7 @@ if selected_part == "Balance Drum, Pump":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -1147,7 +1147,7 @@ if selected_part == "Balance Disc, Pump":
             descr = "*" + " - ".join(descr_parts) + " " + tag_string
 
             st.session_state["output_data"] = {
-                "Item": "6210…",
+                "Item": "40226…",
                 "Description": descr,
                 "Identificativo": "6210-BALANCE DISC",
                 "Classe ricambi": "1-2-3",
@@ -1168,7 +1168,7 @@ if selected_part == "Balance Disc, Pump":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -1241,18 +1241,18 @@ if selected_part == "Gate, Valve":
             descr = "*" + descr
 
             st.session_state["output_data"] = {
-                "Item": "70222…",
+                "Item": "50186…",
                 "Description": descr,
-                "Identificativo": "7100-GATE VALVE",
-                "Classe ricambi": "2-3",
+                "Identificativo": "VALVOLA (GLOBO,SARAC,SFERA,NEEDLE,MANIF,CONTR)",
+                "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
-                "Catalog": "VALVOLA",
+                "Catalog": "ARTVARI",
                 "Disegno": dwg,
                 "Material": materiale,
                 "FPD material code": codice_fpd,
                 "Template": "FPD_BUY_2",
-                "ERP_L1": "40_VALVES",
-                "ERP_L2": "41_GATE_VALVES",
+                "ERP_L1": "72_VALVE",
+                "ERP_L2": "18_GATE_VALVE",
                 "To supplier": "",
                 "Quality": quality
             }
@@ -1262,7 +1262,7 @@ if selected_part == "Gate, Valve":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -1378,7 +1378,7 @@ if selected_part == "Gasket, Spiral Wound":
             out = st.session_state["output_data"]
             for campo, valore in out.items():
                 if campo in ["Description", "Quality"]:
-                    st.text_area(campo, value=valore, height=120, key=f"sw_{campo}")
+                    st.text_area(campo, value=valore, height=200, key=f"sw_{campo}")
                 else:
                     st.text_input(campo, value=valore, key=f"sw_{campo}")
 
@@ -1462,18 +1462,18 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
             descr_bear = "*" + " - ".join([p for p in descr_parts_bear if p])
 
             st.session_state["output_data"] = {
-                "Item": "50XXX…",                 # mantieni il tuo valore originale
+                "Item": "50122…",
                 "Description": descr_bear,
-                "Identificativo": "XXXX-BEARING", # idem
+                "Identificativo": "3010-ANTI-FRICTION BEARING",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
-                "Catalog": "CUSCINETTO",
+                "Catalog": "ALBERO",
                 "Disegno": dwg_bear,
                 "Material": materiale_bear,
                 "FPD material code": codice_fpd_bear,
-                "Template": "FPD_BUY_2",
-                "ERP_L1": "50_BEARING",
-                "ERP_L2": "10_HYDROSTATIC_HYDRODYNAMIC",
+                "Template": "FPD_BUY_1",
+                "ERP_L1": "20_TURNKEY_MACHINING",
+                "ERP_L2": "29_OTHER",
                 "To supplier": "",
                 "Quality": ""
             }
@@ -1484,7 +1484,7 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -1609,18 +1609,18 @@ if selected_part == "Bearing, Rolling":
             descr_roll = "*" + " - ".join([p for p in descr_parts_roll if p])
 
             st.session_state["output_data"] = {
-                "Item": "50YYY…",
+                "Item": "50122…",
                 "Description": descr_roll,
-                "Identificativo": "XXXX-ROLLING BEARING",
+                "Identificativo": "3010-ANTI-FRICTION BEARING",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
-                "Catalog": "CUSCINETTO",
-                "Disegno": ".",                      # <-- nessun input, lo mettiamo a punto
+                "Catalog": "ARTVARI",
+                "Disegno": "",
                 "Material": "COMMERCIAL BEARING",
                 "FPD material code": "NA",
                 "Template": "FPD_BUY_2",
-                "ERP_L1": "50_BEARING",
-                "ERP_L2": "20_ROLLING",
+                "ERP_L1": "31_COMMERCIAL_BEARING",
+                "ERP_L2": "18_OTHER",
                 "To supplier": "",
                 "Quality": ""
             }
@@ -1631,7 +1631,7 @@ if selected_part == "Bearing, Rolling":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -1694,9 +1694,9 @@ if selected_part == "Bolt, Eye":
             descr = "*" + " - ".join(descr_parts)
 
             st.session_state["output_data"] = {
-                "Item": "56120…",
+                "Item": "55150…",
                 "Description": descr,
-                "Identificativo": "6540-EYE BOLT",
+                "Identificativo": "6583-EYE BOLT",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
@@ -1705,7 +1705,7 @@ if selected_part == "Bolt, Eye":
                 "FPD material code": codice_fpd,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
-                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
                 "To supplier": "",
                 "Quality": ""
             }
@@ -1716,7 +1716,7 @@ if selected_part == "Bolt, Eye":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -1788,9 +1788,9 @@ if selected_part == "Bolt, Hexagonal":
             descr_bh = "*" + " - ".join([p for p in descr_parts_bh if p])
 
             st.session_state["output_data"] = {
-                "Item": "56020…",
+                "Item": "56230…",
                 "Description": descr_bh,
-                "Identificativo": "6520-HEXAGONAL BOLT",
+                "Identificativo": "6577-HEXAGON HEAD BOLT",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
@@ -1799,13 +1799,12 @@ if selected_part == "Bolt, Hexagonal":
                 "FPD material code": codice_fpd_bh,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
-                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
                 "To supplier": "",
                 "Quality": ""
             }
 
-    # (col2 e col3 restano invariati)
-
+   
 
     # --------------------- COLONNA 2: OUTPUT ---------------------
     with col2:
@@ -1813,7 +1812,7 @@ if selected_part == "Bolt, Hexagonal":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -1854,9 +1853,9 @@ if selected_part == "Gasket, Ring Type Joint":
             descr_rtj = "*" + descr_rtj
 
             st.session_state["output_data"] = {
-                "Item": "50413…",
+                "Item": "50158…",
                 "Description": descr_rtj,
-                "Identificativo": "4510-GASKET RTJ",
+                "Identificativo": "4595-JOINT RING",
                 "Classe ricambi": "1-2-3",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
@@ -1865,7 +1864,7 @@ if selected_part == "Gasket, Ring Type Joint":
                 "FPD material code": "NOT AVAILABLE",
                 "Template": "FPD_BUY_1",
                 "ERP_L1": "55_GASKETS_OR_SEAL",
-                "ERP_L2": "17_RTJ",
+                "ERP_L2": "20_OTHER",
                 "To supplier": "",
                 "Quality": quality
             }
@@ -1876,7 +1875,7 @@ if selected_part == "Gasket, Ring Type Joint":
         if "output_data" in st.session_state:
             for campo, valore in st.session_state["output_data"].items():
                 if campo in ["Description", "Quality"]:
-                    st.text_area(campo, value=valore, height=120, key=f"rtj_{campo}")
+                    st.text_area(campo, value=valore, height=200, key=f"rtj_{campo}")
                 else:
                     st.text_input(campo, value=valore, key=f"rtj_{campo}")
 
@@ -1974,7 +1973,7 @@ elif selected_part == "Gusset, Other":
         if "output_data" in st.session_state:
             for campo, valore in st.session_state["output_data"].items():
                 if campo == "Description":
-                    st.text_area(campo, value=valore, height=80, key=f"gusset_{campo}")
+                    st.text_area(campo, value=valore, height=200, key=f"gusset_{campo}")
                 else:
                     st.text_input(campo, value=valore, key=f"gusset_{campo}")
 
@@ -2043,9 +2042,9 @@ if selected_part == "Stud, Threaded":
             descr_stud = "*" + " - ".join([p for p in descr_parts_stud if p])
 
             st.session_state["output_data"] = {
-                "Item": "56110…",
+                "Item": "56146…",
                 "Description": descr_stud,
-                "Identificativo": "6535-STUD THREADED",
+                "Identificativo": "6572-STUD",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
@@ -2054,7 +2053,7 @@ if selected_part == "Stud, Threaded":
                 "FPD material code": codice_fpd_stud,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
-                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
                 "To supplier": "",
                 "Quality": ""
             }
@@ -2065,7 +2064,7 @@ if selected_part == "Stud, Threaded":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -2141,7 +2140,7 @@ if selected_part == "Nut, Hex":
                 "FPD material code": codice_fpd_nut,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
-                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
                 "To supplier": "",
                 "Quality": ""
             }
@@ -2152,7 +2151,7 @@ if selected_part == "Nut, Hex":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -2254,7 +2253,7 @@ if selected_part == "Ring, Wear":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -2331,9 +2330,9 @@ if selected_part == "Pin, Dowel":
             descr_pin = "*" + " - ".join([p for p in descr_parts_pin if p])
 
             st.session_state["output_data"] = {
-                "Item": "56200…",
+                "Item": "56230…",
                 "Description": descr_pin,
-                "Identificativo": "6550-DOWEL PIN",
+                "Identificativo": "6810-DOWEL PIN",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
@@ -2342,7 +2341,7 @@ if selected_part == "Pin, Dowel":
                 "FPD material code": codice_fpd_pin,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
-                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
                 "To supplier": "",
                 "Quality": ""
             }
@@ -2353,7 +2352,7 @@ if selected_part == "Pin, Dowel":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -2486,7 +2485,7 @@ if selected_part == "Shaft, Pump":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -2530,16 +2529,16 @@ elif selected_part == "Baseplate, Pump":
 
         if st.button("Generate Output"):
             item = "477..."
-            ident = "BASEPLATE"
+            ident = "6110-BASE PLATE"
             classe = ""
             cat = "FASCIA ITE 5"
-            catalog = "BASE"
+            catalog = "ARTVARI"
             drawing_out = drawing
             material = f"{mat_type} {mat_prefix} {mat_name}".strip()
             fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
             template = "FPD_BUY_4"
             erp1 = "21_FABRICATION_OR_BASEPLATES"
-            erp2 = "22_BASEPLATE"
+            erp2 = "18_FOUNDATION_PLATE"
             to_supplier = sourcing
 
             descr_parts = [
@@ -2598,7 +2597,7 @@ elif selected_part == "Baseplate, Pump":
             st.text_input("ERP L1", value=data["ERP L1"], key="base_out11")
             st.text_input("ERP L2", value=data["ERP L2"], key="base_out12")
             st.text_input("To Supplier", value=data["To Supplier"], key="base_out13")
-            st.text_area("Quality", value="\n".join(data["Quality"]), height=100, key="base_out14")
+            st.text_area("Quality", value="\n".join(data["Quality"]), height=200, key="base_out14")
 
     with col3:
         render_dataload_panel(
@@ -2665,7 +2664,7 @@ if selected_part == "Flange, Pipe":
         if "output_data" in st.session_state:
             for campo, valore in st.session_state["output_data"].items():
                 if campo in ["Description", "Quality"]:
-                    st.text_area(campo, value=valore, height=120, key=f"fl_{campo}")
+                    st.text_area(campo, value=valore, height=200, key=f"fl_{campo}")
                 else:
                     st.text_input(campo, value=valore, key=f"fl_{campo}")
 
@@ -2706,18 +2705,18 @@ if selected_part == "Gasket, Flat":
             descr_gf = "*" + descr_gf
 
             st.session_state["output_data"] = {
-                "Item": "50412…",
+                "Item": "50158…",
                 "Description": descr_gf,
-                "Identificativo": "4510-GASKET FLAT",
+                "Identificativo": "4590-GASKET",
                 "Classe ricambi": "1-2-3",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
                 "Disegno": dwg_gf,
                 "Material": material_gf,
                 "FPD material code": "NOT AVAILABLE",
-                "Template": "FPD_BUY_1",
+                "Template": "FPD_BUY_2",
                 "ERP_L1": "55_GASKETS_OR_SEAL",
-                "ERP_L2": "18_FLAT",
+                "ERP_L2": "20_OTHER",
                 "To supplier": "",
                 "Quality": quality
             }
@@ -2728,7 +2727,7 @@ if selected_part == "Gasket, Flat":
         if "output_data" in st.session_state:
             for campo, valore in st.session_state["output_data"].items():
                 if campo in ["Description", "Quality"]:
-                    st.text_area(campo, value=valore, height=120, key=f"gf_{campo}")
+                    st.text_area(campo, value=valore, height=200, key=f"gf_{campo}")
                 else:
                     st.text_input(campo, value=valore, key=f"gf_{campo}")
 
@@ -2801,9 +2800,9 @@ if selected_part == "Screw, Cap":
             descr_cap = "*" + " - ".join([p for p in descr_parts_cap if p])
 
             st.session_state["output_data"] = {
-                "Item": "56090…",
+                "Item": "56230…",
                 "Description": descr_cap,
-                "Identificativo": "6590-CAP SCREW",
+                "Identificativo": "6579-SOCKET HEAD CAP SCREW",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
@@ -2812,7 +2811,7 @@ if selected_part == "Screw, Cap":
                 "FPD material code": codice_fpd_cap,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
-                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
                 "To supplier": "",
                 "Quality": ""
             }
@@ -2825,7 +2824,7 @@ if selected_part == "Screw, Cap":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -2897,9 +2896,9 @@ if selected_part == "Screw, Grub":
             descr_grub = "*" + " - ".join([p for p in descr_parts_grub if p])
 
             st.session_state["output_data"] = {
-                "Item": "56095…",
+                "Item": "56310…",
                 "Description": descr_grub,
-                "Identificativo": "6595-GRUB SCREW",
+                "Identificativo": "6814-GRUB SCREW",
                 "Classe ricambi": "",
                 "Categories": "FASCIA ITE 5",
                 "Catalog": "ARTVARI",
@@ -2908,7 +2907,7 @@ if selected_part == "Screw, Grub":
                 "FPD material code": codice_fpd_grub,
                 "Template": "FPD_BUY_2",
                 "ERP_L1": "60_FASTENER",
-                "ERP_L2": "11_STANDARD_BOLT_NUT_STUD_SCREW_WASHER",
+                "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
                 "To supplier": "",
                 "Quality": ""
             }
@@ -2919,7 +2918,7 @@ if selected_part == "Screw, Grub":
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
                 if k in ["Quality", "To supplier", "Description"]:
-                    st.text_area(k, value=v, height=160)
+                    st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
@@ -3050,7 +3049,7 @@ if selected_part in [
             quality_field = "\n".join(quality_lines)
 
             st.text_input("Item", value=item_number, key="cast_out_item")
-            st.text_area("Description", value=description, height=100, key="cast_out_desc")
+            st.text_area("Description", value=description, height=200, key="cast_out_desc")
             st.text_input("Identificativo", value=identificativo, key="cast_out_id")
             st.text_input("Classe ricambi", value="", key="cast_out_class")
             st.text_input("Categories", value="FASCIA ITE 7", key="cast_out_cat")
@@ -3063,7 +3062,7 @@ if selected_part in [
             st.text_input("ERP L1", value="10_CASTING", key="cast_out_erp1")
             st.text_input("ERP L2", value="", key="cast_out_erp2")
             st.text_input("To Supplier", value="", key="cast_out_supplier")
-            st.text_area("Quality", value=quality_field, height=100, key="cast_out_quality")
+            st.text_area("Quality", value=quality_field, height=200, key="cast_out_quality")
 
     # ─── COLONNA 3: DATALOAD ───
     with col_dataload:
