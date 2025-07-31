@@ -2922,7 +2922,6 @@ if selected_part == "Screw, Grub":
             update_btn_key="gen_upd_beye"
         )
 
-
 # --- CASTING PARTS (unico blocco per tutte le voci di casting) ---
 if selected_part in [
     "Casing cover casting",
@@ -2950,6 +2949,12 @@ if selected_part in [
     # ─── COLONNA 1: INPUT ───
     with col_input:
         st.markdown("### 📥 Input")
+        # Nuovo: selezione Pump Model per logica SQ36
+        pump_model = st.selectbox(
+            "Pump Model",
+            [""] + sorted(size_df["Pump Model"].dropna().unique()),
+            key="cast_pump_model"
+        )
         base_pattern     = st.text_input("Base pattern", key="cast_base_pattern")
         mod1             = st.text_input("Pattern modification 1", key="cast_mod1")
         mod2             = st.text_input("Pattern modification 2", key="cast_mod2")
@@ -3020,25 +3025,30 @@ if selected_part in [
             if material_note:
                 parts.append(material_note)
 
+            # Tag di qualità di default
             qual_tags = ["[SQ58]", "[CORP-ENG-0115]", "[DE2390.002]"]
-            if hf_service_casting:
-                qual_tags.append("<SQ113>")
-            if selected_part == "Impeller casting":
-                qual_tags.append("[DE2920.025]")
-
-            base_description = ", ".join(parts)
-            description = base_description + " " + " ".join(qual_tags)
-
             quality_lines = [
                 "DE 2390.002 - Procurement and Quality Specification for Ferrous Castings",
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
                 "CORP-ENG-0115 - General Surface Quality Requirements G1-1"
             ]
+
+            # Condizionali generali
             if hf_service_casting:
+                qual_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
             if selected_part == "Impeller casting":
+                qual_tags.append("[DE2920.025]")
                 quality_lines.append("DE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E.")
-            quality_field = "\n".join(quality_lines)
+
+            # Condizione specifica: SQ36 solo per Bearing housing casting e modello HPX
+            if selected_part == "Bearing housing casting" and pump_model == "HPX":
+                qual_tags.insert(0, "[SQ36]")
+                quality_lines.insert(0, "SQ 36 - HPX Bearing Housing: Requisiti di Qualità")
+
+            base_description = ", ".join(parts)
+            description      = f"{base_description} {' '.join(qual_tags)}"
+            quality_field    = "\n".join(quality_lines)
 
             st.text_input("Item", value=item_number, key="cast_out_item")
             st.text_area("Description", value=description, height=200, key="cast_out_desc")
@@ -3074,7 +3084,6 @@ if selected_part in [
                     st.error("❌ Please enter the item code first.")
                 else:
                     st.success("✅ Update string successfully generated. Download the CSV file below.")
-
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
