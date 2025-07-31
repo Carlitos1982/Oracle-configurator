@@ -2967,7 +2967,7 @@ if selected_part in [
     # ─── COLONNA 1: INPUT ───
     with col_input:
         st.markdown("### 📥 Input")
-        # Pump type selection for specific castings: Impeller DMX and Bearing Housing HPX
+        # Pump type selection for specific castings
         if selected_part == "Impeller casting":
             imp_pump_type = st.selectbox(
                 "Impeller Pump Type", ["Other", "DMX"], key="cast_imp_pump_type"
@@ -2988,22 +2988,6 @@ if selected_part in [
 
         st.markdown("**Material selection**")
         material_type = st.selectbox("Material Type", [""] + material_types, key="cast_mat_type")
-
-        prefixes = sorted(
-            materials_df[materials_df["Material Type"] == material_type]["Prefix"]
-            .dropna().unique().tolist()
-        )
-        prefix = st.selectbox("Prefix", [""] + prefixes, key="cast_prefix")
-
-        names = materials_df[
-            (materials_df["Material Type"] == material_type) &
-            (materials_df["Prefix"] == prefix)
-        ]["Name"].dropna().unique().tolist()
-        name = st.selectbox("Name", [""] + names, key="cast_name")
-
-        material_note = st.text_input("Material Note", key="cast_mat_note")
-
-        hf_service_casting = False
         if selected_part != "Bearing housing casting":
             hf_service_casting = st.checkbox(
                 "Is it an hydrofluoric acid alkylation service (lethal)?",
