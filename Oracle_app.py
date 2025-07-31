@@ -2921,6 +2921,7 @@ if selected_part == "Screw, Grub":
             create_btn_key="gen_dl_beye",
             update_btn_key="gen_upd_beye"
         )
+
 # --- CASTING PARTS (unico blocco per tutte le voci di casting) ---
 if selected_part in [
     "Casing cover casting",
@@ -3033,6 +3034,20 @@ if selected_part in [
                 "CORP-ENG-0115 - General Surface Quality Requirements G1-1"
             ]
 
+            # Specifiche aggiuntive per determinati casting
+            special_casts = [
+                "Casing cover casting", "Casing casting", "Impeller casting",
+                "Pump bowl casting", "Diffuser casting", "Inducer casting", "Wear plate casting"
+            ]
+            if selected_part in special_casts:
+                # aggiungi tre nuove procedure
+                qual_tags.extend(["[DE2390.001]", "[CORP-ENG-0523]", "[CORP-ENG-0090]"])
+                quality_lines.extend([
+                    "DE 2390.001 - Procurement and Cleaning Requirements for Hydraulic Castings-API, Vertical, Submersible and Specially Pumps",
+                    "CORP-ENG-0523 - As-Cast Surface Finish and Cleaning Requirements for Hydraulic Castings",
+                    "CORP-ENG-0090 - Procurement and Cleaning Requirement for Hydraulic Castings - API, Vertical, Submersible, and Specialty Pumps P-5"
+                ])
+
             # Condizionali generali
             if hf_service_casting:
                 qual_tags.append("<SQ113>")
@@ -3040,20 +3055,18 @@ if selected_part in [
             if selected_part == "Impeller casting":
                 qual_tags.append("[DE2920.025]")
                 quality_lines.append("DE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E.")
-
-            # Condizione specifica: SQ36 solo per Bearing housing casting e pump_type HPX
+            # Condizione SQ36 per Bearing housing casting e tipo
             if selected_part == "Bearing housing casting":
-                # default aggiunta per bearing housing di tutti i modelli
                 qual_tags.insert(0, "[SQ36]")
                 quality_lines.insert(0, "SQ 36 - HPX Bearing Housing: Requisiti di Qualità")
-                # rimuovi se non HPX
                 if pump_type != "HPX":
                     qual_tags.remove("[SQ36]")
                     quality_lines.remove("SQ 36 - HPX Bearing Housing: Requisiti di Qualità")
 
             base_description = ", ".join(parts)
             description      = f"{base_description} {' '.join(qual_tags)}"
-            quality_field    = "\n".join(quality_lines)
+            quality_field    = "
+".join(quality_lines)
 
             st.text_input("Item", value=item_number, key="cast_out_item")
             st.text_area("Description", value=description, height=200, key="cast_out_desc")
@@ -3087,26 +3100,26 @@ if selected_part in [
                     quality_tokens = []
                     for ln in lines:
                         quality_tokens.append(ln)
-                        quality_tokens.append("\\{NUMPAD ENTER}")
-                    if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
+                        quality_tokens.append("\{NUMPAD ENTER}")
+                    if quality_tokens and quality_tokens[-1] == "\{NUMPAD ENTER}":
                         quality_tokens.pop()
 
                     fields = [
-                        "\\%FN", item_code_dl,
-                        "\\%TC", "FPD_BUY_CASTING", "TAB",
-                        "\\%D", "\\%O", "TAB",
+                        "\%FN", item_code_dl,
+                        "\%TC", "FPD_BUY_CASTING", "TAB",
+                        "\%D", "\%O", "TAB",
                         description, *["TAB"]*6,
                         identificativo, "TAB",
                         "", "TAB",
-                        "\\%O", "\\^S", "\\%TA", "TAB",
+                        "\%O", "\^S", "\%TA", "TAB",
                         "10_CASTING.", "TAB", "FASCIA ITE", "TAB", item_code_dl[:1], "TAB",
-                        "\\^S", "\\^{F4}", "\\%TG", "FUSIONI", *["TAB"]*4,
+                        "\^S", "\^{F4}", "\%TG", "FUSIONI", *["TAB"]*4,
                         pattern_item, "TAB", "TAB", casting_drawing, "TAB",
-                        "\\^S", "\\^{F4}", "\\%TR", "MATER+DESCR_FPD", *["TAB"]*2,
+                        "\^S", "\^{F4}", "\%TR", "MATER+DESCR_FPD", *["TAB"]*2,
                         fpd_material_code, "TAB", f"{prefix} {name}",
-                        "\\^S", "\\^S", "\\^{F4}", "\\%VA", "TAB", "Quality", *["TAB"]*4,
+                        "\^S", "\^S", "\^{F4}", "\%VA", "TAB", "Quality", *["TAB"]*4,
                         *quality_tokens,
-                        "\\^S", "\\^{F4}", "\\^S"
+                        "\^S", "\^{F4}", "\^S"
                     ]
                     buf = io.StringIO()
                     writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
