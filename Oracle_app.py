@@ -2363,8 +2363,6 @@ if selected_part == "Pin, Dowel":
             create_btn_key="gen_dl_beye",
             update_btn_key="gen_upd_beye"
         )
-
-
 # --- SHAFT, PUMP ---
 if selected_part == "Shaft, Pump":
     col1, col2, col3 = st.columns(3)
@@ -2416,7 +2414,7 @@ if selected_part == "Shaft, Pump":
             match    = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix) & (materials_df["Name"] == mname)]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-                        # ─── Tags di qualità di default per Shaft ───
+            # ─── Tags di qualità di default per Shaft ───
             sq_tags = ["[SQ60]", "[DE3513.014]", "[CORP-ENG-0115]", "[SQ58]"]
             quality_lines = [
                 "SQ 60 - Procedura di Esecuzione del Run-Out per Alberi e Rotori di Pompe",
@@ -2451,8 +2449,9 @@ if selected_part == "Shaft, Pump":
                 sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
-            tag_string = " ".join(sq_tags).join(sq_tags)
-            quality    = "\n".join(quality_lines)
+            tag_string = " ".join(sq_tags)
+            quality    = "
+".join(quality_lines)
 
             # ─── Costruzione Description ───
             descr_parts = ["SHAFT, PUMP"] + [v for v in [model, size, brg_type, brg_size, max_diam, max_len, note, materiale, material_note] if v]
@@ -2480,8 +2479,10 @@ if selected_part == "Shaft, Pump":
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
-                widget = st.text_area if k in ["Description","Quality","To supplier"] else st.text_input
-                widget(k, value=v, height=200 if widget is st.text_area else None)
+                if k in ["Description","Quality","To supplier"]:
+                    st.text_area(k, value=v, height=200)
+                else:
+                    st.text_input(k, value=v)
 
     # ─── COLONNA 3: DATALOAD ───
     with col3:
