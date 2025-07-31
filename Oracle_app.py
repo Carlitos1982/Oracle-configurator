@@ -3001,6 +3001,18 @@ if selected_part in [
                 key="cast_hf"
             )
 
+        # DMX select only for Impeller casting
+        if selected_part == "Impeller casting":
+            imp_pump_type = st.selectbox(
+                "Impeller Pump Type", ["Other", "DMX"], key="cast_imp_pump_type"
+            )
+
+        # HPX select only for Bearing housing casting
+        if selected_part == "Bearing housing casting":
+            pump_type = st.selectbox(
+                "Pump Type", ["Other", "HPX"], key="cast_pump_type"
+            )
+
         if st.button("Generate Output", key="cast_gen"):
             st.session_state.cast_generated = True
 
@@ -3009,7 +3021,7 @@ if selected_part in [
         with col_output:
             st.markdown("### 📤 Output")
 
-            # --- Lookup codici
+            # --- Lookup codici ---
             casting_code      = "XX"
             fpd_material_code = "NA"
             dfm = materials_df[
@@ -3048,27 +3060,35 @@ if selected_part in [
             # HF service
             if hf_service_casting:
                 qual_tags.append("<SQ113>")
-                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
+                quality_lines.append(
+                    "SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)"
+                )
 
-            # Impeller casting DMX
+            # Impeller casting DMX logic
             if selected_part == "Impeller casting":
-                # aggiungi DMX select prima nel tuo input se non l'hai già
-                pump_type = st.session_state.get("cast_imp_pump_type", "Other")
-                if pump_type == "DMX":
-                    qual_tags.insert(0, "[CORP-ENG-0229]")
-                    quality_lines.insert(0, "CORP-ENG-0229 - Inspection Procedures and Requirements for DMX Impeller Castings J4-6")
-                # sempre
+                if imp_pump_type == "DMX":
+                    qual_tags.insert(
+                        0, "[CORP-ENG-0229]"
+                    )
+                    quality_lines.insert(
+                        0, "CORP-ENG-0229 - Inspection Procedures and Requirements for DMX Impeller Castings J4-6"
+                    )
                 qual_tags.append("[DE2920.025]")
-                quality_lines.append("DE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E.")
+                quality_lines.append(
+                    "DE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E."
+                )
 
-            # Bearing housing HPX
+            # Bearing housing HPX logic
             if selected_part == "Bearing housing casting":
-                pump_type = st.session_state.get("cast_pump_type", "Other")
                 if pump_type == "HPX":
-                    qual_tags.insert(0, "[SQ36]")
-                    quality_lines.insert(0, "SQ 36 - HPX Bearing Housing: Requisiti di Qualità")
+                    qual_tags.insert(
+                        0, "[SQ36]"
+                    )
+                    quality_lines.insert(
+                        0, "SQ 36 - HPX Bearing Housing: Requisiti di Qualità"
+                    )
 
-            # Specifiche DE2390.x per hydraulic castings
+            # Special hydraulic castings logic
             special_casts = [
                 "Casing cover casting", "Casing casting", "Impeller casting",
                 "Pump bowl casting", "Diffuser casting", "Inducer casting", "Wear plate casting"
@@ -3082,22 +3102,22 @@ if selected_part in [
                     "CORP-ENG-0090 - Procurement and Cleaning Requirement for Hydraulic Castings - API, Vertical, Submersible, and Specialty Pumps P-5"
                 ])
 
-            # --- SQ95 per CG3M/CG8M ---
+            # SQ95 logic
             cg_materials = {
                 ("A351_","CG3M"),("A351_","CG8M"),
                 ("A351_","CG8M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY"),
                 ("A351_","CG3M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY + PTA STELLITE 6 OVERLAY"),
-                ("A743_","CG3M"),("A743_","CG8M"),
-                ("A743_","CG8M + PTA STELLITE 12 OVERLAY"),
-                ("A743_","CG3M + PTA STELLITE 6 OVERLAY"),
-                ("A743_","CG3M + DLD WC-Ni 60-40"),
+                ("A743_","CG3M"),("A743_","CG8M"),("A743_","CG8M + PTA STELLITE 12 OVERLAY"),
+                ("A743_","CG3M + PTA STELLITE 6 OVERLAY"),("A743_","CG3M + DLD WC-Ni 60-40"),
                 ("A744_","CG3M")
             }
             if (prefix, name) in cg_materials:
                 qual_tags.append("[SQ95]")
-                quality_lines.append("SQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)")
+                quality_lines.append(
+                    "SQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
+                )
 
-            # --- Costruisci outputs ---
+            # Build outputs
             description   = ", ".join(parts) + " " + " ".join(qual_tags)
             quality_field = "\n".join(quality_lines)
 
@@ -3139,7 +3159,6 @@ if selected_part in [
                     st.error("❌ Please enter the item code first.")
                 else:
                     st.success("✅ Update string successfully generated. Download the CSV below.")
-
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
