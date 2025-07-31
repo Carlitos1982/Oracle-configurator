@@ -2965,6 +2965,7 @@ if selected_part in [
         st.session_state.cast_generated = False
 
     # ─── COLONNA 1: INPUT ───
+        # ─── COLONNA 1: INPUT ───
     with col_input:
         st.markdown("### 📥 Input")
         # Pump type selection for specific castings
@@ -2988,12 +2989,13 @@ if selected_part in [
 
         st.markdown("**Material selection**")
         material_type = st.selectbox("Material Type", [""] + material_types, key="cast_mat_type")
+        hf_service_casting = False
         if selected_part != "Bearing housing casting":
             hf_service_casting = st.checkbox(
                 "Is it an hydrofluoric acid alkylation service (lethal)?",
                 key="cast_hf"
-            )        # DMX and HPX selectboxes are above, no duplicates here
-                if st.button("Generate Output", key="cast_gen"):
+            )
+        if st.button("Generate Output", key="cast_gen"):
             st.session_state.cast_generated = True
 
     # ─── COLONNA 2: OUTPUT ───
@@ -3139,6 +3141,7 @@ if selected_part in [
                     st.error("❌ Please enter the item code first.")
                 else:
                     st.success("✅ Update string successfully generated. Download the CSV below.")
+
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
