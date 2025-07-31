@@ -2363,6 +2363,9 @@ if selected_part == "Pin, Dowel":
             create_btn_key="gen_dl_beye",
             update_btn_key="gen_upd_beye"
         )
+
+
+
 # --- SHAFT, PUMP ---
 if selected_part == "Shaft, Pump":
     col1, col2, col3 = st.columns(3)
@@ -2384,7 +2387,11 @@ if selected_part == "Shaft, Pump":
     # ─── COLONNA 1: INPUT ───
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", ["", "QL", "QLQ"] + [m for m in sorted(size_df["Pump Model"].dropna().unique()) if m not in ["QL","QLQ"]], key="shaft_model")
+        model = st.selectbox(
+            "Product Type",
+            ["", "QL", "QLQ"] + [m for m in sorted(size_df["Pump Model"].dropna().unique()) if m not in ["QL","QLQ"]],
+            key="shaft_model"
+        )
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="shaft_size")
 
@@ -2398,7 +2405,11 @@ if selected_part == "Shaft, Pump":
 
         mtype       = st.selectbox("Material Type", ["", "ASTM"] + [t for t in material_types if t != "ASTM"], key="shaft_mtype")
         prefixes    = sorted(materials_df[materials_df["Material Type"] == mtype]["Prefix"].dropna().unique().tolist())
-        mprefix     = st.selectbox("Material Prefix", ["", "A322_", "A276_", "A473_"] + [p for p in prefixes if p not in ["A322_","A276_","A473_"]], key="shaft_mprefix")
+        mprefix     = st.selectbox(
+            "Material Prefix",
+            ["", "A322_", "A276_", "A473_"] + [p for p in prefixes if p not in ["A322_","A276_","A473_"]],
+            key="shaft_mprefix"
+        )
         names       = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().tolist()
         mname       = st.selectbox("Material Name", [""] + names, key="shaft_mname")
         material_note = st.text_area("Material Note", height=60, key="shaft_matnote")
@@ -2411,8 +2422,12 @@ if selected_part == "Shaft, Pump":
 
         if st.button("Generate Output", key="shaft_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip()
-            match    = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix) & (materials_df["Name"] == mname)]
-            codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
+            df_match = materials_df[
+                (materials_df["Material Type"] == mtype) &
+                (materials_df["Prefix"] == mprefix) &
+                (materials_df["Name"] == mname)
+            ]
+            codice_fpd = df_match["FPD Code"].iloc[0] if not df_match.empty else ""
 
             # ─── Tags di qualità di default per Shaft ───
             sq_tags = ["[SQ60]", "[DE3513.014]", "[CORP-ENG-0115]", "[SQ58]"]
@@ -2431,7 +2446,7 @@ if selected_part == "Shaft, Pump":
                 "Tp. 410 HB 352-400", "Tp. 410 HB 325-375", "Tp. 410 HB 300-350",
                 "Tp. 410 Cond A", "Tp. 410 Double Tempered HRC 22 max.", "Tp. 410 Quenched & Tempered - Cond. T"
             ]
-            if model in ["QL","QLQ"] and mtype == "ASTM" and mname in astm_names:
+            if model in ["QL", "QLQ"] and mtype == "ASTM" and mname in astm_names:
                 sq_tags.insert(0, "[SQ123]")
                 quality_lines.insert(0, "SQ 123 - Specifica di Trattamento Termico di Stabilizzazione degli Alberi delle Pompe Multistadio")
 
@@ -2450,11 +2465,12 @@ if selected_part == "Shaft, Pump":
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             tag_string = " ".join(sq_tags)
-            quality    = "
-".join(quality_lines)
+            quality    = "\n".join(quality_lines)
 
             # ─── Costruzione Description ───
-            descr_parts = ["SHAFT, PUMP"] + [v for v in [model, size, brg_type, brg_size, max_diam, max_len, note, materiale, material_note] if v]
+            descr_parts = ["SHAFT, PUMP"] + [
+                v for v in [model, size, brg_type, brg_size, max_diam, max_len, note, materiale, material_note] if v
+            ]
             descr = "*" + " - ".join(descr_parts) + " " + tag_string
 
             st.session_state["output_data"] = {
@@ -2479,7 +2495,7 @@ if selected_part == "Shaft, Pump":
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
-                if k in ["Description","Quality","To supplier"]:
+                if k in ["Description", "Quality", "To supplier"]:
                     st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
@@ -2491,6 +2507,7 @@ if selected_part == "Shaft, Pump":
             create_btn_key="gen_dl_beye",
             update_btn_key="gen_upd_beye"
         )
+
 
 elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
