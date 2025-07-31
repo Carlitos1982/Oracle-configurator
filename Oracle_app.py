@@ -3067,7 +3067,7 @@ if selected_part in [
 
     # ─── COLONNA 3: DATALOAD ───
     with col_dataload:
-        st.markdown("### ⚙️ DataLoad")
+        st.markdown("### 🧾 DataLoad")
         mode = st.radio("Operation type:", ["Create new item", "Update item"], key="cast_mode")
         item_code_dl = st.text_input("Item code", key="cast_dl_code")
 
