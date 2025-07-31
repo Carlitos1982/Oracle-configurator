@@ -3097,39 +3097,50 @@ if selected_part in [
             st.text_area ("Quality", value=quality_field, height=120, key="cast_out_quality")
 
     # --- COLONNA 3: DATALOAD ---
+       # --- COLONNA 3: DATALOAD ---
     with col_dataload:
         st.markdown("### 🧾 DataLoad")
-        mode         = st.radio("Operation type:", ["Create new item", "Update item"], key="cast_mode")
+        mode         = st.radio(
+            "Operation type:",
+            ["Create new item", "Update item"],
+            key="cast_mode"
+        )
         item_code_dl = st.text_input("Item code", key="cast_dl_code")
+
         if mode == "Create new item":
             if st.button("Generate DataLoad string", key="cast_dl_create"):
                 if not item_code_dl:
                     st.error("❌ Please enter the item code first.")
                 else:
                     st.success("✅ DataLoad string successfully generated. Download the CSV below.")
-       else:
-           if st.button("Generate Update string", key="cast"):
-               # --- Footer (non fisso, subito dopo i contenuti)
-               footer_html = """
-               <style>
-               .footer {
-                   width: 100%;
-                   background-color: #f0f2f6;
-                   color: #444444;
-                   text-align: center;
-                   padding: 0.5rem 0;
-                   font-size: 0.9rem;
-                   border-top: 1px solid #e1e3e6;
-                   margin-top: 2rem;
-               }
-               .footer a {
-                   color: inherit;
-                   text-decoration: underline;
-               }
-               </style>
-               <div class="footer">
-                   © 2025 Flowserve – Desio Order Engineering – 
-                   <a href="mailto:dzecchinel@flowserve.com">dzecchinel@flowserve.com</a>
-               </div>
-               """
-               st.markdown(footer_html, unsafe_allow_html=True)
+        else:
+            if st.button("Generate Update string", key="cast_dl_update"):
+                if not item_code_dl:
+                    st.error("❌ Please enter the item code first.")
+                else:
+                    st.success("✅ Update string successfully generated.")
+
+        # --- Footer (mostrato sempre) ---
+        footer_html = """
+        <style>
+        .footer {
+            width: 100%;
+            background-color: #f0f2f6;
+            color: #444444;
+            text-align: center;
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+            border-top: 1px solid #e1e3e6;
+            margin-top: 2rem;
+        }
+        .footer a {
+            color: inherit;
+            text-decoration: underline;
+        }
+        </style>
+        <div class="footer">
+            © 2025 Flowserve – Desio Order Engineering – 
+            <a href="mailto:dzecchinel@flowserve.com">dzecchinel@flowserve.com</a>
+        </div>
+        """
+        st.markdown(footer_html, unsafe_allow_html=True)
