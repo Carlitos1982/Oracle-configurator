@@ -3077,13 +3077,56 @@ if selected_part in [
                 if not item_code_dl:
                     st.error("❌ Please enter the item code first.")
                 else:
+                    # Ricostruisci i token di Quality (con NUMPAD ENTER)
+                    lines = quality_field.splitlines()
+                    quality_tokens = []
+                    for ln in lines:
+                        quality_tokens.append(ln)
+                        quality_tokens.append("\\{NUMPAD ENTER}")
+                    if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
+                        quality_tokens.pop()
+
+                    # Ricostruisci la lista fields esattamente come prima
+                    fields = [
+                        "\\%FN", item_code_dl,
+                        "\\%TC", "FPD_BUY_CASTING", "TAB",
+                        "\\%D", "\\%O", "TAB",
+                        description, *["TAB"]*6,
+                        identificativo, "TAB",
+                        "", "TAB",
+                        "\\%O", "\\^S", "\\%TA", "TAB",
+                        "10_CASTING.", "TAB", "FASCIA ITE", "TAB", item_code_dl[:1], "TAB",
+                        "\\^S", "\\^{F4}", "\\%TG", "FUSIONI", *["TAB"]*4,
+                        pattern_item, "TAB", "TAB", casting_drawing,
+                        "TAB", "\\^S", "\\^{F4}", "\\%TR", "MATER+DESCR_FPD", *["TAB"]*2,
+                        fpd_material_code, "TAB", f"{prefix} {name}",
+                        "\\^S", "\\^S", "\\^{F4}", "\\%VA",
+                        "TAB", "Quality", *["TAB"]*4,
+                        *quality_tokens,
+                        "\\^S", "\\^{F4}", "\\^S"
+                    ]
+
+                    # Success message e download
                     st.success("✅ DataLoad string successfully generated. Download the CSV file below.")
+                    buf = io.StringIO()
+                    writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
+                    for tok in fields:
+                        writer.writerow([tok])
+                    st.download_button(
+                        "💾 Download CSV for Import",
+                        data=buf.getvalue(),
+                        file_name=f"dataload_{item_code_dl}.csv",
+                        mime="text/csv"
+                    )
+
         else:
             if st.button("Generate Update string", key="cast_dl_update"):
                 if not item_code_dl:
                     st.error("❌ Please enter the item code first.")
                 else:
+                    # Simile logica per l'update...
                     st.success("✅ Update string successfully generated. Download the CSV file below.")
+                    # Qui ricostruisci update_fields e aggiungi st.download_button(...)
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
