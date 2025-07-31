@@ -2386,7 +2386,7 @@ if selected_part == "Shaft, Pump":
     # ─── COLONNA 1: INPUT ───
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="shaft_model")
+        model = st.selectbox("Product Type", ["", "QL", "QLQ"] + [m for m in sorted(size_df["Pump Model"].dropna().unique()) if m not in ["QL","QLQ"]], key="shaft_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="shaft_size")
 
@@ -2398,14 +2398,10 @@ if selected_part == "Shaft, Pump":
         dwg      = st.text_input("Drawing number", key="shaft_dwg")
         note     = st.text_area("Note", height=80, key="shaft_note")
 
-        mtype       = st.selectbox("Material Type", [""] + material_types, key="shaft_mtype")
-        pref_df     = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
-        prefixes    = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
-        mprefix     = st.selectbox("Material Prefix", [""] + prefixes, key="shaft_mprefix")
-        names       = (materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
-                       if mtype == "MISCELLANEOUS"
-                       else materials_df[(materials_df["Material Type"] == mtype) &
-                                         (materials_df["Prefix"] == mprefix)]["Name"].dropna().tolist())
+        mtype       = st.selectbox("Material Type", ["", "ASTM"] + [t for t in material_types if t != "ASTM"], key="shaft_mtype")
+        prefixes    = sorted(materials_df[materials_df["Material Type"] == mtype]["Prefix"].dropna().unique().tolist())
+        mprefix     = st.selectbox("Material Prefix", ["", "A322_", "A276_", "A473_"] + [p for p in prefixes if p not in ["A322_","A276_","A473_"]], key="shaft_mprefix")
+        names       = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix)]["Name"].dropna().tolist()
         mname       = st.selectbox("Material Name", [""] + names, key="shaft_mname")
         material_note = st.text_area("Material Note", height=60, key="shaft_matnote")
 
@@ -2417,12 +2413,10 @@ if selected_part == "Shaft, Pump":
 
         if st.button("Generate Output", key="shaft_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip()
-            match    = materials_df[(materials_df["Material Type"] == mtype) &
-                                    (materials_df["Prefix"] == mprefix) &
-                                    (materials_df["Name"] == mname)]
+            match    = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"] == mprefix) & (materials_df["Name"] == mname)]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-            # ─── Tags di qualità di default per Shaft ───
+                        # ─── Tags di qualità di default per Shaft ───
             sq_tags = ["[SQ60]", "[DE3513.014]", "[CORP-ENG-0115]", "[SQ58]"]
             quality_lines = [
                 "SQ 60 - Procedura di Esecuzione del Run-Out per Alberi e Rotori di Pompe",
@@ -2430,6 +2424,18 @@ if selected_part == "Shaft, Pump":
                 "CORP-ENG-0115 - General Surface Quality Requirements G1-1",
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche"
             ]
+
+            # ─── Logica SQ123 per QL/QLQ e materiali ASTM specifici ───
+            astm_names = [
+                "4140", "4140 HRC 22 max", "4140 quenched & tempered (with mechanical properties according to ASTM A434 4140 Class BC)",
+                "Tp. 410 Quen Temp Cd T", "Tp. 410 - Annealed Condition A", "Tp. 410 BHN 250-300",
+                "Tp. 410 DOUBLE TEMPERED HRC 22 MAX NACE", "Tp. 410 - Double-tempered HB 237 max.",
+                "Tp. 410 HB 352-400", "Tp. 410 HB 325-375", "Tp. 410 HB 300-350",
+                "Tp. 410 Cond A", "Tp. 410 Double Tempered HRC 22 max.", "Tp. 410 Quenched & Tempered - Cond. T"
+            ]
+            if model in ["QL","QLQ"] and mtype == "ASTM" and mname in astm_names:
+                sq_tags.insert(0, "[SQ123]")
+                quality_lines.insert(0, "SQ 123 - Specifica di Trattamento Termico di Stabilizzazione degli Alberi delle Pompe Multistadio")
 
             # ─── Aggiunte condizionali ───
             if overlay:
@@ -2445,31 +2451,28 @@ if selected_part == "Shaft, Pump":
                 sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
-            tag_string = " ".join(sq_tags)
+            tag_string = " ".join(sq_tags).join(sq_tags)
             quality    = "\n".join(quality_lines)
 
             # ─── Costruzione Description ───
-            descr_parts = ["SHAFT, PUMP"]
-            for v in [model, size, brg_type, brg_size, max_diam, max_len, note, materiale, material_note]:
-                if v:
-                    descr_parts.append(v)
+            descr_parts = ["SHAFT, PUMP"] + [v for v in [model, size, brg_type, brg_size, max_diam, max_len, note, materiale, material_note] if v]
             descr = "*" + " - ".join(descr_parts) + " " + tag_string
 
             st.session_state["output_data"] = {
-                "Item":               "40231…",
-                "Description":        descr,
-                "Identificativo":     "2100-SHAFT",
-                "Classe ricambi":     "2-3",
-                "Categories":         "FASCIA ITE 4",
-                "Catalog":            "ALBERO",
-                "Disegno":            dwg,
-                "Material":           materiale,
-                "FPD material code":  codice_fpd,
-                "Template":           "FPD_MAKE",
-                "ERP_L1":             "20_TURNKEY_MACHINING",
-                "ERP_L2":             "25_SHAFTS",
-                "To supplier":        "",
-                "Quality":            quality
+                "Item":              "40231…",
+                "Description":       descr,
+                "Identificativo":    "2100-SHAFT",
+                "Classe ricambi":    "2-3",
+                "Categories":        "FASCIA ITE 4",
+                "Catalog":           "ALBERO",
+                "Disegno":           dwg,
+                "Material":          materiale,
+                "FPD material code": codice_fpd,
+                "Template":          "FPD_MAKE",
+                "ERP_L1":            "20_TURNKEY_MACHINING",
+                "ERP_L2":            "25_SHAFTS",
+                "To supplier":       "",
+                "Quality":           quality
             }
 
     # ─── COLONNA 2: OUTPUT ───
@@ -2477,10 +2480,8 @@ if selected_part == "Shaft, Pump":
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
-                if k in ["Description", "Quality", "To supplier"]:
-                    st.text_area(k, value=v, height=200)
-                else:
-                    st.text_input(k, value=v)
+                widget = st.text_area if k in ["Description","Quality","To supplier"] else st.text_input
+                widget(k, value=v, height=200 if widget is st.text_area else None)
 
     # ─── COLONNA 3: DATALOAD ───
     with col3:
