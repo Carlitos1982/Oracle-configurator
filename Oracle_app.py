@@ -3065,8 +3065,8 @@ if selected_part in [
 
             base_description = ", ".join(parts)
             description      = f"{base_description} {' '.join(qual_tags)}"
-            quality_field    = "
-".join(quality_lines)
+            quality_field    = "\n".join(quality_lines)
+
 
             st.text_input("Item", value=item_number, key="cast_out_item")
             st.text_area("Description", value=description, height=200, key="cast_out_desc")
