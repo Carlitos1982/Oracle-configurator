@@ -3108,7 +3108,9 @@ if selected_part in [
                 else:
                     st.success("✅ DataLoad string successfully generated. Download the CSV below.")
         else:
-            if st.button("Generate Update string", key="cast
+            if st.button("Generate Update string", key="cast"):
+ 
+
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
