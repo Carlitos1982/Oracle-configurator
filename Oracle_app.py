@@ -2967,6 +2967,15 @@ if selected_part in [
     # ─── COLONNA 1: INPUT ───
     with col_input:
         st.markdown("### 📥 Input")
+        # Pump type selection for specific castings: Impeller DMX and Bearing Housing HPX
+        if selected_part == "Impeller casting":
+            imp_pump_type = st.selectbox(
+                "Impeller Pump Type", ["Other", "DMX"], key="cast_imp_pump_type"
+            )
+        if selected_part == "Bearing housing casting":
+            pump_type = st.selectbox(
+                "Pump Type", ["Other", "HPX"], key="cast_pump_type"
+            )
         base_pattern     = st.text_input("Base pattern", key="cast_base_pattern")
         mod1             = st.text_input("Pattern modification 1", key="cast_mod1")
         mod2             = st.text_input("Pattern modification 2", key="cast_mod2")
