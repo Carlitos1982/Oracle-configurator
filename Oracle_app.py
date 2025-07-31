@@ -2992,21 +2992,8 @@ if selected_part in [
             hf_service_casting = st.checkbox(
                 "Is it an hydrofluoric acid alkylation service (lethal)?",
                 key="cast_hf"
-            )
-
-        # DMX select only for Impeller casting
-        if selected_part == "Impeller casting":
-            imp_pump_type = st.selectbox(
-                "Impeller Pump Type", ["Other", "DMX"], key="cast_imp_pump_type"
-            )
-
-        # HPX select only for Bearing housing casting
-        if selected_part == "Bearing housing casting":
-            pump_type = st.selectbox(
-                "Pump Type", ["Other", "HPX"], key="cast_pump_type"
-            )
-
-        if st.button("Generate Output", key="cast_gen"):
+            )        # DMX and HPX selectboxes are above, no duplicates here
+        if st.button("Generate Output", key="cast_gen"):"Generate Output", key="cast_gen"):
             st.session_state.cast_generated = True
 
     # ─── COLONNA 2: OUTPUT ───
@@ -3128,7 +3115,7 @@ if selected_part in [
             st.text_input("ERP L1",            value="10_CASTING",          key="cast_out_erp1")
             st.text_input("ERP L2",            value="",                    key="cast_out_erp2")
             st.text_input("To Supplier",       value="",                    key="cast_out_supplier")
-            st.text_area ("Quality",           value=quality_field, height=200, key="cast_out_quality")
+            st.text_area ("Quality",           value=quality_field, height=120, key="cast_out_quality")
 
     # ─── COLONNA 3: DATALOAD ───
     with col_dataload:
@@ -3152,6 +3139,7 @@ if selected_part in [
                     st.error("❌ Please enter the item code first.")
                 else:
                     st.success("✅ Update string successfully generated. Download the CSV below.")
+
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
