@@ -2921,7 +2921,6 @@ if selected_part == "Screw, Grub":
             create_btn_key="gen_dl_beye",
             update_btn_key="gen_upd_beye"
         )
-
 # --- CASTING PARTS (unico blocco per tutte le voci di casting) ---
 if selected_part in [
     "Casing cover casting",
@@ -2949,12 +2948,13 @@ if selected_part in [
     # ─── COLONNA 1: INPUT ───
     with col_input:
         st.markdown("### 📥 Input")
-        # Nuovo: selezione Pump Model per logica SQ36
-        pump_model = st.selectbox(
-            "Pump Model",
-            [""] + sorted(size_df["Pump Model"].dropna().unique()),
-            key="cast_pump_model"
-        )
+        # Selezione tipo pompa solo per bearing housing casting
+        if selected_part == "Bearing housing casting":
+            pump_type = st.selectbox(
+                "Pump Type",
+                ["HPX", "Other"],
+                key="cast_pump_type"
+            )
         base_pattern     = st.text_input("Base pattern", key="cast_base_pattern")
         mod1             = st.text_input("Pattern modification 1", key="cast_mod1")
         mod2             = st.text_input("Pattern modification 2", key="cast_mod2")
@@ -3041,10 +3041,15 @@ if selected_part in [
                 qual_tags.append("[DE2920.025]")
                 quality_lines.append("DE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E.")
 
-            # Condizione specifica: SQ36 solo per Bearing housing casting e modello HPX
-            if selected_part == "Bearing housing casting" and pump_model == "HPX":
+            # Condizione specifica: SQ36 solo per Bearing housing casting e pump_type HPX
+            if selected_part == "Bearing housing casting":
+                # default aggiunta per bearing housing di tutti i modelli
                 qual_tags.insert(0, "[SQ36]")
                 quality_lines.insert(0, "SQ 36 - HPX Bearing Housing: Requisiti di Qualità")
+                # rimuovi se non HPX
+                if pump_type != "HPX":
+                    qual_tags.remove("[SQ36]")
+                    quality_lines.remove("SQ 36 - HPX Bearing Housing: Requisiti di Qualità")
 
             base_description = ", ".join(parts)
             description      = f"{base_description} {' '.join(qual_tags)}"
@@ -3077,7 +3082,7 @@ if selected_part in [
                 if not item_code_dl:
                     st.error("❌ Please enter the item code first.")
                 else:
-                    # Ricostruisci i token di Quality (con NUMPAD ENTER)
+                    # Quality tokens
                     lines = quality_field.splitlines()
                     quality_tokens = []
                     for ln in lines:
@@ -3086,7 +3091,6 @@ if selected_part in [
                     if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
                         quality_tokens.pop()
 
-                    # Ricostruisci la lista fields esattamente come prima
                     fields = [
                         "\\%FN", item_code_dl,
                         "\\%TC", "FPD_BUY_CASTING", "TAB",
@@ -3097,36 +3101,31 @@ if selected_part in [
                         "\\%O", "\\^S", "\\%TA", "TAB",
                         "10_CASTING.", "TAB", "FASCIA ITE", "TAB", item_code_dl[:1], "TAB",
                         "\\^S", "\\^{F4}", "\\%TG", "FUSIONI", *["TAB"]*4,
-                        pattern_item, "TAB", "TAB", casting_drawing,
-                        "TAB", "\\^S", "\\^{F4}", "\\%TR", "MATER+DESCR_FPD", *["TAB"]*2,
+                        pattern_item, "TAB", "TAB", casting_drawing, "TAB",
+                        "\\^S", "\\^{F4}", "\\%TR", "MATER+DESCR_FPD", *["TAB"]*2,
                         fpd_material_code, "TAB", f"{prefix} {name}",
-                        "\\^S", "\\^S", "\\^{F4}", "\\%VA",
-                        "TAB", "Quality", *["TAB"]*4,
+                        "\\^S", "\\^S", "\\^{F4}", "\\%VA", "TAB", "Quality", *["TAB"]*4,
                         *quality_tokens,
                         "\\^S", "\\^{F4}", "\\^S"
                     ]
-
-                    # Success message e download
-                    st.success("✅ DataLoad string successfully generated. Download the CSV file below.")
                     buf = io.StringIO()
                     writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
                     for tok in fields:
                         writer.writerow([tok])
+                    st.success("✅ DataLoad string successfully generated. Download the CSV file below.")
                     st.download_button(
                         "💾 Download CSV for Import",
                         data=buf.getvalue(),
                         file_name=f"dataload_{item_code_dl}.csv",
                         mime="text/csv"
                     )
-
         else:
             if st.button("Generate Update string", key="cast_dl_update"):
                 if not item_code_dl:
                     st.error("❌ Please enter the item code first.")
                 else:
-                    # Simile logica per l'update...
+                    # Similar logic for update
                     st.success("✅ Update string successfully generated. Download the CSV file below.")
-                    # Qui ricostruisci update_fields e aggiungi st.download_button(...)
 
 # --- Footer (non fisso, subito dopo i contenuti)
 footer_html = """
