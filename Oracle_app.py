@@ -2365,8 +2365,7 @@ if selected_part == "Pin, Dowel":
         )
 
 
-
-# --- SHAFT, PUMP
+# --- SHAFT, PUMP ---
 if selected_part == "Shaft, Pump":
     col1, col2, col3 = st.columns(3)
 
@@ -2384,54 +2383,46 @@ if selected_part == "Shaft, Pump":
         "EKH": ["EK0-H", "EK2-H", "EK5-H", "EK6-H", "EK7-H", "EK8-H", "EK85-H", "EK9-H", "EK10-H", "EK11-H", "EK12-H"]
     }
 
+    # ─── COLONNA 1: INPUT ───
     with col1:
         st.subheader("✏️ Input")
         model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="shaft_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="shaft_size")
 
-        # 🔧 RIMOSSO Additional Feature 1
-
-        brg_type = st.selectbox("Brg. Type", [""] + brg_types, key="shaft_brg_type")
-        brg_size = st.selectbox("Brg. Size", [""] + brg_size_options.get(brg_type, []), key="shaft_brg_size")
+        brg_type = st.selectbox("Bearing Type", [""] + brg_types, key="shaft_brg_type")
+        brg_size = st.selectbox("Bearing Size", [""] + brg_size_options.get(brg_type, []), key="shaft_brg_size")
 
         max_diam = st.text_input("Max diameter (mm)", key="shaft_diam")
-        max_len = st.text_input("Max length (mm)", key="shaft_len")
-        dwg = st.text_input("Dwg/doc number", key="shaft_dwg")
-        note = st.text_area("Note", height=80, key="shaft_note")
+        max_len  = st.text_input("Max length (mm)", key="shaft_len")
+        dwg      = st.text_input("Drawing number", key="shaft_dwg")
+        note     = st.text_area("Note", height=80, key="shaft_note")
 
-        mtype = st.selectbox("Material Type", [""] + material_types, key="shaft_mtype")
-        pref_df = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
-        prefixes = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
-        mprefix = st.selectbox("Material Prefix", [""] + prefixes, key="shaft_mprefix")
+        mtype       = st.selectbox("Material Type", [""] + material_types, key="shaft_mtype")
+        pref_df     = materials_df[(materials_df["Material Type"] == mtype) & (materials_df["Prefix"].notna())]
+        prefixes    = sorted(pref_df["Prefix"].unique()) if mtype != "MISCELLANEOUS" else []
+        mprefix     = st.selectbox("Material Prefix", [""] + prefixes, key="shaft_mprefix")
+        names       = (materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
+                       if mtype == "MISCELLANEOUS"
+                       else materials_df[(materials_df["Material Type"] == mtype) &
+                                         (materials_df["Prefix"] == mprefix)]["Name"].dropna().tolist())
+        mname       = st.selectbox("Material Name", [""] + names, key="shaft_mname")
+        material_note = st.text_area("Material Note", height=60, key="shaft_matnote")
 
-        if mtype == "MISCELLANEOUS":
-            names = materials_df[materials_df["Material Type"] == mtype]["Name"].dropna().tolist()
-        else:
-            names = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix)
-            ]["Name"].dropna().tolist()
-
-        mname = st.selectbox("Material Name", [""] + names, key="shaft_mname")
-        material_note = st.text_area("Material note", height=60, key="shaft_matnote")
-
-        # Checkbox qualità
-        overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="shaft_overlay")
-        hvof = st.checkbox("HVOF coating?", key="shaft_hvof")
-        water = st.checkbox("Water service?", key="shaft_water")
+        # Checkboxes qualità aggiuntive
+        overlay     = st.checkbox("Overlay (DLD/PTAW/…)", key="shaft_overlay")
+        hvof        = st.checkbox("HVOF coating?", key="shaft_hvof")
+        water       = st.checkbox("Water service?", key="shaft_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="shaft_stamicarbon")
 
         if st.button("Generate Output", key="shaft_gen"):
-            materiale = f"{mtype} {mprefix} {mname}".strip() if mtype != "MISCELLANEOUS" else mname
-            match = materials_df[
-                (materials_df["Material Type"] == mtype) &
-                (materials_df["Prefix"] == mprefix) &
-                (materials_df["Name"] == mname)
-            ]
+            materiale = f"{mtype} {mprefix} {mname}".strip()
+            match    = materials_df[(materials_df["Material Type"] == mtype) &
+                                    (materials_df["Prefix"] == mprefix) &
+                                    (materials_df["Name"] == mname)]
             codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
 
-            # Tag qualità
+            # ─── Tags di qualità di default per Shaft ───
             sq_tags = ["[SQ60]", "[DE3513.014]", "[CORP-ENG-0115]", "[SQ58]"]
             quality_lines = [
                 "SQ 60 - Procedura di Esecuzione del Run-Out per Alberi e Rotori di Pompe",
@@ -2439,9 +2430,11 @@ if selected_part == "Shaft, Pump":
                 "CORP-ENG-0115 - General Surface Quality Requirements G1-1",
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche"
             ]
+
+            # ─── Aggiunte condizionali ───
             if overlay:
-                sq_tags.append("<PQ72>")
-                quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + Components with METCO or Ceramic Chrome (cr2o3) overlay")
+                sq_tags.append("[PQ72]")
+                quality_lines.append("PQ 72 - Components with overlay applied thru DLD, PTAW + Components with Laser Hardening surface + METCO or Ceramic Chrome overlay")
             if hvof:
                 sq_tags.append("[DE2500.002]")
                 quality_lines.append("DE 2500.002 - Surface coating by HVOF - High Velocity Oxygen Fuel Thermal Spray System")
@@ -2453,50 +2446,49 @@ if selected_part == "Shaft, Pump":
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             tag_string = " ".join(sq_tags)
-            quality = "\n".join(quality_lines)
+            quality    = "\n".join(quality_lines)
 
+            # ─── Costruzione Description ───
             descr_parts = ["SHAFT, PUMP"]
-            for val in [model, size, brg_type, max_diam, max_len, note, materiale, material_note]:
-                if val:
-                    descr_parts.append(val)
+            for v in [model, size, brg_type, brg_size, max_diam, max_len, note, materiale, material_note]:
+                if v:
+                    descr_parts.append(v)
             descr = "*" + " - ".join(descr_parts) + " " + tag_string
 
             st.session_state["output_data"] = {
-                "Item": "40231…",
-                "Description": descr,
-                "Identificativo": "2100-SHAFT",
-                "Classe ricambi": "2-3",
-                "Categories": "FASCIA ITE 4",
-                "Catalog": "ALBERO",
-                "Disegno": dwg,
-                "Material": materiale,
-                "FPD material code": codice_fpd,
-                "Template": "FPD_MAKE",
-                "ERP_L1": "20_TURNKEY_MACHINING",
-                "ERP_L2": "25_SHAFTS",
-                "To supplier": "",
-                "Quality": quality
+                "Item":               "40231…",
+                "Description":        descr,
+                "Identificativo":     "2100-SHAFT",
+                "Classe ricambi":     "2-3",
+                "Categories":         "FASCIA ITE 4",
+                "Catalog":            "ALBERO",
+                "Disegno":            dwg,
+                "Material":           materiale,
+                "FPD material code":  codice_fpd,
+                "Template":           "FPD_MAKE",
+                "ERP_L1":             "20_TURNKEY_MACHINING",
+                "ERP_L2":             "25_SHAFTS",
+                "To supplier":        "",
+                "Quality":            quality
             }
 
-
-    # COLONNA 2: Output
+    # ─── COLONNA 2: OUTPUT ───
     with col2:
         st.subheader("📤 Output")
         if "output_data" in st.session_state:
             for k, v in st.session_state["output_data"].items():
-                if k in ["Quality", "To supplier", "Description"]:
+                if k in ["Description", "Quality", "To supplier"]:
                     st.text_area(k, value=v, height=200)
                 else:
                     st.text_input(k, value=v)
 
-    # COLONNA 3: DataLoad
+    # ─── COLONNA 3: DATALOAD ───
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
+            item_code_key="beye_item_code",
             create_btn_key="gen_dl_beye",
             update_btn_key="gen_upd_beye"
         )
-
 
 elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
