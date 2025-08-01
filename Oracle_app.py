@@ -766,6 +766,11 @@ if selected_part == "Impeller, Pump":
             if stamicarbon:
                 sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+            # ✔️ Nuova qualità solo se A747_ + Tp. CB7Cu-1 (H1150 DBL)
+            if mprefix == "A747_" and mname == "Tp. CB7Cu-1 (H1150 DBL)":
+               sq_tags.append("[DE2980.001]")
+               quality_lines.append("DE2980.001 - Progettazione e Produzione giranti in 17-4 PH")
+  
 
             tag_string = " ".join(sq_tags)
             quality = "\n".join(quality_lines)
