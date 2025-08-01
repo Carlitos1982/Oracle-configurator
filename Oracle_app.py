@@ -1971,7 +1971,7 @@ elif selected_part == "Gusset, Other":
                 "Material": materiale_gusset,
                 "FPD material code": codice_fpd_gusset,
                 "Template": "FPD_BUY_1",
-                "ERP_L1": "21_FABRICATION_OR_BASEPLATES",
+                "ERP_L1": "21_FABRICATIONS_OR_BASEPLATES",
                 "ERP_L2": "29_OTHER",
                 "To supplier": "",
                 "Quality": ""
@@ -2556,7 +2556,7 @@ elif selected_part == "Baseplate, Pump":
             material = f"{mat_type} {mat_prefix} {mat_name}".strip()
             fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
             template = "FPD_BUY_4"
-            erp1 = "21_FABRICATION_OR_BASEPLATES"
+            erp1 = "21_FABRICATIONS_OR_BASEPLATES"
             erp2 = "18_FOUNDATION_PLATE"
             to_supplier = sourcing
 
