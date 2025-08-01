@@ -3028,7 +3028,7 @@ if selected_part in [
                 (materials_df["Prefix"] == prefix) &
                 (materials_df["Name"] == name)
             ]
-            casting_code      = dfm["Casting code"].iloc[0][-2:] if not dfm.empty else "XX"
+            casting_code      = str(dfm["Casting code"].iloc[0])[-2:] if "Casting code" in dfm.columns and not dfm.empty and pd.notna(dfm["Casting code"].iloc[0]) else "XX"
             fpd_material_code = dfm["FPD Code"].iloc[0]       if not dfm.empty else "NA"
             item_number       = "7" + casting_code
             pattern_parts     = [m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()]
