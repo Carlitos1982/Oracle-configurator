@@ -1,5 +1,7 @@
 import io, csv, streamlit as st
 
+import io, csv, streamlit as st
+
 def render_dataload_panel(item_code_key: str,
                           create_btn_key: str,
                           update_btn_key: str,
@@ -15,12 +17,10 @@ def render_dataload_panel(item_code_key: str,
     data = st.session_state.get(state_key, {})
 
     raw_q = data.get("Quality", "")
-    # Gestione robusta del campo Quality
     if isinstance(raw_q, list):
         raw_q = "\n".join(raw_q)
     elif not isinstance(raw_q, str):
         raw_q = ""
-
     raw_q = raw_q.strip()
 
     if not raw_q:
@@ -35,10 +35,7 @@ def render_dataload_panel(item_code_key: str,
 
     def get_val(k, default="."):
         v = str(data.get(k, "")).strip()
-        if not v:
-            # Classe ricambi deve rimanere vuota se assente
-            return "" if k == "Classe ricambi" else default
-        return v
+        return "" if k == "Classe ricambi" and not v else (v if v else default)
 
     if mode == "Create new item":
         if st.button("Generate DataLoad string", key=create_btn_key):
@@ -46,25 +43,18 @@ def render_dataload_panel(item_code_key: str,
                 st.error("❌ Please enter the item code first.")
             else:
                 fields = [
-                    "\\%FN",            item_code,
-                    "\\%TC",            get_val("Template"),
-                    "TAB",
-                    "\\%D", "\\%O",
-                    "TAB",
+                    "\\%FN", item_code,
+                    "\\%TC", get_val("Template"), "TAB",
+                    "\\%D", "\\%O", "TAB",
                     get_val("Description"),
                     *["TAB"]*6,
-                    get_val("Identificativo"),
-                    "TAB",
-                    get_val("Classe ricambi"),
-                    "TAB",
-                    "\\%O", "\\^S", "\\%TA",
-                    "TAB",
-                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}",
-                    "TAB", "FASCIA ITE", "TAB",
+                    get_val("Identificativo"), "TAB",
+                    get_val("Classe ricambi"), "TAB",
+                    "\\%O", "\\^S", "\\%TA", "TAB",
+                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "TAB", "FASCIA ITE", "TAB",
                     item_code[:1], "TAB",
                     "\\^S", "\\^{F4}", "\\%TG",
-                    get_val("Catalog"),
-                    *["TAB"]*4,
+                    get_val("Catalog"), *["TAB"]*4,
                     get_val("Disegno"), "TAB",
                     "\\^S", "\\^{F4}",
                     "\\%TR", "MATER+DESCR_FPD", *["TAB"]*2,
@@ -75,135 +65,52 @@ def render_dataload_panel(item_code_key: str,
                     "\\^S", "\\^{F4}", "\\^S"
                 ]
 
-                st.success("✅ DataLoad string successfully generated. Download the CSV file below.")
                 buf = io.StringIO()
                 writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
                 for tok in fields:
                     writer.writerow([tok])
+                st.success("✅ DataLoad string successfully generated.")
                 st.download_button(
                     "💾 Download CSV for Import",
                     data=buf.getvalue(),
                     file_name=f"dataload_{item_code}.csv",
                     mime="text/csv"
                 )
-
     else:
         if st.button("Generate Update string", key=update_btn_key):
             if not item_code:
                 st.error("❌ Please enter the item code first.")
             else:
                 fields = [
-                    "\\%VF",            item_code,
-                    "\\{NUMPAD ENTER}", "TAB",
+                    "\\%VF", item_code, "\\{NUMPAD ENTER}", "TAB",
                     get_val("Description", "*?"),
                     *["TAB"]*6,
                     get_val("Identificativo"), "TAB",
                     get_val("Classe ricambi"), "TAB",
                     "\\%O", "\\^S", "\\%TA",
-                    "\\%VF",            "FASCIA ITE", "\\{NUMPAD ENTER}", "TAB",
-                    item_code[:1],     "\\^S",
-                    "\\%VF",           "TIPO ARTICOLO", "\\{NUMPAD ENTER}", "TAB",
+                    "\\%VF", "FASCIA ITE", "\\{NUMPAD ENTER}", "TAB",
+                    item_code[:1], "\\^S",
+                    "\\%VF", "TIPO ARTICOLO", "\\{NUMPAD ENTER}", "TAB",
                     f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "\\^S", "\\^{F4}",
-                    "\\%TG",           get_val("Catalog"),
-                    *["TAB"]*3,        get_val("Disegno"), "TAB",
+                    "\\%TG", get_val("Catalog"),
+                    *["TAB"]*3, get_val("Disegno"), "TAB",
                     "\\^S", "\\^{F4}", "\\^S",
-                    "\\%VA",           "TAB", "Quality", *["TAB"]*4,
+                    "\\%VA", "TAB", "Quality", *["TAB"]*4,
                     *quality_tokens,
                     "\\^S", "\\^{F4}", "\\^S"
                 ]
 
-                st.success("✅ Update string successfully generated. Download the CSV file below.")
                 buf = io.StringIO()
                 writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
                 for tok in fields:
                     writer.writerow([tok])
-                st.do
-
-
-    if mode == "Create new item":
-        if st.button("Generate DataLoad string", key=create_btn_key):
-            if not item_code:
-                st.error("❌ Please enter the item code first.")
-            else:
-                fields = [
-                    "\\%FN",            item_code,
-                    "\\%TC",            get_val("Template"),
-                    "TAB",
-                    "\\%D", "\\%O",
-                    "TAB",
-                    get_val("Description"),
-                    *["TAB"]*6,
-                    get_val("Identificativo"),
-                    "TAB",
-                    get_val("Classe ricambi"),
-                    "TAB",
-                    "\\%O", "\\^S", "\\%TA",
-                    "TAB",
-                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}",
-                    "TAB", "FASCIA ITE", "TAB",
-                    item_code[:1], "TAB",
-                    "\\^S", "\\^{F4}", "\\%TG",
-                    get_val("Catalog"),
-                    *["TAB"]*4,
-                    get_val("Disegno"), "TAB",
-                    "\\^S", "\\^{F4}",
-                    "\\%TR", "MATER+DESCR_FPD", *["TAB"]*2,
-                    get_val("FPD material code"), "TAB",
-                    get_val("Material"), "\\^S", "\\^S", "\\^{F4}", "\\%VA",
-                    "TAB", "Quality", *["TAB"]*4,
-                    *quality_tokens,
-                    "\\^S", "\\^{F4}", "\\^S"
-                ]
-
-                st.success("✅ DataLoad string successfully generated. Download the CSV file below.")
-                buf = io.StringIO()
-                writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
-                for tok in fields:
-                    writer.writerow([tok])
-                st.download_button(
-                    "💾 Download CSV for Import",
-                    data=buf.getvalue(),
-                    file_name=f"dataload_{item_code}.csv",
-                    mime="text/csv"
-                )
-
-    else:
-        if st.button("Generate Update string", key=update_btn_key):
-            if not item_code:
-                st.error("❌ Please enter the item code first.")
-            else:
-                fields = [
-                    "\\%VF",            item_code,
-                    "\\{NUMPAD ENTER}", "TAB",
-                    get_val("Description", "*?"),
-                    *["TAB"]*6,
-                    get_val("Identificativo"), "TAB",
-                    get_val("Classe ricambi"), "TAB",
-                    "\\%O", "\\^S", "\\%TA",
-                    "\\%VF",            "FASCIA ITE", "\\{NUMPAD ENTER}", "TAB",
-                    item_code[:1],     "\\^S",
-                    "\\%VF",           "TIPO ARTICOLO", "\\{NUMPAD ENTER}", "TAB",
-                    f"{get_val('ERP_L1')}.{get_val('ERP_L2')}", "\\^S", "\\^{F4}",
-                    "\\%TG",           get_val("Catalog"),
-                    *["TAB"]*3,        get_val("Disegno"), "TAB",
-                    "\\^S", "\\^{F4}", "\\^S",
-                    "\\%VA",           "TAB", "Quality", *["TAB"]*4,
-                    *quality_tokens,
-                    "\\^S", "\\^{F4}", "\\^S"
-                ]
-
-                st.success("✅ Update string successfully generated. Download the CSV file below.")
-                buf = io.StringIO()
-                writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
-                for tok in fields:
-                    writer.writerow([tok])
+                st.success("✅ Update string successfully generated.")
                 st.download_button(
                     "💾 Download CSV for Update",
                     data=buf.getvalue(),
                     file_name=f"update_{item_code}.csv",
                     mime="text/csv"
                 )
-
 
 # Caricamento dati materiali da file Excel
 material_df = pd.read_excel("dati_config4.xlsx", sheet_name="Materials")
