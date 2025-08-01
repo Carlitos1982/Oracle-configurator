@@ -3053,6 +3053,11 @@ if selected_part in [
             if selected_part == "Impeller casting":
                 qual_tags.append("[DE2920.025]")
                 quality_lines.append("DE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E.")
+            # ✔️ Qualità DE2980.001 per Impeller casting in 17-4 PH
+            if selected_part == "Impeller casting" and prefix == "A747_" and name == "Tp. CB7Cu-1 (H1150 DBL)":
+                qual_tags.append("[DE2980.001]")
+                quality_lines.append("DE2980.001 - Progettazione e Produzione giranti in 17-4 PH")
+
 
             if selected_part == "Bearing housing casting" and st.session_state.get("cast_pump_type") == "HPX":
                 qual_tags.insert(0, "[SQ36]")
