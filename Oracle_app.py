@@ -39,11 +39,11 @@ def render_dataload_panel(item_code_key: str,
             quality_tokens.pop()
 
     def get_val(k, default="."):
-        v = data.get(k, "")
-        v = str(v).strip()
+        v = str(data.get(k, "")).strip()
         if k == "Classe ricambi":
-            return v  # lascia vuoto se non valorizzato
-        return v if v else default  # "." solo se campo richiesto è completamente assente
+            return v  # lascia vuoto
+        return v if v else default  # "." per gli altri
+
 
 
 
