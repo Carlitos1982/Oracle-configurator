@@ -3137,27 +3137,27 @@ if selected_part in [
                 else:
                     st.success("✅ Update string successfully generated.")
 
-        # --- Footer (mostrato sempre) ---
-        footer_html = """
-        <style>
-        .footer {
-            width: 100%;
-            background-color: #f0f2f6;
-            color: #444444;
-            text-align: center;
-            padding: 0.5rem 0;
-            font-size: 0.9rem;
-            border-top: 1px solid #e1e3e6;
-            margin-top: 2rem;
-        }
-        .footer a {
-            color: inherit;
-            text-decoration: underline;
-        }
-        </style>
-        <div class="footer">
-            © 2025 Flowserve – Desio Order Engineering – 
-            <a href="mailto:dzecchinel@flowserve.com">dzecchinel@flowserve.com</a>
-        </div>
-        """
-        st.markdown(footer_html, unsafe_allow_html=True)
+# --- Footer (mostrato sempre) ---
+footer_html = """
+<style>
+.footer {
+    width: 100%;
+    background-color: #f0f2f6;
+    color: #444444;
+    text-align: center;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    border-top: 1px solid #e1e3e6;
+    margin-top: 2rem;
+}
+.footer a {
+    color: inherit;
+    text-decoration: underline;
+}
+</style>
+<div class="footer">
+    © 2025 Flowserve – Desio Order Engineering – 
+    <a href="mailto:dzecchinel@flowserve.com">dzecchinel@flowserve.com</a>
+</div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)
