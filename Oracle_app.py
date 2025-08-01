@@ -39,8 +39,12 @@ def render_dataload_panel(item_code_key: str,
             quality_tokens.pop()
 
     def get_val(k, default="."):
-        v = data.get(k, "").strip()
-        return v if v else default
+        v = str(data.get(k, "")).strip()
+        if not v:
+        # Classe ricambi deve rimanere vuota se assente
+        return "" if k == "Classe ricambi" else default
+    return v
+
 
     if mode == "Create new item":
         if st.button("Generate DataLoad string", key=create_btn_key):
