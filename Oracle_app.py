@@ -3107,22 +3107,12 @@ if selected_part in [
             st.text_input("FPD Material Code", value=fpd_material_code, key="cast_out_fpd")
             st.text_input("Template", value="FPD_BUY_CASTING", key="cast_out_template")
             st.text_input("ERP L1", value="10_CASTING", key="cast_out_erp1")
-            st.text_input("ERP L2", value="23_OTHER_MATERIAL", key="cast_out_erp2")
+            st.text_input("ERP L2", value="", key="cast_out_erp2")
             st.text_input("To Supplier", value="", key="cast_out_supplier")
-            st.text_area ("Quality", value=quality_field, height=200, key="cast_out_quality")
+            st.text_area ("Quality", value=quality_field, height=120, key="cast_out_quality")
 
     # --- COLONNA 3: DATALOAD ---
        # --- COLONNA 3: DATALOAD ---
-    with col_dataload:
-        st.markdown("### 🧾 DataLoad")
-        mode         = st.radio(
-            "Operation type:",
-            ["Create new item", "Update item"],
-            key="cast_mode"
-        )
-        item_code_dl = st.text_input("Item code", key="cast_dl_code")
-
- # --- COLONNA 3: DATALOAD ---
     with col_dataload:
         st.markdown("### 🧾 DataLoad")
         mode         = st.radio(
