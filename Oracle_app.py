@@ -29,7 +29,7 @@ def render_dataload_panel(item_code_key: str,
         if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
             quality_tokens.pop()
 
-    def get_val(k, default="."):
+    def get_val(k, default=""):
         v = data.get(k, "").strip()
         return v if v else default
 
