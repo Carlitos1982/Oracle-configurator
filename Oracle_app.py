@@ -38,11 +38,8 @@ def render_dataload_panel(item_code_key: str,
         if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
             quality_tokens.pop()
 
-    def get_val(k, default="."):
-        v = str(data.get(k, "")).strip()
-        if k == "Classe ricambi":
-            return v  # lascia vuoto
-        return v if v else default  # "." per gli altri
+    def get_val(k, default=""):
+        return str(data.get(k, "")).strip()
 
 
 
