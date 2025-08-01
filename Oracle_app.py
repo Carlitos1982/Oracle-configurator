@@ -5,7 +5,6 @@ import io
 import csv
 
 import io, csv, streamlit as st
-
 def render_dataload_panel(item_code_key: str,
                           create_btn_key: str,
                           update_btn_key: str,
@@ -20,7 +19,15 @@ def render_dataload_panel(item_code_key: str,
     item_code = st.text_input("Item Code", key=item_code_key)
     data = st.session_state.get(state_key, {})
 
-    raw_q = data.get("Quality", "").strip()
+    raw_q = data.get("Quality", "")
+    # Gestione robusta del campo Quality
+    if isinstance(raw_q, list):
+        raw_q = "\n".join(raw_q)
+    elif not isinstance(raw_q, str):
+        raw_q = ""
+
+    raw_q = raw_q.strip()
+
     if not raw_q:
         quality_tokens = ["NA"]
     else:
