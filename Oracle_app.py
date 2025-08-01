@@ -40,7 +40,10 @@ def render_dataload_panel(item_code_key: str,
 
     def get_val(k, default="."):
         v = data.get(k, "").strip()
-        return v if v else default
+        if not v:
+            return "" if k == "Classe ricambi" else default
+        return v
+
 
     if mode == "Create new item":
         if st.button("Generate DataLoad string", key=create_btn_key):
