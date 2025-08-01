@@ -2592,8 +2592,8 @@ elif selected_part == "Baseplate, Pump":
                 "Material": material,
                 "FPD material code": fpd_code,
                 "Template": template,
-                "ERP L1": erp1,
-                "ERP L2": erp2,
+                "ERP_L1": erp1,
+                "ERP_L2": erp2,
                 "To Supplier": to_supplier,
                 "Quality": quality
             }
@@ -2613,8 +2613,8 @@ elif selected_part == "Baseplate, Pump":
             st.text_input("Material", value=data["Material"], key="base_out8")
             st.text_input("FPD material code", value=data["FPD material code"], key="base_out9")
             st.text_input("Template", value=data["Template"], key="base_out10")
-            st.text_input("ERP L1", value=data["ERP L1"], key="base_out11")
-            st.text_input("ERP L2", value=data["ERP L2"], key="base_out12")
+            st.text_input("ERP_L1", value=data["ERP_L1"], key="base_out11")
+            st.text_input("ERP_L2", value=data["ERP_L2"], key="base_out12")
             st.text_input("To Supplier", value=data["To Supplier"], key="base_out13")
             st.text_area("Quality", value="\n".join(data["Quality"]), height=200, key="base_out14")
 
