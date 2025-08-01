@@ -4,7 +4,6 @@ from PIL import Image
 import io
 import csv
 
-import io, csv, streamlit as st
 def render_dataload_panel(item_code_key: str,
                           create_btn_key: str,
                           update_btn_key: str,
@@ -38,11 +37,9 @@ def render_dataload_panel(item_code_key: str,
         if quality_tokens and quality_tokens[-1] == "\\{NUMPAD ENTER}":
             quality_tokens.pop()
 
-    def get_val(k, default=""):
-        return str(data.get(k, "")).strip()
-
-
-
+    def get_val(k, default="."):
+        v = data.get(k, "").strip()
+        return v if v else default
 
     if mode == "Create new item":
         if st.button("Generate DataLoad string", key=create_btn_key):
@@ -127,7 +124,6 @@ def render_dataload_panel(item_code_key: str,
                     file_name=f"update_{item_code}.csv",
                     mime="text/csv"
                 )
-
 
 
 # Caricamento dati materiali da file Excel
