@@ -1,6 +1,5 @@
 import io, csv, streamlit as st
 
-import io, csv, streamlit as st
 
 def render_dataload_panel(item_code_key: str,
                           create_btn_key: str,
@@ -113,7 +112,7 @@ def render_dataload_panel(item_code_key: str,
                 )
 
 # Caricamento dati materiali da file Excel
-material_df = pd.read_excel("dati_config4.xlsx", sheet_name="Materials")
+# material_df = pd.read_excel("dati_config4.xlsx", sheet_name="Materials")
 
 # --- Configurazione pagina wide
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
