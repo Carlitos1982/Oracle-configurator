@@ -1,10 +1,11 @@
-import streamlit as st
+import csv
+import io
+
 import pandas as pd
 from PIL import Image
-import io
-import csv
+import streamlit as st
 
-import io, csv, streamlit as st
+
 def render_dataload_panel(item_code_key: str,
                           create_btn_key: str,
                           update_btn_key: str,
