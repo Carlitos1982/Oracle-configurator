@@ -392,7 +392,7 @@ categories = {
 col1, col2 = st.columns([1, 1], gap="small")
 with col1:
     selected_category = st.selectbox("Category:",
-        [""] + list(categories.keys(, key='selectbox_1')),
+        [""] + list(categories.keys()),
         index=0
     )
 with col2:
@@ -423,7 +423,7 @@ if selected_part == "Casing, Pump":
     # COLONNA 1 – INPUT
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_2').unique()), key="casing_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="casing_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="casing_size")
 
@@ -559,7 +559,7 @@ if selected_part == "Casing Cover, Pump":
 
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_3').unique()), key="ccov_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="ccov_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="ccov_size")
 
@@ -693,7 +693,7 @@ if selected_part == "Impeller, Pump":
 
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_4').unique()), key="imp_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="imp_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="imp_size")
 
@@ -816,7 +816,7 @@ if selected_part == "Balance Bushing, Pump":
 
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_5').unique()), key="bbush_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="bbush_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="bbush_size")
 
@@ -943,7 +943,7 @@ if selected_part == "Balance Drum, Pump":
 
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_6').unique()), key="bdrum_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="bdrum_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="bdrum_size")
 
@@ -1065,7 +1065,7 @@ if selected_part == "Balance Disc, Pump":
 
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_7').unique()), key="bdisc_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="bdisc_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="bdisc_size")
 
@@ -1311,12 +1311,12 @@ if selected_part == "Gasket, Spiral Wound":
             "ULTRA HIGH PRESSURE - m=3; y=23500psi (3 stripes)": ("ULTRA HIGH PRESSURE", "m=3; y=23500psi", "3 stripes")
         }
 
-        winding_gsw    = st.selectbox("Winding Material", list(winding_options, key='selectbox_8'), key="gsw_winding")
-        filler_gsw     = st.selectbox("Filler",            list(filler_options, key='selectbox_9'),  key="gsw_filler")
+        winding_gsw    = st.selectbox("Winding Material", list(winding_options), key="gsw_winding")
+        filler_gsw     = st.selectbox("Filler",            list(filler_options),  key="gsw_filler")
         out_dia_gsw    = st.text_input("Outer Diameter (MM)", key="gsw_out_dia")
         in_dia_gsw     = st.text_input("Inner Diameter (MM)", key="gsw_in_dia")
         thickness_gsw  = st.text_input("Thickness (MM)",      key="gsw_thick")
-        rating_gsw     = st.selectbox("Rating", list(rating_mapping, key='selectbox_10'), key="gsw_rating")
+        rating_gsw     = st.selectbox("Rating", list(rating_mapping), key="gsw_rating")
         dwg_gsw        = st.text_input("Dwg/doc number",       key="gsw_dwg")
         note_gsw       = st.text_area("Note", height=80,       key="gsw_note")
         hf_service_gsw = st.checkbox(
@@ -2171,7 +2171,7 @@ if selected_part == "Ring, Wear":
         st.subheader("✏️ Input")
 
         ring_type = st.selectbox("Type", ["Stationary", "Rotary"], key="ring_type")
-        model = st.selectbox("Pump Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_11').unique()), key="ring_model")
+        model = st.selectbox("Pump Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="ring_model")
         int_diam = st.text_input("Internal diameter (mm)", key="ring_id")
         out_diam = st.text_input("Outer diameter (mm)", key="ring_od")
         note = st.text_area("Note", height=80, key="ring_note")
@@ -2386,7 +2386,7 @@ if selected_part == "Shaft, Pump":
     with col1:
         st.subheader("✏️ Input")
         model = st.selectbox("Product Type",
-            ["", "QL", "QLQ"] + [m for m in sorted(size_df["Pump Model"].dropna(, key='selectbox_12').unique()) if m not in ["QL","QLQ"]],
+            ["", "QL", "QLQ"] + [m for m in sorted(size_df["Pump Model"].dropna().unique()) if m not in ["QL","QLQ"]],
             key="shaft_model"
         )
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
@@ -2512,8 +2512,8 @@ elif selected_part == "Baseplate, Pump":
     with col1:
         st.subheader("✏️ Input")
 
-        model = st.selectbox("Pump Type", size_df["Pump Model"].dropna(, key='selectbox_14').unique())
-        size = st.selectbox("Pump Size", size_df[size_df["Pump Model"] == model]["Size"].dropna(, key='selectbox_15').unique())
+        model = st.selectbox("Pump Type", size_df["Pump Model"].dropna().unique())
+        size = st.selectbox("Pump Size", size_df[size_df["Pump Model"] == model]["Size"].dropna().unique())
 
         length = st.number_input("Length (mm)", min_value=0)
         width = st.number_input("Width (mm)", min_value=0)
@@ -2523,7 +2523,7 @@ elif selected_part == "Baseplate, Pump":
 
         drawing = st.text_input("DWG/Doc")
         note = st.text_area("Note")
-        mat_type = st.selectbox("Material Type", materials_df["Material Type"].dropna(, key='selectbox_17').unique(), key="base_mat_type")
+        mat_type = st.selectbox("Material Type", materials_df["Material Type"].dropna().unique(), key="base_mat_type")
 
         filtered_prefix = materials_df[materials_df["Material Type"] == mat_type]["Prefix"].dropna().unique()
         mat_prefix = st.selectbox("Material Prefix", filtered_prefix, key="base_mat_prefix")
@@ -3326,7 +3326,7 @@ categories = {
 col1, col2 = st.columns([1, 1], gap="small")
 with col1:
     selected_category = st.selectbox("Category:",
-        [""] + list(categories.keys(, key='selectbox_18')),
+        [""] + list(categories.keys()),
         index=0
     )
 with col2:
@@ -3357,7 +3357,7 @@ if selected_part == "Casing, Pump":
     # COLONNA 1 – INPUT
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_19').unique()), key="casing_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="casing_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="casing_size")
 
@@ -3493,7 +3493,7 @@ if selected_part == "Casing Cover, Pump":
 
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_20').unique()), key="ccov_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="ccov_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="ccov_size")
 
@@ -3627,7 +3627,7 @@ if selected_part == "Impeller, Pump":
 
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_21').unique()), key="imp_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="imp_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="imp_size")
 
@@ -3750,7 +3750,7 @@ if selected_part == "Balance Bushing, Pump":
 
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_22').unique()), key="bbush_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="bbush_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="bbush_size")
 
@@ -3877,7 +3877,7 @@ if selected_part == "Balance Drum, Pump":
 
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_23').unique()), key="bdrum_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="bdrum_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="bdrum_size")
 
@@ -3999,7 +3999,7 @@ if selected_part == "Balance Disc, Pump":
 
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_24').unique()), key="bdisc_model")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="bdisc_model")
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
         size = st.selectbox("Pump Size", [""] + size_list, key="bdisc_size")
 
@@ -4245,12 +4245,12 @@ if selected_part == "Gasket, Spiral Wound":
             "ULTRA HIGH PRESSURE - m=3; y=23500psi (3 stripes)": ("ULTRA HIGH PRESSURE", "m=3; y=23500psi", "3 stripes")
         }
 
-        winding_gsw    = st.selectbox("Winding Material", list(winding_options, key='selectbox_25'), key="gsw_winding")
-        filler_gsw     = st.selectbox("Filler",            list(filler_options, key='selectbox_26'),  key="gsw_filler")
+        winding_gsw    = st.selectbox("Winding Material", list(winding_options), key="gsw_winding")
+        filler_gsw     = st.selectbox("Filler",            list(filler_options),  key="gsw_filler")
         out_dia_gsw    = st.text_input("Outer Diameter (MM)", key="gsw_out_dia")
         in_dia_gsw     = st.text_input("Inner Diameter (MM)", key="gsw_in_dia")
         thickness_gsw  = st.text_input("Thickness (MM)",      key="gsw_thick")
-        rating_gsw     = st.selectbox("Rating", list(rating_mapping, key='selectbox_27'), key="gsw_rating")
+        rating_gsw     = st.selectbox("Rating", list(rating_mapping), key="gsw_rating")
         dwg_gsw        = st.text_input("Dwg/doc number",       key="gsw_dwg")
         note_gsw       = st.text_area("Note", height=80,       key="gsw_note")
         hf_service_gsw = st.checkbox(
@@ -5105,7 +5105,7 @@ if selected_part == "Ring, Wear":
         st.subheader("✏️ Input")
 
         ring_type = st.selectbox("Type", ["Stationary", "Rotary"], key="ring_type")
-        model = st.selectbox("Pump Type", [""] + sorted(size_df["Pump Model"].dropna(, key='selectbox_28').unique()), key="ring_model")
+        model = st.selectbox("Pump Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="ring_model")
         int_diam = st.text_input("Internal diameter (mm)", key="ring_id")
         out_diam = st.text_input("Outer diameter (mm)", key="ring_od")
         note = st.text_area("Note", height=80, key="ring_note")
@@ -5320,7 +5320,7 @@ if selected_part == "Shaft, Pump":
     with col1:
         st.subheader("✏️ Input")
         model = st.selectbox("Product Type",
-            ["", "QL", "QLQ"] + [m for m in sorted(size_df["Pump Model"].dropna(, key='selectbox_29').unique()) if m not in ["QL","QLQ"]],
+            ["", "QL", "QLQ"] + [m for m in sorted(size_df["Pump Model"].dropna().unique()) if m not in ["QL","QLQ"]],
             key="shaft_model"
         )
         size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
@@ -5446,8 +5446,8 @@ elif selected_part == "Baseplate, Pump":
     with col1:
         st.subheader("✏️ Input")
 
-        model = st.selectbox("Pump Type", size_df["Pump Model"].dropna(, key='selectbox_31').unique())
-        size = st.selectbox("Pump Size", size_df[size_df["Pump Model"] == model]["Size"].dropna(, key='selectbox_32').unique())
+        model = st.selectbox("Pump Type", size_df["Pump Model"].dropna().unique())
+        size = st.selectbox("Pump Size", size_df[size_df["Pump Model"] == model]["Size"].dropna().unique())
 
         length = st.number_input("Length (mm)", min_value=0)
         width = st.number_input("Width (mm)", min_value=0)
@@ -5457,7 +5457,7 @@ elif selected_part == "Baseplate, Pump":
 
         drawing = st.text_input("DWG/Doc")
         note = st.text_area("Note")
-        mat_type = st.selectbox("Material Type", materials_df["Material Type"].dropna(, key='selectbox_34').unique(), key="base_mat_type")
+        mat_type = st.selectbox("Material Type", materials_df["Material Type"].dropna().unique(), key="base_mat_type")
 
         filtered_prefix = materials_df[materials_df["Material Type"] == mat_type]["Prefix"].dropna().unique()
         mat_prefix = st.selectbox("Material Prefix", filtered_prefix, key="base_mat_prefix")
