@@ -4,7 +4,7 @@ from PIL import Image
 import io
 import csv
 
-
+import io, csv, streamlit as st
 def render_dataload_panel(item_code_key: str,
                           create_btn_key: str,
                           update_btn_key: str,
@@ -19,7 +19,15 @@ def render_dataload_panel(item_code_key: str,
     item_code = st.text_input("Item Code", key=item_code_key)
     data = st.session_state.get(state_key, {})
 
-    raw_q = data.get("Quality", "").strip()
+    raw_q = data.get("Quality", "")
+    # Gestione robusta del campo Quality
+    if isinstance(raw_q, list):
+        raw_q = "\n".join(raw_q)
+    elif not isinstance(raw_q, str):
+        raw_q = ""
+
+    raw_q = raw_q.strip()
+
     if not raw_q:
         quality_tokens = ["NA"]
     else:
@@ -391,7 +399,8 @@ categories = {
 # --- Selezione categoria e parte affiancate
 col1, col2 = st.columns([1, 1], gap="small")
 with col1:
-    selected_category = st.selectbox("Category:",
+    selected_category = st.selectbox(
+        "Category:",
         [""] + list(categories.keys()),
         index=0
     )
@@ -764,6 +773,11 @@ if selected_part == "Impeller, Pump":
             if stamicarbon:
                 sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+            # ✔️ Nuova qualità solo se A747_ + Tp. CB7Cu-1 (H1150 DBL)
+            if mprefix == "A747_" and mname == "Tp. CB7Cu-1 (H1150 DBL)":
+               sq_tags.append("[DE2980.001]")
+               quality_lines.append("DE2980.001 - Progettazione e Produzione giranti in 17-4 PH")
+  
 
             tag_string = " ".join(sq_tags)
             quality = "\n".join(quality_lines)
@@ -1394,9 +1408,139 @@ if selected_part == "Gasket, Spiral Wound":
 if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
     col1, col2, col3 = st.columns(3)
 
+    # --------------------- COLONNA 1: INPUT ---------------------
+    with col1:
+        st.subheader("✏️ Input")
+
+        # Dimensioni
+        od_bear    = st.text_input("Outside diameter (OD)", key="bear_od")
+        id_bear    = st.text_input("Inside diameter (ID)",  key="bear_id")
+        width_bear = st.text_input("Width",                 key="bear_width")
+
+        # ex Additional Features -> Note
+        note_bear = st.text_area("Note", height=80, key="bear_note")
+
+        # Materiale (Type -> Prefix -> Name)
+        mtype_bear = st.selectbox("Material Type", [""] + material_types, key="bear_mtype")
+        pref_df_bear = materials_df[
+            (materials_df["Material Type"] == mtype_bear) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_bear = sorted(pref_df_bear["Prefix"].unique()) if mtype_bear != "MISCELLANEOUS" else []
+        mprefix_bear = st.selectbox("Material Prefix", [""] + prefixes_bear, key="bear_mprefix")
+
+        if mtype_bear == "MISCELLANEOUS":
+            names_bear = materials_df[materials_df["Material Type"] == mtype_bear]["Name"].dropna().tolist()
+        else:
+            names_bear = materials_df[
+                (materials_df["Material Type"] == mtype_bear) &
+                (materials_df["Prefix"] == mprefix_bear)
+            ]["Name"].dropna().tolist()
+        mname_bear = st.selectbox("Material Name", [""] + names_bear, key="bear_mname")
+
+        # ex Material add. features -> Material note
+        material_note_bear = st.text_area("Material note", height=60, key="bear_matnote")
+
+        dwg_bear = st.text_input("Dwg/doc number", key="bear_dwg")
+
+        if st.button("Generate Output", key="bear_gen"):
+            materiale_bear = (
+                mname_bear if mtype_bear == "MISCELLANEOUS"
+                else f"{mtype_bear} {mprefix_bear} {mname_bear}".strip()
+            )
+
+            match_bear = materials_df[
+                (materials_df["Material Type"] == mtype_bear) &
+                (materials_df["Prefix"] == mprefix_bear) &
+                (materials_df["Name"] == mname_bear)
+            ]
+            codice_fpd_bear = match_bear["FPD Code"].values[0] if not match_bear.empty else ""
+
+            # Blocchetto dimensioni
+            dim_bear = " - ".join([
+                f"OD {od_bear}" if od_bear else "",
+                f"ID {id_bear}" if id_bear else "",
+                f"W {width_bear}" if width_bear else ""
+            ]).strip(" -")
+
+            # Descrizione SENZA etichetta “Material:”
+            descr_parts_bear = [
+                "BEARING, HYDROSTATIC/HYDRODYNAMIC",
+                dim_bear,
+                note_bear,
+                materiale_bear,
+                material_note_bear
+            ]
+            descr_bear = "*" + " - ".join([p for p in descr_parts_bear if p])
+
+            st.session_state["output_data"] = {
+                "Item": "50122…",
+                "Description": descr_bear,
+                "Identificativo": "3010-ANTI-FRICTION BEARING",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ALBERO",
+                "Disegno": dwg_bear,
+                "Material": materiale_bear,
+                "FPD material code": codice_fpd_bear,
+                "Template": "FPD_BUY_1",
+                "ERP_L1": "20_TURNKEY_MACHINING",
+                "ERP_L2": "29_OTHER",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # --------------------- COLONNA 2: OUTPUT ---------------------
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=200)
+                else:
+                    st.text_input(k, value=v)
+
+    # --------------------- COLONNA 3: DATALOAD ---------------------
+    with col3:
+        render_dataload_panel(
+            item_code_key="beye_item_code", 
+            create_btn_key="gen_dl_beye",
+            update_btn_key="gen_upd_beye"
+        )
+    
 # --- BEARING, ROLLING
 if selected_part == "Bearing, Rolling":
     col1, col2, col3 = st.columns(3)
+
+    # --------------------- COLONNA 1: INPUT ---------------------
+    with col1:
+        st.subheader("✏️ Input")
+
+        # Modello SKF base
+        skf_choice = st.selectbox("SKF Model", [""] + skf_models + ["Altro..."], key="br_model")
+        custom_model = ""
+        if skf_choice == "Altro...":
+            custom_model = st.text_input("Inserisci modello SKF", key="br_model_custom")
+
+        # Design / pairing / sigilli ecc.
+        design_opt     = st.selectbox("Design / Contact angle", skf_design, key="br_design")
+        pairing_opt    = st.selectbox("Pairing / Preload",      skf_pairing, key="br_pairing")
+        seal_opt       = st.selectbox("Seals/Shields",          skf_seals, key="br_seal")
+        cage_opt       = st.selectbox("Cage type",              skf_cages, key="br_cage")
+        clearance_opt  = st.selectbox("Clearance",              skf_clearances, key="br_clear")
+        tolerance_opt  = st.selectbox("Tolerance class",        skf_tolerances, key="br_tol")
+        heat_opt       = st.selectbox("Heat treatment",         skf_heat, key="br_heat")
+        grease_opt     = st.selectbox("Grease / Lubricant",     skf_greases, key="br_grease")
+        vibration_opt  = st.selectbox("Vibration spec",         skf_vibration, key="br_vibration")
+
+        extra_suffix = st.text_input("Extra suffix (optional)", key="br_extra")
+
+        # Dimensioni (opzionali)
+        od_roll    = st.text_input("Outside diameter (OD)", key="br_od")
+        id_roll    = st.text_input("Inside diameter (ID)",  key="br_id")
+        width_roll = st.text_input("Width",                 key="br_width")
+
+        note_roll = st.text_area("Note", height=80, key="br_note")
 
         # --- Funzioni/dizionari già definiti in alto ---
         def bearing_type_from_code(code: str) -> str:
@@ -1493,9 +1637,108 @@ if selected_part == "Bearing, Rolling":
                 "Quality": ""
             }
 
+    # --------------------- COLONNA 2: OUTPUT ---------------------
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=200)
+                else:
+                    st.text_input(k, value=v)
+
+    # --------------------- COLONNA 3: DATALOAD ---------------------
+    with col3:
+        render_dataload_panel(
+            item_code_key="beye_item_code", 
+            create_btn_key="gen_dl_beye",
+            update_btn_key="gen_upd_beye"
+        )
+
+
+
 # --- BOLT, EYE
 if selected_part == "Bolt, Eye":
     col1, col2, col3 = st.columns(3)
+
+    # --------------------- COLONNA 1: INPUT ---------------------
+    with col1:
+        st.subheader("✏️ Input")
+        size   = st.selectbox("Size",   [""] + bolt_sizes,   key="beye_size")
+        length = st.selectbox("Length", [""] + bolt_lengths, key="beye_length")
+
+        note                 = st.text_area("Note", height=80, key="beye_note")
+        mtype_beye           = st.selectbox("Material Type", [""] + material_types, key="beye_mtype")
+        pref_df_beye         = materials_df[(materials_df["Material Type"] == mtype_beye) & (materials_df["Prefix"].notna())]
+        prefixes_beye        = sorted(pref_df_beye["Prefix"].unique()) if mtype_beye != "MISCELLANEOUS" else []
+        mprefix_beye         = st.selectbox("Material Prefix", [""] + prefixes_beye, key="beye_mprefix")
+        names_beye = (
+            materials_df[materials_df["Material Type"] == mtype_beye]["Name"].dropna().tolist()
+            if mtype_beye == "MISCELLANEOUS"
+            else materials_df[
+                (materials_df["Material Type"] == mtype_beye) &
+                (materials_df["Prefix"] == mprefix_beye)
+            ]["Name"].dropna().tolist()
+        )
+        mname_beye           = st.selectbox("Material Name", [""] + names_beye, key="beye_mname")
+        material_note_beye   = st.text_area("Material note", height=60, key="beye_matnote")
+        dwg                  = st.text_input("Dwg/doc number", key="beye_dwg")
+
+        if st.button("Generate Output", key="beye_gen"):
+            # costruisco il materiale e il codice FPD
+            if mtype_beye == "MISCELLANEOUS":
+                materiale = mname_beye
+            else:
+                materiale = f"{mtype_beye} {mprefix_beye} {mname_beye}".strip()
+
+            match = materials_df[
+                (materials_df["Material Type"] == mtype_beye) &
+                (materials_df["Prefix"] == mprefix_beye) &
+                (materials_df["Name"] == mname_beye)
+            ]
+            codice_fpd = match["FPD Code"].values[0] if not match.empty else ""
+
+            # descrizione: Size → Length → Note → Materiale → Material note
+            descr_parts = ["EYE BOLT"]
+            for val in [size, length, note, materiale, material_note_beye]:
+                if val:
+                    descr_parts.append(val)
+            descr = "*" + " - ".join(descr_parts)
+
+            st.session_state["output_data"] = {
+                "Item": "55150…",
+                "Description": descr,
+                "Identificativo": "6583-EYE BOLT",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ARTVARI",
+                "Disegno": dwg,
+                "Material": materiale,
+                "FPD material code": codice_fpd,
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "60_FASTENER",
+                "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # --------------------- COLONNA 2: OUTPUT ---------------------
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=200)
+                else:
+                    st.text_input(k, value=v)
+
+    # --------------------- COLONNA 3: DATALOAD ---------------------
+    with col3:
+        render_dataload_panel(
+            item_code_key="beye_item_code", 
+            create_btn_key="gen_dl_beye",
+            update_btn_key="gen_upd_beye"
+        )
 
 # --- BOLT, HEXAGONAL
 if selected_part == "Bolt, Hexagonal":
@@ -1574,6 +1817,24 @@ if selected_part == "Bolt, Hexagonal":
             }
 
    
+
+    # --------------------- COLONNA 2: OUTPUT ---------------------
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=200)
+                else:
+                    st.text_input(k, value=v)
+
+    # --------------------- COLONNA 3: DATALOAD ---------------------
+    with col3:
+        render_dataload_panel(
+            item_code_key="beye_item_code", 
+            create_btn_key="gen_dl_beye",
+            update_btn_key="gen_upd_beye"
+        )
 
 # --- GASKET, RING TYPE JOINT
 if selected_part == "Gasket, Ring Type Joint":
@@ -1740,9 +2001,181 @@ elif selected_part == "Gusset, Other":
 if selected_part == "Stud, Threaded":
     col1, col2, col3 = st.columns(3)
 
+    # --------------------- COLONNA 1: INPUT ---------------------
+    with col1:
+        st.subheader("✏️ Input")
+
+        size_stud   = st.selectbox("Size",   [""] + bolt_sizes,   key="stud_size")
+        length_stud = st.selectbox("Length", [""] + bolt_lengths, key="stud_length")
+
+        # Partial / Full threaded
+        thread_type = st.radio("Thread type", ["Partial", "Full"], index=0, key="stud_thread_type")
+
+        note_stud = st.text_area("Note", height=80, key="stud_note")
+
+        # Selezione materiale (Type -> Prefix -> Name)
+        mtype_stud = st.selectbox("Material Type", [""] + material_types, key="stud_mtype")
+        pref_df_stud = materials_df[
+            (materials_df["Material Type"] == mtype_stud) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_stud = sorted(pref_df_stud["Prefix"].unique()) if mtype_stud != "MISCELLANEOUS" else []
+        mprefix_stud = st.selectbox("Material Prefix", [""] + prefixes_stud, key="stud_mprefix")
+
+        if mtype_stud == "MISCELLANEOUS":
+            names_stud = materials_df[materials_df["Material Type"] == mtype_stud]["Name"].dropna().tolist()
+        else:
+            names_stud = materials_df[
+                (materials_df["Material Type"] == mtype_stud) &
+                (materials_df["Prefix"] == mprefix_stud)
+            ]["Name"].dropna().tolist()
+        mname_stud = st.selectbox("Material Name", [""] + names_stud, key="stud_mname")
+
+        material_note_stud = st.text_area("Material note", height=60, key="stud_matnote")
+
+        # Disegno
+        dwg_stud = st.text_input("Dwg/doc number", key="stud_dwg")
+
+        if st.button("Generate Output", key="stud_gen"):
+            materiale_stud = (
+                mname_stud if mtype_stud == "MISCELLANEOUS"
+                else f"{mtype_stud} {mprefix_stud} {mname_stud}".strip()
+            )
+
+            match_stud = materials_df[
+                (materials_df["Material Type"] == mtype_stud) &
+                (materials_df["Prefix"] == mprefix_stud) &
+                (materials_df["Name"] == mname_stud)
+            ]
+            codice_fpd_stud = match_stud["FPD Code"].values[0] if not match_stud.empty else ""
+
+            # Descrizione: Size → Length → Thread type → Note → Material → Material note
+            descr_parts_stud = ["THREADED STUD", size_stud, length_stud, thread_type.upper()+" THREADED" if thread_type else "", note_stud, materiale_stud, material_note_stud]
+            descr_stud = "*" + " - ".join([p for p in descr_parts_stud if p])
+
+            st.session_state["output_data"] = {
+                "Item": "56146…",
+                "Description": descr_stud,
+                "Identificativo": "6572-STUD",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ARTVARI",
+                "Disegno": dwg_stud,
+                "Material": materiale_stud,
+                "FPD material code": codice_fpd_stud,
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "60_FASTENER",
+                "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # --------------------- COLONNA 2: OUTPUT ---------------------
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=200)
+                else:
+                    st.text_input(k, value=v)
+
+    # --------------------- COLONNA 3: DATALOAD ---------------------
+    with col3:
+        render_dataload_panel(
+            item_code_key="beye_item_code", 
+            create_btn_key="gen_dl_beye",
+            update_btn_key="gen_upd_beye"
+        )
 # --- NUT, HEX
 if selected_part == "Nut, Hex":
     col1, col2, col3 = st.columns(3)
+
+    # --------------------- COLONNA 1: INPUT ---------------------
+    with col1:
+        st.subheader("✏️ Input")
+
+        nut_type = "Heavy"  # fisso
+        size_nut = st.selectbox("Size", [""] + bolt_sizes, key="nut_size")
+
+        note_nut = st.text_area("Note", height=80, key="nut_note")
+
+        # Selezione materiale (Type -> Prefix -> Name)
+        mtype_nut = st.selectbox("Material Type", [""] + material_types, key="nut_mtype")
+        pref_df_nut = materials_df[
+            (materials_df["Material Type"] == mtype_nut) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_nut = sorted(pref_df_nut["Prefix"].unique()) if mtype_nut != "MISCELLANEOUS" else []
+        mprefix_nut = st.selectbox("Material Prefix", [""] + prefixes_nut, key="nut_mprefix")
+
+        if mtype_nut == "MISCELLANEOUS":
+            names_nut = materials_df[materials_df["Material Type"] == mtype_nut]["Name"].dropna().tolist()
+        else:
+            names_nut = materials_df[
+                (materials_df["Material Type"] == mtype_nut) &
+                (materials_df["Prefix"] == mprefix_nut)
+            ]["Name"].dropna().tolist()
+        mname_nut = st.selectbox("Material Name", [""] + names_nut, key="nut_mname")
+
+        material_note_nut = st.text_area("Material note", height=60, key="nut_matnote")
+
+        # dwg non usato
+        dwg_nut = ""
+
+        if st.button("Generate Output", key="nut_gen"):
+            materiale_nut = (
+                mname_nut if mtype_nut == "MISCELLANEOUS"
+                else f"{mtype_nut} {mprefix_nut} {mname_nut}".strip()
+            )
+
+            match_nut = materials_df[
+                (materials_df["Material Type"] == mtype_nut) &
+                (materials_df["Prefix"] == mprefix_nut) &
+                (materials_df["Name"] == mname_nut)
+            ]
+            codice_fpd_nut = match_nut["FPD Code"].values[0] if not match_nut.empty else ""
+
+            # Descrizione: Type -> Size -> Note -> Material -> Material note
+            descr_parts_nut = ["HEX NUT", nut_type, size_nut, note_nut, materiale_nut, material_note_nut]
+            descr_nut = "*" + " - ".join([p for p in descr_parts_nut if p])
+
+            st.session_state["output_data"] = {
+                "Item": "56030…",
+                "Description": descr_nut,
+                "Identificativo": "6581-HEXAGON NUT",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ARTVARI",
+                "Disegno": dwg_nut,
+                "Material": materiale_nut,
+                "FPD material code": codice_fpd_nut,
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "60_FASTENER",
+                "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # --------------------- COLONNA 2: OUTPUT ---------------------
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=200)
+                else:
+                    st.text_input(k, value=v)
+
+    # --------------------- COLONNA 3: DATALOAD ---------------------
+    with col3:
+        render_dataload_panel(
+            item_code_key="beye_item_code", 
+            create_btn_key="gen_dl_beye",
+            update_btn_key="gen_upd_beye"
+        )
+
+
 
 # --- RING, WEAR
 if selected_part == "Ring, Wear":
@@ -1850,6 +2283,99 @@ if selected_part == "Ring, Wear":
 if selected_part == "Pin, Dowel":
     col1, col2, col3 = st.columns(3)
 
+    # --------------------- COLONNA 1: INPUT ---------------------
+    with col1:
+        st.subheader("✏️ Input")
+
+        # Unisco mm + inch nelle tendine (aggiungo " mm" ai metrici)
+        diam_list = [""] + [f"{d} mm" for d in dowel_diameters_mm_raw] + dowel_diameters_in
+        len_list  = [""] + dowel_lengths_mm + dowel_lengths_in
+
+        diameter_pin = st.selectbox("Diameter", diam_list, key="pin_diam")
+        length_pin   = st.selectbox("Length",   len_list,  key="pin_len")
+
+        note_pin = st.text_area("Note", height=80, key="pin_note")
+
+        # Materiale (Type -> Prefix -> Name)
+        mtype_pin = st.selectbox("Material Type", [""] + material_types, key="pin_mtype")
+        pref_df_pin = materials_df[
+            (materials_df["Material Type"] == mtype_pin) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_pin = sorted(pref_df_pin["Prefix"].unique()) if mtype_pin != "MISCELLANEOUS" else []
+        mprefix_pin = st.selectbox("Material Prefix", [""] + prefixes_pin, key="pin_mprefix")
+
+        if mtype_pin == "MISCELLANEOUS":
+            names_pin = materials_df[materials_df["Material Type"] == mtype_pin]["Name"].dropna().tolist()
+        else:
+            names_pin = materials_df[
+                (materials_df["Material Type"] == mtype_pin) &
+                (materials_df["Prefix"] == mprefix_pin)
+            ]["Name"].dropna().tolist()
+        mname_pin = st.selectbox("Material Name", [""] + names_pin, key="pin_mname")
+
+        material_note_pin = st.text_area("Material note", height=60, key="pin_matnote")
+
+        if st.button("Generate Output", key="pin_gen"):
+            materiale_pin = (
+                mname_pin if mtype_pin == "MISCELLANEOUS"
+                else f"{mtype_pin} {mprefix_pin} {mname_pin}".strip()
+            )
+
+            match_pin = materials_df[
+                (materials_df["Material Type"] == mtype_pin) &
+                (materials_df["Prefix"] == mprefix_pin) &
+                (materials_df["Name"] == mname_pin)
+            ]
+            codice_fpd_pin = match_pin["FPD Code"].values[0] if not match_pin.empty else ""
+
+            # Diametro e lunghezza in un unico blocco con L=
+            dim_block = f"{diameter_pin} - L={length_pin}"
+
+            descr_parts_pin = [
+                "DOWEL PIN",
+                dim_block,
+                note_pin,
+                materiale_pin,
+                material_note_pin
+            ]
+            descr_pin = "*" + " - ".join([p for p in descr_parts_pin if p])
+
+            st.session_state["output_data"] = {
+                "Item": "56230…",
+                "Description": descr_pin,
+                "Identificativo": "6810-DOWEL PIN",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ARTVARI",
+                "Disegno": "",
+                "Material": materiale_pin,
+                "FPD material code": codice_fpd_pin,
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "60_FASTENER",
+                "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # --------------------- COLONNA 2: OUTPUT ---------------------
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=200)
+                else:
+                    st.text_input(k, value=v)
+
+    # --------------------- COLONNA 3: DATALOAD ---------------------
+    with col3:
+        render_dataload_panel(
+            item_code_key="beye_item_code", 
+            create_btn_key="gen_dl_beye",
+            update_btn_key="gen_upd_beye"
+        )
+
 # --- SHAFT, PUMP ---
 if selected_part == "Shaft, Pump":
     col1, col2, col3 = st.columns(3)
@@ -1871,7 +2397,8 @@ if selected_part == "Shaft, Pump":
     # ─── COLONNA 1: INPUT ───
     with col1:
         st.subheader("✏️ Input")
-        model = st.selectbox("Product Type",
+        model = st.selectbox(
+            "Product Type",
             ["", "QL", "QLQ"] + [m for m in sorted(size_df["Pump Model"].dropna().unique()) if m not in ["QL","QLQ"]],
             key="shaft_model"
         )
@@ -1879,7 +2406,7 @@ if selected_part == "Shaft, Pump":
         size = st.selectbox("Pump Size", [""] + size_list, key="shaft_size")
 
         brg_type = st.selectbox("Bearing Type", [""] + brg_types, key="shaft_brg_type")
-        brg_size = st.selectbox("Bearing Size", [""] + brg_size_options.get(brg_type, [], key='selectbox_13'), key="shaft_brg_size")
+        brg_size = st.selectbox("Bearing Size", [""] + brg_size_options.get(brg_type, []), key="shaft_brg_size")
 
         max_diam = st.text_input("Max diameter (mm)", key="shaft_diam")
         max_len  = st.text_input("Max length (mm)", key="shaft_len")
@@ -2005,7 +2532,7 @@ elif selected_part == "Baseplate, Pump":
         width = st.number_input("Width (mm)", min_value=0)
         weight = st.number_input("Weight (kg)", min_value=0)
 
-        sourcing = st.selectbox("Sourcing", ["EUROPEAN", "INDIAN", "CHINESE"], key='selectbox_16')
+        sourcing = st.selectbox("Sourcing", ["EUROPEAN", "INDIAN", "CHINESE"])
 
         drawing = st.text_input("DWG/Doc")
         note = st.text_area("Note")
@@ -2312,9 +2839,118 @@ if selected_part == "Screw, Cap":
 
 
 
+    # --------------------- COLONNA 2: OUTPUT ---------------------
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=200)
+                else:
+                    st.text_input(k, value=v)
+
+    # --------------------- COLONNA 3: DATALOAD ---------------------
+    with col3:
+        render_dataload_panel(
+            item_code_key="beye_item_code", 
+            create_btn_key="gen_dl_beye",
+            update_btn_key="gen_upd_beye"
+        )
+
+
+
+
 # --- SCREW, GRUB
 if selected_part == "Screw, Grub":
     col1, col2, col3 = st.columns(3)
+
+    # --------------------- COLONNA 1: INPUT ---------------------
+    with col1:
+        st.subheader("✏️ Input")
+
+        size_grub   = st.selectbox("Size",   [""] + bolt_sizes,   key="grub_size")
+        length_grub = st.selectbox("Length", [""] + bolt_lengths, key="grub_length")
+
+        note_grub = st.text_area("Note", height=80, key="grub_note")
+
+        # Materiale (Type -> Prefix -> Name)
+        mtype_grub = st.selectbox("Material Type", [""] + material_types, key="grub_mtype")
+        pref_df_grub = materials_df[
+            (materials_df["Material Type"] == mtype_grub) &
+            (materials_df["Prefix"].notna())
+        ]
+        prefixes_grub = sorted(pref_df_grub["Prefix"].unique()) if mtype_grub != "MISCELLANEOUS" else []
+        mprefix_grub = st.selectbox("Material Prefix", [""] + prefixes_grub, key="grub_mprefix")
+
+        if mtype_grub == "MISCELLANEOUS":
+            names_grub = materials_df[materials_df["Material Type"] == mtype_grub]["Name"].dropna().tolist()
+        else:
+            names_grub = materials_df[
+                (materials_df["Material Type"] == mtype_grub) &
+                (materials_df["Prefix"] == mprefix_grub)
+            ]["Name"].dropna().tolist()
+        mname_grub = st.selectbox("Material Name", [""] + names_grub, key="grub_mname")
+
+        material_note_grub = st.text_area("Material note", height=60, key="grub_matnote")
+
+        if st.button("Generate Output", key="grub_gen"):
+            materiale_grub = (
+                mname_grub if mtype_grub == "MISCELLANEOUS"
+                else f"{mtype_grub} {mprefix_grub} {mname_grub}".strip()
+            )
+
+            match_grub = materials_df[
+                (materials_df["Material Type"] == mtype_grub) &
+                (materials_df["Prefix"] == mprefix_grub) &
+                (materials_df["Name"] == mname_grub)
+            ]
+            codice_fpd_grub = match_grub["FPD Code"].values[0] if not match_grub.empty else ""
+
+            descr_parts_grub = [
+                "GRUB SCREW",
+                size_grub,
+                length_grub,
+                note_grub,
+                materiale_grub,
+                material_note_grub
+            ]
+            descr_grub = "*" + " - ".join([p for p in descr_parts_grub if p])
+
+            st.session_state["output_data"] = {
+                "Item": "56310…",
+                "Description": descr_grub,
+                "Identificativo": "6814-GRUB SCREW",
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ARTVARI",
+                "Disegno": "",
+                "Material": materiale_grub,
+                "FPD material code": codice_fpd_grub,
+                "Template": "FPD_BUY_2",
+                "ERP_L1": "60_FASTENER",
+                "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
+                "To supplier": "",
+                "Quality": ""
+            }
+
+    # --------------------- COLONNA 2: OUTPUT ---------------------
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=200)
+                else:
+                    st.text_input(k, value=v)
+
+    # --------------------- COLONNA 3: DATALOAD ---------------------
+    with col3:
+        render_dataload_panel(
+            item_code_key="beye_item_code", 
+            create_btn_key="gen_dl_beye",
+            update_btn_key="gen_upd_beye"
+        )
+
 
 # --- CASTING PARTS (unico blocco per tutte le voci di casting) ---
 if selected_part in [
@@ -2424,6 +3060,11 @@ if selected_part in [
             if selected_part == "Impeller casting":
                 qual_tags.append("[DE2920.025]")
                 quality_lines.append("DE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E.")
+            # ✔️ Qualità DE2980.001 per Impeller casting in 17-4 PH
+            if selected_part == "Impeller casting" and prefix == "A747_" and name == "Tp. CB7Cu-1 (H1150 DBL)":
+                qual_tags.append("[DE2980.001]")
+                quality_lines.append("DE2980.001 - Progettazione e Produzione giranti in 17-4 PH")
+
 
             if selected_part == "Bearing housing casting" and st.session_state.get("cast_pump_type") == "HPX":
                 qual_tags.insert(0, "[SQ36]")
@@ -2473,10 +3114,16 @@ if selected_part in [
             st.text_area ("Quality", value=quality_field, height=120, key="cast_out_quality")
 
     # --- COLONNA 3: DATALOAD ---
+       # --- COLONNA 3: DATALOAD ---
     with col_dataload:
         st.markdown("### 🧾 DataLoad")
-        mode         = st.radio("Operation type:", ["Create new item", "Update item"], key="cast_mode")
+        mode         = st.radio(
+            "Operation type:",
+            ["Create new item", "Update item"],
+            key="cast_mode"
+        )
         item_code_dl = st.text_input("Item code", key="cast_dl_code")
+
         if mode == "Create new item":
             if st.button("Generate DataLoad string", key="cast_dl_create"):
                 if not item_code_dl:
@@ -2484,12 +3131,13 @@ if selected_part in [
                 else:
                     st.success("✅ DataLoad string successfully generated. Download the CSV below.")
         else:
-            if st.button("Generate Update string", key="cast"):
+            if st.button("Generate Update string", key="cast_dl_update"):
                 if not item_code_dl:
                     st.error("❌ Please enter the item code first.")
                 else:
-                    st.success("✅ DataLoad string successfully generated. Download the CSV below.")
-# --- Footer (non fisso, subito dopo i contenuti)
+                    st.success("✅ Update string successfully generated.")
+
+# --- Footer (mostrato sempre) ---
 footer_html = """
 <style>
 .footer {
@@ -2502,9 +3150,14 @@ footer_html = """
     border-top: 1px solid #e1e3e6;
     margin-top: 2rem;
 }
+.footer a {
+    color: inherit;
+    text-decoration: underline;
+}
 </style>
 <div class="footer">
-    © 2025 Flowserve - Desio Order Engineering – mailto:dzecchinel@flowserve.com
+    © 2025 Flowserve – Desio Order Engineering – 
+    <a href="mailto:dzecchinel@flowserve.com">dzecchinel@flowserve.com</a>
 </div>
 """
 st.markdown(footer_html, unsafe_allow_html=True)
