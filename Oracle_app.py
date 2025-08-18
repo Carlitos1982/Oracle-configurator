@@ -1,15 +1,13 @@
-import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parent / "src"))
 import pandas as pd
 from PIL import Image
 import streamlit as st
-from utils.dataload import render_dataload_panel
-from utils.materials import get_fpd_code, select_material
-from utils.quality import build_quality_tags
-from utils.data import load_data
-from parts import casing, impeller
-from utils.constants import (
+from src.utils.dataload import render_dataload_panel
+from src.utils.materials import get_fpd_code, select_material
+from src.utils.quality import build_quality_tags
+from src.utils.data import load_data
+from src.parts import casing, impeller
+from src.utils.constants import (
     base_series_desc,
     design_desc,
     pairing_desc,
