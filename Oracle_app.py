@@ -6,6 +6,7 @@ from PIL import Image
 import streamlit as st
 from utils.dataload import render_dataload_panel
 from utils.materials import get_fpd_code
+from utils.data import load_data
 from parts import casing, impeller
 
 # Caricamento dati materiali da file Excel
@@ -46,78 +47,22 @@ size_df, features_df, materials_df = load_config_data()
 material_types = materials_df["Material Type"].dropna().unique().tolist()
 
 
-# --- Definizione di dimensioni comuni per bulloni
-bolt_sizes = [
-    "#10-24UNC", "5/16\"-18UNC", "3/8\"-16UNC", "1/2\"-13UNC", "3/4\"-16UNF",
-    "7/8\"-9UNC", "7/8\"-14UNF", "1\"-12UNF", "1-1/8\"-12UNF", "1-1/2\"-12UNC",
-    "2\"-4.5UNC", "2-1/2\"-4UNC", "3\"-6UNC", "4\"-8UNC",
-    "M6x1", "M8x1.25", "M10x1.5", "M12x1.75", "M16x2", "M20x2.5", "M24x3",
-    "M30x3.5", "M36x4", "M42x4.5", "M48x5", "M56x5.5", "M64x6", "M72x6",
-    "M80x6", "M90x6", "M100x6"
-]
+# --- Bolt and SKF configuration data loaded from assets
+bolts_data = load_data("bolts")
+bolt_sizes = bolts_data["sizes"]
+bolt_lengths = bolts_data["lengths"]
 
-bolt_lengths = [
-    "1/8\"in", "1/4\"in", "3/8\"in", "5/16\"in", "1/2\"in", "3/4\"in",
-    "1\"in", "1-1/8\"in", "1-1/4\"in", "1-3/8\"in", "1-1/2\"in", "2\"in",
-    "2-1/8\"in", "2-1/4\"in", "2-3/8\"in", "2-1/2\"in", "2-3/4\"in",
-    "3\"in", "3-1/8\"in", "3-1/4\"in", "3-3/8\"in", "3-1/2\"in", "4\"in",
-    "4-1/8\"in", "4-1/4\"in", "4-3/8\"in", "4-1/2\"in",
-    "50mm", "55mm", "60mm", "65mm", "70mm", "75mm", "80mm", "85mm", "90mm", "95mm",
-    "100mm", "105mm", "110mm", "115mm", "120mm", "125mm", "130mm", "135mm", "140mm",
-    "145mm", "150mm", "155mm", "160mm", "165mm", "170mm", "175mm", "180mm", "185mm",
-    "190mm", "195mm"
-]
-
-# --- SKF MODELS (serie principali – aggiungi/rimuovi a piacere)
-skf_models = [
-    "6000","6001","6002","6003","6004","6005","6006","6007","6008","6009","6010",
-    "6200","6201","6202","6203","6204","6205","6206","6207","6208","6209","6210","6211","6212",
-    "6300","6301","6302","6303","6304","6305","6306","6307","6308","6309","6310","6311","6312",
-    "3200","3201","3202","3203","3204","3205","3206","3207","3208","3209","3210",
-    "7200","7201","7202","7203","7204","7205","7206","7207","7208","7209","7210","7211","7212",
-    "7300","7301","7302","7303","7304","7305","7306","7307","7308","7309","7310","7311","7312",
-    "1200","1201","1202","1203","1204","1205","1206","1207","1208","1209","1210",
-    "2200","2201","2202","2203","2204","2205","2206","2207","2208","2209","2210",
-    "NU202","NU203","NU204","NU205","NU206","NU207","NU208","NU209","NU210",
-    "NUP202","NUP203","NUP204","NUP205","NUP206","NUP207","NUP208","NUP209","NUP210",
-    "NJ202","NJ203","NJ204","NJ205","NJ206","NJ207","NJ208","NJ209","NJ210",
-    "22205","22206","22207","22208","22209","22210","22211","22212",
-    "22308","22309","22310","22311","22312",
-    "23022","23024","23026","23120","23122","23124",
-    "30205","30206","30207","30208","30209","30210","30211","30212",
-    "30305","30306","30307","30308","30309","30310",
-    "32005","32006","32007","32008","32009","32010","32011","32012",
-]
-
-# --- Seals / Shields
-skf_seals = ["", "2RS1", "2RSH", "2RSL", "RS1", "RS", "Z", "ZZ", "2Z"]
-
-# --- Design / angolo di contatto / capacità
-skf_design = ["", "BE (40° AC, paired)", "B (40° AC)", "AC (25° AC)", "A (30° AC)",
-              "E (high capacity)", "EC (high capacity)"]
-
-# --- Pairing / Preload
-skf_pairing = ["", "CB (light preload)", "CC (medium preload)", "CD (heavy preload)",
-               "GA (paired)", "GB (paired)", "GC (paired)"]
-
-# --- Cage
-skf_cages = ["", "TN9 (polyamide)", "J (pressed steel)", "M (machined brass)",
-             "MA (brass)", "CA (brass)", "CC (polyamide)"]
-
-# --- Clearance
-skf_clearances = ["", "C2", "CN (normal)", "C3", "C4", "C5"]
-
-# --- Tolerance class
-skf_tolerances = ["", "P0 (normal)", "P6", "P5", "P4"]
-
-# --- Heat treatment / Stabilization
-skf_heat = ["", "S0", "S1", "S2", "S3"]
-
-# --- Grease / Lubricant
-skf_greases = ["", "VT143", "VT378", "MT33", "GJN"]
-
-# --- Vibration
-skf_vibration = ["", "V1", "V2", "V3", "V4", "VA201", "VA208", "VA228"]
+skf_data = load_data("skf_options")
+skf_models = skf_data["models"]
+skf_seals = skf_data["seals"]
+skf_design = skf_data["design"]
+skf_pairing = skf_data["pairing"]
+skf_cages = skf_data["cages"]
+skf_clearances = skf_data["clearances"]
+skf_tolerances = skf_data["tolerances"]
+skf_heat = skf_data["heat"]
+skf_greases = skf_data["greases"]
+skf_vibration = skf_data["vibration"]
 
 # ------------------ DIZIONARI DESCRITTIVI ------------------
 base_series_desc = {
