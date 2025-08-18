@@ -28,9 +28,6 @@ from utils.constants import (
     color_codes,
 )
 
-# Caricamento dati materiali da file Excel
-material_df = pd.read_excel("dati_config4.xlsx", sheet_name="Materials")
-
 # --- Configurazione pagina wide
 st.set_page_config(layout="wide", page_title="Oracle Config", page_icon="⚙️")
 
@@ -52,10 +49,10 @@ st.markdown("---")
 # --- Caricamento dati
 @st.cache_data
 def load_config_data():
-    url = "https://raw.githubusercontent.com/Carlitos1982/Oracle-configurator/main/dati_config4.xlsx"
-    xls = pd.ExcelFile(url)
-    size_df      = pd.read_excel(xls, sheet_name="Pump Size")
-    features_df  = pd.read_excel(xls, sheet_name="Features")
+    xls_path = Path(__file__).resolve().with_name("dati_config4.xlsx")
+    xls = pd.ExcelFile(xls_path)
+    size_df = pd.read_excel(xls, sheet_name="Pump Size")
+    features_df = pd.read_excel(xls, sheet_name="Features")
     materials_df = pd.read_excel(xls, sheet_name="Materials")
     materials_df = materials_df.drop_duplicates(
         subset=["Material Type", "Prefix", "Name"]
