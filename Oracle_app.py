@@ -3322,34 +3322,6 @@ categories = {
 }
 
 
-# --- Selezione categoria e parte affiancate
-col1, col2 = st.columns([1, 1], gap="small")
-with col1:
-    selected_category = st.selectbox("Category:",
-        [""] + list(categories.keys()),
-        index=0
-    )
-with col2:
-    if selected_category:
-        part_list = categories[selected_category]
-    else:
-        part_list = []
-    selected_part = st.selectbox(
-        "Part:",
-        [""] + part_list,
-        key="selected_part"
-    )
-# ——— Gestione “output_data” per ogni cambio di selected_part ———
-if "prev_part" not in st.session_state:
-    st.session_state.prev_part = ""
-
-if selected_part != st.session_state.prev_part:
-    st.session_state.pop("output_data", None)
-    st.session_state.prev_part = selected_part
-# —————————————————————————————————————————————————————————
-
-st.markdown("---")
-
 # --- CASING, PUMP
 if selected_part == "Casing, Pump":
     col1, col2, col3 = st.columns(3)
