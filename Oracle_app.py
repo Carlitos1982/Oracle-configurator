@@ -557,9 +557,9 @@ if selected_part == "Casing, Pump":
     # COLONNA 3: DataLoad
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="casing_item_code",
+            create_btn_key="gen_dl_casing",
+            update_btn_key="gen_upd_casing"
         )
 
 # --- CASING COVER, PUMP
@@ -688,9 +688,9 @@ if selected_part == "Casing Cover, Pump":
 
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="ccov_item_code",
+            create_btn_key="gen_dl_ccov",
+            update_btn_key="gen_upd_ccov"
         )
 
 
@@ -817,9 +817,9 @@ if selected_part == "Impeller, Pump":
 
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="imp_item_code",
+            create_btn_key="gen_dl_imp",
+            update_btn_key="gen_upd_imp"
         )
 
 
@@ -943,9 +943,9 @@ if selected_part == "Balance Bushing, Pump":
 
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="bbush_item_code",
+            create_btn_key="gen_dl_bbush",
+            update_btn_key="gen_upd_bbush"
         )
 
 
@@ -1066,9 +1066,9 @@ if selected_part == "Balance Drum, Pump":
 
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="bdrum_item_code",
+            create_btn_key="gen_dl_bdrum",
+            update_btn_key="gen_upd_bdrum"
         )
 
 
@@ -1187,9 +1187,9 @@ if selected_part == "Balance Disc, Pump":
     # COLONNA 3: DataLoad
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="bdisc_item_code",
+            create_btn_key="gen_dl_bdisc",
+            update_btn_key="gen_upd_bdisc"
         )
 
 
@@ -1281,9 +1281,9 @@ if selected_part == "Gate, Valve":
     # COLONNA 3: DataLoad
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="gate_item_code",
+            create_btn_key="gen_dl_gate",
+            update_btn_key="gen_upd_gate"
         )
 
 if selected_part == "Gasket, Spiral Wound":
@@ -1397,9 +1397,9 @@ if selected_part == "Gasket, Spiral Wound":
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code",
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="gsw_item_code",
+            create_btn_key="gen_dl_gsw",
+            update_btn_key="gen_upd_gsw"
         )
 
 
@@ -1503,9 +1503,9 @@ if selected_part == "Bearing, Hydrostatic/Hydrodynamic":
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="bear_item_code",
+            create_btn_key="gen_dl_bear",
+            update_btn_key="gen_upd_bear"
         )
     
 # --- BEARING, ROLLING
@@ -1650,9 +1650,9 @@ if selected_part == "Bearing, Rolling":
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="broll_item_code",
+            create_btn_key="gen_dl_broll",
+            update_btn_key="gen_upd_broll"
         )
 
 
@@ -1735,7 +1735,7 @@ if selected_part == "Bolt, Eye":
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
+            item_code_key="beye_item_code",
             create_btn_key="gen_dl_beye",
             update_btn_key="gen_upd_beye"
         )
@@ -1831,9 +1831,9 @@ if selected_part == "Bolt, Hexagonal":
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="bh_item_code",
+            create_btn_key="gen_dl_bh",
+            update_btn_key="gen_upd_bh"
         )
 
 # --- GASKET, RING TYPE JOINT
@@ -1894,9 +1894,9 @@ if selected_part == "Gasket, Ring Type Joint":
     # COLONNA 3 – DATALOAD
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="rtj_item_code",
+            create_btn_key="gen_dl_rtj",
+            update_btn_key="gen_upd_rtj"
         )
 
 
@@ -1992,9 +1992,9 @@ elif selected_part == "Gusset, Other":
     # COLONNA 3: DataLoad
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="gusset_item_code",
+            create_btn_key="gen_dl_gusset",
+            update_btn_key="gen_upd_gusset"
         )
 
 # --- STUD, THREADED
@@ -2083,9 +2083,9 @@ if selected_part == "Stud, Threaded":
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="stud_item_code",
+            create_btn_key="gen_dl_stud",
+            update_btn_key="gen_upd_stud"
         )
 # --- NUT, HEX
 if selected_part == "Nut, Hex":
@@ -2170,9 +2170,9 @@ if selected_part == "Nut, Hex":
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="nut_item_code",
+            create_btn_key="gen_dl_nut",
+            update_btn_key="gen_upd_nut"
         )
 
 
@@ -2272,9 +2272,9 @@ if selected_part == "Ring, Wear":
     # COLONNA 3: DataLoad
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="ring_item_code",
+            create_btn_key="gen_dl_ring",
+            update_btn_key="gen_upd_ring"
         )
 
 
@@ -2371,9 +2371,9 @@ if selected_part == "Pin, Dowel":
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="pin_item_code",
+            create_btn_key="gen_dl_pin",
+            update_btn_key="gen_upd_pin"
         )
 
 # --- SHAFT, PUMP ---
@@ -2513,9 +2513,9 @@ if selected_part == "Shaft, Pump":
     # ─── COLONNA 3: DATALOAD ───
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code",
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="shaft_item_code",
+            create_btn_key="gen_dl_shaft",
+            update_btn_key="gen_upd_shaft"
         )
 
 
@@ -2622,9 +2622,9 @@ elif selected_part == "Baseplate, Pump":
 
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="base_item_code",
+            create_btn_key="gen_dl_base",
+            update_btn_key="gen_upd_base"
         )
 
 
@@ -2692,9 +2692,9 @@ if selected_part == "Flange, Pipe":
     # COLONNA 3 – DATALOAD
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="flange_item_code",
+            create_btn_key="gen_dl_flange",
+            update_btn_key="gen_upd_flange"
         )
 
 # --- GASKET, FLAT
@@ -2755,9 +2755,9 @@ if selected_part == "Gasket, Flat":
     # COLONNA 3 – DATALOAD
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="gf_item_code",
+            create_btn_key="gen_dl_gf",
+            update_btn_key="gen_upd_gf"
         )
 
 
@@ -2852,9 +2852,9 @@ if selected_part == "Screw, Cap":
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="cap_item_code",
+            create_btn_key="gen_dl_cap",
+            update_btn_key="gen_upd_cap"
         )
 
 
@@ -2946,9 +2946,9 @@ if selected_part == "Screw, Grub":
     # --------------------- COLONNA 3: DATALOAD ---------------------
     with col3:
         render_dataload_panel(
-            item_code_key="beye_item_code", 
-            create_btn_key="gen_dl_beye",
-            update_btn_key="gen_upd_beye"
+            item_code_key="grub_item_code",
+            create_btn_key="gen_dl_grub",
+            update_btn_key="gen_upd_grub"
         )
 
 
