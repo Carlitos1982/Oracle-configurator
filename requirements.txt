@@ -1,2 +1,5 @@
 openpyxl
+pandas
+pillow
+streamlit
 xlsxwriter
