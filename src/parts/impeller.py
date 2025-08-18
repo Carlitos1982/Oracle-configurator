@@ -1,7 +1,7 @@
 import streamlit as st
-from utils.materials import render_material_selector
-from utils.quality import assemble_quality_tags
-from utils.dataload import render_dataload_panel
+from src.utils.materials import render_material_selector
+from src.utils.quality import assemble_quality_tags
+from src.utils.dataload import render_dataload_panel
 
 
 def render(size_df, features_df, materials_df, material_types):
