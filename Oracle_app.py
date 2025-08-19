@@ -1355,12 +1355,19 @@ if selected_part == "Ring, Wear":
         hf_service = st.checkbox(
             "Is it an hydrofluoric acid alkylation service (lethal)?", key="ring_hf"
         )
+        tmt_service = st.checkbox(
+            "TMT/HVOF protection requirements?", key="ring_tmt"
+        )
 
         if st.button("Generate Output", key="ring_gen"):
             extra = []
             if clearance == "Yes":
                 extra.append(("<SQ173>", "SQ 173 - Increased Clearance for Wear Ring"))
-            tag_string, quality = build_quality_tags({"hf_service": hf_service, "extra": extra})
+            tag_string, quality = build_quality_tags({
+                "hf_service": hf_service,
+                "tmt_service": tmt_service,
+                "extra": extra,
+            })
 
             # Descrizione
             descr_parts = [f"{ring_type.upper()} WEAR RING"]
