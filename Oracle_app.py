@@ -1527,6 +1527,7 @@ if selected_part == "Shaft, Pump":
         hvof        = st.checkbox("HVOF coating?", key="shaft_hvof")
         water       = st.checkbox("Water service?", key="shaft_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="shaft_stamicarbon")
+        hf_service  = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="shaft_hf")
 
         if st.button("Generate Output", key="shaft_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip()
@@ -1571,6 +1572,9 @@ if selected_part == "Shaft, Pump":
             if stamicarbon:
                 sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+            if hf_service:
+                sq_tags.append("<SQ113>")
+                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
 
             tag_string = " ".join(sq_tags)
             quality    = "\n".join(quality_lines)
