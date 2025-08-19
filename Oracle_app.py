@@ -2119,7 +2119,11 @@ if selected_part in [
         material_note = st.text_input("Material Note", key="cast_mat_note")
 
         hf_service_casting = False
-        if selected_part not in ["Bearing housing casting", "Bearing bracket casting"]:
+        if selected_part not in [
+            "Bearing housing casting",
+            "Bearing bracket casting",
+            "Bearing cover casting",
+        ]:
             hf_service_casting = st.checkbox(
                 "Is it an hydrofluoric acid alkylation service (lethal)?",
                 key="cast_hf"
