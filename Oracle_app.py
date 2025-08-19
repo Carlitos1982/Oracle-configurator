@@ -1347,6 +1347,7 @@ if selected_part == "Ring, Wear":
         note = st.text_area("Note", height=80, key="ring_note")
         clearance = st.radio("Increased clearance?", ["No", "Yes"], horizontal=True, key="ring_clr")
         dwg = st.text_input("Dwg/doc number", key="ring_dwg")
+        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="ring_hf")
 
         materiale, codice_fpd, material_note, mtype, mprefix, mname = select_material(
             materials_df, "ring"
@@ -1356,7 +1357,7 @@ if selected_part == "Ring, Wear":
             extra = []
             if clearance == "Yes":
                 extra.append(("<SQ173>", "SQ 173 - Increased Clearance for Wear Ring"))
-            tag_string, quality = build_quality_tags({"extra": extra})
+            tag_string, quality = build_quality_tags({"hf_service": hf_service, "extra": extra})
 
             # Descrizione
             descr_parts = [f"{ring_type.upper()} WEAR RING"]
@@ -1527,6 +1528,7 @@ if selected_part == "Shaft, Pump":
         hvof        = st.checkbox("HVOF coating?", key="shaft_hvof")
         water       = st.checkbox("Water service?", key="shaft_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="shaft_stamicarbon")
+        hf_service  = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="shaft_hf")
 
         if st.button("Generate Output", key="shaft_gen"):
             materiale = f"{mtype} {mprefix} {mname}".strip()
@@ -1571,6 +1573,9 @@ if selected_part == "Shaft, Pump":
             if stamicarbon:
                 sq_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+            if hf_service:
+                sq_tags.append("<SQ113>")
+                quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
 
             tag_string = " ".join(sq_tags)
             quality    = "\n".join(quality_lines)
