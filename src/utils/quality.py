@@ -4,12 +4,17 @@ def assemble_quality_tags(hf_service: bool = False,
                           hvof: bool = False,
                           water: bool = False,
                           stamicarbon: bool = False,
-                          extra=None):
-    sq_tags = ["[SQ58]", "[CORP-ENG-0115]"]
-    quality_lines = [
-        "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
-        "CORP-ENG-0115 - General Surface Quality Requirements G1-1",
-    ]
+                          extra=None,
+                          include_standard: bool = True):
+    sq_tags = []
+    quality_lines = []
+
+    if include_standard:
+        sq_tags.extend(["[SQ58]", "[CORP-ENG-0115]"])
+        quality_lines.extend([
+            "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
+            "CORP-ENG-0115 - General Surface Quality Requirements G1-1",
+        ])
     if hf_service:
         sq_tags.append("<SQ113>")
         quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
@@ -56,15 +61,6 @@ def build_quality_tags(options):
     sq_tags = []
     quality_lines = []
 
-    if include_standard:
-        sq_tags.extend(["[SQ58]", "[CORP-ENG-0115]"])
-        quality_lines.extend(
-            [
-                "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
-                "CORP-ENG-0115 - General Surface Quality Requirements G1-1",
-            ]
-        )
-
     tag_string, qual_descr = assemble_quality_tags(
         hf_service=options.get("hf_service", False),
         tmt_service=options.get("tmt_service", False),
@@ -73,6 +69,7 @@ def build_quality_tags(options):
         water=options.get("water", False),
         stamicarbon=options.get("stamicarbon", False),
         extra=options.get("extra"),
+        include_standard=include_standard,
     )
 
     if tag_string:
