@@ -647,6 +647,7 @@ if selected_part == "Gasket, Spiral Wound":
             "Is it a hydrofluoric acid (HF) alkylation service?",
             key="gsw_hf"
         )
+        water_gsw = st.checkbox("Water service?", key="gsw_water")
         stamicarbon_gsw = st.checkbox("Stamicarbon?", key="gsw_stamicarbon")
 
         if st.button("Generate Output", key="gsw_gen"):
@@ -674,6 +675,7 @@ if selected_part == "Gasket, Spiral Wound":
             tag_string, quality_field = build_quality_tags(
                 {
                     "hf_service": hf_service_gsw,
+                    "water": water_gsw,
                     "stamicarbon": stamicarbon_gsw,
                     "include_standard": False,
                     "extra": extras,
@@ -2180,6 +2182,7 @@ if selected_part in [
         name          = st.selectbox("Name", [""] + names, key="cast_name")
         material_note = st.text_input("Material Note", key="cast_mat_note")
 
+        water_casting = False
         hf_service_casting = False
         stamicarbon_casting = False
         if selected_part not in [
@@ -2187,6 +2190,7 @@ if selected_part in [
             "Bearing bracket casting",
             "Bearing cover casting",
         ]:
+            water_casting = st.checkbox("Water service?", key="cast_water")
             hf_service_casting = st.checkbox(
                 "Is it an hydrofluoric acid alkylation service (lethal)?",
                 key="cast_hf"
@@ -2227,6 +2231,9 @@ if selected_part in [
             if hf_service_casting:
                 qual_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
+            if water_casting:
+                qual_tags.append("<PI23>")
+                quality_lines.append("PI 23 - Pompe per Acqua Potabile")
             if stamicarbon_casting:
                 qual_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
