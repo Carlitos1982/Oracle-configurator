@@ -1654,7 +1654,7 @@ elif selected_part == "Baseplate, Pump":
             catalog = "ARTVARI"
             drawing_out = drawing
             material = f"{mat_type} {mat_prefix} {mat_name}".strip()
-            fpd_code = get_fpd_code(mat_type, mat_prefix, mat_name)
+            fpd_code = get_fpd_code(materials_df, mat_type, mat_prefix, mat_name)
             template = "FPD_BUY_4"
             erp1 = "21_FABRICATION_OR_BASEPLATES"
             erp2 = "18_FOUNDATION_PLATE"
