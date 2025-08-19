@@ -647,6 +647,7 @@ if selected_part == "Gasket, Spiral Wound":
             "Is it a hydrofluoric acid (HF) alkylation service?",
             key="gsw_hf"
         )
+        stamicarbon_gsw = st.checkbox("Stamicarbon?", key="gsw_stamicarbon")
 
         if st.button("Generate Output", key="gsw_gen"):
             color1, ral1      = winding_options[winding_gsw]
@@ -673,6 +674,7 @@ if selected_part == "Gasket, Spiral Wound":
             tag_string, quality_field = build_quality_tags(
                 {
                     "hf_service": hf_service_gsw,
+                    "stamicarbon": stamicarbon_gsw,
                     "include_standard": False,
                     "extra": extras,
                 }
@@ -1030,6 +1032,7 @@ if selected_part == "Bolt, Hexagonal":
         )
 
         zinc_plated_bh = st.radio("Zinc plated?", ["No", "Yes"], index=0, key="bh_zinc")
+        stamicarbon_bh = st.checkbox("Stamicarbon?", key="bh_stamicarbon")
 
         if st.button("Generate Output", key="bh_gen"):
             descr_parts_bh = [
@@ -1042,7 +1045,13 @@ if selected_part == "Bolt, Hexagonal":
                 "ZINC PLATED" if zinc_plated_bh == "Yes" else "",
                 material_note_bh
             ]
+            tag_string, quality = build_quality_tags({
+                "stamicarbon": stamicarbon_bh,
+                "include_standard": False,
+            })
             descr_bh = "*" + " - ".join([p for p in descr_parts_bh if p])
+            if tag_string:
+                descr_bh += f" {tag_string}"
 
             st.session_state["output_data"] = {
                 "Item": "56230…",
@@ -1058,7 +1067,7 @@ if selected_part == "Bolt, Hexagonal":
                 "ERP_L1": "60_FASTENER",
                 "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
                 "To supplier": "",
-                "Quality": ""
+                "Quality": quality,
             }
 
    
@@ -1094,6 +1103,7 @@ if selected_part == "Gasket, Ring Type Joint":
         note_rtj = st.text_area("Note (opzionale)", height=80, key="rtj_note")
         dwg_rtj = st.text_input("Dwg/doc number", key="rtj_dwg")
         hf_service_rtj = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="rtj_hf")
+        stamicarbon_rtj = st.checkbox("Stamicarbon?", key="rtj_stamicarbon")
 
         if st.button("Generate Output", key="rtj_gen"):
             descr_rtj = (
@@ -1102,7 +1112,7 @@ if selected_part == "Gasket, Ring Type Joint":
             if note_rtj:
                 descr_rtj += f", NOTE: {note_rtj}"
             tag_string, quality = build_quality_tags(
-                {"hf_service": hf_service_rtj, "include_standard": False}
+                {"hf_service": hf_service_rtj, "stamicarbon": stamicarbon_rtj, "include_standard": False}
             )
             descr_rtj += f" {tag_string}" if tag_string else ""
             descr_rtj = "*" + descr_rtj
@@ -1234,9 +1244,17 @@ if selected_part == "Stud, Threaded":
         # Disegno
         dwg_stud = st.text_input("Dwg/doc number", key="stud_dwg")
 
+        stamicarbon_stud = st.checkbox("Stamicarbon?", key="stud_stamicarbon")
+
         if st.button("Generate Output", key="stud_gen"):
             descr_parts_stud = ["THREADED STUD", size_stud, length_stud, thread_type.upper()+" THREADED" if thread_type else "", note_stud, materiale_stud, material_note_stud]
+            tag_string, quality = build_quality_tags({
+                "stamicarbon": stamicarbon_stud,
+                "include_standard": False,
+            })
             descr_stud = "*" + " - ".join([p for p in descr_parts_stud if p])
+            if tag_string:
+                descr_stud += f" {tag_string}"
 
             st.session_state["output_data"] = {
                 "Item": "56146…",
@@ -1252,7 +1270,7 @@ if selected_part == "Stud, Threaded":
                 "ERP_L1": "60_FASTENER",
                 "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
                 "To supplier": "",
-                "Quality": ""
+                "Quality": quality,
             }
 
     # --------------------- COLONNA 2: OUTPUT ---------------------
@@ -1289,12 +1307,17 @@ if selected_part == "Nut, Hex":
             materials_df, "nut"
         )
 
-        # dwg non usato
-        dwg_nut = ""
+        stamicarbon_nut = st.checkbox("Stamicarbon?", key="nut_stamicarbon")
 
         if st.button("Generate Output", key="nut_gen"):
             descr_parts_nut = ["HEX NUT", nut_type, size_nut, note_nut, materiale_nut, material_note_nut]
+            tag_string, quality = build_quality_tags({
+                "stamicarbon": stamicarbon_nut,
+                "include_standard": False,
+            })
             descr_nut = "*" + " - ".join([p for p in descr_parts_nut if p])
+            if tag_string:
+                descr_nut += f" {tag_string}"
 
             st.session_state["output_data"] = {
                 "Item": "56030…",
@@ -1310,7 +1333,7 @@ if selected_part == "Nut, Hex":
                 "ERP_L1": "60_FASTENER",
                 "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
                 "To supplier": "",
-                "Quality": ""
+                "Quality": quality,
             }
 
     # --------------------- COLONNA 2: OUTPUT ---------------------
@@ -1440,6 +1463,8 @@ if selected_part == "Pin, Dowel":
             materials_df, "pin"
         )
 
+        stamicarbon_pin = st.checkbox("Stamicarbon?", key="pin_stamicarbon")
+
         if st.button("Generate Output", key="pin_gen"):
             dim_block = f"{diameter_pin} - L={length_pin}"
 
@@ -1450,7 +1475,13 @@ if selected_part == "Pin, Dowel":
                 materiale_pin,
                 material_note_pin
             ]
+            tag_string, quality = build_quality_tags({
+                "stamicarbon": stamicarbon_pin,
+                "include_standard": False,
+            })
             descr_pin = "*" + " - ".join([p for p in descr_parts_pin if p])
+            if tag_string:
+                descr_pin += f" {tag_string}"
 
             st.session_state["output_data"] = {
                 "Item": "56230…",
@@ -1466,7 +1497,7 @@ if selected_part == "Pin, Dowel":
                 "ERP_L1": "60_FASTENER",
                 "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
                 "To supplier": "",
-                "Quality": ""
+                "Quality": quality,
             }
 
     # --------------------- COLONNA 2: OUTPUT ---------------------
@@ -1761,6 +1792,7 @@ if selected_part == "Flange, Pipe":
         material_flange = st.text_input("Material", key="flange_material")
         note_flange = st.text_input("Additional Features (optional)", key="flange_note")
         hf_service_flange = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="flange_hf")
+        stamicarbon_flange = st.checkbox("Stamicarbon?", key="flange_stamicarbon")
 
         if st.button("Generate Output", key="flange_gen"):
             descr = (
@@ -1769,13 +1801,16 @@ if selected_part == "Flange, Pipe":
             )
             if note_flange:
                 descr += f", NOTE: {note_flange}"
-            if hf_service_flange:
-                descr += " <SQ113>"
-                quality = "SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)"
-            else:
-                quality = ""
+
+            tag_string, quality = build_quality_tags({
+                "hf_service": hf_service_flange,
+                "stamicarbon": stamicarbon_flange,
+                "include_standard": False,
+            })
 
             descr = "*" + descr
+            if tag_string:
+                descr += f" {tag_string}"
 
             st.session_state["output_data"] = {
                 "Item": "50155…",
@@ -1825,6 +1860,7 @@ if selected_part == "Gasket, Flat":
         material_gf = st.text_input("Material", key="gf_material")
         note_gf = st.text_area("Note (opzionale)", height=80, key="gf_note")
         hf_service_gf = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="gf_hf")
+        stamicarbon_gf = st.checkbox("Stamicarbon?", key="gf_stamicarbon")
 
         if st.button("Generate Output", key="gf_gen"):
             descr_gf = (
@@ -1832,13 +1868,16 @@ if selected_part == "Gasket, Flat":
             )
             if note_gf:
                 descr_gf += f", NOTE: {note_gf}"
-            if hf_service_gf:
-                descr_gf += " <SQ113>"
-                quality = "SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)"
-            else:
-                quality = ""
+
+            tag_string, quality = build_quality_tags({
+                "hf_service": hf_service_gf,
+                "stamicarbon": stamicarbon_gf,
+                "include_standard": False,
+            })
 
             descr_gf = "*" + descr_gf
+            if tag_string:
+                descr_gf += f" {tag_string}"
 
             st.session_state["output_data"] = {
                 "Item": "50158…",
@@ -1907,6 +1946,7 @@ if selected_part == "Screw, Cap":
 
         # 👉 Zinc dopo il materiale
         zinc_plated_cap = st.radio("Zinc plated?", ["No", "Yes"], index=0, key="cap_zinc")
+        stamicarbon_cap = st.checkbox("Stamicarbon?", key="cap_stamicarbon")
 
         material_note_cap = st.text_area("Material note", height=60, key="cap_matnote")
 
@@ -1933,7 +1973,13 @@ if selected_part == "Screw, Cap":
                 "ZINC PLATED" if zinc_plated_cap == "Yes" else "",
                 material_note_cap
             ]
+            tag_string, quality = build_quality_tags({
+                "stamicarbon": stamicarbon_cap,
+                "include_standard": False,
+            })
             descr_cap = "*" + " - ".join([p for p in descr_parts_cap if p])
+            if tag_string:
+                descr_cap += f" {tag_string}"
 
             st.session_state["output_data"] = {
                 "Item": "56230…",
@@ -1949,7 +1995,7 @@ if selected_part == "Screw, Cap":
                 "ERP_L1": "60_FASTENER",
                 "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
                 "To supplier": "",
-                "Quality": ""
+                "Quality": quality,
             }
 
 
@@ -2007,6 +2053,7 @@ if selected_part == "Screw, Grub":
         mname_grub = st.selectbox("Material Name", [""] + names_grub, key="grub_mname")
 
         material_note_grub = st.text_area("Material note", height=60, key="grub_matnote")
+        stamicarbon_grub = st.checkbox("Stamicarbon?", key="grub_stamicarbon")
 
         if st.button("Generate Output", key="grub_gen"):
             materiale_grub = (
@@ -2029,7 +2076,13 @@ if selected_part == "Screw, Grub":
                 materiale_grub,
                 material_note_grub
             ]
+            tag_string, quality = build_quality_tags({
+                "stamicarbon": stamicarbon_grub,
+                "include_standard": False,
+            })
             descr_grub = "*" + " - ".join([p for p in descr_parts_grub if p])
+            if tag_string:
+                descr_grub += f" {tag_string}"
 
             st.session_state["output_data"] = {
                 "Item": "56310…",
@@ -2045,7 +2098,7 @@ if selected_part == "Screw, Grub":
                 "ERP_L1": "60_FASTENER",
                 "ERP_L2": "74_OTHER_FAST_COMP_EYE_NUTS_LOCK_NUTS",
                 "To supplier": "",
-                "Quality": ""
+                "Quality": quality,
             }
 
     # --------------------- COLONNA 2: OUTPUT ---------------------
@@ -2128,6 +2181,7 @@ if selected_part in [
         material_note = st.text_input("Material Note", key="cast_mat_note")
 
         hf_service_casting = False
+        stamicarbon_casting = False
         if selected_part not in [
             "Bearing housing casting",
             "Bearing bracket casting",
@@ -2137,6 +2191,7 @@ if selected_part in [
                 "Is it an hydrofluoric acid alkylation service (lethal)?",
                 key="cast_hf"
             )
+            stamicarbon_casting = st.checkbox("Stamicarbon?", key="cast_stamicarbon")
 
         if st.button("Generate Output", key="cast_gen"):
             st.session_state.cast_generated = True
@@ -2172,6 +2227,9 @@ if selected_part in [
             if hf_service_casting:
                 qual_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
+            if stamicarbon_casting:
+                qual_tags.append("<SQ172>")
+                quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
 
             if selected_part == "Impeller casting" and st.session_state.get("cast_imp_pump_type") == "DMX":
                 qual_tags.insert(0, "[CORP-ENG-0229]")
