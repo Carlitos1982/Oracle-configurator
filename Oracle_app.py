@@ -89,6 +89,7 @@ categories = {
         "Balance Drum, Pump",
         "Balance Disc, Pump",
         "Shaft, Pump",
+        "Housing, Bearing",
         "Ring, Wear"
     ],
     "Piping": [
@@ -1679,6 +1680,100 @@ if selected_part == "Shaft, Pump":
             update_btn_key="gen_upd_shaft"
         )
 
+elif selected_part == "Housing, Bearing":
+    col1, col2, col3 = st.columns(3)
+
+    brg_types = ["W", "W-TK", "EC", "ECR", "ESBR", "EKBR", "ECH", "ESH", "EKH"]
+    brg_size_options = {
+        "W": ["W040", "W050", "W070", "W090", "W091", "W091-N", "W092", "W092-N", "W105", "W105-N"],
+        "W-TK": ["W040-TK", "W050-TK", "W070-TK", "W090-TK", "W091-TK", "W091-N-TK", "W092-TK", "W092-N-TK", "W105-TK", "W105-N-TK"],
+        "EC": ["EC0", "EC1", "EC2", "EC34", "EC5", "EC6", "EC7", "EC8", "EC85", "EC9"],
+        "ECR": ["ECR0", "ECR1", "ECR2", "ECR34", "ECR5", "ECR6", "ECR7", "ECR8", "ECR85", "ECR9"],
+        "ESBR": ["ESBR0", "ESBR1", "ESBR2", "ESBR34", "ESBR5", "ESBR6", "ESBR7", "ESBR8", "ESBR85", "ESBR9"],
+        "EKBR": ["EKBR0", "EKBR1", "EKBR2", "EKBR34", "EKBR5", "EKBR6", "EKBR7", "EKBR8", "EKBR85", "EKBR9"],
+        "ECH": ["EC0-H", "EC2-H", "EC5-H", "EC6-H", "EC7-H", "EC8-H", "EC85-H", "EC9-H", "EC10-H", "EC11-H", "EC12-H", "EC15-H"],
+        "ESH": ["ES0-H", "ES2-H", "ES5-H", "ES6-H", "ES7-H", "ES8-H", "ES85-H", "ES9-H", "ES10-H", "ES11-H", "ES12-H"],
+        "EKH": ["EK0-H", "EK2-H", "EK5-H", "EK6-H", "EK7-H", "EK8-H", "EK85-H", "EK9-H", "EK10-H", "EK11-H", "EK12-H"],
+    }
+
+    with col1:
+        st.subheader("✏️ Input")
+        brg_type = st.selectbox("Bearing Type", [""] + brg_types, key="bh_brg_type")
+        brg_size = st.selectbox(
+            "Bearing Size",
+            [""] + brg_size_options.get(brg_type, []),
+            key="bh_brg_size",
+        )
+        dwg = st.text_input("Drawing number", key="bh_dwg")
+        note = st.text_area("Note", height=80, key="bh_note")
+
+        mtype = st.selectbox(
+            "Material Type",
+            ["", "ASTM"] + [t for t in material_types if t != "ASTM"],
+            key="bh_mtype",
+        )
+        prefixes = sorted(
+            materials_df[materials_df["Material Type"] == mtype]["Prefix"].dropna().unique().tolist()
+        )
+        mprefix = st.selectbox(
+            "Material Prefix",
+            ["", "A322_", "A276_", "A473_"]
+            + [p for p in prefixes if p not in ["A322_", "A276_", "A473_"]],
+            key="bh_mprefix",
+        )
+        names = materials_df[
+            (materials_df["Material Type"] == mtype)
+            & (materials_df["Prefix"] == mprefix)
+        ]["Name"].dropna().tolist()
+        mname = st.selectbox("Material Name", [""] + names, key="bh_mname")
+        material_note = st.text_area("Material Note", height=60, key="bh_matnote")
+
+        if st.button("Generate Output", key="bh_gen"):
+            materiale = f"{mtype} {mprefix} {mname}".strip()
+            df_match = materials_df[
+                (materials_df["Material Type"] == mtype)
+                & (materials_df["Prefix"] == mprefix)
+                & (materials_df["Name"] == mname)
+            ]
+            codice_fpd = df_match["FPD Code"].iloc[0] if not df_match.empty else ""
+
+            descr_parts = ["BEARING HOUSING"] + [
+                v for v in [brg_type, brg_size, note, materiale, material_note] if v
+            ]
+            descr = "*" + " - ".join(descr_parts)
+
+            st.session_state["output_data"] = {
+                "Item": "40217…",
+                "Description": descr,
+                "Identificativo": "3200-BEARING HOUSING",
+                "Classe ricambi": "3",
+                "Categories": "FASCIA ITE 4",
+                "Catalog": "SUPPORTO",
+                "Disegno": dwg,
+                "Material": materiale,
+                "FPD material code": codice_fpd,
+                "Template": "FPD_MAKE",
+                "ERP_L1": "20_TURNKEY_MACHINING",
+                "ERP_L2": "12_BEARING_HOUSING",
+                "To supplier": "",
+                "Quality": "",
+            }
+
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Description", "Quality", "To supplier"]:
+                    st.text_area(k, value=v, height=200)
+                else:
+                    st.text_input(k, value=v)
+
+    with col3:
+        render_dataload_panel(
+            item_code_key="bh_item_code",
+            create_btn_key="gen_dl_bh",
+            update_btn_key="gen_upd_bh",
+        )
 
 elif selected_part == "Baseplate, Pump":
     col1, col2, col3 = st.columns(3)
