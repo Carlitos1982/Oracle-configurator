@@ -2,6 +2,37 @@ from pathlib import Path
 import pandas as pd
 from PIL import Image
 import streamlit as st
+
+# Ensure every dropdown list is sorted in ascending order
+_original_selectbox = st.selectbox
+
+
+def _sort_options(options):
+    items = list(options)
+    placeholders = [item for item in items if item == ""]
+    others = [item for item in items if item != ""]
+
+    def key_func(x):
+        try:
+            return (0, float(x))
+        except (TypeError, ValueError):
+            return (1, str(x))
+
+    try:
+        others.sort(key=key_func)
+    except Exception:
+        others.sort(key=lambda x: str(x))
+
+    return placeholders + others
+
+
+def selectbox(label, options, *args, **kwargs):
+    sorted_options = _sort_options(options)
+    return _original_selectbox(label, sorted_options, *args, **kwargs)
+
+
+st.selectbox = selectbox
+
 from src.utils.dataload import render_dataload_panel
 from src.utils.materials import get_fpd_code, select_material
 from src.utils.quality import build_quality_tags
