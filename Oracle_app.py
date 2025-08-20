@@ -1386,6 +1386,7 @@ if selected_part == "Ring, Wear":
         overlay = st.checkbox(
             "DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="ring_overlay"
         )
+        hvof = st.checkbox("HVOF coating?", key="ring_hvof")
         stamicarbon = st.checkbox("Stamicarbon?", key="ring_stamicarbon")
 
         if st.button("Generate Output", key="ring_gen"):
@@ -1396,6 +1397,7 @@ if selected_part == "Ring, Wear":
                 "hf_service": hf_service,
                 "tmt_service": tmt_service,
                 "overlay": overlay,
+                "hvof": hvof,
                 "stamicarbon": stamicarbon,
                 "extra": extra,
             })
