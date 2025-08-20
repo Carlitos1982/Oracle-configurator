@@ -1740,6 +1740,10 @@ elif selected_part == "Housing, Bearing":
             descr_parts = ["BEARING HOUSING"] + [
                 v for v in [brg_type, brg_size, note, materiale, material_note] if v
             ]
+            quality = ""
+            if brg_type in ["W", "W-TK"]:
+                descr_parts.append("[SQ36]")
+                quality = "SQ 36 - HPX Bearing Housing: Requisiti di Qualità"
             descr = "*" + " - ".join(descr_parts)
 
             st.session_state["output_data"] = {
@@ -1756,7 +1760,7 @@ elif selected_part == "Housing, Bearing":
                 "ERP_L1": "20_TURNKEY_MACHINING",
                 "ERP_L2": "12_BEARING_HOUSING",
                 "To supplier": "",
-                "Quality": "",
+                "Quality": quality,
             }
 
     with col2:
