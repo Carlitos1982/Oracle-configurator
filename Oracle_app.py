@@ -1569,7 +1569,7 @@ if selected_part == "Shaft, Pump":
         material_note = st.text_area("Material Note", height=60, key="shaft_matnote")
 
         # Checkboxes qualità aggiuntive
-        overlay     = st.checkbox("Overlay (DLD/PTAW/…)", key="shaft_overlay")
+        overlay     = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="shaft_overlay")
         hvof        = st.checkbox("HVOF coating?", key="shaft_hvof")
         water       = st.checkbox("Water service?", key="shaft_water")
         stamicarbon = st.checkbox("Stamicarbon?", key="shaft_stamicarbon")
