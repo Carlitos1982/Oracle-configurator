@@ -1740,10 +1740,14 @@ elif selected_part == "Housing, Bearing":
             descr_parts = ["BEARING HOUSING"] + [
                 v for v in [brg_type, brg_size, note, materiale, material_note] if v
             ]
-            quality = ""
+            descr_parts.append("[CORP-ENG-0190]")
+            quality_lines = [
+                "CORP-ENG-0190 - Coatings Specification for Bearings Housing and Frame Internal Oil Contacting Surfaces D16-1",
+            ]
             if brg_type in ["W", "W-TK"]:
                 descr_parts.append("[SQ36]")
-                quality = "SQ 36 - HPX Bearing Housing: Requisiti di Qualità"
+                quality_lines.append("SQ 36 - HPX Bearing Housing: Requisiti di Qualità")
+            quality = "\n".join(quality_lines)
             descr = "*" + " - ".join(descr_parts)
 
             st.session_state["output_data"] = {
