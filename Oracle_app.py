@@ -1591,12 +1591,19 @@ if selected_part == "Shaft, Pump":
             codice_fpd = df_match["FPD Code"].iloc[0] if not df_match.empty else ""
 
             # ─── Tags di qualità di default per Shaft ───
-            sq_tags = ["[SQ60]", "[DE3513.014]", "[CORP-ENG-0115]", "[SQ58]"]
+            sq_tags = [
+                "[SQ60]",
+                "[DE3513.014]",
+                "[CORP-ENG-0115]",
+                "[SQ58]",
+                "[SQ62]",
+            ]
             quality_lines = [
                 "SQ 60 - Procedura di Esecuzione del Run-Out per Alberi e Rotori di Pompe",
                 "DE 3513.014 - Shaft Demagnetization",
                 "CORP-ENG-0115 - General Surface Quality Requirements G1-1",
-                "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche"
+                "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
+                "SQ-62 - Standard of definition of the Supply Condition and of the Heat Treatment of Stress Relieving in the rough machining condition of shafts from bar or forging",
             ]
 
             # ─── Logica SQ123 per QL/QLQ e materiali ASTM specifici ───
