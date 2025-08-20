@@ -2344,11 +2344,6 @@ if selected_part in [
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
                 "CORP-ENG-0115 - General Surface Quality Requirements G1-1"
             ]
-            if selected_part == "Bearing housing casting":
-                qual_tags.append("[CORP-ENG-0190]")
-                quality_lines.append(
-                    "CORP-ENG-0190 - Coatings Specification for Bearings Housing and Frame Internal Oil Contacting Surfaces D16-1"
-                )
             if hf_service_casting:
                 qual_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
