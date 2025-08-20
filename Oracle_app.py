@@ -1603,7 +1603,7 @@ if selected_part == "Shaft, Pump":
                 "DE 3513.014 - Shaft Demagnetization",
                 "CORP-ENG-0115 - General Surface Quality Requirements G1-1",
                 "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
-                "SQ-62 - Standard of definition of the Supply Condition and of the Heat Treatment of Stress Relieving in the rough machining condition of shafts from bar or forging",
+                "SQ 62 - Standard of definition of the Supply Condition and of the Heat Treatment of Stress Relieving in the rough machining condition of shafts from bar or forging",
             ]
 
             # ─── Logica SQ123 per QL/QLQ e materiali ASTM specifici ───
