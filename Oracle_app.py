@@ -1383,6 +1383,9 @@ if selected_part == "Ring, Wear":
         tmt_service = st.checkbox(
             "TMT/HVOF protection requirements?", key="ring_tmt"
         )
+        overlay = st.checkbox(
+            "DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="ring_overlay"
+        )
         stamicarbon = st.checkbox("Stamicarbon?", key="ring_stamicarbon")
 
         if st.button("Generate Output", key="ring_gen"):
@@ -1392,6 +1395,7 @@ if selected_part == "Ring, Wear":
             tag_string, quality = build_quality_tags({
                 "hf_service": hf_service,
                 "tmt_service": tmt_service,
+                "overlay": overlay,
                 "stamicarbon": stamicarbon,
                 "extra": extra,
             })
