@@ -143,6 +143,7 @@ categories = {
         "Bearing, Hydrostatic/Hydrodynamic",
         "Bearing, Rolling",
         "Gusset, Other",
+        "Key, Parallel",
         "Gasket, Spiral Wound"
     ],
       "Casting": [
@@ -1343,6 +1344,74 @@ elif selected_part == "Gusset, Other":
             item_code_key="gusset_item_code",
             create_btn_key="gen_dl_gusset",
             update_btn_key="gen_upd_gusset"
+        )
+
+# --- KEY, PARALLEL
+elif selected_part == "Key, Parallel":
+    col1, col2, col3 = st.columns(3)
+
+    # COLONNA 1: INPUT
+    with col1:
+        st.subheader("✏️ Input")
+        width_key   = st.number_input("Width",  min_value=0, step=1, format="%d", key="key_width")
+        height_key  = st.number_input("Height", min_value=0, step=1, format="%d", key="key_height")
+        length_key  = st.number_input("Length", min_value=0, step=1, format="%d", key="key_length")
+        uom_key     = st.selectbox("Unità di misura", ["mm", "inches"], key="key_uom")
+        note1_key   = st.text_area("Note", height=80, key="key_note1")
+        dwg_key     = st.text_input("Dwg/doc number", key="key_dwg")
+
+        materiale_key, codice_fpd_key, note2_key, mtype_key, mprefix_key, mname_key = select_material(
+            materials_df, "key"
+        )
+
+        if st.button("Generate Output", key="gen_key"):
+
+            descr_key = (
+                f"KEY, PARALLEL - WIDTH: {int(width_key)}{uom_key}, "
+                f"HEIGHT: {int(height_key)}{uom_key}, "
+                f"LENGTH: {int(length_key)}{uom_key}"
+            )
+            if note1_key:
+                descr_key += f", {note1_key}"
+            descr_key += f", {materiale_key}"
+            if note2_key:
+                descr_key += f", {note2_key}"
+
+            descr_key = "*" + descr_key
+
+            st.session_state["output_data"] = {
+                "Item": "56340…",
+                "Description": descr_key,
+                "Identificativo": "6700-KEY",
+                "Classe ricambi": "2-3",
+                "Categories": "FASCIA ITE 5",
+                "Catalog": "ARTVARI",
+                "Disegno": dwg_key,
+                "Material": materiale_key,
+                "FPD material code": codice_fpd_key,
+                "Template": "FPD_BUY_1",
+                "ERP_L1": "64_HARDWARE",
+                "ERP_L2": "10_KEYS",
+                "To supplier": "",
+                "Quality": "",
+            }
+
+    # COLONNA 2: OUTPUT
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for campo, valore in st.session_state["output_data"].items():
+                if campo == "Description":
+                    st.text_area(campo, value=valore, height=200, key=f"key_{campo}")
+                else:
+                    st.text_input(campo, value=valore, key=f"key_{campo}")
+
+    # COLONNA 3: DataLoad
+    with col3:
+        render_dataload_panel(
+            item_code_key="key_item_code",
+            create_btn_key="gen_dl_key",
+            update_btn_key="gen_upd_key"
         )
 
 # --- STUD, THREADED
