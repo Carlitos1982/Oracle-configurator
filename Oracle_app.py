@@ -1500,6 +1500,9 @@ if selected_part == "Nut, Hex":
             materials_df, "nut"
         )
 
+        # Disegno
+        dwg_nut = st.text_input("Dwg/doc number", key="nut_dwg")
+
         stamicarbon_nut = st.checkbox("Stamicarbon?", key="nut_stamicarbon")
 
         if st.button("Generate Output", key="nut_gen"):
