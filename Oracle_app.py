@@ -115,6 +115,7 @@ categories = {
         "Baseplate, Pump",
         "Casing, Pump",
         "Casing Cover, Pump",
+        "Diffuser, Pump",
         "Impeller, Pump",
         "Balance Bushing, Pump",
         "Balance Drum, Pump",
@@ -294,7 +295,96 @@ if selected_part == "Casing Cover, Pump":
             create_btn_key="gen_dl_ccov",
             update_btn_key="gen_upd_ccov"
         )
+# --- DIFFUSER, PUMP
+if selected_part == "Diffuser, Pump":
+    col1, col2, col3 = st.columns(3)
 
+    with col1:
+        st.subheader("✏️ Input")
+        model = st.selectbox("Product Type", [""] + sorted(size_df["Pump Model"].dropna().unique()), key="diff_model")
+        size_list = size_df[size_df["Pump Model"] == model]["Size"].dropna().tolist()
+        size = st.selectbox("Pump Size", [""] + size_list, key="diff_size")
+
+        f1_list = features_df[
+            (features_df["Pump Model"] == model) &
+            (features_df["Feature Type"] == "features1")
+        ]["Feature"].dropna().tolist()
+        feature_1 = st.selectbox("Additional Feature 1", [""] + f1_list, key="diff_feat1") if f1_list else ""
+
+        feature_2 = ""
+
+        note = st.text_area("Note", height=80, key="diff_note")
+        dwg = st.text_input("Dwg/doc number", key="diff_dwg")
+
+        materiale, codice_fpd, material_note, mtype, mprefix, mname = select_material(
+            materials_df, "diff"
+        )
+
+        make_or_buy = st.radio("Make or Buy?", ["Buy", "Make"], key="diff_makebuy")
+        template = "FPD_BUY_1" if make_or_buy == "Buy" else "FPD_MAKE"
+
+        hf_service = st.checkbox("Is it an hydrofluoric acid alkylation service (lethal)?", key="diff_hf")
+        tmt_service = st.checkbox("TMT/HVOF protection requirements?", key="diff_tmt")
+        overlay = st.checkbox("DLD, PTAW, Laser Hardening, METCO, Ceramic Chrome?", key="diff_overlay")
+        hvof = st.checkbox("HVOF coating?", key="diff_hvof")
+        water = st.checkbox("Water service?", key="diff_water")
+        stamicarbon = st.checkbox("Stamicarbon?", key="diff_stamicarbon")
+
+        if st.button("Generate Output", key="diff_gen"):
+            tag_string, quality = build_quality_tags(
+                {
+                    "hf_service": hf_service,
+                    "tmt_service": tmt_service,
+                    "overlay": overlay,
+                    "hvof": hvof,
+                    "water": water,
+                    "stamicarbon": stamicarbon,
+                }
+            )
+
+            descr_parts = ["DIFFUSER, PUMP"]
+            for val in [model, size, feature_1, note]:
+                if val:
+                    descr_parts.append(val)
+            if materiale:
+                descr_parts.append(materiale)
+            if material_note:
+                descr_parts.append(material_note)
+
+            descr = "*" + " - ".join(descr_parts) + " " + tag_string
+
+            st.session_state["output_data"] = {
+                "Item": "40227…",
+                "Description": descr,
+                "Identificativo": "1410-DIFFUSER",
+                "Classe ricambi": "2-3",
+                "Categories": "FASCIA ITE 4",
+                "Catalog": "CORPO",
+                "Disegno": dwg,
+                "Material": materiale,
+                "FPD material code": codice_fpd,
+                "Template": template,
+                "ERP_L1": "20_TURNKEY_MACHINING",
+                "ERP_L2": "20_IMPELLER_DIFFUSER",
+                "To supplier": "",
+                "Quality": quality
+            }
+
+    with col2:
+        st.subheader("📤 Output")
+        if "output_data" in st.session_state:
+            for k, v in st.session_state["output_data"].items():
+                if k in ["Quality", "To supplier", "Description"]:
+                    st.text_area(k, value=v, height=200)
+                else:
+                    st.text_input(k, value=v)
+
+    with col3:
+        render_dataload_panel(
+            item_code_key="diff_item_code",
+            create_btn_key="gen_dl_diff",
+            update_btn_key="gen_upd_diff"
+        )
 
 
 
