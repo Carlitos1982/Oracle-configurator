@@ -2350,8 +2350,10 @@ elif selected_part == "Housing, Bearing":
             descr_parts = ["BEARING HOUSING"] + [
                 v for v in [brg_type, brg_size, note, materiale, material_note] if v
             ]
-            descr_parts.append("[CORP-ENG-0190]")
+            descr_parts.extend(["[SQ58]", "[CORP-ENG-0115]", "[CORP-ENG-0190]"])
             quality_lines = [
+                "SQ 58 - Controllo Visivo e Dimensionale delle Lavorazioni Meccaniche",
+                "CORP-ENG-0115 - General Surface Quality Requirements G1-1",
                 "CORP-ENG-0190 - Coatings Specification for Bearings Housing and Frame Internal Oil Contacting Surfaces D16-1",
             ]
             if brg_type in ["W", "W-TK"]:
