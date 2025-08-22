@@ -118,7 +118,7 @@ categories = {
         "Diffuser, Pump",
         "Impeller, Pump",
         "Balance Bushing, Pump",
-        "Throat Bushing, Pump",
+        "Neck Bush, Pump",
         "Balance Drum, Pump",
         "Balance Disc, Pump",
         "Shaft, Pump",
@@ -569,8 +569,8 @@ if selected_part == "Balance Drum, Pump":
         )
 
 
-# --- THROAT BUSHING, PUMP
-if selected_part == "Throat Bushing, Pump":
+# --- NECK BUSH, PUMP
+if selected_part == "Neck Bush, Pump":
     col1, col2, col3 = st.columns(3)
 
     with col1:
@@ -611,7 +611,7 @@ if selected_part == "Throat Bushing, Pump":
                 }
             )
 
-            descr_parts = ["THROAT BUSHING, PUMP"]
+            descr_parts = ["NECK BUSH, PUMP"]
             for val in [model, size, feature_1, note, materiale, material_note]:
                 if val:
                     descr_parts.append(val)
