@@ -35,6 +35,7 @@ def render(size_df, features_df, materials_df, material_types):
 
         if st.button("Generate Output", key="imp_gen"):
             extra = []
+            # ✔️ Qualità DE2980.001 per Impeller in 17-4 PH
             if mprefix == "A747_" and mname == "Tp. CB7Cu-1 (H1150 DBL)":
                 extra.append(("[DE2980.001]", "DE2980.001 - Progettazione e Produzione giranti in 17-4 PH"))
             tag_string, quality = assemble_quality_tags(
