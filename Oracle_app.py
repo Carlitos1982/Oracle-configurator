@@ -34,7 +34,7 @@ def selectbox(label, options, *args, **kwargs):
 st.selectbox = selectbox
 
 from src.utils.dataload import render_dataload_panel
-from src.utils.materials import get_fpd_code, select_material
+from src.utils.materials import get_fpd_code, select_material, get_casting_code
 from src.utils.quality import build_quality_tags, CG_MATERIALS, SQ121_MATERIALS
 from src.utils.data import load_data
 from src.parts import casing, impeller
@@ -3005,7 +3005,7 @@ if selected_part in [
                 (materials_df["Prefix"] == prefix) &
                 (materials_df["Name"] == name)
             ]
-            casting_code      = dfm["Casting code"].iloc[0][-2:] if not dfm.empty else "XX"
+            casting_code      = get_casting_code(dfm)
             fpd_material_code = dfm["FPD Code"].iloc[0]       if not dfm.empty else "NA"
             item_number       = "7" + casting_code
             pattern_parts     = [m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()]
