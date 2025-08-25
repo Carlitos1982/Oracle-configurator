@@ -123,11 +123,6 @@ def assemble_quality_tags(
         quality_lines.append(
             "SQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
         )
-    if mat_name and mat_name in SQ121_MATERIALS:
-        sq_tags.append("[SQ121]")
-        quality_lines.append(
-            "SQ 121 - Cleaning, Descaling and Passivation of Stainless Steel Components"
-        )
     return " ".join(sq_tags), "\n".join(quality_lines)
 
 
