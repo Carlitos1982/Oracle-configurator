@@ -35,7 +35,7 @@ st.selectbox = selectbox
 
 from src.utils.dataload import render_dataload_panel
 from src.utils.materials import get_fpd_code, select_material
-from src.utils.quality import build_quality_tags
+from src.utils.quality import build_quality_tags, CG_MATERIALS
 from src.utils.data import load_data
 from src.parts import casing, impeller
 from src.utils.constants import (
@@ -254,6 +254,8 @@ if selected_part == "Casing Cover, Pump":
                     "hvof": hvof,
                     "water": water,
                     "stamicarbon": stamicarbon,
+                    "material_prefix": mprefix,
+                    "material_name": mname,
                 }
             )
 
@@ -345,6 +347,8 @@ if selected_part == "Diffuser, Pump":
                     "hvof": hvof,
                     "water": water,
                     "stamicarbon": stamicarbon,
+                    "material_prefix": mprefix,
+                    "material_name": mname,
                 }
             )
 
@@ -435,6 +439,8 @@ if selected_part == "Balance Bushing, Pump":
                     "hvof": hvof,
                     "water": water,
                     "stamicarbon": stamicarbon,
+                    "material_prefix": mprefix,
+                    "material_name": mname,
                 }
             )
 
@@ -526,6 +532,8 @@ if selected_part == "Balance Drum, Pump":
                     "hvof": hvof,
                     "water": water,
                     "stamicarbon": stamicarbon,
+                    "material_prefix": mprefix,
+                    "material_name": mname,
                 }
             )
 
@@ -609,6 +617,8 @@ if selected_part == "Neck Bush, Pump":
                     "hvof": hvof,
                     "water": water,
                     "stamicarbon": stamicarbon,
+                    "material_prefix": mprefix,
+                    "material_name": mname,
                 }
             )
 
@@ -691,6 +701,8 @@ if selected_part == "Throat Bushing, Pump":
                     "hvof": hvof,
                     "water": water,
                     "stamicarbon": stamicarbon,
+                    "material_prefix": mprefix,
+                    "material_name": mname,
                 }
             )
 
@@ -774,6 +786,8 @@ if selected_part == "Nut, Impeller":
                     "hvof": hvof,
                     "water": water,
                     "stamicarbon": stamicarbon,
+                    "material_prefix": mprefix,
+                    "material_name": mname,
                 }
             )
 
@@ -859,6 +873,8 @@ if selected_part == "Nut, Shaft Sleeve":
                     "hvof": hvof,
                     "water": water,
                     "stamicarbon": stamicarbon,
+                    "material_prefix": mprefix,
+                    "material_name": mname,
                 }
             )
 
@@ -943,6 +959,8 @@ if selected_part == "Balance Disc, Pump":
                     "hvof": hvof,
                     "water": water,
                     "stamicarbon": stamicarbon,
+                    "material_prefix": mprefix,
+                    "material_name": mname,
                 }
             )
 
@@ -1960,6 +1978,8 @@ if selected_part == "Ring, Wear":
                 "hvof": hvof,
                 "stamicarbon": stamicarbon,
                 "extra": extra,
+                "material_prefix": mprefix,
+                "material_name": mname,
             })
 
             # Descrizione
@@ -2194,6 +2214,11 @@ if selected_part == "Shaft, Pump":
             if hf_service:
                 sq_tags.append("<SQ113>")
                 quality_lines.append("SQ 113 - Material Requirements for Pumps in Hydrofluoric Acid Service (HF)")
+            if (mprefix, mname) in CG_MATERIALS:
+                sq_tags.append("[SQ95]")
+                quality_lines.append(
+                    "SQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
+                )
 
             tag_string = " ".join(sq_tags)
             quality    = "\n".join(quality_lines)
@@ -2277,6 +2302,8 @@ elif selected_part == "Shaft Sleeve, Pump":
                     "hvof": hvof,
                     "water": water,
                     "stamicarbon": stamicarbon,
+                    "material_prefix": mprefix,
+                    "material_name": mname,
                 }
             )
 
@@ -2388,6 +2415,11 @@ elif selected_part == "Housing, Bearing":
             if brg_type in ["W", "W-TK"]:
                 descr_parts.append("[SQ36]")
                 quality_lines.append("SQ 36 - HPX Bearing Housing: Requisiti di Qualità")
+            if (mprefix, mname) in CG_MATERIALS:
+                descr_parts.append("[SQ95]")
+                quality_lines.append(
+                    "SQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
+                )
             quality = "\n".join(quality_lines)
             descr = "*" + " - ".join(descr_parts)
 
@@ -2467,6 +2499,8 @@ elif selected_part == "Baseplate, Pump":
             erp2 = "18_FOUNDATION_PLATE"
             to_supplier = sourcing
 
+            needs_sq95 = (mat_prefix, mat_name) in CG_MATERIALS
+
             descr_parts = [
                 f"*{ident}",
                 f"{model}-{size}",
@@ -2478,14 +2512,19 @@ elif selected_part == "Baseplate, Pump":
                 "[SQ53]",
                 "[CORP-ENG-0234]"
             ]
-       
-   
+            if needs_sq95:
+                descr_parts.append("[SQ95]")
+
             descr = " ".join([d for d in descr_parts if d])
 
             quality = [
                 "SQ 53 - HORIZONTAL PUMP BASEPLATES CHECKING PROCEDURE",
                 "CORP-ENG-0234 - Procedure for Baseplate Inspection J4-11"
             ]
+            if needs_sq95:
+                quality.append(
+                    "SQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
+                )
         
 
             st.session_state["output_data"] = {
@@ -3023,17 +3062,6 @@ if selected_part in [
                     "CORP-ENG-0523 - As-Cast Surface Finish and Cleaning Requirements for Hydraulic Castings",
                     "CORP-ENG-0090 - Procurement and Cleaning Requirement for Hydraulic Castings - API, Vertical, Submersible, and Specialty Pumps P-5"
                 ])
-
-            cg_materials = {
-                ("A351_","CG3M"),("A351_","CG8M"),("A743_","CG3M"),("A743_","CG8M"),
-                ("A351_","CG8M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY"),
-                ("A351_","CG3M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY + PTA STELLITE 6 OVERLAY"),
-                ("A743_","CG8M + PTA STELLITE 12 OVERLAY"),("A743_","CG3M + PTA STELLITE 6 OVERLAY"),
-                ("A743_","CG3M + DLD WC-Ni 60-40"),("A744_","CG3M")
-            }
-            if (prefix, name) in cg_materials:
-                qual_tags.append("[SQ95]")
-                quality_lines.append("SQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)")
 
             quality_field = "\n".join(quality_lines)
             description   = ", ".join(parts) + " " + " ".join(qual_tags)

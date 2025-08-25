@@ -33,3 +33,15 @@ def test_build_quality_tags_skip_standard():
     assert "[SQ58]" not in tags
     assert "[CORP-ENG-0115]" not in tags
     assert all("SQ 58 -" not in line for line in lines)
+
+
+def test_build_quality_tags_sq95_for_cg_materials():
+    """SQ95 should be added for CG3M/CG8M materials."""
+    options = {
+        "material_prefix": "A351_",
+        "material_name": "CG3M",
+        "include_standard": False,
+    }
+    tags_string, lines_string = build_quality_tags(options)
+    assert "[SQ95]" in tags_string.split()
+    assert "SQ 95 -" in lines_string

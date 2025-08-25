@@ -46,7 +46,14 @@ def render(size_df, features_df, materials_df, material_types):
 
         if st.button("Generate Output", key="casing_gen"):
             tag_string, quality = assemble_quality_tags(
-                hf_service, tmt_service, overlay, hvof, water, stamicarbon
+                hf_service,
+                tmt_service,
+                overlay,
+                hvof,
+                water,
+                stamicarbon,
+                mat_prefix=mprefix,
+                mat_name=mname,
             )
             descr_parts = ["CASING, PUMP"]
             for val in [model, size, feature_1, feature_2, note, materiale, material_note]:
