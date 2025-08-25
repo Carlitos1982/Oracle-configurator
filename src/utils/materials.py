@@ -97,3 +97,29 @@ def get_fpd_code(materials_df: pd.DataFrame, mat_type, mat_prefix, mat_name):
     if not row.empty and "FPD Code" in row.columns:
         return row.iloc[0]["FPD Code"]
     return "NOT AVAILABLE"
+
+
+def get_casting_code(dfm: pd.DataFrame) -> str:
+    """Extract the last two characters of the casting code.
+
+    Parameters
+    ----------
+    dfm : pandas.DataFrame
+        DataFrame potentially containing a ``Casting code`` column.
+
+    Returns
+    -------
+    str
+        The last two characters of the ``Casting code`` value in the first row
+        of ``dfm``.  If the dataframe is empty, the column is missing or the
+        value is null, the default ``"XX"`` is returned.
+    """
+
+    if dfm.empty or "Casting code" not in dfm.columns:
+        return "XX"
+
+    value = dfm.iloc[0].get("Casting code")
+    if pd.isna(value):
+        return "XX"
+
+    return str(value)[-2:]
