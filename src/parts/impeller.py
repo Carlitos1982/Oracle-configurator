@@ -38,7 +38,15 @@ def render(size_df, features_df, materials_df, material_types):
             if mprefix == "A747_" and mname == "Tp. CB7Cu-1 (H1150 DBL)":
                 extra.append(("[DE2980.001]", "DE2980.001 - Progettazione e Produzione giranti in 17-4 PH"))
             tag_string, quality = assemble_quality_tags(
-                hf_service, tmt_service, overlay, hvof, water, stamicarbon, extra
+                hf_service,
+                tmt_service,
+                overlay,
+                hvof,
+                water,
+                stamicarbon,
+                extra=extra,
+                mat_prefix=mprefix,
+                mat_name=mname,
             )
             descr_parts = ["IMPELLER, PUMP"]
             for val in [model, size, feature_1, note, materiale, material_note]:

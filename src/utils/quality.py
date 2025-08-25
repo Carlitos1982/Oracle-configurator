@@ -1,11 +1,35 @@
-def assemble_quality_tags(hf_service: bool = False,
-                          tmt_service: bool = False,
-                          overlay: bool = False,
-                          hvof: bool = False,
-                          water: bool = False,
-                          stamicarbon: bool = False,
-                          extra=None,
-                          include_standard: bool = True):
+# Materials requiring SQ95 machining cycle
+from typing import Optional
+
+CG_MATERIALS = {
+    ("A351_", "CG3M"),
+    ("A351_", "CG8M"),
+    ("A743_", "CG3M"),
+    ("A743_", "CG8M"),
+    ("A351_", "CG8M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY"),
+    (
+        "A351_",
+        "CG3M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY + PTA STELLITE 6 OVERLAY",
+    ),
+    ("A743_", "CG8M + PTA STELLITE 12 OVERLAY"),
+    ("A743_", "CG3M + PTA STELLITE 6 OVERLAY"),
+    ("A743_", "CG3M + DLD WC-Ni 60-40"),
+    ("A744_", "CG3M"),
+}
+
+
+def assemble_quality_tags(
+    hf_service: bool = False,
+    tmt_service: bool = False,
+    overlay: bool = False,
+    hvof: bool = False,
+    water: bool = False,
+    stamicarbon: bool = False,
+    extra=None,
+    include_standard: bool = True,
+    mat_prefix: Optional[str] = None,
+    mat_name: Optional[str] = None,
+):
     sq_tags = []
     quality_lines = []
 
@@ -41,6 +65,11 @@ def assemble_quality_tags(hf_service: bool = False,
         for tag, line in extra:
             sq_tags.append(tag)
             quality_lines.append(line)
+    if mat_prefix and mat_name and (mat_prefix, mat_name) in CG_MATERIALS:
+        sq_tags.append("[SQ95]")
+        quality_lines.append(
+            "SQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
+        )
     return " ".join(sq_tags), "\n".join(quality_lines)
 
 
@@ -70,6 +99,8 @@ def build_quality_tags(options):
         stamicarbon=options.get("stamicarbon", False),
         extra=options.get("extra"),
         include_standard=include_standard,
+        mat_prefix=options.get("material_prefix"),
+        mat_name=options.get("material_name"),
     )
 
     if tag_string:
