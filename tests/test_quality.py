@@ -45,3 +45,11 @@ def test_build_quality_tags_sq95_for_cg_materials():
     tags_string, lines_string = build_quality_tags(options)
     assert "[SQ95]" in tags_string.split()
     assert "SQ 95 -" in lines_string
+
+
+def test_build_quality_tags_sq121_for_materials():
+    """SQ121 should be added for specific stainless steel materials."""
+    options = {"material_name": "CF3M", "include_standard": False}
+    tags_string, lines_string = build_quality_tags(options)
+    assert "[SQ121]" in tags_string.split()
+    assert "SQ 121 -" in lines_string
