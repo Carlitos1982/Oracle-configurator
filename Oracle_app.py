@@ -1774,14 +1774,29 @@ if selected_part == "Stud, Threaded":
         # Disegno
         dwg_stud = st.text_input("Dwg/doc number", key="stud_dwg")
 
+        hf_service_stud = st.checkbox(
+            "Is it an hydrofluoric acid alkylation service (lethal)?",
+            key="stud_hf",
+        )
         stamicarbon_stud = st.checkbox("Stamicarbon?", key="stud_stamicarbon")
 
         if st.button("Generate Output", key="stud_gen"):
-            descr_parts_stud = ["THREADED STUD", size_stud, length_stud, thread_type.upper()+" THREADED" if thread_type else "", note_stud, materiale_stud, material_note_stud]
-            tag_string, quality = build_quality_tags({
-                "stamicarbon": stamicarbon_stud,
-                "include_standard": False,
-            })
+            descr_parts_stud = [
+                "THREADED STUD",
+                size_stud,
+                length_stud,
+                thread_type.upper() + " THREADED" if thread_type else "",
+                note_stud,
+                materiale_stud,
+                material_note_stud,
+            ]
+            tag_string, quality = build_quality_tags(
+                {
+                    "hf_service": hf_service_stud,
+                    "stamicarbon": stamicarbon_stud,
+                    "include_standard": False,
+                }
+            )
             descr_stud = "*" + " - ".join([p for p in descr_parts_stud if p])
             if tag_string:
                 descr_stud += f" {tag_string}"
@@ -1840,14 +1855,28 @@ if selected_part == "Nut, Hex":
         # Disegno
         dwg_nut = st.text_input("Dwg/doc number", key="nut_dwg")
 
+        hf_service_nut = st.checkbox(
+            "Is it an hydrofluoric acid alkylation service (lethal)?",
+            key="nut_hf",
+        )
         stamicarbon_nut = st.checkbox("Stamicarbon?", key="nut_stamicarbon")
 
         if st.button("Generate Output", key="nut_gen"):
-            descr_parts_nut = ["HEX NUT", nut_type, size_nut, note_nut, materiale_nut, material_note_nut]
-            tag_string, quality = build_quality_tags({
-                "stamicarbon": stamicarbon_nut,
-                "include_standard": False,
-            })
+            descr_parts_nut = [
+                "HEX NUT",
+                nut_type,
+                size_nut,
+                note_nut,
+                materiale_nut,
+                material_note_nut,
+            ]
+            tag_string, quality = build_quality_tags(
+                {
+                    "hf_service": hf_service_nut,
+                    "stamicarbon": stamicarbon_nut,
+                    "include_standard": False,
+                }
+            )
             descr_nut = "*" + " - ".join([p for p in descr_parts_nut if p])
             if tag_string:
                 descr_nut += f" {tag_string}"
