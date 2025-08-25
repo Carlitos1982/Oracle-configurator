@@ -52,6 +52,12 @@ def render(size_df, features_df, materials_df, material_types):
                 hvof,
                 water,
                 stamicarbon,
+                extra=[
+                    (
+                        "[CORP-ENG-0194]",
+                        "CORP-ENG-0194 - Inspection of Flat and Raised Face Flanges G1-3",
+                    )
+                ],
                 mat_prefix=mprefix,
                 mat_name=mname,
             )
