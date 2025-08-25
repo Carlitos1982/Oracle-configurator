@@ -35,7 +35,7 @@ st.selectbox = selectbox
 
 from src.utils.dataload import render_dataload_panel
 from src.utils.materials import get_fpd_code, select_material
-from src.utils.quality import build_quality_tags, CG_MATERIALS
+from src.utils.quality import build_quality_tags, CG_MATERIALS, SQ121_MATERIALS
 from src.utils.data import load_data
 from src.parts import casing, impeller
 from src.utils.constants import (
@@ -3033,6 +3033,11 @@ if selected_part in [
             if stamicarbon_casting:
                 qual_tags.append("<SQ172>")
                 quality_lines.append("SQ 172 - STAMICARBON - SPECIFICATION FOR MATERIAL OF CONSTRUCTION")
+            if name in SQ121_MATERIALS:
+                qual_tags.append("[SQ121]")
+                quality_lines.append(
+                    "SQ 121 - Cleaning, Descaling and Passivation of Stainless Steel Components"
+                )
 
             if selected_part == "Impeller casting" and st.session_state.get("cast_imp_pump_type") == "DMX":
                 qual_tags.insert(0, "[CORP-ENG-0229]")

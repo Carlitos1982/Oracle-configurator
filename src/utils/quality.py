@@ -18,6 +18,59 @@ CG_MATERIALS = {
 }
 
 
+# Materials requiring SQ121 cleaning and passivation
+SQ121_MATERIALS = {
+    "CF3M",
+    "CF3M (Mo > 2.5)",
+    "CF3M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY",
+    "CF3M + HVOF STELLITE 12",
+    "CF3M + HVOF STELLITE 6",
+    "CF3MN",
+    "CF3M + STELLITE 6",
+    "CF3M + STELLITE 12",
+    "CF3M+OVERLAY EUTECTIC ULTRBOND 50000+METACERAM 25040",
+    "CF3M + STELLITE 12 HVOF METHOD",
+    "CF3M + PTA STELLITE 12",
+    "CF3M + PTA STELLITE 6",
+    "CF3M + SPRAY FUSE STELLITE 6",
+    "CF3M + SPRAY FUSE STELLITE 12",
+    "CF3M + PTA COLMONOY 6 OVERLAY",
+    "CF3M + HVOF COLMONOY 6",
+    "CF3M + HVOF COLMONOY 12",
+    "CG3M",
+    "CG3M + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY + PTA STELLITE 6 OVERLAY",
+    "CG3M + PTA STELLITE 12 OVERLAY",
+    "CG3M + PTA STELLITE 6 OVERLAY",
+    "CG3M + DLD WC-Ni 60-40",
+    "1A (CD4MCu)",
+    "3A (CD6MN)",
+    "4A (CD3MN)",
+    "5A (CE3MN)",
+    "6A (CD3MWCuN)",
+    "1B (CD4MCuN)",
+    "5A PREN ≥ 40",
+    "5A PREN>40 (CE3MN) (Water Quenched) +S31+S33+S34+S35 + ASTM A923 Methods A&B",
+    "Gr.5A PREN > 42",
+    "5A + STELLITE 6",
+    "3A + STELLITE 6",
+    "5A + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY",
+    "3A + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY",
+    "4A + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY",
+    "4A + STELLITE 12 HVOF METHOD",
+    "5A + STELLITE 12",
+    "5A PREN ≥ 40 + PTA STELLITE 12",
+    "5A PREN ≥ 40 + PTA STELLITE 6",
+    "5A PREN ≥ 40 + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY",
+    "3A + HVOF COLMONOY 6",
+    "4A + HVOF STELLITE 6",
+    "5A + STELLITE 6 GTAW (TIG) PROCESS",
+    "5A + STELLITE 1 GTAW (TIG) PROCESS",
+    "5A + STELLITE 12 GTAW (TIG) PROCESS",
+    "5A (PREN >42) + HVOF TUNGS. CARBIDE 86-10-4 (WC-Co-Cr) OVERLAY",
+    "5A PREN > 42",
+}
+
+
 def assemble_quality_tags(
     hf_service: bool = False,
     tmt_service: bool = False,
@@ -69,6 +122,11 @@ def assemble_quality_tags(
         sq_tags.append("[SQ95]")
         quality_lines.append(
             "SQ 95 - Ciclo di Lavorazione CG3M e CG8M (fuso AISI 317L e AISI 317)"
+        )
+    if mat_name and mat_name in SQ121_MATERIALS:
+        sq_tags.append("[SQ121]")
+        quality_lines.append(
+            "SQ 121 - Cleaning, Descaling and Passivation of Stainless Steel Components"
         )
     return " ".join(sq_tags), "\n".join(quality_lines)
 
