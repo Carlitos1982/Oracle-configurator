@@ -2939,10 +2939,6 @@ if selected_part in [
     identificativo = selected_part
     col_input, col_output, col_dataload = st.columns(3, gap="small")
 
-    # Inizializza flag
-    if "cast_generated" not in st.session_state:
-        st.session_state.cast_generated = False
-
     # ─── COLONNA 1: INPUT ───
     with col_input:
         st.markdown("### 📥 Input")
@@ -2994,19 +2990,13 @@ if selected_part in [
             stamicarbon_casting = st.checkbox("Stamicarbon?", key="cast_stamicarbon")
 
         if st.button("Generate Output", key="cast_gen"):
-            st.session_state.cast_generated = True
-
-    # ─── COLONNA 2: OUTPUT ───
-    if st.session_state.cast_generated:
-        with col_output:
-            st.markdown("### 📤 Output")
             dfm = materials_df[
                 (materials_df["Material Type"] == material_type) &
                 (materials_df["Prefix"] == prefix) &
                 (materials_df["Name"] == name)
             ]
             casting_code      = get_casting_code(dfm)
-            fpd_material_code = dfm["FPD Code"].iloc[0]       if not dfm.empty else "NA"
+            fpd_material_code = dfm["FPD Code"].iloc[0] if not dfm.empty else "NA"
             item_number       = "7" + casting_code
             pattern_parts     = [m for m in [mod1, mod2, mod3, mod4, mod5] if m.strip()]
             pattern_full      = "/".join(pattern_parts)
@@ -3045,11 +3035,9 @@ if selected_part in [
             if selected_part == "Impeller casting":
                 qual_tags.append("[DE2920.025]")
                 quality_lines.append("DE2920.025 - Impellers' Allowable Tip Speed and Related N.D.E.")
-            # ✔️ Qualità DE2980.001 per Impeller casting in 17-4 PH
             if selected_part == "Impeller casting" and prefix == "A747_" and name == "Tp. CB7Cu-1 (H1150 DBL)":
                 qual_tags.append("[DE2980.001]")
                 quality_lines.append("DE2980.001 - Progettazione e Produzione giranti in 17-4 PH")
-
 
             if selected_part == "Bearing housing casting" and st.session_state.get("cast_pump_type") == "HPX":
                 qual_tags.insert(0, "[SQ36]")
@@ -3071,22 +3059,44 @@ if selected_part in [
             quality_field = "\n".join(quality_lines)
             description   = ", ".join(parts) + " " + " ".join(qual_tags)
 
-            st.text_input("Item", value=item_number, key="cast_out_item")
-            st.text_area ("Description", value=description, height=120, key="cast_out_desc")
-            st.text_input("Identificativo", value=identificativo, key="cast_out_id")
-            st.text_input("Classe ricambi", value="", key="cast_out_class")
-            st.text_input("Categories", value="FASCIA ITE 7", key="cast_out_cat")
-            st.text_input("Catalog", value="FUSIONI", key="cast_out_catalog")
-            st.text_input("Casting drawing", value=casting_drawing, key="cast_out_drawing")
-            st.text_input("Pattern item", value=pattern_full, key="cast_out_pattern")
-            st.text_input("Material", value=f"{prefix} {name}", key="cast_out_material")
-            st.text_input("FPD Material Code", value=fpd_material_code, key="cast_out_fpd")
-            st.text_input("Template", value="FPD_BUY_CASTING", key="cast_out_template")
-            st.text_input("ERP L1", value="10_CASTING", key="cast_out_erp1")
-            st.text_input("ERP L2", value="", key="cast_out_erp2")
-            st.text_input("To Supplier", value="", key="cast_out_supplier")
-            st.text_area ("Quality", value=quality_field, height=300, key="cast_out_quality")
+            st.session_state["output_data"] = {
+                "Item": item_number,
+                "Description": description,
+                "Identificativo": identificativo,
+                "Classe ricambi": "",
+                "Categories": "FASCIA ITE 7",
+                "Catalog": "FUSIONI",
+                "Casting drawing": casting_drawing,
+                "Pattern item": pattern_full,
+                "Material": f"{prefix} {name}",
+                "FPD Material Code": fpd_material_code,
+                "Template": "FPD_BUY_CASTING",
+                "ERP L1": "10_CASTING",
+                "ERP L2": "",
+                "To Supplier": "",
+                "Quality": quality_field,
+            }
 
+    # ─── COLONNA 2: OUTPUT ───
+    with col_output:
+        st.markdown("### 📤 Output")
+        if "output_data" in st.session_state:
+            out = st.session_state["output_data"]
+            st.text_input("Item", value=out["Item"], key="cast_out_item")
+            st.text_area("Description", value=out["Description"], height=120, key="cast_out_desc")
+            st.text_input("Identificativo", value=out["Identificativo"], key="cast_out_id")
+            st.text_input("Classe ricambi", value=out["Classe ricambi"], key="cast_out_class")
+            st.text_input("Categories", value=out["Categories"], key="cast_out_cat")
+            st.text_input("Catalog", value=out["Catalog"], key="cast_out_catalog")
+            st.text_input("Casting drawing", value=out["Casting drawing"], key="cast_out_drawing")
+            st.text_input("Pattern item", value=out["Pattern item"], key="cast_out_pattern")
+            st.text_input("Material", value=out["Material"], key="cast_out_material")
+            st.text_input("FPD Material Code", value=out["FPD Material Code"], key="cast_out_fpd")
+            st.text_input("Template", value=out["Template"], key="cast_out_template")
+            st.text_input("ERP L1", value=out["ERP L1"], key="cast_out_erp1")
+            st.text_input("ERP L2", value=out["ERP L2"], key="cast_out_erp2")
+            st.text_input("To Supplier", value=out["To Supplier"], key="cast_out_supplier")
+            st.text_area("Quality", value=out["Quality"], height=300, key="cast_out_quality")
     # --- COLONNA 3: DATALOAD ---
        # --- COLONNA 3: DATALOAD ---
     with col_dataload:
